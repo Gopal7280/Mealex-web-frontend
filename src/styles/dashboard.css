@@ -1,0 +1,6 @@
+.elementstyle {
+    box-sizing: border-box;
+    display: block;
+    height: 360px !important;
+    width: 80vw !important;
+}

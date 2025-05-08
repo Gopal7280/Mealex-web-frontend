@@ -1,0 +1,29 @@
+a{
+    text-decoration: none !important;
+}
+dl, ol, ul {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+.p-menubar {
+    padding: 0.5rem;
+    background: none !important;
+    color: #4b5563;
+    border: none !important;
+    border-radius: 6px;
+}
+.bgSetSideBar{
+    background:rgb(255, 255, 255) !important;
+}
+.keyIcon{
+    display: inline-block;
+    margin-right: 10px;
+}
+/* .logo-set{
+    font-style: italic !important;
+    color: rgba(255, 221, 0, 0.909);
+} */
+ .p-skeleton {
+    background-color: #e5e7eb;
+    border-radius: 6px;
+}
