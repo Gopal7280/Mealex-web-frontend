@@ -31,7 +31,7 @@ const PurchaseTable = () => {
           const [unPaid,setUnpaid]=useState(null);
     const toast = useRef(null);
     const [loader,setLoader]=useState(true);
-    const column=["Date","Purchase Number","Party Name","Due In","Amount","Status","Generate-Purchase"];
+    const column=["Date","Purchase Number","Party Name","Due In","Amount","Status"];
     useEffect(() => {
         const fetchPurchases = async () => {
             try {
@@ -92,7 +92,7 @@ const PurchaseTable = () => {
             // hi
     const filterPurchase = () => {
         return purchase.filter(purchase => {
-            const matchesSearch = purchase.partyName.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesSearch = `${purchase.partyName} ${purchase.purchaseNumber} ${purchase.amount}`.toLowerCase().includes(searchTerm.toLowerCase());
             const matchesStatus = statusFilter === 'all' || purchase.status.toLowerCase() === statusFilter.toLowerCase();
             return matchesSearch && matchesStatus;
         });
@@ -173,17 +173,17 @@ const PurchaseTable = () => {
     const [match,setMatch]=useState([]);
     function handleCheckboxClick(e,id)
     {
-        if(e.target.checked){
+        if(!e.target.checked){
             console.log("checked");
             for(var i of fecthPurchase)
-                {
-                    
-                  if(id==i.purchase_id)
+                {  
+                  if(id==i.purchase_prefix)
                   {
                     // alert(JSON.stringify(i));
                     console.log(i);
                     const updatedRows=[i];
                     setMatch(updatedRows);
+                    navigate("/generate-purchase",{state:{data:updatedRows}});
                     setOpen(true);
                   }
                 }
@@ -203,7 +203,11 @@ const PurchaseTable = () => {
         // navigate("/generate-challan",{state:{data:match}});
         console.log("generate");
       }
-
+      function handleClick(e,row) {
+        console.log("clicked");
+        console.log(row);
+        handleCheckboxClick(e,row.purchaseNumber);
+      }
     return (
         <>
         {
@@ -378,22 +382,23 @@ const PurchaseTable = () => {
                         </tbody>
                     </table> */}
                      <TableComponent
+                     onClickRow={handleClick}
                             name="Purchase's"
                       column={column}
                       data={filterPurchase()}
                       pageSize={3} // Number of rows per page
-                      generate={(row)=>(
-                        <div className="flex gap-2">
-                            <button disabled className="text-red-500" onClick={(e)=>handleCheckboxClick(e,row.purchaseNumber)}><Checkbox {...label}  color="success" /></button>
-                        </div>
-                      )}
-                      actions={(row) => (
-                        <div className="flex gap-2">
-                          <button className="text-[#3A5B76]" onClick={(e)=>handlePreview(e,row.purchaseNumber,row)}><Preview/></button>
-                          <button className="text-[#3A5B76]" onClick={(e)=>handleEdit(e,row.purchaseNumber)}><ModeEdit/></button>
+                    //   generate={(row)=>(
+                    //     <div className="flex gap-2">
+                    //         <button className="text-red-500" onClick={(e)=>handleCheckboxClick(e,row.purchaseNumber)}><Checkbox {...label}  color="success" /></button>
+                    //     </div>
+                    //   )}
+                    //   actions={(row) => (
+                    //     <div className="flex gap-2">
+                    //       <button className="text-[#3A5B76]" onClick={(e)=>handlePreview(e,row.purchaseNumber,row)}><Preview/></button>
+                    //       <button className="text-[#3A5B76]" onClick={(e)=>handleEdit(e,row.purchaseNumber)}><ModeEdit/></button>
                           
-                        </div>
-                      )}
+                    //     </div>
+                    //   )}
                     />
                     
                 </div>

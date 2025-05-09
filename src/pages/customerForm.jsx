@@ -25,7 +25,7 @@ export default function CustomerForm({
   editCustomer,
   onCancelEdit,
 }) {
-  const [loader,setLoader]=useState(true);
+  const [loader,setLoader]=useState(false);
   const [country, setCountry] = useState([{}]);
   const [iso2Country, setIso2Country] = useState("");
   const [iso2State, setIso2State] = useState("");
@@ -35,6 +35,10 @@ export default function CustomerForm({
   const toast = useRef(null);
   const [locations,setLocationS]=useState("")
   const location=useLocation();
+  const [pan_no,setPan_no]=useState("");
+  const [phoneNumber,setPhoneNumber]=useState("");
+  const [gstIn,setGstIn]=useState("");
+  const [status,setStatus]=useState(true);
   useEffect(() => {
     const getCountry = async () => {
       const url = "https://api.countrystatecity.in/v1/countries";
@@ -160,6 +164,7 @@ export default function CustomerForm({
       customField: [],
     },
     onSubmit: (values) => {
+      setLoader(true);
       if (shipCheck != "") {
         values.shipping_address = shipCheck;
       }
@@ -182,7 +187,11 @@ export default function CustomerForm({
         values.city = names.cityName;
         console.log("working");
       }
+      values.pan_no=pan_no;
+      values.tax_id=gstIn;
+      values.mobile_no=phoneNumber;
       // alert(JSON.stringify(values));
+      console.log(values);
       const addCustomersData = async () => {
         try {
           const token = localStorage.getItem("token");
@@ -221,13 +230,13 @@ export default function CustomerForm({
           console.log(err);
           toast.current.show({severity:'error', summary: 'Error', detail:'Please enter all fields', life: 1500});
         }
+        finally{
+          setLoader(false);
+        }
       };
       addCustomersData();
       // alert(JSON.stringify(values));
     },
-    validationSchema:Yup.object({
-      mobile_no:Yup.string().required("mobile no required").matches(/^\d{10}$/, 'Mobile number must be exactly 10 digits'),
-    })
   });
 
   const handleDebounce = debounce((value) => {
@@ -287,8 +296,126 @@ export default function CustomerForm({
       setShipCheck("");
     }
   }
+  const [error,setError]=useState({
+    panNo:"",
+    gstinNo:"",
+    phone_Number:"",
+  })
+  function handleCheck(e,name){
+    if(name=="pan")
+    {
+      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+      if (!panRegex.test(e.target.value.toUpperCase())) {
+        if(e.target.value=="")
+        {
+          setError({
+            panNo:'',
+            gstinNo:error.gstinNo,
+            phone_Number:error.phone_Number
+          });
+          setPan_no("");
+          setStatus(true);
+        }
+        else
+        {
+        setError({
+          panNo:'Invalid PAN format. Expected: 5 letters, 4 numbers, 1 letter',
+          gstinNo:error.gstinNo,
+          phone_Number:error.phone_Number
+        });
+        setPan_no("false");
+        setStatus(false);
+      }
+      } else {
+        setPan_no(e.target.value.toUpperCase());
+        console.log("2")
+        setError({
+          panNo:"",
+          gstinNo:error.gstinNo,
+          phone_Number:error.phone_Number
+        });
+        setStatus(true);
+      }
+    }
+    if(name=="number")
+      {
+        const panRegex = /^[0-9]{10}$/;
+        if (!panRegex.test(e.target.value)) {
+          if(e.target.value=="")
+          {
+            setError({
+              panNo:error.panNo,
+              gstinNo:error.gstinNo,
+              phone_Number:""
+            });
+            setPhoneNumber("");
+            setStatus(true);
+          }
+          else
+          {
+          setError({
+            panNo:error.panNo,
+            gstinNo:error.gstinNo,
+            phone_Number:"Invalid Mobile no format. Expected: 10 numbers"
+          });
+          setPhoneNumber("false");
+          setStatus(false);
+        }
+        } else {
+          setPhoneNumber(e.target.value);
+          console.log("2")
+          setError({
+            panNo:error.panNo,
+            gstinNo:error.gstinNo,
+            phone_Number:""
+          });
+          setStatus(true);
+        }
+      }
+    if(name=="gstin")
+      {
+        const gstRegex= /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9]{1}[A-Z]{2}$/;
+        if (!gstRegex.test(e.target.value.toUpperCase())) {
+          if(e.target.value=="")
+          {
+            setError({
+              panNo:error.panNo,
+              gstinNo:'',
+              phone_Number:error.phone_Number
+            });
+            setGstIn("");
+            setStatus(true);
+          }
+          else
+          {
+          setError({
+            panNo:error.panNo,
+            gstinNo:"Invalid GSTIN format. Expected: 2 numbers, 5 letters, 4 numbers, 1 letter , 1 number , 2 letters",
+            phone_Number:error.phone_Number
+          });
+          setGstIn("false");
+          setStatus(false);
+        }
+        } else {
+          setGstIn(e.target.value.toUpperCase());
+          console.log("2")
+          setError({
+            panNo:error.panNo,
+            gstinNo:"",
+            phone_Number:error.phone_Number
+          });
+          setStatus(true);
+        }
+      }
+      console.log(e.target.value);
+    }
   return (
-    <div>
+    <>
+    {
+      loader?(
+        <Loader/>
+      ):(
+        <div>
     <div className="over max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-md">
       <h1 className="text-2xl font-bold text-center mb-6">
         Customer/Party
@@ -340,25 +467,28 @@ export default function CustomerForm({
                 labelInput="GSTN:"
                 type="text"
                 id="tax_id"
-                onChange={formik.handleChange}
+                onChange={(e)=>handleCheck(e,"gstin")}
                 name="tax_id"
-                classNameInput="w-full p-2 border rounded mt-1"
+                classNameInput="w-full p-2 border rounded mt-1 text-transform: uppercase"
                 placeholder="Enter GSTN"
               />
-              {/* <span>{formik.errors.tax_id}</span> */}
+              <span className="text-red-500">{error.gstinNo!=""?(error.gstinNo):("")}</span>
             </div>
             <div>
-              <InputComponent
-                htmlFor="customer_category"
-                classNameLabel="block text-gray-600 mt-4"
-                labelInput="Customer category:"
-                type="text"
-                id="customer_category"
+              <label className="block text-gray-600">Customer Category</label>
+              <select
                 onChange={formik.handleChange}
                 name="customer_category"
-                classNameInput="w-full p-2 border rounded mt-1"
-                placeholder="Enter Customer Category"
-              />
+                className="w-full p-2 border rounded mt-1"
+                value={formik.values.customer_category}
+              >
+                <option value="none">Select</option>
+                <option>Proprietor</option>
+                <option>Partner</option>
+                <option>LLP</option>
+                <option>Pvt.Ltd</option>
+                <option>HUF</option>
+              </select>
             </div>
             <div>
               <label
@@ -416,7 +546,7 @@ export default function CustomerForm({
                     name="party"
                     className="mr-2"
                   ></input>
-                  <span> Vendor</span>
+                  <span> Vendor/Supplier</span>
                 </label>
                 <label>
                   <input
@@ -434,16 +564,16 @@ export default function CustomerForm({
                 htmlFor="mobile"
                 classNameLabel="block text-gray-600 mt-4"
                 labelInput="Mobile:"
-                type="number"
+                type="text"
                 min="0"
                 id="mobile"
-                onChange={formik.handleChange}
+                onChange={(e)=>handleCheck(e,"number")}
                 name="mobile_no"
                 classNameInput="w-full p-2 border rounded mt-1"
                 placeholder="Enter Phone Number"
                 
               />
-              <span className="text-red-500">{formik.errors.mobile_no}</span>
+              <span className="text-red-500">{error.phone_Number!=""?(error.phone_Number):("")}</span>
             </div>
             <div>
               <InputComponent
@@ -452,12 +582,13 @@ export default function CustomerForm({
                 labelInput="Pan No:"
                 type="text"
                 id="pan_no"
-                onChange={formik.handleChange}
+                onChange={(e)=>handleCheck(e,"pan")}
                 name="pan_no"
-                classNameInput="w-full p-2 border rounded mt-1"
+                
+                classNameInput="w-full p-2 border rounded mt-1 text-transform: uppercase"
                 placeholder="Enter Pan Number"
               />
-              <span>{formik.errors.pan_no}</span>
+              <span className="text-red-500">{error.panNo!=""?(error.panNo):("")}</span>
             </div>
             <div>
               <label className="block text-gray-600 mt-4">Customer Type</label>
@@ -681,14 +812,18 @@ export default function CustomerForm({
         </div>
         <div className="mt-10 text-end">
           <ButtonComponent
+            {...(status)?{}:{disabled:true}}
             value="Submit"
             type="submit"
             label="Save"
-            className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+            className="disabled:opacity-80 disabled:bg-gray-400 px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
           ></ButtonComponent>
         </div>
       </form>
     </div>
     </div>
+      )
+    }
+    </>
   );
 }

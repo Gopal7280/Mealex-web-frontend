@@ -235,6 +235,7 @@ export function PaymentInForm() {
                 labelInput="Receiving Amount :"
                 type="number"
                 min="0"
+                step="any"
                 id="amount"
                 onChange={formik.handleChange}
                 name="paidAmount"

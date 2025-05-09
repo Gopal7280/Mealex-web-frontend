@@ -105,7 +105,7 @@ export function PaymentOut() {
 
   const filterPaymentIn = () => {
     return paymentIn.filter((paymentIn) => {
-      const matchesSearch = paymentIn.partyName
+      const matchesSearch = `${paymentIn.partyName} ${paymentIn.Id} ${paymentIn.RemainingAmount}`
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
         return matchesSearch;

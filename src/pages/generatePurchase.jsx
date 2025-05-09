@@ -1,23 +1,29 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { apiGet } from "../services/api";
 import "../styles/generateChallan.css";
-import { Loader } from "lucide-react";
+import {Loader} from "../layouts/Loader"
 import { useReactToPrint } from "react-to-print";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
+import { IoMdPrint } from "react-icons/io";
+import { FaFilePdf } from "react-icons/fa6";
+import { FaDownload } from "react-icons/fa6";
+import { FaEdit } from "react-icons/fa";
 import { toWords } from "number-to-words";
 export function GeneratePurchase() {
   const [bussinessData, setBussinessData] = useState(null);
   const [data, setData] = useState(null);
   const [date, setDate] = useState(new Date());
-  const [challanProduct, setChallanProduct] = useState([]);
+  const [purchaseProduct, setpurchaseProduct] = useState([]);
   const [quantity, setQuantity] = useState(0);
   const location = useLocation();
   const contentRef = useRef();
   const handlePrintInvoice = useReactToPrint({ contentRef });
+  const navigate=useNavigate();
   useEffect(() => {
-    setDate(date.toLocaleDateString());
+    const dt=new Date;
+    setDate(dt.toLocaleDateString());
     console.log(location.state.data);
     const number = location.state?.data[0]?.mobile_no; // Use optional chaining
     const id = location.state?.data[0]?.purchase_id; // Use optional chaining
@@ -26,19 +32,20 @@ export function GeneratePurchase() {
     console.log(location.state.data);
     setData([location.state.data[0]]);
 
-    const fetchProductChallan = async () => {
+    const fetchProductpurchase = async () => {
       const res = await apiGet(`/purchase/${id}`);
       console.log(res.data);
-      setChallanProduct(res.data);
+      setpurchaseProduct(res.data);
       var qty = 0;
-      for (var i of res) {
+      for (var i of res.data) {
         qty = qty + parseInt(i.quantity);
       }
+      console.log(qty);
       setQuantity(qty);
       // Clear existing product rows before setting new ones
     };
 
-    fetchProductChallan();
+    fetchProductpurchase();
     const fetchBusiness = async () => {
       const res = await apiGet(`/businessprofile`);
       console.log(res);
@@ -87,303 +94,7 @@ export function GeneratePurchase() {
             
 
   }
-
-
-  // const handleDownloadPDF = async () => {
-  //   if (!contentRef.current || !data || !bussinessData) return;
-
-  //   const canvas = await html2canvas(contentRef.current, {
-  //     scale: 2,
-  //     useCORS: true,
-  //   });
-
-  //   const imgData = canvas.toDataURL("image/png");
-  //   const pdf = new jsPDF("p", "mm", "a4");
-
-  //   const pdfWidth = pdf.internal.pageSize.getWidth();
-  //   const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-
-  //   pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
-  //   pdf.save("challan.pdf");
-  // };
-
-  // Check if challanPreview has data before rendering
-
-  // return(
-  //     <>
-  //     div
-  //     </>
-  // )
-  // return(
-  //         <>
-  //         <button onClick={handlePrintInvoice}>Print Invoice</button>
-  //         {
-  //             data!=null&&bussinessData!=null
-  //             ?
-  //             (
-  //                 <div ref={contentRef} className="genearte-invoice-body" style={{height:"200%"}}>
-  //                  <div>
-  //                  <div className="content-header">
-  //                      <div className="left-content-header">
-  //                          <div className="brand-logo">
-  //                          {/* <h2 className="text-gray-700">Bill<span className="text-green-600">●</span>365</h2> */}
-  //                          <img src={data[0].logo} className="logo-adjust" alt="" />
-  //                          </div>
-  //                          <div className="content">
-  //                              <p>{bussinessData[0].business_name}</p>
-
-  //                              <p>{bussinessData[0].address}</p>
-
-  //                              <p>Madhya Pradesh</p>
-
-  //                          </div>
-  //                      </div>
-  //                      <div className="right-content-header">
-  //                          <br />
-  //                          <span className="">Ph.{bussinessData[0].mobile_no}</span>
-  //                          <br />
-  //                          <span className="">Er.{bussinessData[0].name}</span>
-  //                      </div>
-  //                  </div>
-  //                  <p className="hr" />
-  //                  <p className="section-align">All systems comes here</p>
-  //                  <p className="hr"/>
-  //                  <div className="border-content">
-  //                      <div className="content-heading">
-  //                          <p ><span className="fw-bolder margin-all">GSTIN: </span></p>
-  //                          <p className="tax-invoice-color">TAX INVOICE</p>
-  //                          <p className="margin-right-all">original for recipient</p>
-  //                      </div>
-  //                      <div className="customer-detail">
-  //                          <div className="customer-detail-content">
-  //                              <div className="customer-detail-align">
-  //                                   <div className="customer-detail-head"><span>Customer Detail</span></div>
-  //                                  <dl className="customer-detail-list margin-all">
-  //                                  <dt>M/s</dt>
-  //                                  <dd>{data[0].customername}</dd>
-  //                                  <dt>Address</dt>
-  //                                  <dd>{data[0].billingaddress}</dd>
-  //                                  <dt>PHONE</dt>
-  //                                  <dd>{data[0].customername}</dd>
-  //                                  <dt>GSTIN</dt>
-  //                                  <dd>{data[0].gst}</dd>
-  //                                  <dt>Place of <br />supply</dt>
-  //                                  <dd>{data[0].shippingaddress}</dd>
-  //                              </dl>
-  //                              </div>
-  //                              <dl className="right-details-customer margin-all">
-  //                                  <div className="div-1">
-  //                                  <dt>Invoice No.</dt>
-  //                                  <dd>{data[0].challan_id}</dd>
-  //                                  <dt>Due Date</dt>
-  //                                  <dd>{data[0].due_date}</dd>
-  //                                  </div>
-  //                                  <div className="div-2">
-  //                                  <dt>Invoice Date</dt>
-  //                                  <dd>{data[0].sales_challan_date}</dd>
-  //                                  </div>
-  //                              </dl>
-  //                          </div>
-  //                      </div>
-  //                      <div className="add-border-bottom"><br /></div>
-  //                      <div className="table-data-starts">
-  //                          <table className="table-body">
-  //                              <thead>
-  //                                  <tr>
-  //                                      <th rowSpan="2">Sr.No.</th>
-  //                                      <th rowSpan="2">Name of Product / Services</th>
-  //                                      <th rowSpan="2">HSN/SAC</th>
-  //                                      <th rowSpan="2">Qty</th>
-  //                                      <th rowSpan="2">Rate</th>
-  //                                      <th rowSpan="2">Taxable Value</th>
-  //                                     <th colSpan="2">IGST</th>
-  //                                      <th rowSpan="2">Total</th>
-  //                                  </tr>
-  //                                  <tr>
-  //                                     <th>%</th>
-  //                                     <th>Amount</th>
-  //                                  </tr>
-  //                              </thead>
-  //                              <tbody>
-  //                                  {
-  //                                      data.map((data,index)=>
-  //                                             challanProduct.map((product,index)=>
-
-  //                                          <tr>
-  //                                                  <td>{index+1}</td>
-  //                                                  <td>{product.productname}</td>
-  //                                                  <td>{product.hsncode}</td>
-  //                                                  <td>{product.quantity}</td>
-  //                                                  <td>{product.unitprice}</td>
-  //                                                  <td>{product.unit_price}</td>
-  //                                                 <td>{parseInt(product.tax_rate)+"%"}</td>
-  //                                                 <td>{(product.tax_rate*product.unit_price)/100}</td>
-  //                                                 <td>{product.total_price}</td>
-  //                                                  </tr>
-  //                                           ) )
-  //                                  }
-  //                              </tbody>
-  //                              <tfoot>
-  //                                 <tr>
-  //                                     <td colSpan={3} className="text-end">Total</td>
-  //                                     <td>{}</td>
-  //                                     <td></td>
-  //                                     <td>{}</td>
-  //                                     <td></td><td>{}</td>
-  //                                     <td className="">{}</td>
-  //                                 </tr>
-  //                              </tfoot>
-  //                          </table>
-  //                      </div>
-  //                      <div className="footer-part">
-  //                         <div className="left-footer-adjust">
-  //                         <div className="amount-adjust"><p>Total in Words</p>
-  //                              <p>{}</p>
-  //                         </div>
-  //                         <div className="bank-detail">
-  //                             <p>Bank Details</p>
-  //                             <dl>
-  //                                 <dt>Name</dt>
-  //                                 <dd>ICICI</dd>
-  //                                 <dt>Branch</dt>
-  //                                 <dd>Indore</dd>
-  //                                 <dt>IFSC</dt>
-  //                                 <dd>ICIC045F</dd>
-  //                                 <dt>UPI ID</dt>
-  //                                 <dd>ifox@icici</dd>
-  //                             </dl>
-  //                         </div>
-  //                         <div className="terms-condition">
-  //                             <p>Terms and Condition</p>
-  //                             <p className=""> Subject to our home Ahmedabad. <br />
-  // Our Responsibility Ceases as soon as goods leaves our Premises.
-  // <br />
-  // Goods once sold will not taken back.
-  // <br />
-  // Delivery Ex-Premises.</p>
-  //                         </div>
-  //                         </div>
-  //                         <div className="right-fotter-align">
-  //                             <div>
-  //                                 <div>
-  //                                     <dl className="dlClass">
-  //                                         <div className="right-dl-align">
-  //                                         <dt>Taxable Amount</dt>
-  //                                         <dd>{}</dd>
-  //                                         </div>
-  //                                         <div className="right-dl-align">
-  //                                         <dt>Add: IGST</dt>
-  //                                         <dd>coming..</dd>
-  //                                         </div>
-  //                                         <div className="right-dl-align">
-  //                                         <dt>Total Tax</dt>
-  //                                         <dd>{}</dd>
-  //                                         </div>
-
-  //                                         <div className="right-dl-align">
-  //                                         <dt>Total amount after tax</dt>
-  //                                         <dd>{"₹"}</dd>
-  //                                         </div>
-  //                                         <div className="right-dl-align">
-  //                                         <dt></dt>
-  //                                         <dd>(E & O.E)</dd>
-  //                                         </div>
-  //                                     </dl>
-  //                                 </div>
-  //                                 <div className="certified-right">
-  //                                     <p> Certified that the particulars given above are true and correct.
-  //                                         <br />
-  //                                     </p>
-  //                                     <p>For Compunic Pvt.Ltd</p>
-  //                                 </div>
-  //                                 <div className="signature">Authorized Signature</div>
-  //                             </div>
-  //                         </div>
-  //                      </div>
-  //                  </div>
-  //                 </div>
-  //                 </div>
-  // ):(
-  //     <div>Loading....</div>
-  // )
-  // }
-  //      </>
-
-  //      )
-  
-
-// const handleDownloadPDF = async () => {
-//   if (!contentRef.current || !data || !bussinessData) return;
-
-//   const element = contentRef.current;
-
-//   // Convert HTML to canvas at high resolution
-//   const canvas = await html2canvas(element, {
-//     scale: 3, // High quality
-//     useCORS: true,
-//   });
-
-//   const imgData = canvas.toDataURL("image/png");
-
-//   const pdf = new jsPDF("p", "mm", "a4");
-//   const pageWidth = pdf.internal.pageSize.getWidth();
-//   const pageHeight = pdf.internal.pageSize.getHeight();
-
-//   const topMargin = 10; // mm
-//   const bottomMargin = 10; // mm
-//   const usableHeight = pageHeight - topMargin - bottomMargin;
-
-//   // Full image dimensions in mm
-//   const imgWidth = pageWidth;
-//   const imgHeight = (canvas.height * pageWidth) / canvas.width;
-
-//   const totalPages = Math.ceil(imgHeight / usableHeight);
-//   let yOffset = 0;
-
-//   for (let i = 0; i < totalPages; i++) {
-//     if (i > 0) pdf.addPage();
-
-//     const sliceHeight = (usableHeight * canvas.width) / pageWidth;
-
-//     const sliceCanvas = document.createElement("canvas");
-//     sliceCanvas.width = canvas.width;
-//     sliceCanvas.height = sliceHeight;
-
-//     const ctx = sliceCanvas.getContext("2d");
-//     ctx.drawImage(
-//       canvas,
-//       0,
-//       yOffset,
-//       canvas.width,
-//       sliceHeight,
-//       0,
-//       0,
-//       canvas.width,
-//       sliceHeight
-//     );
-
-//     const sliceImgData = sliceCanvas.toDataURL("image/png");
-//     const sliceImgHeight = (sliceHeight * pageWidth) / canvas.width;
-
-//     pdf.addImage(
-//       sliceImgData,
-//       "PNG",
-//       0,
-//       topMargin,
-//       imgWidth,
-//       sliceImgHeight
-//     );
-
-//     // Page number
-//     pdf.setFontSize(10);
-//     pdf.text(`${i + 1}/${totalPages}`, pageWidth / 2, pageHeight - 5, { align: "center" });
-
-//     yOffset += sliceHeight;
-//   }
-
-//   pdf.save("challan.pdf");
-// };
-
+  const handleDownloadPrint = useReactToPrint({ contentRef });
 
 const handleDownloadPDF = async () => {
   if (!contentRef.current || !data || !bussinessData) return;
@@ -455,7 +166,7 @@ const handleDownloadPDF = async () => {
 
     // Add page number
     pdf.setFontSize(10);
-    pdf.text(`${page + 1}/${totalPages}-${data[0].challan_prefix}`, pageWidth / 2, pageHeight - 5, {
+    pdf.text(`${page + 1}/${totalPages}-${data[0].purchase_prefix}`, pageWidth / 2, pageHeight - 5, {
       align: "center",
     });
 
@@ -463,13 +174,30 @@ const handleDownloadPDF = async () => {
   }
 
   // Step 5: Save PDF
-  pdf.save("challan.pdf");
+  pdf.save("purchase.pdf");
 };
+function handleEdit(e) {
+  const purchaseId=location.state?.purchase_id;
+  console.log(purchaseId);
+  console.log(purchaseId);   
+      //   alert(JSON.stringify(invoiceId));
+      navigate("/purchaseEdit", { state: { data: location.state?.data[0] } });
+  }
 
   return (
     <>
-      <button onClick={handleDownloadPDF}>Print Invoice</button>
       {data != null && bussinessData != null ? (
+        <div className="mt-2">
+        <div className="flex justify-center">
+        <div className=" bg-white w-4xl">
+        <h3 className="text-center p-3 d-inline-block">Preview for Purchase</h3>
+        <div className="float-end">
+        <button className="" onClick={handleDownloadPrint}><IoMdPrint className="iconSize"/></button>
+        <button className="" onClick={handleDownloadPDF}><FaDownload className="iconSize"/></button>
+        <button className="" onClick={(e)=>handleEdit(e)}><FaEdit className="iconSize"/></button>
+        </div>
+        </div>
+        </div>
         <div ref={contentRef}
           className="mx-auto w-4xl p-5"
           style={{backgroundColor:"white"}}
@@ -516,16 +244,16 @@ const handleDownloadPDF = async () => {
             <div id="invoice-details-meta" class="invoice_details" data-subsection-id="1">
                     <div id="invoice-main-details">
                       <div class="page-header-type">
-                        <div class="page-header-type-value">CHALLAN INVOICE</div>
+                        <div class="page-header-type-value">PURCHASE INVOICE</div>
                         <div class="page-header-sub-type">Original for Recipient</div>
                       </div>
                       <div id="invoice-number-container">
-                        <div id="invoice-number-label">CHALLAN NO.</div>
+                        <div id="invoice-number-label">Purchase No.</div>
                         <div class="middle-colon">:</div>
-                        <div id="invoice-number" class="bold">CM25-26/APR24</div>
+                        <div id="invoice-number" class="bold">{data[0].purchase_number}</div>
                       </div>
                       <div id="invoice-date-container">
-                        <div id="invoice-date-label">CHALLAN DATE</div>
+                        <div id="invoice-date-label">DATE</div>
                         <div class="middle-colon">:</div>
                         <div id="invoice-date" class="bold">{date}</div>
                       </div>
@@ -641,7 +369,7 @@ const handleDownloadPDF = async () => {
               </thead>
               <tbody className="border">
                 {data.map((data, index) =>
-                  challanProduct.map((product, index) => (
+                  purchaseProduct.map((product, index) => (
                     <tr>
                       <td className="border p-1">{index + 1}</td>
                       <td className="border p-1">{product.productname}</td>
@@ -740,7 +468,6 @@ const handleDownloadPDF = async () => {
 
               </div>
               Receiver's Signature for 
-              <br />{data[0].customername}
             </div>
             </div>
           </div>
@@ -752,7 +479,6 @@ const handleDownloadPDF = async () => {
               <img src={data[0].signature_box} alt="" style={{width:"200px",height:"100px"}}/> 
               <br /> 
               Authorised Signature for 
-              <br />{data[0].business_name}
             </div>
             </div>
           </div>
@@ -772,8 +498,9 @@ const handleDownloadPDF = async () => {
             </div>
                 </div>
         </div>
+        </div>
       ) : (
-        <div>Loading..</div>
+        <div><Loader/></div>
       )}
     </>
   );

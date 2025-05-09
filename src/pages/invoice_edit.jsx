@@ -14,6 +14,7 @@ import { InputComponent } from "../components/Input";
 import { apiGet, apiPost, apiPut } from "../services/api";
 import { Loader } from "../layouts/Loader";
 export function InvoiceEdit() {
+  const [loader,setLoader]=useState(false);
   const [invoicePreview, setInvoicePreview] = useState([]);
   const [invoiceProduct, setInvoiceProduct] = useState([]);
   const location = useLocation();
@@ -35,6 +36,11 @@ export function InvoiceEdit() {
   const [dueDate, setDueDate] = useState(new Date());
   const [TaxAmount, setTaxAmount] = useState([]);
   const [disabl,setdisabl]=useState([]);
+  const [showNotes, setShowNotes] = useState(false);
+    const [notes, setNotes] = useState("");
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
   const [productAmount, setProductAmount] = useState([
     {
       amount: "0",
@@ -153,6 +159,11 @@ export function InvoiceEdit() {
         totalAmount += parseFloat(row.total);
          taxableamount += parseFloat(row.taxable_amount);
       }
+      var gstSumAmount=0
+      for (var i = 0; i < updateTax.length; i++) {
+        gstSumAmount += parseFloat(updateTax[i]);
+      }
+      setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
       const gstSum = parseFloat(
         updateTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
       );
@@ -172,6 +183,7 @@ export function InvoiceEdit() {
   const [addTotal, setAddTotal] = useState(null);
   const [subTotal, setSubTotal] = useState(0);
   const [qty, setQty] = useState(0);
+  const [round, setRound] = useState(false);
   var qtyy = 0;
   const [AmountWords, setAmountWordss] = useState("");
   const navigate = useNavigate();
@@ -191,7 +203,7 @@ export function InvoiceEdit() {
       shipping_address: "",
       taxableAmount: "",
       totalAmount: "",
-      challanNotes: "",
+      invoiceNotes: "",
       signature_box: "",
       bankDetail: [],
       businessprofile: [],
@@ -202,7 +214,8 @@ export function InvoiceEdit() {
     onSubmit: (values) => {
       values.invoicePrefix = invoiceData.invoice_prefix;
       values.invoiceId = invoiceData.invoice_id;
-      values.customerId = invoiceData.customer_id;
+      values.customerId = selectedCustomer.customer_id;
+      console.log(selectedCustomer);
       if (values.invoiceDate == "") {
         values.invoiceDate = invoicePreview[0].sales_invoice_date;
       }
@@ -219,22 +232,22 @@ export function InvoiceEdit() {
         values.cgst = invoicePreview[0].cgst;
       }
       if (values.customerName == "") {
-        values.customerName = invoicePreview[0].customername;
+        values.customerName = selectedCustomer.customer_name;
       }
       if (values.billing_address == "") {
-        values.billing_address = invoicePreview[0].billingaddress;
+        values.billing_address = selectedCustomer.billing_address;
       }
       if (values.shipping_address == "") {
-        values.shipping_address = invoicePreview[0].shippingaddress;
+        values.shipping_address = selectedCustomer.shipping_address;
       }
       if (values.taxableAmount == "") {
-        values.taxableAmount = invoicePreview[0].taxable_amount;
+        values.taxableAmount = selectedCustomer.shipping_address;
       }
       if (values.totalAmount == "") {
         values.totalAmount = invoicePreview[0].total_amount;
       }
-      if (values.challanNotes == "") {
-        values.challanNotes = invoicePreview[0].add_notes;
+      if (values.invoiceNotes == "") {
+        values.invoiceNotes = invoicePreview[0].add_notes;
       }
       // if(values.signature_box=="")
       //   {
@@ -270,18 +283,28 @@ export function InvoiceEdit() {
       values.totalAmount =
         addTotal != null ? addTotal : invoiceData.total_amount;
       values.taxAmount = TaxAmount.length > 0 ? TaxAmount : [0];
+      values.invoiceNotes=notes;
       // console.log(JSON.stringify(values));
       const EditInvoice = async () => {
-        const res = await apiPut(`/invoices`, values);
+        setLoader(true);
+        try{
+          const res = await apiPut(`/invoices`, values);
         // alert(res);
         navigate("/invoices");
+        }
+        catch(err){
+          console.log(err);
+        }
+        finally{
+          setLoader(false);
+        }
       };
       EditInvoice();
       console.log(values);
     },
   });
   var gstSum = 0;
-  const [gstSu, setGstSu] = useState(0); //hui
+  const [gstSu, setGstSu] = useState("NaN"); //hui
   const [gstRateS, setGstRateS] = useState([]);
   const [showRupee, setShowRupee] = useState(false);
   const [showPer, setPer] = useState(false);
@@ -289,7 +312,8 @@ export function InvoiceEdit() {
   const [gstAmount, setGstAmount] = useState(null);
   const [gstAmountPer, setGstAmountPer] = useState(0);
   const [count,setCount]=useState(0);
-
+   const [display, setDisplay] = useState({ display: "block" });
+    const [display1, setDisplay1] = useState(false);
   // function handleChange(e, item, index, quantity, getNotify) {
   //   // Create copies of the current state
   //   let updatedRows = [...productRows];
@@ -1149,7 +1173,8 @@ export function InvoiceEdit() {
         // const term = e.target.value.split("_");
         // const gstRate = parseFloat(term[1]);
         updatedRows[index].discount_amountPer = "0";
-        const discount_amount = e.target.value != isNaN ? e.target.value : 0;
+        const discount_amoun = e.target.value != isNaN ? e.target.value : 0;
+        const discount_amount=discount_amoun==""?0:discount_amoun
         updatedRows[index].discount_amount = (parseFloat(discount_amount)).toFixed(2);
         updateDiscountAmount[index].per =
           (parseFloat((discount_amount / (item.quantity * item.unitPrice)) * 100)).toFixed(2);
@@ -1626,6 +1651,15 @@ export function InvoiceEdit() {
 
       setCustomer(res1);
       console.log(res1);
+      for(var i of res1)
+      {
+       if(i.customer_id==location.state?.data.customer_id)
+       {
+        console.log(i.customer_id);
+        setSelectedCustomer(i);
+       }
+      }
+      console.log(res1);
     };
     fetchProduct();
   }, []);
@@ -1715,549 +1749,814 @@ export function InvoiceEdit() {
       );
     }
   }
+    function handleRoundChange(e) {
+      if (e.target.checked && addTotal!=null) {
+        console.log("round");
+        var originalValue=addTotal;
+        var roundValue=Math.round(addTotal);
+        console.log(originalValue);
+        console.log(roundValue);
+        var roundedofValue=roundValue-originalValue;
+        setAddTotal(roundValue);
+        setRound(roundedofValue.toFixed(2));
+      } else {
+          originalValue=invoiceData.total_amount;
+         roundValue=Math.round(invoiceData.total_amount);
+        console.log(originalValue);
+        console.log(roundValue);
+         roundedofValue=roundValue-originalValue;
+        setAddTotal(roundValue);
+        setRound(roundedofValue.toFixed(2));
+        console.log("not");
+      }
+    }
+  const handleSelect = (customer) => {
+    setSelectedCustomer(customer);
+    setIsDropdownOpen(false);
+    setSearchTerm(""); // Clear search term
+  };
   function handleEditable() {
     console.log("execute");
     setIsEditable(true);
   }
+  const handleChangeParty = () => {
+    setSelectedCustomer(null);
+    setIsDropdownOpen(true);
+    setDisplay1(false);
+  };
+  const filteredCustomers = customer.filter((customer) =>
+    customer.customer_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+  const toggleNotes = () => {
+    setShowNotes((prevShowNotes) => !prevShowNotes);
+  };
+  const handleShow = () => {
+    setIsDropdownOpen(true);
+    setDisplay1(false);
+  };
+  const handleNotesChange = (event) => {
+    setNotes(event.target.value);
+  };
   return (
-    <div>
-      <div
-        className="over sm:flex sm:justify-center block"
-        style={{ overflow: "scroll", height: "99vh" }}
-      >
-        <div className="py-6">
-          <div className="w-full max-w-7xl p-8 bg-white rounded-lg shadow-md">
-            <h2 className="mb-6 text-3xl font-semibold text-center text-gray-800 d-inline-block">
-            Update Details
-            </h2>
+    <>
+      {
+        loader?(<Loader/>):(
+          <div>
+      <div className="over bg-gray-100 p-4 max-w-7xl mx-auto bg-white">
+      <h2 className="mb-6 text-3xl font-semibold text-center text-gray-800 d-inline-block">
+          Update Details
+             </h2>
 
             <NavLink to="/invoices" className="text-white text-decoration-none">
-              <ButtonComponent
+             <ButtonComponent
                 type="button"
                 className=" bg-[#3A5B76] float-end px-2 py-1 text-white font-bold rounded hover:bg-[#2E4A62]"
                 value="close"
                 children={<Close />}
               />
             </NavLink>
-            <form className="" onSubmit={formik.handleSubmit}>
-              <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2">
-                <div>
-                  <InputComponent
-                    labelName="invoiceDate"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="Sales invoice Date:"
-                    onChange={formik.handleChange}
-                    type="text"
-                    name="invoiceDate"
-                    placeholder="date.month.year"
-                    onFocus={handleEditable}
-                    {...(isEditable
-                      ? {}
-                      : { value: invoiceData.sales_invoice_date })} // Use optional chaining)}
-                    required
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
+        <form onSubmit={formik.handleSubmit}>
+          {/* Invoice Section */}
+          <div className="bg-white rounded-lg">
+            <div className="sm:grid block grid-cols-2 mt-2 border p-6 sm:flex justify-center items-center bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
+              <div className="border p-6 h-90 bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
+                <div className="flex justify-between">
+                  <div>
+                    {businessprofile.length > 0 ? (
+                      <>
+                      { businessprofile[0].logo!=null?(
+                        <img
+                        src={businessprofile[0].logo}
+                        alt="Logo Preview"
+                        className="w-20 h-20 object-cover border rounded"
+                      />):(<div className="font-bold text-5xl rounded">
+                            {(businessprofile[0].business_name).substring(0,1).toUpperCase()}
+                      </div>)
+                      }
+                      </>
+                    ) : (
+                      ""
+                    )}
+                    <h6>
+                      {businessprofile.length > 0
+                        ? businessprofile[0].business_name
+                        : ""}
+                    </h6>
+                  </div>
+                  <div>
+                    <h6>
+                      {businessprofile.length > 0
+                        ? businessprofile[0].mobile_no
+                        : ""}
+                    </h6>
+                    <h6>
+                      {businessprofile.length > 0
+                        ? businessprofile[0].pan_no
+                        : ""}
+                    </h6>
+                    <h6>
+                      {businessprofile.length > 0 ? businessprofile[0].gst : ""}
+                    </h6>
+                  </div>
                 </div>
-                <div>
-                  <InputComponent
-                    labelName="invoiceDate"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="Invoice Due Date:"
-                    onChange={formik.handleChange}
-                    type="text"
-                    name="invoiceDueDate"
-                    placeholder="date.month.year"
-                    onFocus={handleEditable}
-                    {...(isEditable ? {} : { value: invoiceData.due_date })} // Use optional chaining)}
-                    required
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div>
-                <div>
-                  <InputComponent
-                    labelName="invoicePrefix"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="Invoice Prefix:"
-                    onChange={formik.handleChange}
-                    type="text"
-                    name="invoicePrefix"
-                    placeholder="invoice prefix"
-                    onFocus={handleEditable}
-                    {...(isEditable
-                      ? {}
-                      : { value: invoiceData.invoice_prefix })} // Use optional chaining)}
-                    required
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div>
-                <div>
-                  <InputComponent
-                    labelName="paymentTerms"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="Payment Terms:"
-                    onChange={formik.handleChange}
-                    type="text"
-                    name="paymentTerms"
-                    placeholder="payment terms"
-                    onFocus={handleEditable}
-                    {...(isEditable
-                      ? {}
-                      : { value: invoiceData.payment_terms })} // Use optional chaining)}
-                    required
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div>
-                {/* <div>
-                  <InputComponent
-                    labelName="CustomerNumber"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="Customer Contact_Number"
-                    type="number"
-                    name="customerNumber"
-                    onChange={formik.handleChange}
-                    placeholder="Enter Customer number"
-                    required
-                    onFocus={handleEditable}
-                    {...(isEditable?{}:{value:invoiceData.mobile_no})} // Use optional chaining)}
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div> */}
-                <div>
-                  <InputComponent
-                    labelName="customerName"
-                    onChange={formik.handleChange}
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="Customer Name"
-                    onFocus={handleEditable}
-                    {...(isEditable ? {} : { value: invoiceData.customername })} // Use optional chaining)}
-                    type="text"
-                    name="customerName"
-                    placeholder="Enter Customer name"
-                    required
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
+                <h6>
+                  {businessprofile.length > 0 ? businessprofile[0].address : ""}
+                </h6>
+                <h2 className="fs-5 font-semibold mb-1 p-1">Bill To:</h2>
+                <div className="relative">
+                  <div className="relative" style={display}>
+                    {selectedCustomer ? (
+                      <div className="flex flex-col gap-4">
+                        <div className="flex justify-between items-center">
+                          <div className="flex flex-col">
+                            <div className="font-bold">Party Name:</div>
+                            <div>{selectedCustomer.customer_name}</div>
+                          </div>
+                          <button
+                            onClick={handleChangeParty}
+                            className="ml-4 bg-[#3A5B76] text-white sm:px-4 sm:py-2 px-1 py-1 rounded hover:bg-[#2D465B]"
+                          >
+                            Change Party
+                          </button>
+                        </div>
+                        <div className="flex justify-between">
+                          <div className="flex flex-col">
+                            <div className="font-bold">Billing Address:</div>
+                            <div>{selectedCustomer.billing_address}</div>
+                          </div>
+                          <div className="flex flex-col">
+                            <div className="font-bold">Shipping Address:</div>
+                            <div>{selectedCustomer.shipping_address}</div>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div>
+                                                {
+                                                  filteredCustomers.length>0?(
+                                                    <div
+                                                  onClick={handleShow}
+                                                  className="flex justify-center items-center border border-gray-400 p-4 rounded-md cursor-pointer hover:bg-gray-100"
+                                              >
+                                                  <ButtonComponent
+                                                      className="w-full text-left border-dashed border-2 rounded-md px-4 py-2"
+                                                      label="Add Party"
+                                                  />
+                                              </div>
+                                                  ):(
+                                                    <button type="button" className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]" onClick={()=>navigate("/home",{state:{data:"FromInvoice"}})}>Create Party</button>
+                                                  )
+                                                }
+                                              </div>
+                    )}
+                    {isDropdownOpen && (
+                      <div
+                        ref={dropdownRef}
+                        className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1"
+                      >
+                        <InputComponent
+                          labelName="search-customers"
+                          labelInput="Search Customers"
+                          type="text"
+                          name="search"
+                          placeholder="Search Customers"
+                          classNameInput="p-2 border border-gray-300 rounded-md w-full"
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          autoFocus
+                        />
+                        {filteredCustomers.length > 0 ? (
+                          <ul className="max-h-60 overflow-y-auto">
+                            {filteredCustomers.map((customer) => (
+                              <li
+                                key={customer.id}
+                                onClick={() => handleSelect(customer)}
+                                className="p-2 hover:bg-gray-200 cursor-pointer"
+                              >
+                                {customer.customer_name},{customer.mobile_no}
+                                <br />
+                                {customer.billing_address}
+                                <br />
+                              </li>
+                            ))}
+                            <button
+                              type="button"
+                              className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                              onClick={() =>
+                                navigate("/home", {
+                                  state: { data: "FromInvoice" },
+                                })
+                              }
+                            >
+                              Create Party
+                            </button>
+                          </ul>
+                        ) : (
+                          <div className="p-2 text-gray-500">
+                            No customers found
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
+              <div className="block sm:grid grid-cols-3 gap-4 border p-6 sm:h-90 h-max sm:flex justify-center items-center bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Invoice Prefix:
+                  </label>
+                  <InputComponent
+                    type="text"
+                    name="invoice_prefix"
+                    value={invoiceData.invoice_prefix}
+                    readOnly
+                    classNameInput="w-full border p-2 rounded-lg text-gray-700 bg-gray-50 mt-2"
+                    onChange={formik.handleChange} // This will not trigger since readOnly
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Invoice Number:
+                  </label>
+                  <InputComponent
+                    type="text"
+                    name="invoice_number"
+                    value={invoiceData.invoice_number}
+                    readOnly
+                    classNameInput="w-full border p-2 rounded-lg text-gray-700 bg-gray-50 mt-2"
+                    onChange={formik.handleChange} // This will not trigger since readOnly
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Sales Invoice Date:
+                  </label>
+                  <InputComponent
+                    type="text"
+                    name="sales_invoice_date"
+                    value={invoiceData.sales_invoice_date}
+                    readOnly
+                    classNameInput="w-full border p-2 rounded-lg text-gray-700 bg-gray-50 mt-2"
+                    onChange={formik.handleChange} // This will not trigger since readOnly
+                  />
+                </div>
+                <div className="sm:w-96 sm:outline-3 outline-0 outline-gray-400 outline-offset-4 outline-dashed rounded-md">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mb-2 px-2">
+                    <div className="w-42">
+                      <label
+                        htmlFor="payment_terms"
+                        className="w-full text-gray-600 font-semibold mb-1"
+                      >
+                        Payment Terms:
+                      </label>
+                      <InputComponent
+                        type="number"
+                        name="payment_terms"
+                        id="payment_terms"
+                        readOnly
+                        value={invoiceData.payment_terms}
+                        classNameInput="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#3A5B76] hover:bg-gray-100"
+                        onChange={(e) => setPaymentTerms(e.target.value)} // This will not trigger since readOnly
+                        placeholder="In Days"
+                      />
+                    </div>
+                    <div className="w-42">
+                      <label
+                        htmlFor="due_date"
+                        className="w-full text-gray-600 font-semibold mb-1"
+                      >
+                        Due Date:
+                      </label>
+                      <InputComponent
+                        type="text"
+                        name="due_date"
+                        id="due_date"
+                        value={invoiceData.due_date}
+                        readOnly
+                        classNameInput="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#3A5B76] hover:bg-gray-100"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
 
-              <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2">
-                {/* <div>
-                  <InputComponent
-                    labelName="reference"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="Reference"
-                    type="text"
-                    value={invoiceData?.reference || ''} // Use optional chaining
-                    name="references"
-                    placeholder="Enter Reference details"
-                    required
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div> */}
-              </div>
-              <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2">
-                <div>
-                  <label
-                    htmlFor="billing_address"
-                    className="block mb-2 font-semibold text-gray-700"
-                  >
-                    Billing Address's:
-                  </label>
-                  <textarea
-                    onFocus={handleEditable}
-                    name="billing_address"
-                    onChange={formik.handleChange}
-                    rows="3"
-                    {...(isEditable
-                      ? {}
-                      : { value: `${invoiceData?.billingaddress || ""}` })}
-                    className="w-full p-3 mb-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="shipping_address"
-                    className="block mb-2 font-semibold text-gray-700"
-                  >
-                    Shipping Address's:
-                  </label>
-                  <textarea
-                    onFocus={handleEditable}
-                    name="shipping_address"
-                    onChange={formik.handleChange}
-                    rows="3"
-                    {...(isEditable
-                      ? {}
-                      : { value: `${invoiceData?.shippingaddress || ""}` })}
-                    className="w-full p-3 mb-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div>
-              </div>
-              <div className="mb-6 overflow-x-auto">
-                <table className="w-full border border-gray-300">
-                  <thead className="bg-gray-200 text-[#2D465B]">
+          {/* Items and Billing */}
+          <div className="overflow-x-auto">
+            <table className="w-full border border-gray-300">
+              <thead className="bg-gray-200 text-[#2D465B]">
+                <tr>
+                  <th className=" border">S.No</th>
+                  <th className="p-2 border">Item/ Services</th>
+                  <th className="p-2 border">HSN Code</th>
+                  <th className="p-2 border">QTY</th>
+                  <th className="p-2 border">Price/ Item</th>
+                  <th className="p-2 border">Discount</th>
+                  <th className="p-2 border">TAX</th>
+                  <th className="p-2 border">Taxable amt</th>
+                  <th className="p-2 border">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {productRows.map((product, index) => (
+                  <React.Fragment key={index}>
                     <tr>
-                      <th className="p-2 border">S.No</th>
-                      <th className="p-2 border">Item/ Services</th>
-                      <th className="p-2 border">HSN Code</th>
-                      <th className="p-2 border">QTY</th>
-                      <th className="p-2 border">Price/ Item</th>
-                      <th className="p-2 border">Discount</th>
-                      <th className="p-2 border">TAX</th>
-                      <th></th>
-                      <th className="p-2 border">Action</th>
+                      <td className="w-10">
+                        <InputComponent
+                          onChange={formik.handleChange}
+                          type="number"
+                          name="sNo"
+                          value={index + 1}
+                          readOnly
+                          classNameInput="w-10 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                        />
+                      </td>
+                      <td className="w-80">
+                        <select
+                          disabled={disabl!=null && disabl[index]==0}
+                          className="w-80 p-2 border border-gray-300 hover:bg-gray-200"
+                          name="productdetail"
+                          onChange={(e) =>
+                            handleProductChange(index, e.target.value)
+                          }
+                          value={product.productName}
+                        >
+                          <option value="">Select</option>
+                          {products.map((product) => (
+                            <option
+                              key={product.product_name}
+                              value={product.product_name}
+                            >
+                              {product.product_name}
+                            </option>
+                          ))}
+                          <option value="addProduct" className="bg-[#2D465B] text-white">Add Product</option>
+                        </select>
+                      </td>
+                      <td className="w-30">
+                        <InputComponent
+                          onChange={formik.handleChange}
+                          type="text"
+                          name="HSNCode"
+                          value={product.hsnCode}
+                          min="0"
+                          classNameInput="w-full p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                        />
+                      </td>
+                      <td className="w-20">
+                        <InputComponent
+                          onChange={formik.handleChange}
+                          type="number"
+                          min="0"
+                          name="quantity"
+                          onFocus={(e) => handleFocus(e, index, "qty")}
+                          {...(product.quantity != ""
+                            ? { value: product.quantity }
+                            : {})}
+                          onBlur={(e) =>
+                            handleChange(
+                              e,
+                              product,
+                              index,
+                              e.target.value,
+                              "qtyChange"
+                            )
+                          }
+                          classNameInput="w-20 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                          placeholder="Quantity"
+                        />
+                      </td>
+                      <td className="w-40">
+                        <InputComponent
+                          type="number"
+                          step="any"
+                          name="unitPrice"
+                          onFocus={(e) => handleFocus(e, index, "unitChange")}
+                          {...(product.unitPrice != ""
+                            ? { value: product.unitPrice }
+                            : {})}
+                          onBlur={(e) =>
+                            handleChange(
+                              e,
+                              product,
+                              index,
+                              e.target.value,
+                              "unitchange"
+                            )
+                          }
+                          min="0"
+                          classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                        />
+                      </td>
+                      <td className="w-30">
+                        <InputComponent
+                          type="number"
+                          name="rupe"
+                          step="any"
+                          min="0"
+                          onFocus={(e) => handleFocus(e, index, "rupe")}
+                          {...(product.discount_amount != ""
+                            ? { value: productAmount[index].amount }
+                            : {})}
+                          onBlur={(e) =>
+                            handleChange(e, product, index, 0, "discount")
+                          }
+                          placeholder="₹"
+                          classNameInput="w-30 p-2 border border-gray-300  hover:bg-gray-200"
+                        />
+                      </td>
+                      <td className="w-40">
+                        <select
+                          onChange={(e) =>
+                            handleChange(e, product, index, 0, "gstChange")
+                          }
+                          // value={product.gstRate}
+                          className="w-40 border d-inline-block border-gray-300 rounded-md p-2"
+                        >
+                          <option className="bg-gray" readOnly value={"gst_"}>{count==0?product.gstRate:(productRows.length?product.gstRate:"")}</option>
+                          <option value="gst_0">0%</option>
+                          <option value="gst_0.1">0.1%</option>
+                          <option value="gst_0.25">0.25%</option>
+                          <option value="gst_1.5">1.5%</option>
+                          <option value="gst_3">3%</option>
+                          <option value="gst_5">5%</option>
+                          <option value="gst_6">6%</option>
+                          <option value="gst_12">12%</option>
+                          <option value="gst_13.8">13.8%</option>
+                          <option value="gst_18">18%</option>
+                          <option value="gst_28">GST @ 28%</option>
+                        </select>
+                      </td>
+                      <td className="w-40">
+                        <InputComponent
+                          onChange={formik.handleChange}
+                          type="number"
+                          step="any"
+                          name="taxableAmount"
+                          value={product.taxable_amount}
+                          min="0"
+                          readOnly
+                          classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                        />
+                      </td>
+                      <td>
+                        <ButtonComponent
+                          type="button"
+                          className="p-1 m-auto w-100 text-white bg-red-500 rounded hover:bg-red-600"
+                          value="remove"
+                          onClick={() => handleDeleteRow(index)}
+                        >
+                          <DeleteForever />
+                        </ButtonComponent>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody>
-                    {productRows.map((product, index) => (
-                     <React.Fragment key={index}>
-                     <tr>
-                       <td className="w-10">
-                         <InputComponent
-                           onChange={formik.handleChange}
-                           type="number"
-                           name="sNo"
-                           value={index + 1}
-                           readOnly
-                           classNameInput="w-10 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                         />
-                       </td>
-                       <td className="w-80">
-                         <select
-                           disabled={disabl!=null && disabl[index]==0}
-                           className="w-80 p-2 border border-gray-300 hover:bg-gray-200"
-                           name="productdetail"
-                           onChange={(e) =>
-                             handleProductChange(index, e.target.value)
-                           }
-                           value={product.productName}
-                         >
-                           <option value="">Select</option>
-                           {products.map((product) => (
-                             <option
-                               key={product.product_name}
-                               value={product.product_name}
-                             >
-                               {product.product_name}
-                             </option>
-                           ))}
-                           <option value="addProduct" className="bg-[#2D465B] text-white">Add Product</option>
-                         </select>
-                       </td>
-                       <td className="w-30">
-                         <InputComponent
-                           onChange={formik.handleChange}
-                           type="text"
-                           name="HSNCode"
-                           value={product.hsnCode}
-                           min="0"
-                           classNameInput="w-full p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                         />
-                       </td>
-                       <td className="w-20">
-                         <InputComponent
-                           onChange={formik.handleChange}
-                           type="number"
-                           min="0"
-                           name="quantity"
-                           onFocus={(e) => handleFocus(e, index, "qty")}
-                           {...(product.quantity != ""
-                             ? { value: product.quantity }
-                             : {})}
-                           onBlur={(e) =>
-                             handleChange(
-                               e,
-                               product,
-                               index,
-                               e.target.value,
-                               "qtyChange"
-                             )
-                           }
-                           classNameInput="w-20 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                           placeholder="Quantity"
-                         />
-                       </td>
-                       <td className="w-40">
-                         <InputComponent
-                           type="number"
-                           step="any"
-                           name="unitPrice"
-                           onFocus={(e) => handleFocus(e, index, "unitChange")}
-                           {...(product.unitPrice != ""
-                             ? { value: product.unitPrice }
-                             : {})}
-                           onBlur={(e) =>
-                             handleChange(
-                               e,
-                               product,
-                               index,
-                               e.target.value,
-                               "unitchange"
-                             )
-                           }
-                           min="0"
-                           classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                         />
-                       </td>
-                       <td className="w-30">
-                         <InputComponent
-                           type="number"
-                           name="rupe"
-                           step="any"
-                           min="0"
-                           onFocus={(e) => handleFocus(e, index, "rupe")}
-                           {...(product.discount_amount != ""
-                             ? { value: productAmount[index].amount }
-                             : {})}
-                           onBlur={(e) =>
-                             handleChange(e, product, index, 0, "discount")
-                           }
-                           placeholder="₹"
-                           classNameInput="w-30 p-2 border border-gray-300  hover:bg-gray-200"
-                         />
-                       </td>
-                       <td className="w-40">
-                         <select
-                           onChange={(e) =>
-                             handleChange(e, product, index, 0, "gstChange")
-                           }
-                           // value={product.gstRate}
-                           className="w-40 border d-inline-block border-gray-300 rounded-md p-2"
-                         >
-                           <option className="bg-gray" readOnly value={"gst_"}>{count==0?product.gstRate:(productRows.length?product.gstRate:"")}</option>
-                           <option value="gst_0">0%</option>
-                           <option value="gst_0.1">0.1%</option>
-                           <option value="gst_0.25">0.25%</option>
-                           <option value="gst_1.5">1.5%</option>
-                           <option value="gst_3">3%</option>
-                           <option value="gst_5">5%</option>
-                           <option value="gst_6">6%</option>
-                           <option value="gst_12">12%</option>
-                           <option value="gst_13.8">13.8%</option>
-                           <option value="gst_18">18%</option>
-                           <option value="gst_28">GST @ 28%</option>
-                         </select>
-                       </td>
-                       <td className="w-40">
-                         <InputComponent
-                           onChange={formik.handleChange}
-                           type="number"
-                           step="any"
-                           name="taxableAmount"
-                           value={product.taxable_amount}
-                           min="0"
-                           readOnly
-                           classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                         />
-                       </td>
-                       <td>
-                         <ButtonComponent
-                           type="button"
-                           className="p-1 m-auto w-100 text-white bg-red-500 rounded hover:bg-red-600"
-                           value="remove"
-                           onClick={() => handleDeleteRow(index)}
-                         >
-                           <DeleteForever />
-                         </ButtonComponent>
-                       </td>
-                     </tr>
-                     <tr>
-                       <td></td>
-                       <td colSpan={4}>
-                         <textarea
-                           onFocus={(e) => handleFocus(e, index, "proD")}
-                           {...(product.productDescription != ""
-                             ? { value: product.productDescription }
-                             : {})}
-                           onBlur={(e) => handleDescriptionAdd(e, index)}
-                           name="productDescription"
-                           placeholder="Enter product description"
-                           className="bg-white w-full border border-gray-300 hover:bg-gray-200"
-                           id=""
-                         ></textarea>
-                       </td>
-                       <td className="w-30">
-                         <InputComponent
-                           onBlur={(e) =>
-                             handleChange(e, product, index, 0, "discount")
-                           }
-                           type="number"
-                           step="any"
-                           min="0"
-                           max="100"
-                           name="per"
-                           placeholder="%"
-                           onFocus={(e) => handleFocus(e, index, "dis")}
-                           {...(product.discount_amountPer != "0_%"
-                             ? { value: productAmount[index].per }
-                             : {})}
-                           classNameInput="w-30 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                         />
-                       </td>
-                       <td className="w-40">
-                         {TaxAmount[index] !== "NaN" ? (
-                           <div>
-                             <input
-                               className="w-40 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                               // value={"Rs." + TaxAmount[index]}
-                               value={TaxAmount[index]!=undefined?("₹" + TaxAmount[index]):("₹ 0.00")}
-                             ></input>
-                           </div>
-                         ) : (
-                           <span className="w-40">0.00</span>
-                         )}
-                       </td>
-                       <td></td>
-                     </tr>
-                   </React.Fragment>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="relative w-full p-1 grid grid-cols-1 md:grid-cols-2 gap-1">
+                    <tr>
+                      <td></td>
+                      <td colSpan={4}>
+                        <textarea
+                          onFocus={(e) => handleFocus(e, index, "proD")}
+                          {...(product.productDescription != ""
+                            ? { value: product.productDescription }
+                            : {})}
+                          onBlur={(e) => handleDescriptionAdd(e, index)}
+                          name="productDescription"
+                          placeholder="Enter product description"
+                          className="bg-white w-full border border-gray-300 hover:bg-gray-200"
+                          id=""
+                        ></textarea>
+                      </td>
+                      <td className="w-30">
+                        <InputComponent
+                          onBlur={(e) =>
+                            handleChange(e, product, index, 0, "discount")
+                          }
+                          type="number"
+                          step="any"
+                          min="0"
+                          max="100"
+                          name="per"
+                          placeholder="%"
+                          onFocus={(e) => handleFocus(e, index, "dis")}
+                          {...(product.discount_amountPer != "0_%"
+                            ? { value: productAmount[index].per }
+                            : {})}
+                          classNameInput="w-30 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                        />
+                      </td>
+                      <td className="w-40">
+                        {TaxAmount[index] !== "NaN" ? (
+                          <div>
+                            <input
+                              className="w-40 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                              // value={"Rs." + TaxAmount[index]}
+                              value={TaxAmount[index]!=undefined?("₹" + TaxAmount[index]):("₹ 0.00")}
+                            ></input>
+                          </div>
+                        ) : (
+                          <span className="w-40">0.00</span>
+                        )}
+                      </td>
+                      <td></td>
+                    </tr>
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
+            <div className="relative w-full p-1 grid grid-cols-1 md:grid-cols-2 gap-1">
+              <button
+                type="button"
+                className="mt-3 px-2 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
+                onClick={handleAddProductRow}
+              >
+                +ADD ITEM
+              </button>
+              <div>
                 <button
                   type="button"
-                  className="mt-3 px-2 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
-                  onClick={handleAddProductRow}
+                  className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
                 >
-                  +ADD ITEM
+                  Scan Barcode
                 </button>
               </div>
-              <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2">
-                <div>
-                  <InputComponent
-                    labelName="sgst"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="SGST:"
-                    type="number"
-                    name="sgst"
-                    onChange={formik.handleChange}
-                    readOnly
-                    value={addTotal == null ? invoiceData.sgst : gstAmount / 2}
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div>
-                <div>
-                  <InputComponent
-                    labelName="cgst"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="CGST:"
-                    type="number"
-                    name="cgst"
-                    onChange={formik.handleChange}
-                    readOnly
-                    value={addTotal == null ? invoiceData.cgst : gstAmount / 2}
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div>
-                <div>
-                  <InputComponent
-                    labelName="subTotal"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="Taxable Amount:"
-                    type="number"
-                    onChange={formik.handleChange}
-                    name="taxableAmount"
-                    readOnly
-                    value={
-                      taxableAmount == null
-                        ? invoiceData.taxable_amount
-                        : taxableAmount
-                    } // Use optional chaining
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div>
-                <div>
-                  <InputComponent
-                    labelName="gstAmount"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="Tax Amount:"
-                    type="number"
-                    name="totalGstAmount"
-                    onChange={formik.handleChange}
-                    readOnly
-                    value={
-                      gstAmount == null ? invoiceData.tax_amount : gstAmount
-                    }
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div>
-                <div>
-                  <InputComponent
-                    labelName="totalAmount"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="Total Amount:"
-                    type="number"
-                    name="totalAmount"
-                    onChange={formik.handleChange}
-                    readOnly
-                    value={
-                      addTotal == null ? invoiceData.total_amount : addTotal
-                    }
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div>
-              </div>
-
-              {/* <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-1">
-                <div>
-                  <InputComponent
-                    labelName="Amountinwords"
-                    classNameLabel="block mb-2 font-semibold text-gray-700"
-                    labelInput="Amount in Words:"
-                    type="text"
-                    name="Amountinwords"
-                    readOnly
-                    value={amount_to_words}
-                    classNameInput="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                  />
-                </div>
-              </div> */}
-
-              <div className="grid grid-cols-1 gap-6 mb-6 md:grid-cols-2">
-                {invoiceData.notes ? (
-                  <div>
-                    <label
-                      htmlFor="challanNotes"
-                      className="block mb-2 font-semibold text-gray-700"
-                    >
-                      Notes:
-                    </label>
-                    <textarea
-                      id="invoiceNotes"
-                      value={invoiceData?.notes || ""} // Use optional chaining
-                      name="challanNotes"
-                      onChange={formik.handleChange}
-                      className="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
-                      placeholder="Any additional notes..."
-                    />
-                  </div>
-                ) : (
-                  ""
-                )}
-
-                {
-                invoiceData.signature_box==null?(<></>):(
-                  <div>
-                <label htmlFor="signature_box" className="block mb-2 font-semibold text-gray-700">
-                  Signature Box:
-                </label>
-                <img src={invoiceData.signature_box} alt="Logo Preview" className="w-full h-40 object-cover border rounded" />
-              </div>
-                )
-              }
-              </div>
-              <div className="mt-10 text-end">
-                <ButtonComponent
-                  value="Submit"
-                  type="submit"
-                  label="Update"
-                  className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                ></ButtonComponent>
-              </div>
-            </form>
+            </div>
           </div>
-        </div>
+
+          {/* Subtotal and Total */}
+          <div className="p-1">
+            <div className="grid grid-cols-4 gap-4 border border-gray-300 pt-4">
+              <div className="text-center font-semibold">Sub Total</div>
+              {/* <div
+            className="text-center font-semibold"
+            name="totalQty"
+            onChange={formik.handleChange}
+          >
+            QTY: {qty}
+          </div> */}
+              {gstSu != "NaN" ? (
+                <div
+                  className="text-center font-semibold"
+                  name="subTotal"
+                  onChange={formik.handleChange}
+                >
+                  ₹Tax Amount {gstSu.toFixed(2)}
+                </div>
+              ) : (
+                <div
+                  className="text-center font-semibold"
+                  name="subTotal"
+                  onChange={formik.handleChange}
+                >
+                  ₹Tax Amount {invoiceData.tax_amount}
+                </div>
+              )}
+              <div
+                className="text-center font-semibold"
+                name="totalAmount"
+                onChange={formik.handleChange}
+              >
+                Total Amount:₹{addTotal==null?invoiceData.total_amount:addTotal}
+              </div>
+            </div>
+          </div>
+
+          {/* Terms and Conditions */}
+          <div className="sm:grid grid-cols-2 px-6  sm:flex justify-center items-center bg-white text-gray-500 text-lg font-medium cursor-pointer">
+            <div className="border p-6 bg-gray-50">
+              <ButtonComponent
+                onClick={toggleNotes}
+                type="button"
+                className="mt-3 block text-[#3A5B76] font-semibold hover:text-[#2E4A62]"
+              >
+                + Add Notes
+              </ButtonComponent>
+
+              {showNotes && (
+                <div id="notesContainer" className="mt-4">
+                  <label
+                    htmlFor="invoiceNotes"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Notes
+                  </label>
+                  <textarea
+                    id="invoiceNotes"
+                    rows="4"
+                    className="mt-1 p-2 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Enter any special instructions or notes here..."
+                    value={notes}
+                    onChange={handleNotesChange}
+                  />
+                </div>
+              )}
+
+              <div className="mt-4 sm:block hidden">
+                <h2 className="text-xl font-semibold mb-2">
+                  Terms and Conditions
+                </h2>
+                <p className="text-sm bg-gray-200 p-2">
+                  Goods once sold will not be taken back. All warranty &
+                  replacement material will be handled per manufacturer's
+                  policy. We are not responsible for warranty. Replacement is
+                  from the source. Payment due within 15 days.
+                </p>
+              </div>
+            </div>
+
+            <div className="m-4">
+              <div>
+                <ButtonComponent
+                  type="button"
+                  className="mt-3 text-[#3A5B76] font-semibold rounded hover:text-[#2E4A62]"
+                >
+                  + Add Additional Charges
+                </ButtonComponent>
+                <div className="flex justify-between mt-3">
+                  <button
+                    type="button"
+                    className=" text-[#3A5B76] font-semibold rounded hover:text-[#2E4A62]"
+                  >
+                    + Taxable Amount
+                  </button>
+                  <div>₹{taxableAmount == null
+                        ? invoiceData.taxable_amount
+                        : taxableAmount}</div>
+                </div>
+                <div className="mt-1.5">
+                  {/* {productRows.map((item, index) => (
+                <div key={index} className="">
+                    <div className="flex justify-between">
+                        <div className="font-medium">SGST@{item.gstRate / 2}</div>
+                        <div className="" >₹{TaxAmount.length>0?TaxAmount[index]/2:0}</div>
+                    </div>
+                    <div className="flex justify-between">
+                        <div className="font-medium">CGST@{item.gstRate / 2}</div>
+                        <div>₹{TaxAmount.length>0?TaxAmount[index]/2:0}</div>
+                    </div>
+                </div>
+            ))} */}
+                  <div className="">
+                    <div className="flex justify-between">
+                      <div className="font-medium">
+                        SGST@
+                        {gstAmountPer == productRows.length
+                          ? productRows[0].gstRate + "%"
+                          : ""}
+                      </div>
+                      <div className="">₹{(addTotal == null ? invoiceData.sgst : (gstAmount / 2).toFixed(2))}</div>
+                    </div>
+                    <div className="flex justify-between">
+                      <div className="font-medium">
+                        CGST@
+                        {gstAmountPer == productRows.length
+                          ? productRows[0].gstRate + "%"
+                          : ""}
+                      </div>
+                      <div>₹{(addTotal == null ? invoiceData.cgst : (gstAmount / 2).toFixed(2))}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* tcs */}
+              {/* <div className="flex items-center space-x-2 mt-4 col-span-2">
+                <input type="checkbox" className="h-4 w-4 cursor-pointer" />
+                <label className="text-sm text-gray-700">Apply TCS</label>
+              </div> */}
+            </div>
+          </div>
+
+          {/* Bank Details */}
+          <div className="block sm:grid grid-cols-2 px-6 h-max sm:flex justify-center items-center bg-white text-gray-500 text-lg font-medium cursor-pointer">
+            <div>
+              <div className="border p-6 h-60 bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
+                <h2 className="text-xl font-semibold mb-2">Bank Details</h2>
+                <div className="mt-1 p-2">
+                  <p className="text-sm">
+                    Account Number: 
+                  </p>
+                  <p className="text-sm">
+                    Account Holder's Name: 
+                  </p>
+                  <p className="text-sm">IFSC CODE: </p>
+                  <p className="text-sm">
+                    Branch Name: 
+                  </p>
+                </div>
+                {/* <ButtonComponent
+                  type="button"
+                  onClick={() => setIsModalOpen(true)}
+                  className="mt-1 p-1 text-sm text-[#3A5B76] border rounded border-[#3A5B76] hover:text-white hover:bg-[#2E4A62]"
+                >
+                  Change Bank Account
+                </ButtonComponent> */}
+                {/* <ButtonComponent
+                  type="button"
+                  className="mt-1 p-1 text-sm text-[#3A5B76] border rounded border-[#3A5B76] hover:text-white hover:bg-[#2E4A62]"
+                >
+                  Remove Bank Account
+                </ButtonComponent> */}
+              </div>
+            </div>
+
+            <div className="block sm:grid grid-cols-2 gap-4 border p-6 h-max sm:flex justify-center items-center bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
+              
+              <div>
+                <label className="text-xl text-gray-700">Total Amount:</label>
+              </div>
+              <div>
+                <InputComponent
+                  type="number"
+                  className="w-full p-2 bg-white border rounded-lg border-gray-300"
+                  value={addTotal == null ? invoiceData.total_amount : addTotal}
+                  readOnly
+                />
+              </div>
+              <div className="block sm:flex sm:items-center sm:space-x-2 sm:mt-4">
+                <input
+                  type="checkbox"
+                  onChange={handleRoundChange}
+                  className="h-max w-4"
+                />
+                <label className="text-sm text-gray-700">Auto Round Off:</label>
+              </div>
+              <div>
+                <InputComponent
+                  type="number"
+                  className="w-full p-1 bg-white border border-gray-300"
+                  value={round}
+                  readOnly
+                />
+              </div>
+              <div>
+                <label className="text-xl text-gray-700">Amount Receipt:</label>
+              </div>
+              <div>
+                <InputComponent
+                  type="number"
+                  className="w-full p-2 bg-white border rounded-lg border-gray-300"
+                  value={amountReceipt}
+                  onChange={(e) =>
+                    setAmountReceipt(parseFloat(e.target.value) || 0)
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Balance Amount */}
+          {/* <div className="grid grid-cols-2 px-4 w-full bg-white text-gray-500 text-lg font-medium cursor-pointer">
+            <div>
+              <label className="text-xl text-gray-700 p-2">
+                Balance Amount:
+              </label>
+            </div>
+            <div>
+              <input
+                type="number"
+                className="w-96 p-2 bg-white border rounded-lg border-gray-300"
+                value={(total - amountReceipt).toFixed(2)}
+                readOnly
+              />
+            </div>
+          </div> */}
+          {/* Authorised Signatory */}
+          <div className="block sm:grid grid-cols-2 px-6 h-80 sm:flex justify-center items-center bg-white text-gray-500 text-lg font-medium cursor-pointer">
+            <div className="border sm:p-6 p-0 sm:h-60 h-0 bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
+              <h2 className="text-xl font-semibold mb-2"></h2>
+            </div>
+            <div className="border p-6 sm:h-60 h-max  bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
+              <h2 className="text-xl font-semibold mb-2">
+              Authorized signatory
+              </h2>
+              {
+                (businessprofile.length>0 && businessprofile[0].signature_box!=null)?(
+                  <img
+                src={
+                  businessprofile.length > 0
+                    ? businessprofile[0].signature_box
+                    : ""
+                }
+                alt="Logo Preview"
+                className="w-full h-40 object-cover border rounded"
+              />
+                ):(<div className="w-100 h-40 border-1 border-black"></div>)
+              }
+            </div>
+          </div>
+          <div className="mt-10 text-end">
+            <ButtonComponent
+              value="Submit"
+              type="submit"
+              label="Save"
+              className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+            ></ButtonComponent>
+          </div>
+        </form>
       </div>
     </div>
+        )
+      }
+    </>
   );
 }

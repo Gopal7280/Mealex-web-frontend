@@ -29,7 +29,7 @@ const QuotationTable = () => {
         const [totalPurchase,setTotalPurchase]=useState(null);
         const [statusOpen,setStatusOpen]=useState(null);
         const [statusClose,setStatusClose]=useState(null);
-        const column=["Date","Quotation Number","Party Name","Due In","Amount","Status","Generate-Quotation"];
+        const column=["Date","Quotation Number","Party Name","Due In","Amount","Status"];
         useEffect(() => {
             const fetchQuotations = async () => {
                 setLoader(true); // Show the loader when the data fetching starts
@@ -97,7 +97,7 @@ const QuotationTable = () => {
     
         const filterQuotation = () => {
             return quotation.filter(quotation => {
-                const matchesSearch = quotation.partyName.toLowerCase().includes(searchTerm.toLowerCase());
+                const matchesSearch = `${quotation.partyName} ${quotation.quotationNumber} ${quotation.amount}`.toLowerCase().includes(searchTerm.toLowerCase());
                 const matchesStatus = statusFilter === 'all' || quotation.status.toLowerCase() === statusFilter.toLowerCase();
                 return matchesSearch && matchesStatus;
             });
@@ -178,7 +178,7 @@ const QuotationTable = () => {
         }
         function handleCheckboxClick(e,id)
     {
-        if(e.target.checked){
+        if(!e.target.checked){
             console.log("checked");
             for(var i of fetchQuotation)
                 {
@@ -209,6 +209,11 @@ const QuotationTable = () => {
         console.log("close");
         
       };
+      function handleClick(e,row) {
+        console.log("clicked");
+        console.log(row);
+        handleCheckboxClick(e,row.quotationNumber);
+      }
     
         return (
           <>
@@ -384,19 +389,21 @@ const QuotationTable = () => {
                             </tbody>
                         </table> */}
                          <TableComponent
+                         onClickRow={handleClick}
                                 name="Quotation"
                           column={column}
                           data={filterQuotation()}
                           pageSize={3} // Number of rows per page
-                          generate={(row)=>(
-                                                      <div className="flex gap-2">
-                                                          <button className="text-red-500" onClick={(e)=>handleCheckboxClick(e,row.quotationNumber)}><Checkbox  color="success" /></button>
-                                                      </div>
-                                                    )}
+                        //   generate={(row)=>(
+                        //                               <div className="flex gap-2">
+                        //                                   <button className="text-red-500" onClick={(e)=>handleCheckboxClick(e,row.quotationNumber)}><Checkbox  color="success" /></button>
+                        //                               </div>
+                        //                             )}
                           actions={(row) => (
-                            <div className="flex gap-2">
-                              <button className="text-[#3A5B76]" onClick={(e)=>handlePreview(e,row.quotationNumber,row)}><Preview/></button>
-                              <button className="text-[#3A5B76]" onClick={(e)=>handleEdit(e,row.quotationNumber)}><ModeEdit/></button>
+                            <div className="text-center">
+                                {/* flex gap-2 */}
+                              {/* <button className="text-[#3A5B76]" onClick={(e)=>handlePreview(e,row.quotationNumber,row)}><Preview/></button>
+                              <button className="text-[#3A5B76]" onClick={(e)=>handleEdit(e,row.quotationNumber)}><ModeEdit/></button> */}
                               <button className="text-red-500" onClick={(e) =>handledelete(e,row.quotationNumber)}><DeleteForever/></button>
                             </div>
                           )}

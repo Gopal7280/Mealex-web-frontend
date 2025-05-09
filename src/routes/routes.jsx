@@ -54,6 +54,7 @@ import HotkeyManager from "../components/hotKeyManager";
 import LandingPage from "../pages/landingPage"
 import Users from "../pages/users";
 import { UserForm } from "../pages/userForm";
+import { GeneratePurchase } from "../pages/generatePurchase";
 
 function RouteComponent() {
     const [isAuthenticated, setIsAuthenticated] = useState(
@@ -114,6 +115,7 @@ function RouteComponent() {
                 <Route path="/generate-quotation" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<GenerateQuotationn />} />} />
                 <Route path="/purchasePreview" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<PurchasePreview />} />} />
                 <Route path="/purchaseEdit" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<PurchaseEdit />} />} />
+                <Route path="/generate-purchase" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<GeneratePurchase />} />} />
                 <Route path="/paymentIn" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<PaymentIn />} />} />
                 <Route path="/paymentInForm" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<PaymentInForm />} />} />
                 <Route path="/paymentOutForm" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<PaymentOutForm />} />} />

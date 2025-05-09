@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { apiGet } from "../services/api";
 import "../styles/generateChallan.css";
 import { useReactToPrint } from "react-to-print";
@@ -9,6 +9,7 @@ import { FaDownload } from "react-icons/fa6";
 import { toWords } from "number-to-words";
 import { IoMdPrint } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
+import { FaEdit } from "react-icons/fa";
 import {Loader} from "../layouts/Loader"
 export function GenerateInvoice() {
   const [loader,setLoader]=useState(true);
@@ -19,7 +20,7 @@ export function GenerateInvoice() {
   const [quantity, setQuantity] = useState(0);
   const location = useLocation();
   const contentRef = useRef();
-  
+  const navigate=useNavigate();
   const handleDownloadPrint = useReactToPrint({ contentRef });
   useEffect(() => {
     try{
@@ -479,18 +480,26 @@ const handleDownloadPDF = async () => {
   // Step 5: Save PDF
   pdf.save("invoice.pdf");
 };
+function handleEdit(e) {
+  const invoiceId=location.state?.invoice_id;
+  console.log(invoiceId);
+  console.log(invoiceId);   
+      //   alert(JSON.stringify(invoiceId));
+      navigate("/invoice-edit", { state: { data: location.state?.data[0] } });
+  }
 
   return (
     <>
    {
     data != null && bussinessData != null?(
-      <div className="w-full">
+      <div className="w-full mt-2">
         <div className="flex justify-center">
       <div className=" bg-white w-4xl">
       <h3 className="text-center p-3 d-inline-block">Preview for Invoice</h3>
       <div className="float-end">
       <button className="" onClick={handleDownloadPrint}><IoMdPrint className="iconSize"/></button>
       <button className="" onClick={handleDownloadPDF}><FaDownload className="iconSize"/></button>
+      <button className="" onClick={(e)=>handleEdit(e)}><FaEdit className="iconSize"/></button>
       </div>
       </div>
       </div>
@@ -501,13 +510,18 @@ const handleDownloadPDF = async () => {
         >
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center">
-              <div className=" mr-4 flex items-center rounded-full justify-center">
+              {
+                data[0].logo!=null?(
+                  <div className=" mr-4 flex items-center rounded-full justify-center">
                 <img
                   className="w-16 h-16 text-white font-bold text-xl"
                   src={data[0].logo}
                   alt=""
-                />
+                /> 
+                {/* hi1 */}
               </div>
+                ):(<></>)
+              }
               <div className="" style={{color:"#364153"}}>
                 <div id="company-name" style={{ color: " #000000" }}>
                   {bussinessData[0].business_name} ™
@@ -550,7 +564,7 @@ const handleDownloadPDF = async () => {
                         <div id="invoice-number" class="bold">{data[0].invoice_prefix}</div>
                       </div>
                       <div id="invoice-date-container">
-                        <div id="invoice-date-label">INVOICE DATE</div>
+                        <div id="invoice-date-label">DATE</div>
                         <div class="middle-colon">:</div>
                         <div id="invoice-date" class="bold">{date}</div>
                       </div>

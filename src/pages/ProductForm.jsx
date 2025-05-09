@@ -83,7 +83,7 @@ function handleCustomFieldChange(index, value) {
       gstWithWithout:{},
     },
     onSubmit: async (values) => {
-
+      setLoader(true);
       if(values.purchase_price==""){
         values.purchase_price=0;
       }
@@ -106,7 +106,8 @@ function handleCustomFieldChange(index, value) {
       values.product_category=product_category;
       // alert(JSON.stringify(values));
       console.log(values);
-        try{   
+      const addProduct=async ()=>{  
+      try{   
           // setLoader(true);
           const res=await apiPost("/products",values);   
         if(location.state?.data=="FromInvoice"){
@@ -141,8 +142,12 @@ function handleCustomFieldChange(index, value) {
         catch(err){
           console.log(err.status);
           toast.current.show({severity:'error', summary: 'Error', detail:'Please enter all fields', life: 3000});
-
         }
+        finally{
+          setLoader(false);
+        }
+      }
+      addProduct();
     },
   });
   const [gvalue,setGvalue]=useState("");

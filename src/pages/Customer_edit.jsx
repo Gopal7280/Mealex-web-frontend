@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
 import { debounce, values } from "lodash";
-import { Preview, ModeEdit, DeleteForever,Close } from "@mui/icons-material";
+import { Preview, ModeEdit, DeleteForever, Close } from "@mui/icons-material";
 import axios from "axios";
 import "../styles/layoutFix.css";
-import Sidebar from '../layouts/Sidebar';
+import Sidebar from "../layouts/Sidebar";
 import { InputComponent } from "../components/Input";
 import { ButtonComponent } from "../components/Button";
 import { apiPut } from "../services/api";
@@ -15,11 +15,11 @@ export default function Customer_detail_edit({
   editCustomer,
   onCancelEdit,
 }) {
-  const [party,setParty]=useState("");
+  const [party, setParty] = useState("");
   const [isEdit, setIsEdit] = useState(false);
   const location = useLocation();
   const [data, setData] = useState({});
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const formik = useFormik({
     initialValues: {
       customer_name: "",
@@ -34,7 +34,7 @@ export default function Customer_detail_edit({
       shipping_address: "",
       opening_value: "",
       country: "",
-      is_active:false,
+      is_active: false,
       state: "",
       city: "",
       zip_code: "",
@@ -42,10 +42,10 @@ export default function Customer_detail_edit({
       birth_date: "",
       anniversary_date: "",
       personal_notes: "",
-      customer_id:"",
+      customer_id: "",
     },
     onSubmit: (values) => {
-      values.customer_id=location.state.data.customer_id;
+      values.customer_id = location.state.data.customer_id;
       // alert(values.customer_id);
       // alert(JSON.stringify(values));
       if (values.customer_name == "") {
@@ -105,12 +105,13 @@ export default function Customer_detail_edit({
       if (values.personal_notes == "") {
         values.personal_notes = data.personal_notes;
       }
+      console.log(values);
       // alert(JSON.stringify(values));
       const editdetail=async ()=>{
             const res=await apiPut("/customers",values);
             // alert(JSON.stringify(values));
             navigate("/display");
-            
+
       }
       editdetail();
     },
@@ -127,39 +128,36 @@ export default function Customer_detail_edit({
   function handleFieldChange(e) {
     setIsEdit(true);
   }
-  function handlePartyChange(e)
-  {
-        setParty(e);
+  function handlePartyChange(e) {
+    setParty(e);
   }
   return (
     <div className="">
-    <div className="over max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-md">
-      <h1 className="text-2xl font-bold text-center mb-6">
-      Update Details
-      </h1>
+      <div className="over max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-md">
+        <h1 className="text-2xl font-bold text-center mb-6">Update Details</h1>
 
         <NavLink to="/display" className="text-white text-decoration-none">
           <ButtonComponent
-                        type="button"
-                        className=" bg-[#3A5B76] float-end px-2 py-1 text-white font-bold rounded hover:bg-[#2E4A62]"
-                        value="close"
-                        children={<Close/>}
-                      />
+            type="button"
+            className=" bg-[#3A5B76] float-end px-2 py-1 text-white font-bold rounded hover:bg-[#2E4A62]"
+            value="close"
+            children={<Close />}
+          />
         </NavLink>
-      <form onSubmit={formik.handleSubmit} id="customerForm" className="mt-6">
-        <div className="grid grid-cols-2 gap-6 max-sm:block">
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="customer_name"
-              onFocus={handleFieldChange}
-              labelInput="Customer Name"
-              type="text"
-              placeholder="Enter Product Name"
-              {...(isEdit ? {} : { value: data.customer_name })}
-            ></InputComponent>
-          </div>
-          <div>
+        <form onSubmit={formik.handleSubmit} id="customerForm" className="mt-6">
+          <div className="grid grid-cols-2 gap-6 max-sm:block">
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="customer_name"
+                onFocus={handleFieldChange}
+                labelInput="Customer Name"
+                type="text"
+                placeholder="Enter Product Name"
+                {...(isEdit ? {} : { value: data.customer_name })}
+              ></InputComponent>
+            </div>
+            {/* <div>
             <InputComponent
               onChange={formik.handleChange}
               name="party_type"
@@ -169,53 +167,69 @@ export default function Customer_detail_edit({
               // value={data.party}
               {...(isEdit ? {} : { value: data.party })}
             ></InputComponent>
-          </div>
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="email"
-              onFocus={handleFieldChange}
-              labelInput="Email Id"
-              type="text"
-              // value={data.email}
-              {...(isEdit ? {} : { value: data.email })}
-            ></InputComponent>
-          </div>
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="mobile_no"
-              onFocus={handleFieldChange}
-              labelInput="Mobile No."
-              type="text"
-              readOnly
-              // value={data.mobile_no}
-              {...(isEdit ? {} : { value: data.mobile_no })}
-            ></InputComponent>
-          </div>
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="tax_id"
-              onFocus={handleFieldChange}
-              labelInput="GSTIN No."
-              type="text"
-              // value={data.tax_id}
-              {...(isEdit ? {} : { value: data.tax_id })}
-            ></InputComponent>
-          </div>
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="pan_no"
-              onFocus={handleFieldChange}
-              labelInput="Pan No."
-              type="text"
-              // value={data.pan_number}
-              {...(isEdit ? {} : { value: data.pan_number })}
-            ></InputComponent>
-          </div>
-          <div>
+          </div> */}
+            <div>
+              <label className="block text-gray-600">Party Type</label>
+              <select
+                onChange={formik.handleChange}
+                {...(isEdit ? {} : { value: data.party })}
+                name="party_type"
+                className="w-full p-2 border rounded mt-1"
+                value={formik.values.party_type}
+              >
+                <option disabled value="">
+                  {data.party != "" ? data.party : "select"}
+                </option>
+                <option>Customer</option>
+                <option>Vendor/Supplier</option>
+              </select>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="email"
+                onFocus={handleFieldChange}
+                labelInput="Email Id"
+                type="text"
+                // value={data.email}
+                {...(isEdit ? {} : { value: data.email })}
+              ></InputComponent>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="mobile_no"
+                onFocus={handleFieldChange}
+                labelInput="Mobile No."
+                type="text"
+                readOnly
+                // value={data.mobile_no}
+                {...(isEdit ? {} : { value: data.mobile_no })}
+              ></InputComponent>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="tax_id"
+                onFocus={handleFieldChange}
+                labelInput="GSTIN No."
+                type="text"
+                // value={data.tax_id}
+                {...(isEdit ? {} : { value: data.tax_id })}
+              ></InputComponent>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="pan_no"
+                onFocus={handleFieldChange}
+                labelInput="Pan No."
+                type="text"
+                // value={data.pan_number}
+                {...(isEdit ? {} : { value: data.pan_number })}
+              ></InputComponent>
+            </div>
+            {/* <div>
             <InputComponent
               onChange={formik.handleChange}
               name="customer_category"
@@ -225,167 +239,191 @@ export default function Customer_detail_edit({
               // value={data.customer_category}
               {...(isEdit ? {} : { value: data.customer_category })}
             ></InputComponent>
-          </div>
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="customer_type"
-              labelInput="Customer Type."
-              type="text"
-              // value={data.customer_type}
-              onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.customer_type })}
-            ></InputComponent>
-          </div>
-          <div>
-            <label
-              htmlFor="billing_address"
-              className="block text-gray-600 mt-4"
-            >
-              Billing Address:
-            </label>
-            <textarea
-              onChange={formik.handleChange}
-              id="billing_address"
-              name="billing_address"
-              // value={data.billing_address}
-              onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.billing_address })}
-              className="w-full p-2 border rounded mt-1"
-              placeholder="Enter Billing Address"
-            ></textarea>
+          </div> */}
+            <div>
+              <label className="block text-gray-600">Customer Category</label>
+              <select
+                onChange={formik.handleChange}
+                {...(isEdit ? {} : { value: data.customer_category })}
+                name="customer_category"
+                className="w-full p-2 border rounded mt-1"
+                value={formik.values.customer_category}
+              >
+                <option disabled value="">
+                  {data.customer_category != ""
+                    ? data.customer_category
+                    : "select"}
+                </option>
+                <option>Proprietor</option>
+                <option>Partner</option>
+                <option>LLP</option>
+                <option>Pvt.Ltd</option>
+                <option>HUF</option>
+              </select>
+            </div>
+            <div>
+                            <label className="block text-gray-600">Customer Type</label>
+                            <select
+                            onChange={formik.handleChange}
+                            {...(isEdit ? {} : { value: data.customer_type })}
+                                name="customer_type"
+                                className="w-full p-2 border rounded mt-1"
+                                value={formik.values.customer_type}
+                            >
+                                <option disabled value="">{data.customer_type!=""?data.customer_type:"select"}</option>
+                                <option>Retail</option>
+                                <option>WholeSale</option>
+                            </select>
+                        </div>
+            <div>
+              <label
+                htmlFor="billing_address"
+                className="block text-gray-600 mt-4"
+              >
+                Billing Address:
+              </label>
+              <textarea
+                onChange={formik.handleChange}
+                id="billing_address"
+                name="billing_address"
+                // value={data.billing_address}
+                onFocus={handleFieldChange}
+                {...(isEdit ? {} : { value: data.billing_address })}
+                className="w-full p-2 border rounded mt-1"
+                placeholder="Enter Billing Address"
+              ></textarea>
+            </div>
+            <div>
+              <label htmlFor="" className="block text-gray-600 mt-4">
+                Shipping Address:
+              </label>
+              <textarea
+                onChange={formik.handleChange}
+                name="shipping_address"
+                // value={data.shipping_address}
+                onFocus={handleFieldChange}
+                {...(isEdit ? {} : { value: data.shipping_address })}
+                className="w-full p-2 border rounded mt-1"
+                placeholder="Enter Billing Address"
+              ></textarea>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="opening_value"
+                labelInput="Opening Value"
+                type="text"
+                // value={data.opening_value}
+                onFocus={handleFieldChange}
+                {...(isEdit ? {} : { value: data.opening_value })}
+              ></InputComponent>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="country"
+                labelInput="Country"
+                type="text"
+                // value={data.country}
+                onFocus={handleFieldChange}
+                {...(isEdit ? {} : { value: data.country })}
+              ></InputComponent>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="state"
+                labelInput="State"
+                type="text"
+                // value={data.state}
+                onFocus={handleFieldChange}
+                {...(isEdit ? {} : { value: data.state })}
+              ></InputComponent>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="city"
+                labelInput="City"
+                type="text"
+                // value={data.city}
+                onFocus={handleFieldChange}
+                {...(isEdit ? {} : { value: data.city })}
+              ></InputComponent>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="zip_code"
+                labelInput="zip/PinCode"
+                type="text"
+                // value={data.zip_code}
+                onFocus={handleFieldChange}
+                {...(isEdit ? {} : { value: data.zip_code })}
+              ></InputComponent>
+            </div>
           </div>
           <div>
             <label htmlFor="" className="block text-gray-600 mt-4">
-              Shipping Address:
+              Notes:
             </label>
             <textarea
               onChange={formik.handleChange}
-              name="shipping_address"
-              // value={data.shipping_address}
+              name="notes"
+              // value={data.notes}
               onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.shipping_address })}
+              {...(isEdit ? {} : { value: data.notes })}
               className="w-full p-2 border rounded mt-1"
-              placeholder="Enter Billing Address"
             ></textarea>
           </div>
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="opening_value"
-              labelInput="Opening Value"
-              type="text"
-              // value={data.opening_value}
-              onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.opening_value })}
-            ></InputComponent>
+          <h3 class="text-xl font-bold">Personal Information</h3>
+          <div className="grid grid-cols-2 gap-6">
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="birth_date"
+                labelInput="Birth Date"
+                type="text"
+                // value={data.date_of_birth}
+                onFocus={handleFieldChange}
+                {...(isEdit ? {} : { value: data.date_of_birth })}
+              ></InputComponent>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="anniversary_date"
+                labelInput="Anniversary"
+                type="text"
+                // value={data.anniversary_date}
+                onFocus={handleFieldChange}
+                {...(isEdit ? {} : { value: data.anniversary_date })}
+              ></InputComponent>
+            </div>
           </div>
           <div>
-            <InputComponent
+            <label htmlFor="" className="block text-gray-600 mt-4">
+              Personal notes:
+            </label>
+            <textarea
               onChange={formik.handleChange}
-              name="country"
-              labelInput="Country"
-              type="text"
-              // value={data.country}
+              name="personal_notes"
+              // value={data.personal_notes}
               onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.country })}
-            ></InputComponent>
+              {...(isEdit ? {} : { value: data.personal_notes })}
+              className="w-full p-2 border rounded mt-1"
+            ></textarea>
           </div>
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="state"
-              labelInput="State"
-              type="text"
-              // value={data.state}
-              onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.state })}
-            ></InputComponent>
+          <div className="mt-10 text-end">
+            <ButtonComponent
+              value="Submit"
+              label="Update"
+              type="submit"
+              className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+            ></ButtonComponent>
           </div>
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="city"
-              labelInput="City"
-              type="text"
-              // value={data.city}
-              onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.city })}
-            ></InputComponent>
-          </div>
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="zip_code"
-              labelInput="zip/PinCode"
-              type="text"
-              // value={data.zip_code}
-              onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.zip_code })}
-            ></InputComponent>
-          </div>
-        </div>
-        <div>
-          <label htmlFor="" className="block text-gray-600 mt-4">
-            Notes:
-          </label>
-          <textarea
-            onChange={formik.handleChange}
-            name="notes"
-            // value={data.notes}
-            onFocus={handleFieldChange}
-            {...(isEdit ? {} : { value: data.notes })}
-            className="w-full p-2 border rounded mt-1"
-          ></textarea>
-        </div>
-        <h3 class="text-xl font-bold">Personal Information</h3>
-        <div className="grid grid-cols-2 gap-6">
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="birth_date"
-              labelInput="Birth Date"
-              type="text"
-              // value={data.date_of_birth}
-              onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.date_of_birth })}
-            ></InputComponent>
-          </div>
-          <div>
-            <InputComponent
-              onChange={formik.handleChange}
-              name="anniversary_date"
-              labelInput="Anniversary"
-              type="text"
-              // value={data.anniversary_date}
-              onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.anniversary_date })}
-            ></InputComponent>
-          </div>
-        </div>
-        <div>
-          <label htmlFor="" className="block text-gray-600 mt-4">
-            Personal notes:
-          </label>
-          <textarea
-            onChange={formik.handleChange}
-            name="personal_notes"
-            // value={data.personal_notes}
-            onFocus={handleFieldChange}
-            {...(isEdit ? {} : { value: data.personal_notes })}
-            className="w-full p-2 border rounded mt-1"
-          ></textarea>
-        </div>
-        <div className="mt-10 text-end">
-          <ButtonComponent
-            value="Submit"
-            label="Update"
-            type="submit"
-            className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-          ></ButtonComponent>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
     </div>
   );
 }

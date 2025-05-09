@@ -31,7 +31,7 @@ const DeliveryChallanTable = () => {
     const [totalPurchase,setTotalPurchase]=useState(null);
     const [statusOpen,setStatusOpen]=useState(null);
     const [statusClose,setStatusClose]=useState(null);
-    const column=["Date","Challan Number","Party Name","Due In","Amount","Status","Generate-Challan"];
+    const column=["Date","Challan Number","Party Name","Due In","Amount","Status"];
     useEffect(() => {
         const fetchCustomers = async () => {
             try {
@@ -177,7 +177,7 @@ const DeliveryChallanTable = () => {
     const [match,setMatch]=useState([]);
     function handleCheckboxClick(e,id)
     {
-        if(e.target.checked){
+        if(!e.target.checked){
             console.log("checked");
             for(var i of fetchChallan)
                 {
@@ -208,7 +208,12 @@ const DeliveryChallanTable = () => {
         navigate("/generate-challan",{state:{data:match}});
         console.log("generate");
       }
-
+      function handleClick(e,row) {
+        console.log("clicked");
+        console.log(row);
+        handleCheckboxClick(e,row.challanNumber);
+      }
+    
     return (
         <>
         {
@@ -382,19 +387,20 @@ const DeliveryChallanTable = () => {
                             </tbody>
                         </table> */}
                          <TableComponent
+                          onClickRow={handleClick}
                                 name="Challan"
                           column={column}
                           data={filterChallan()}
                           pageSize={3} // Number of rows per page
-                          generate={(row)=>(
-                            <div className="flex gap-2">
-                                <button className="text-red-500" onClick={(e)=>handleCheckboxClick(e,row.challanNumber)}><Checkbox {...label}  color="success" /></button>
-                            </div>
-                          )}
+                        //   generate={(row)=>(
+                        //     <div className="flex gap-2">
+                        //         <button className="text-red-500" onClick={(e)=>handleCheckboxClick(e,row.challanNumber)}><Checkbox {...label}  color="success" /></button>
+                        //     </div>
+                        //   )}
                           actions={(row) => (
-                            <div className="flex gap-2">
-                              <button className="text-[#3A5B76]" onClick={(e)=>handlePreview(e,row.challanNumber,row)}><Preview/></button>
-                              <button className="text-[#3A5B76]" onClick={(e)=>handleEdit(e,row.challanNumber)}><ModeEdit/></button>
+                            <div className="text-center">
+                              {/* <button className="text-[#3A5B76]" onClick={(e)=>handlePreview(e,row.challanNumber,row)}><Preview/></button>
+                              <button className="text-[#3A5B76]" onClick={(e)=>handleEdit(e,row.challanNumber)}><ModeEdit/></button> */}
                               <button className="text-red-500" onClick={(e) =>handledelete(e,row.challanNumber)}><DeleteForever/></button>
                               
                             </div>

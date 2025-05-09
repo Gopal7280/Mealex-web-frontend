@@ -2,7 +2,7 @@ import { useState, useEffect, useMemo } from "react";
 import "../styles/Table.css"
 import { QrCode } from "./QrCode";
 import { Loader } from "../layouts/Loader";
-export function TableComponent({ column = [], data = [],fullData = [],generate=null, actions = null, pageSize = 5, ...rest }) {
+export function TableComponent({column = [], data = [],fullData = [],generate=null, actions = null, pageSize = 5, ...rest }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [loader,setLoader]=useState(false);
   // Watch data changes to reset page if needed
@@ -37,7 +37,7 @@ export function TableComponent({ column = [], data = [],fullData = [],generate=n
     if (page < 1 || page > totalPages) return;
     setCurrentPage(page);
   };
-
+  
   return (
     <>
     {
@@ -65,7 +65,12 @@ export function TableComponent({ column = [], data = [],fullData = [],generate=n
                 ))} */}
                 {
                   Object.keys(row).map((value,index)=>
-                  <td className="p-3" key={index}>{row[value]}</td>
+                  <>
+                  {rest.onClickRow?(
+                    <td onClick={(e)=>rest.onClickRow(e,row)} className="p-3 cursor-pointer" key={index}>{row[value]}</td>
+                  ):(<td className="p-3 cursor-pointer" key={index}>{row[value]}</td>)
+                }
+                  </>
                   )
                 }
                 {

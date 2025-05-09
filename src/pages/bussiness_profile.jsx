@@ -16,6 +16,8 @@ export function Bussiness_profile() {
   const [loader, setLoader] = useState(false);
   const [edit, setEdit] = useState(false);
   const navigate = useNavigate();
+  const [error, setError] = useState("");
+  const maxSizeInMB = 2; // Limit size to 2MB
   useEffect(() => {
     setLoader(true);
     const bussinessProfle = async () => {
@@ -51,9 +53,11 @@ export function Bussiness_profile() {
       personalNotes: "",
       logo: "",
       signatureBox: "",
+      businessId:"",
     },
     onSubmit: (values) => {
       setLoader(true);
+      values.businessId=data[0].business_profile_id;
       if (values.name == "") {
         values.name = data[0].name;
       }
@@ -119,27 +123,47 @@ export function Bussiness_profile() {
   }
   const handleLogoChange = (event) => {
     const file = event.target.files[0];
+    console.log(file);
     if (file) {
+      const fileSizeInMB = file.size / (1024 * 1024); // Convert bytes to MB
+
+      if (fileSizeInMB > maxSizeInMB) {
+        setError(`File size should be less than ${maxSizeInMB} MB`);
+        alert("file size too long for logo");
+        event.target.value = ""; // Clear the input
+      }
+      else{
       const reader = new FileReader();
       reader.onload = (e) => {
-        console.log(e.target.result);
+        // console.log(e.target.result);
         setLogoPreview(e.target.result);
-        localStorage.setItem("image", e.target.result);
+        // localStorage.setItem("image", e.target.result);
       };
       reader.readAsDataURL(file);
     }
+  }
   };
   const handleSignatureChange = (event) => {
     const file = event.target.files[0];
     if (file) {
+      const fileSizeInMB = file.size / (1024 * 1024); // Convert bytes to MB
+
+      if (fileSizeInMB > maxSizeInMB) {
+        setError(`File size should be less than ${maxSizeInMB} MB`);
+        alert("file size too long for signature");
+        event.target.value = ""; // Clear the input
+      }
+      else{
+      setError("");
       const reader = new FileReader();
       reader.onload = (e) => {
         console.log(e.target.result);
         setSignature(e.target.result);
-        localStorage.setItem("imageSign", e.target.result);
+        localStorage.setItem("imageSign", e.target.result);       
       };
       reader.readAsDataURL(file);
     }
+  }
   };
   return (
     <>
@@ -253,37 +277,38 @@ export function Bussiness_profile() {
                     />
                   </div>
                   <div>
-                    <div>
-                      <InputComponent
-                        required
-                        onFocus={handleEdit}
-                        labelName="Business Type"
-                        labelInput="Business Type"
-                        type="text"
-                        name="businessType"
-                        placeholder="Enter business type"
-                        classNameInput="w-full p-2 border rounded mt-1"
-                        onChange={formik.handleChange}
-                        {...(edit ? {} : { value: data[0].businesstype })}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div>
-                      <InputComponent
-                        onFocus={handleEdit}
-                        required
-                        labelName="businessCategory"
-                        labelInput="Business Category"
-                        type="text"
-                        name="businessCategory"
-                        placeholder="Enter Business category"
-                        classNameInput="w-full p-2 border rounded mt-1"
-                        onChange={formik.handleChange}
-                        {...(edit ? {} : { value: data[0].businesscategory })}
-                      />
-                    </div>
-                  </div>
+                            <label className="block text-gray-600">Business Type</label>
+                            <select
+                                onChange={formik.handleChange}
+                                {...(edit ? {} : { value: data[0].businesstype })}
+                                name="businessType"
+                                className="w-full p-2 border rounded mt-1"
+                                value={formik.values.businessType}
+                            >
+                                <option disabled value="">{data[0].businesstype!=""?data[0].businesstype:"select"}</option>
+                                <option>Proprietor</option>
+                                <option>Partner</option>
+                                <option>LLP</option>
+                                <option>Pvt.Ltd</option>
+                                <option>HUF</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-gray-600">Business Category</label>
+                            <select
+                                name="businessCategory"
+                                onChange={formik.handleChange}
+                      {...(edit ? {} : { value: data[0].gst })}
+                                className="w-full p-2 border rounded mt-1"
+                                value={formik.values.businessCategory}
+                            >
+                                <option disabled value="">{data[0].businesscategory!=""?data[0].businesscategory:"select"}</option>
+                                <option>Retail</option>
+                                <option>Wholesale</option>
+                                <option>IT Field</option>
+                                <option>Service Industry</option>
+                            </select>
+                        </div>
                   <div>
                     <InputComponent
                       onFocus={handleEdit}
@@ -324,7 +349,7 @@ export function Bussiness_profile() {
                       <img
                         src={logoPreview}
                         alt="Logo Preview"
-                        className="w-24 h-24 object-cover border rounded mt-2"
+                        className="w-24 h-24 object-contain ms-2 rounded mt-2"
                       />
                     )}
                   </div>
@@ -345,7 +370,7 @@ export function Bussiness_profile() {
                       <img
                         src={signature}
                         alt="Logo Preview"
-                        className="w-24 h-24 object-cover border rounded mt-2"
+                        className="w-24 h-24 object-contain ms-2 rounded mt-2"
                       />
                     )}
                   </div>

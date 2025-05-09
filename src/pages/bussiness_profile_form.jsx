@@ -12,6 +12,8 @@ export function Bussiness_profile_from() {
     const [loader,setLoader]=useState(false);
     const [logoPreview, setLogoPreview] = useState(null);
     const [signature, setSignature] = useState(null);
+    const [error, setError] = useState("");
+    const maxSizeInMB = 2; // Limit size to 2MB
     const navigate=useNavigate();
     const formik = useFormik({
         initialValues: {
@@ -80,6 +82,14 @@ export function Bussiness_profile_from() {
     const handleLogoChange = (event) => {
         const file = event.target.files[0];
         if (file) {
+            const fileSizeInMB = file.size / (1024 * 1024); // Convert bytes to MB
+
+      if (fileSizeInMB > maxSizeInMB) {
+        setError(`File size should be less than ${maxSizeInMB} MB`);
+        alert("file size too long for logo");
+        event.target.value = ""; // Clear the input
+      }
+      else{
             const reader = new FileReader();
             reader.onload = (e) => {
                 console.log(e.target.result);
@@ -88,10 +98,19 @@ export function Bussiness_profile_from() {
             };
             reader.readAsDataURL(file);
         }
+    }
     };
     const handleSignatureChange = (event) => {
         const file = event.target.files[0];
         if (file) {
+            const fileSizeInMB = file.size / (1024 * 1024); // Convert bytes to MB
+
+            if (fileSizeInMB > maxSizeInMB) {
+              setError(`File size should be less than ${maxSizeInMB} MB`);
+              alert("file size too long for signature");
+              event.target.value = ""; // Clear the input
+            }
+            else{
             const reader = new FileReader();
             reader.onload = (e) => {
                 console.log(e.target.result);
@@ -100,6 +119,7 @@ export function Bussiness_profile_from() {
             };
             reader.readAsDataURL(file);
         }
+    }
     };
     const [shipping,setShipping]=useState("");
     function handleCheck(e){
@@ -280,7 +300,7 @@ export function Bussiness_profile_from() {
                             className="p-1 border rounded mt-1"
                             onChange={handleLogoChange}
                         />
-                        {logoPreview && <img src={logoPreview} alt="Logo Preview" className="w-24 h-24 object-cover border rounded mt-2" />}
+                        {logoPreview && <img src={logoPreview} alt="Logo Preview" className="w-24 h-24 object-contain border rounded mt-2" />}
                         </div>
                     </div>
                     <div className="mt-6">
@@ -293,7 +313,7 @@ export function Bussiness_profile_from() {
                             className="p-1 border rounded mt-1"
                             onChange={handleSignatureChange}
                         />
-                        {signature && <img src={signature} alt="Logo Preview" className="w-24 h-24 object-cover border rounded mt-2" />}
+                        {signature && <img src={signature} alt="Logo Preview" className="w-24 h-24 object-contain border rounded mt-2" />}
                         </div>
                     </div>
                     <div className="mt-6">

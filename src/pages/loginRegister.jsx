@@ -6,7 +6,7 @@ import "../../node_modules/bootstrap-icons/font/bootstrap-icons.css";
 import { apiPost } from "../services/api";
 import { setToken } from "../services/authService";
 import imgLogo from "../assets/Bill365Logo.jpg"
-
+import emailjs from '@emailjs/browser';
 const LoginRegister = ({ setAuth }) => {
     const [formType, setFormType] = useState("login");
     const [email, setEmail] = useState("");
@@ -42,6 +42,29 @@ const LoginRegister = ({ setAuth }) => {
             setError("Passwords do not match!");
             return;
         }
+        console.log(email);
+        const sendEmail=async ()=>{
+            const templateParams = {
+                to_name: 'Bill365', // Must match variable in your template
+                email: email, // Optional, if used in your template
+                message: 'Welcome to our app! Let us know if you have any questions.', // Match variable name in template
+              };
+              emailjs.send(
+                'service_s4es4n8',    // Replace with your actual Service ID
+                'template_31jd2hh',   // Replace with your actual Template ID
+                 templateParams,
+                '-1wolPEfuWi750zxX'     // Replace with your actual Public Key
+              )
+              .then((response) => {
+                console.log('SUCCESS!', response.status, response.text);
+                console.log('Welcome email sent successfully!');
+              })
+              .catch((error) => {
+                console.error('FAILED...', error);
+                console.log('Failed to send welcome email.');
+              });
+        }
+        sendEmail();
         try {
             const response=await apiPost("/auth/signUp",{username,email,password});
             console.log(response);

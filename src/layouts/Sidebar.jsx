@@ -188,7 +188,7 @@ const Sidebar = () => {
                 <img
                   src={business_name[0].logo}
                   alt="Logo Preview"
-                  className="w-30 h-10 object-cover border rounded"
+                  className="w-20 h-10 object-contain"
                 />
               ) : (
                 <span className="font-bold text-5xl rounded text-white">

@@ -1054,6 +1054,11 @@ export default function InvoiceForm({ onInvoiceAdded }) {
         totalAmount += parseFloat(row.total);
          taxableamount += parseFloat(row.taxable_amount);
       }
+      var gstSumAmount=0;
+      for (var i = 0; i < updateTax.length; i++) {
+        gstSumAmount += parseFloat(updateTax[i]);
+      }
+      setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
       const gstSum = parseFloat(
         updateTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
       );
@@ -1242,14 +1247,14 @@ export default function InvoiceForm({ onInvoiceAdded }) {
       values.invoice_number=invoiceNumber;
       // alert(JSON.stringify(values));
       const postInvoice = async () => {
-        setLoader(true); // 🟢 Show loader before API call
+        setLoader(true); 
         try {
           const res = await apiPost("/invoices", values);
           navigate("/invoices"); // On success
         } catch (error) {
           console.error("Failed to post invoice:", error);
         } finally {
-          setLoader(false); // 🔴 Hide loader after success/fail
+          setLoader(false); 
         }
       };
     

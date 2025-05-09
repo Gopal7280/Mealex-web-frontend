@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { apiGet } from "../services/api";
 import "../styles/generateChallan.css";
 import { useReactToPrint } from "react-to-print";
@@ -10,6 +10,7 @@ import { FaDownload } from "react-icons/fa6";
 import { IoMdPrint } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
 import {Loader} from "../layouts/Loader"
+import { FaEdit } from "react-icons/fa";
 export function GenerateQuotationn() {
   const [loader,setLoader]=useState(true);
   const [bussinessData, setBussinessData] = useState(null);
@@ -478,17 +479,26 @@ const handleDownloadPDF = async () => {
   // Step 5: Save PDF
   pdf.save("quotation.pdf");
 };
+const navigate=useNavigate();
+function handleEdit(e) {
+  const quotationId=location.state?.quotation_id;
+  console.log(quotationId);
+  console.log(quotationId);   
+      //   alert(JSON.stringify(invoiceId));
+      navigate("/quotation-edit", { state: { data: location.state?.data[0] } });
+  }
 
   return (
     <>
       {data != null && bussinessData != null ? (
-        <div>
+        <div className="mt-2">
           <div className="flex justify-center">
       <div className=" bg-white w-4xl">
       <h3 className="text-center p-3 d-inline-block">Preview for Quotation</h3>
       <div className="float-end">
       <button className="" onClick={handleDownloadPrint}><IoMdPrint className="iconSize"/></button>
       <button className="" onClick={handleDownloadPDF}><FaDownload className="iconSize"/></button>
+      <button className="" onClick={(e)=>handleEdit(e)}><FaEdit className="iconSize"/></button>
       </div>
       </div>
       </div>
@@ -498,13 +508,18 @@ const handleDownloadPDF = async () => {
         >
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center">
-              <div className=" mr-4 flex items-center rounded-full justify-center">
+            {
+                data[0].logo!=null?(
+                  <div className=" mr-4 flex items-center rounded-full justify-center">
                 <img
                   className="w-16 h-16 text-white font-bold text-xl"
                   src={data[0].logo}
                   alt=""
-                />
+                /> 
+                {/* hi1 */}
               </div>
+                ):(<></>)
+              }
               <div className="" style={{color:"#364153"}}>
                 <div id="company-name" style={{ color: " #000000" }}>
                   {bussinessData[0].business_name} ™
@@ -547,7 +562,7 @@ const handleDownloadPDF = async () => {
                         <div id="invoice-number" class="bold">{data[0].quotation_prefix}</div>
                       </div>
                       <div id="invoice-date-container">
-                        <div id="invoice-date-label">QUOTATION DATE</div>
+                        <div id="invoice-date-label">DATE</div>
                         <div class="middle-colon">:</div>
                         <div id="invoice-date" class="bold">{date}</div>
                       </div>

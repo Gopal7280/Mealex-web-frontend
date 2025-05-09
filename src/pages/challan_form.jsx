@@ -14,7 +14,7 @@ import { Loader } from "../layouts/Loader";
 import "../styles/layoutFix.css";
 import Sidebar from "../layouts/Sidebar";
 export function ChallanForm() {
-  const [loader, setLoader] = useState(true);
+  const [loader, setLoader] = useState(false);
   const [products, setProducts] = useState([]);
   const [businessprofile, setBusinessProfile] = useState([]);
   const [date, setDate] = useState(new Date());
@@ -311,6 +311,11 @@ export function ChallanForm() {
         totalAmount += parseFloat(row.total);
          taxableamount += parseFloat(row.taxable_amount);
       }
+      var gstSumAmount=0
+      for (var i = 0; i < updateTax.length; i++) {
+        gstSumAmount += parseFloat(updateTax[i]);
+      }
+      setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
       const gstSum = parseFloat(
         updateTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
       );

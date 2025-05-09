@@ -15,7 +15,7 @@ import Sidebar from "../layouts/Sidebar";
 import {Loader} from "../layouts/Loader"
 import ProductTable from "../components/tableForProduct";
 export function QuotationFrom() {
-  const [loader,setLoader]=useState(true);
+  const [loader,setLoader]=useState(false);
   const [products, setProducts] = useState([]);
   const [businessprofile, setBusinessProfile] = useState([]);
   const [date, setDate] = useState(new Date());
