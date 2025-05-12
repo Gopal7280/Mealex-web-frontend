@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { apiGet } from "../services/api";
+import { apiGet, apiPost } from "../services/api";
 import "../styles/generateChallan.css";
 import { useReactToPrint } from "react-to-print";
 import html2canvas from "html2canvas";
@@ -11,6 +11,7 @@ import { FaFilePdf } from "react-icons/fa6";
 import {Loader} from "../layouts/Loader"
 import { FaDownload } from "react-icons/fa6";
 import { FaEdit } from "react-icons/fa";
+import {ButtonComponent} from "../components/Button"
 export function GenerateChallan() {
   const [bussinessData, setBussinessData] = useState(null);
   const [data, setData] = useState(null);
@@ -486,6 +487,15 @@ function handleEdit(e) {
       //   alert(JSON.stringify(invoiceId));
       navigate("/challan-edit", { state: { data: location.state?.data[0] } });
   }
+  function handleChallanToInvoice(){
+                console.log(location.state.data[0].challan_id);
+                const challanId=location.state.data[0].challan_id;
+                const convert=async ()=>{
+                  const res=await apiPost(`/invoices/convert/challan/invoice/${challanId}`);
+                  navigate("/deliverychallan-table");
+                }
+                convert();
+              }
   return (
     <>
     {data != null && bussinessData != null ? (
@@ -805,6 +815,15 @@ function handleEdit(e) {
             </div>
                 </div>
         </div>
+        <div className="mt-10 me-40 mb-20 text-end">
+                             <ButtonComponent
+                             onClick={handleChallanToInvoice}
+                               value="convert_invoice"
+                               type="button"
+                               label="Convert Challan to Invoice"
+                               className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                             ></ButtonComponent>
+                           </div>
         </div>
       ) : (
         <Loader/>

@@ -60,7 +60,7 @@ function RouteComponent() {
     const [isAuthenticated, setIsAuthenticated] = useState(
         localStorage.getItem("isAuthenticated") === "true"
     );
-
+    const [isRefresh,setIsRefresh]=useState(false);
     useEffect(() => {
         localStorage.setItem("isAuthenticated", isAuthenticated);
     }, [isAuthenticated]);
@@ -77,10 +77,10 @@ function RouteComponent() {
                 {/* Protected Routes */}
 
                 <Route path="/dashboard" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<Dashboard />} />} />
-                <Route path="/sidebar" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<Sidebar />} />} />
+                <Route path="/sidebar" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<Sidebar/>} />} />
                 <Route path="/home" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<CustomerForm />} />} />
                 <Route path="/add-product" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<ProductForm />} />} />
-                <Route path="/display" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<CustomerDisplay />} />} />
+                <Route path="/display" element={<ProtectedRoute setRefresh={isRefresh} isAuthenticated={isAuthenticated} element={<CustomerDisplay />} />} />
                 <Route path="/profile/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<CustomerProfile />} />} />
                 <Route path="/edit/:id" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<EditCustomer />} />} />
                 <Route path="/invoices" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<Invoices />} />} />
@@ -103,7 +103,7 @@ function RouteComponent() {
                 <Route path="/challan-edit" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<ChallanEdit />} />} />
                 <Route path="/quotation-edit" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<Quotation_edit />} />} />
                 <Route path="/bussiness-profile" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<Bussiness_profile />} />} />
-                <Route path="/profile_form" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<Bussiness_profile_from />} />} />
+                <Route path="/profile_form" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<Bussiness_profile_from setRefresh={setIsRefresh} />} />} />
                 <Route path="/purchase-table" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<PurchaseTable />} />} />
                 <Route path="/deliverychallan-table" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<DeliveryChallanTable />} />} />
                 <Route path="/quotation-preview" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<QuotationPreview />} />} />

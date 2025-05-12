@@ -14,7 +14,7 @@ import { apiGet } from "../services/api";
 import { Toast } from "primereact/toast";
 import { Sidebar as KeyShortcut } from "primereact/sidebar";
 import { FaRegKeyboard } from "react-icons/fa6";
-const Sidebar = () => {
+const Sidebar = ({setRefresh}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const timeoutRef = useRef(null); // <== Ref for timeout
   const [dropdownOpen, setDropdownOpen] = useState(null);
@@ -58,9 +58,22 @@ const Sidebar = () => {
   const disabledTrue = true;
   const [visibleRight, setVisibleRight] = useState(false);
   const [business_name, setBusinessName] = useState("");
+  const [userRole,setUserRole]=useState("all");
   const navigate = useNavigate();
   useEffect(() => {
     console.log("working with use");
+    const fetchUserRole=async ()=>{
+        try{
+              if(userRole=="deliveryBoy"){
+                console.log("user role");
+              }
+        }
+        catch(err)
+        {
+          console.log(err);
+        }
+    }
+    fetchUserRole();
     const fetchBussinessProfile = async () => {
       try {
         const res = await apiGet("/businessprofile");
@@ -85,7 +98,7 @@ const Sidebar = () => {
       }
     };
     fetchBussinessProfile();
-  }, []);
+  }, [setRefresh]);
   const cities = [
     { name: "Create Invoice", code: "CI" },
     { name: "Create Challan", code: "CC" },
@@ -466,149 +479,167 @@ const Sidebar = () => {
         </div>
       </div>
       <div className="bgSetSideBar">
-        {/* <div className="">
-          <Menubar
-            model={[
-              {
-                label: "Dashboard",
-                icon: "pi pi-fw pi-home",
-                command: () => navigate("/dashboard"),
-              },
-              {
-                label: "Products",
-                icon: "pi pi-fw pi-list",
-                items: [
-                  {
-                    label: "Add Product",
-                    icon: "pi pi-fw pi-plus",
-                    command: () => navigate("/add-product"),
-                  },
-                  {
-                    label: "Product List",
-                    icon: "pi pi-fw pi-list",
-                    command: () => navigate("/products"),
-                  },
-                ],
-              },
-              {
-                label: "Customer's",
-                icon: "pi pi-fw pi-users",
-                items: [
-                  {
-                    label: "Add Customer",
-                    icon: "pi pi-fw pi-user-plus",
-                    command: () => navigate("/home"),
-                  },
-                  {
-                    label: "Customer List",
-                    icon: "pi pi-fw pi-user",
-                    command: () => navigate("/display"),
-                  },
-                ],
-              },
-              {
-                label: "₹ Sales",
-                icon: "", // Add appropriate icon if needed
-                items: [
-                  {
-                    label: "Invoices",
-                    icon: "pi pi-fw pi-file",
-                    command: () => navigate("/invoices"),
-                  },
-                  {
-                    label: "Delivery Challan",
-                    icon: "pi pi-fw pi-truck",
-                    command: () => navigate("/deliverychallan-table"),
-                  },
-                  {
-                    label: "Quotations",
-                    icon: "pi pi-fw pi-file",
-                    command: () => navigate("/quotation"),
-                  },
-                  {
-                    label: "Payment In List",
-                    icon: "pi pi-fw pi-money-bill",
-                    command: () => navigate("/paymentIn"),
-                  },
-                ],
-              },
-              {
-                label: "Users",
-                disabled: true, // Assuming disabledTrue is true
-                icon: "pi pi-fw pi-user",
-                items: [
-                  {
-                    label: "Add User",
-                    icon: "pi pi-fw pi-user-plus",
-                    // command: () => navigate('/users/add'), // Uncomment and add URL if needed
-                  },
-                  {
-                    label: "Delete User",
-                    icon: "pi pi-fw pi-user-minus",
-                    // command: () => navigate('/users/delete'), // Uncomment and add URL if needed
-                  },
-                  {
-                    label: "Show User",
-                    icon: "pi pi-fw pi-eye",
-                    // command: () => navigate('/users/show'), // Uncomment and add URL if needed
-                  },
-                ],
-              },
-              {
-                label: "Purchase",
-                icon: "pi pi-fw pi-shopping-cart",
-                items: [
-                  {
-                    label: "Purchase List",
-                    icon: "pi pi-fw pi-file",
-                    command: () => navigate("/purchase-table"),
-                  },
-                  {
-                    label: "Purchase Form",
-                    icon: "pi pi-fw pi-arrow-left",
-                    command: () => navigate("/purchaseForm"),
-                  },
-                  {
-                    label: "Payment Out List",
-                    icon: "pi pi-fw pi-money-bill",
-                    command: () => navigate("/paymentOut"),
-                  },
-                ],
-              },
-              {
-                label: "Reports",
-                disabled: true, // Assuming disabledTrue is true
-                icon: "pi pi-fw pi-chart-bar",
-                items: [
-                  {
-                    label: "Sales Report",
-                    icon: "pi pi-fw pi-file",
-                    // command: () => navigate('/reports/sales'), // Uncomment and add URL if needed
-                  },
-                  {
-                    label: "Party wise Sales",
-                    icon: "pi pi-fw pi-file",
-                    // command: () => navigate('/reports/party'), // Uncomment and add URL if needed
-                  },
-                  {
-                    label: "Day Book",
-                    icon: "pi pi-fw pi-file",
-                    // command: () => navigate('/reports/daybook'), // Uncomment and add URL if needed
-                  },
-                ],
-              },
-              {
-                label: "Settings",
-                disabled: true, // Assuming disabledTrue is true
-                icon: "pi pi-fw pi-cog",
-                command: () => navigate("/settings"),
-              },
-            ]}
-          />
-        </div> */}
         <div>
           {/* Navbar */}
-          <nav className=" bg-white px-4 py-3 shadow-md flex justify-between items-center">
+          {
+            userRole=="deliveryBoy" &&  <nav className=" bg-white px-4 py-3 shadow-md flex justify-between items-center">
+            <button
+              className="md:hidden text-2xl"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <span className="text-2xl">☰</span>
+            </button>
+
+            <div className="hidden md:flex space-x-6 items-center">
+              <NavLink
+                to="/dashboard"
+                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
+              >
+                <span className="pi pi-fw pi-home  d-inline-block"></span>
+                <span className="text-black">Dashboard</span>
+              </NavLink>
+
+              {/* Products Dropdown */}
+              <div
+                className="relative"
+                ref={(el) => (dropdownRefs.current[0] = el)}
+              >
+                <button
+                  disabled
+                  style={{ borderRadius: "16px" }}
+                  onClick={(e) => handleCheckClick(e, "products")}
+                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2"
+                >
+                  <span className="pi pi-fw pi-list  d-inline-block"></span>
+                  <span className="text-black">Products</span>
+                </button>
+              </div>
+
+              {/* Customer's Dropdown */}
+              <div
+                className="relative"
+                ref={(el) => (dropdownRefs.current[0] = el)}
+              >
+                <button
+                  disabled
+                  style={{ borderRadius: "16px" }}
+                  onClick={(e) => handleCheckClick(e, "display")}
+                  className="text-decoration-none disabled:opacity-70 disabled:text-gray-200 text-black hover:bg-gray-300 p-2"
+                >
+                  <span className="pi pi-fw pi-users d-inline-block"></span>
+                  <span className="text-black">Customer's</span>
+                </button>
+              </div>
+
+              {/* ₹ Sales Dropdown */}
+              {/* ₹ Sales Dropdown */}
+              <div
+                className="relative"
+                ref={(el) => (dropdownRefs.current[2] = el)}
+              >
+                <button
+                  onClick={() => toggleDropdown(2)}
+                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
+                  style={{ borderRadius: "16px" }}
+                >
+                  <span>₹ Sales ▼</span>
+                </button>
+                {dropdownOpen === 2 && (
+                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
+                    <button
+                    disabled
+                      onClick={(e) => handleCheckClick(e, "invoices")}
+                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-file d-inline-block"></span>
+                      <span>Invoice's</span>
+                    </button>
+                    <button
+                      onClick={(e) =>
+                        handleCheckClick(e, "deliverychallan-table")
+                      }
+                      className="block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-truck d-inline-block"></span>
+                      <span>Delivery Challan</span>
+                    </button>
+                    <button
+                      disabled
+                      onClick={(e) => handleCheckClick(e, "quotation")}
+                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-file d-inline-block"></span>
+                      <span>Quotation's</span>
+                    </button>
+                    <button
+                    disabled
+                      onClick={(e) => handleCheckClick(e, "paymentIn")}
+                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
+                      <span>Payment In list</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Purchase Dropdown */}
+              <div
+                className="relative"
+                ref={(el) => (dropdownRefs.current[3] = el)}
+              >
+                <button
+                  disabled
+                  onClick={() => toggleDropdown(3)}
+                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
+                  style={{ borderRadius: "16px" }}
+                >
+                  <span>Purchase ▼</span>
+                </button>
+                {dropdownOpen === 3 && (
+                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
+                    <button
+                      onClick={(e) => handleCheckClick(e, "purchase-table")}
+                      className="block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-file d-inline-block"></span>
+                      <span>Purchase List</span>
+                    </button>
+                    <button
+                      onClick={(e) => handleCheckClick(e, "purchaseForm")}
+                      className="block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-arrow-left d-inline-block"></span>
+                      <span>Purchase Form</span>
+                    </button>
+                    <button
+                      onClick={(e) => handleCheckClick(e, "paymentOut")}
+                      className="block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
+                      <span>Payment Out List</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div
+                className="relative"
+                ref={(el) => (dropdownRefs.current[0] = el)}
+              >
+                <NavLink
+                  to="#"
+                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
+                >
+                  <span className="pi pi-fw pi-users text-black opacity-50  d-inline-block"></span>
+                  <span className="text-black opacity-50">Users</span>
+                </NavLink>
+              </div>
+            </div>
+          </nav>
+          }
+          {
+            userRole=="salesMan" && 
+            <nav className=" bg-white px-4 py-3 shadow-md flex justify-between items-center">
             <button
               className="md:hidden text-2xl"
               onClick={() => setSidebarOpen(true)}
@@ -694,8 +725,9 @@ const Sidebar = () => {
                       <span>Quotation's</span>
                     </button>
                     <button
+                      disabled
                       onClick={(e) => handleCheckClick(e, "paymentIn")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
+                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
                     >
                       <span className="pi pi-fw pi-money-bill d-inline-block"></span>
                       <span>Payment In list</span>
@@ -710,8 +742,9 @@ const Sidebar = () => {
                 ref={(el) => (dropdownRefs.current[3] = el)}
               >
                 <button
+                  disabled
                   onClick={() => toggleDropdown(3)}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
+                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
                   style={{ borderRadius: "16px" }}
                 >
                   <span>Purchase ▼</span>
@@ -756,7 +789,159 @@ const Sidebar = () => {
               </div>
             </div>
           </nav>
+          }
+          {
+            userRole=="all" && <nav className=" bg-white px-4 py-3 shadow-md flex justify-between items-center">
+            <button
+              className="md:hidden text-2xl"
+              onClick={() => setSidebarOpen(true)}
+            >
+              <span className="text-2xl">☰</span>
+            </button>
 
+            <div className="hidden md:flex space-x-6 items-center">
+              <NavLink
+                to="/dashboard"
+                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
+              >
+                <span className="pi pi-fw pi-home  d-inline-block"></span>
+                <span className="text-black">Dashboard</span>
+              </NavLink>
+
+              {/* Products Dropdown */}
+              <div
+                className="relative"
+                ref={(el) => (dropdownRefs.current[0] = el)}
+              >
+                <button
+                  style={{ borderRadius: "16px" }}
+                  onClick={(e) => handleCheckClick(e, "products")}
+                  className="text-decoration-none text-black hover:bg-gray-300 p-2"
+                >
+                  <span className="pi pi-fw pi-list  d-inline-block"></span>
+                  <span className="text-black">Products</span>
+                </button>
+              </div>
+
+              {/* Customer's Dropdown */}
+              <div
+                className="relative"
+                ref={(el) => (dropdownRefs.current[0] = el)}
+              >
+                <button
+                  style={{ borderRadius: "16px" }}
+                  onClick={(e) => handleCheckClick(e, "display")}
+                  className="text-decoration-none text-black hover:bg-gray-300 p-2"
+                >
+                  <span className="pi pi-fw pi-users d-inline-block"></span>
+                  <span className="text-black">Customer's</span>
+                </button>
+              </div>
+
+              {/* ₹ Sales Dropdown */}
+              {/* ₹ Sales Dropdown */}
+              <div
+                className="relative"
+                ref={(el) => (dropdownRefs.current[2] = el)}
+              >
+                <button
+                  onClick={() => toggleDropdown(2)}
+                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
+                  style={{ borderRadius: "16px" }}
+                >
+                  <span>₹ Sales ▼</span>
+                </button>
+                {dropdownOpen === 2 && (
+                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
+                    <button
+                      onClick={(e) => handleCheckClick(e, "invoices")}
+                      className="block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-file d-inline-block"></span>
+                      <span>Invoice's</span>
+                    </button>
+                    <button
+                      onClick={(e) =>
+                        handleCheckClick(e, "deliverychallan-table")
+                      }
+                      className="block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-truck d-inline-block"></span>
+                      <span>Delivery Challan</span>
+                    </button>
+                    <button
+                      onClick={(e) => handleCheckClick(e, "quotation")}
+                      className="block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-file d-inline-block"></span>
+                      <span>Quotation's</span>
+                    </button>
+                    <button
+                      
+                      onClick={(e) => handleCheckClick(e, "paymentIn")}
+                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
+                      <span>Payment In list</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {/* Purchase Dropdown */}
+              <div
+                className="relative"
+                ref={(el) => (dropdownRefs.current[3] = el)}
+              >
+                <button
+                  
+                  onClick={() => toggleDropdown(3)}
+                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
+                  style={{ borderRadius: "16px" }}
+                >
+                  <span>Purchase ▼</span>
+                </button>
+                {dropdownOpen === 3 && (
+                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
+                    <button
+                      onClick={(e) => handleCheckClick(e, "purchase-table")}
+                      className="block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-file d-inline-block"></span>
+                      <span>Purchase List</span>
+                    </button>
+                    <button
+                      onClick={(e) => handleCheckClick(e, "purchaseForm")}
+                      className="block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-arrow-left d-inline-block"></span>
+                      <span>Purchase Form</span>
+                    </button>
+                    <button
+                      onClick={(e) => handleCheckClick(e, "paymentOut")}
+                      className="block px-4 py-2 hover:bg-gray-100 text-black"
+                    >
+                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
+                      <span>Payment Out List</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+              <div
+                className="relative"
+                ref={(el) => (dropdownRefs.current[0] = el)}
+              >
+                <button
+                  onClick={(e) => handleCheckClick(e, "users")}
+                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
+                >
+                  <span className="pi pi-fw pi-users text-black d-inline-block"></span>
+                  <span className="text-black">Users</span>
+                </button>
+              </div>
+            </div>
+          </nav>
+          }
           {/* Offcanvas Sidebar */}
           <div
             className={`fixed overflow-scroll top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${

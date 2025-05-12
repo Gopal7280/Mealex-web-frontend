@@ -16,8 +16,15 @@ import { Challan } from "../pages/challan";
 import { ChallanForm } from "../pages/challan_form";
 import Sidebar from "../layouts/Sidebar";
 
-const ProtectedRoute = ({ isAuthenticated,element }) => {
-    return isAuthenticated?<><Sidebar/>{element}</>:<Navigate to="/"></Navigate>;
+const ProtectedRoute = ({ isAuthenticated,element,...rest }) => {
+    if(rest.setRefresh)
+    {
+        console.log(rest.setRefresh);
+        return isAuthenticated?<><Sidebar setRefresh={true} />{element}</>:<Navigate to="/"></Navigate>;
+    }
+    else{
+         return isAuthenticated?<><Sidebar/>{element}</>:<Navigate to="/"></Navigate>;
+    }
 };
 
 export default ProtectedRoute; 

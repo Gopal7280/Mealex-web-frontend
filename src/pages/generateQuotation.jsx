@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { apiGet } from "../services/api";
+import { apiGet, apiPost } from "../services/api";
 import "../styles/generateChallan.css";
 import { useReactToPrint } from "react-to-print";
 import html2canvas from "html2canvas";
@@ -11,6 +11,7 @@ import { IoMdPrint } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
 import {Loader} from "../layouts/Loader"
 import { FaEdit } from "react-icons/fa";
+import {ButtonComponent} from '../components/Button';
 export function GenerateQuotationn() {
   const [loader,setLoader]=useState(true);
   const [bussinessData, setBussinessData] = useState(null);
@@ -487,7 +488,16 @@ function handleEdit(e) {
       //   alert(JSON.stringify(invoiceId));
       navigate("/quotation-edit", { state: { data: location.state?.data[0] } });
   }
-
+  function handleQuotationToInvoice(){
+                console.log(location.state.data[0].quotation_id);
+                const quotationId=location.state.data[0].quotation_id;
+                const convert=async ()=>{
+                  const res=await apiPost(`/invoices/convert/quotation/invoice/${quotationId}`);
+                  // alert(res);
+                  navigate("/quotation");
+                }
+                convert();
+              }
   return (
     <>
       {data != null && bussinessData != null ? (
@@ -807,6 +817,15 @@ function handleEdit(e) {
             </div>
                 </div>
         </div>
+        <div className="mt-10 me-40 mb-20 text-end">
+                                         <ButtonComponent
+                                         onClick={handleQuotationToInvoice}
+                                           value="convert_quotation"
+                                           type="button"
+                                           label="Convert Quotation to Invoice"
+                                           className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                         ></ButtonComponent>
+                                       </div>
         </div>
       ):(<Loader/>)}
     </>
