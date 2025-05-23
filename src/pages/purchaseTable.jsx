@@ -36,6 +36,7 @@ const PurchaseTable = () => {
         const fetchPurchases = async () => {
             try {
                 const res = await apiGet("/purchase");
+                console.log(res);
                 const formattedPurchase = res.data.map(purchase => ({
                     date: purchase.purchase_date,
                     purchaseNumber: purchase.purchase_prefix,

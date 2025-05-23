@@ -4,15 +4,33 @@ import { InputComponent } from "../components/Input";
 import { ButtonComponent } from "../components/Button";
 import { useFormik } from "formik";
 import { Preview, ModeEdit, DeleteForever,Close } from "@mui/icons-material";
-import { apiPut } from "../services/api";
+import { apiGet, apiPut } from "../services/api";
 import "../styles/layoutFix.css"
 import Sidebar from '../layouts/Sidebar';
 export function Product_edit() {
   const location = useLocation();
   const [data, setData] = useState({});
   const [isEdit, setIsEdit] = useState(false);
+    const [loader, setLoader] = useState(true);
+      const [unitSelected, setUnitSelected] = useState([]);
+       const [productUnit, setProductUnuit] = useState("");
   useEffect(() => {
+     const fetchUnit = async () => {
+          setLoader(true);
+          try {
+            const res = await apiGet("products/units");
+            console.log(res.data);
+            setUnitSelected(res.data);
+          } catch (err) {
+            console.log(err);
+          } finally {
+            setLoader(false);
+          }
+        };
+    
+        fetchUnit();
     console.log(location.state.data);
+    setProductUnuit(location.state.data.product_unit);
     setData(location.state.data);
     console.log(data);
     console.log("execute");
@@ -78,15 +96,22 @@ export function Product_edit() {
       if (values.custom_field == "") {
         values.custom_field = data.custom_field;
       }
+      values.product_unit=productUnit;
+      console.log(values);
       // alert(JSON.stringify(values));
       const res = await apiPut("/products", values);
       navigate("/products")
       // alert(JSON.stringify(res));
     },
   });
+  function handleChangeUnit(e) {
+    console.log(e.target.value);
+    setProductUnuit(e.target.value);
+  }
   return (
     <div>
       <div className="over max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-md">
+        <div className="flex justify-between">
         <h1 className="text-2xl font-bold text-center mb-6">
         Update Details
         </h1>
@@ -94,12 +119,12 @@ export function Product_edit() {
           <NavLink to="/products" className="text-white text-decoration-none">
           <ButtonComponent
               type="button"
-              className=" bg-[#3A5B76] float-end px-2 py-1 text-white font-bold rounded hover:bg-[#2E4A62]"
+              className=" bg-[#3A5B76]  px-2 py-1 text-white font-bold rounded hover:bg-[#2E4A62]"
               value="close"
               children={<Close/>}
             />
           </NavLink>
-
+          </div>
         <form onSubmit={formik.handleSubmit} id="ProductForm" className="mt-6">
           <div className="md:grid md:grid-cols-2 md:gap-6 inline-block">
             <div>
@@ -114,34 +139,63 @@ export function Product_edit() {
               ></InputComponent>
             </div>
             <div>
-              <InputComponent
+              <div>
+              <label className="block text-gray-600">Product Type</label>
+              <select
                 onChange={formik.handleChange}
-                labelInput="Product Type"
-                name="product_type"
-                type="text"
-                onFocus={handleEdit}
                 {...(isEdit ? {} : { value: data.product_type })}
-              ></InputComponent>
+                name="product_type"
+                className="w-full p-2 border rounded mt-1"
+                value={formik.values.product_type}
+              >
+                <option disabled value="">
+                  {data.product_type != "" ? data.product_type : "select"}
+                </option>
+                <option>service</option>
+                <option>product</option>
+              </select>
             </div>
-            <div>
-              <InputComponent
-                onChange={formik.handleChange}
-                labelInput="Product Unit"
-                type="text"
-                name="product_unit"
-                onFocus={handleEdit}
-                {...(isEdit ? {} : { value: data.product_unit })}
-              ></InputComponent>
             </div>
+            <div className="">
+                      <label className="block mt-2 text-gray-600">
+                        Product Unit
+                      </label>
+                      <select
+                        onChange={(e) => handleChangeUnit(e)}
+                        onFocus={handleEdit}
+                        {...(isEdit ? {} : { value: data.product_unit })}
+                        className="w-full  p-2 border rounded"
+                      >
+                         <option disabled value="">
+                  {data.product_unit != "" ? data.product_unit : "select"}
+                </option>
+                        {unitSelected.length > 0 ? (
+                          unitSelected.map((item) => (
+                            <option value={item.unit_name}>
+                              {item.unit_name}
+                            </option>
+                          ))
+                        ) : (
+                          <option value="no load">Loading..</option>
+                        )}
+                      </select>
+                    </div>
             <div>
-              <InputComponent
+              <label className="block text-gray-600">Product Category</label>
+              <select
                 onChange={formik.handleChange}
-                labelInput="Product Category"
-                type="text"
-                name="product_category"
-                onFocus={handleEdit}
                 {...(isEdit ? {} : { value: data.category })}
-              ></InputComponent>
+                name="product_category"
+                className="w-full p-2 border rounded mt-1"
+                value={formik.values.product_category}
+              >
+                <option disabled value="">
+                  {data.category != "" ? data.category : "select"}
+                </option>
+                <option value="Electronics">Electronics</option>
+                        <option value="clothing">Clothing</option>
+                        <option value="food">Food</option>
+              </select>
             </div>
             <div>
               <InputComponent
@@ -174,14 +228,29 @@ export function Product_edit() {
               ></InputComponent>
             </div>
             <div>
-              <InputComponent
+              <label className="block text-gray-600">Gst Rate</label>
+              <select
                 onChange={formik.handleChange}
-                labelInput="GST Rate"
-                type="text"
-                name="gst_rate"
-                onFocus={handleEdit}
                 {...(isEdit ? {} : { value: data.gst_rate })}
-              ></InputComponent>
+                name="gst_rate"
+                className="w-full p-2 border rounded mt-1"
+                value={formik.values.gst_rate}
+              >
+                <option disabled value="">
+                  {data.gst_rate != "" ? data.gst_rate : "select"}
+                </option>
+                 <option value="0">0%</option>
+                        <option value="0.1">0.1%</option>
+                        <option value="0.25">0.25%</option>
+                        <option value="1.5">1.5%</option>
+                        <option value="3">3%</option>
+                        <option value="5">5%</option>
+                        <option value="6">6%</option>
+                        <option value="12">12%</option>
+                        <option value="13.8">13.8%</option>
+                        <option value="18">18%</option>
+                        <option value="28">28%</option>
+              </select>
             </div>
             {/* <div>
               <InputComponent

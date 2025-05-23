@@ -33,10 +33,10 @@ const apiClient = axios.create({
     (response) => response,
     (error) => {
       console.log("error coming")
-      // if(error.message=="Network Error")
-      // {
-      //   logoutUser();
-      // }
+        // if(error.message=="Network Error")
+        // {
+        //   logoutUser();
+        // }
       if (error.response) {
         // Handle specific status codes
         if (error.response.status === 400) {

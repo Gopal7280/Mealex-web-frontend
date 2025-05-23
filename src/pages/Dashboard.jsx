@@ -83,7 +83,7 @@ const Dashboard = () => {
         console.log(res1);
         var total = 0;
         for (var i of res1) {
-          if (i.status == "Unpaid") {
+          if (i.status == "unpaid") {
             total = total + 1;
           }
         }
@@ -95,7 +95,7 @@ const Dashboard = () => {
         console.log(res1);
         var total = 0;
         for (var i of res1.data) {
-          if (i.status == "Unpaid") {
+          if (i.status == "unpaid") {
             total = total + 1;
           }
         }
@@ -233,19 +233,19 @@ const Dashboard = () => {
         {/* Summary Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
           <div className="bg-white dark:!bg-gray-800 p-4 shadow-md rounded-lg hover:bg-gray-100 relative group">
-            <h3 className="text-lg font-semibold text-[#3A5B76] dark:!text-white">
+            <h3 className="text-lg font-semibold !text-[#3A5B76] dark:!text-white">
               Total Sales Weekly
             </h3>
             <p className="text-3xl font-bold text-[#3A5B76] dark:!text-white">₹{totalSales.toFixed(2)}</p>
           </div>
           <div className="bg-white dark:!bg-gray-800 p-4 shadow-md rounded-lg hover:bg-gray-100 relative group">
-            <h3 className="text-lg font-semibold dark:!text-white text-[#3A5B76]">
+            <h3 className="text-lg font-semibold dark:!text-white !text-[#3A5B76]">
               Total Customers
             </h3>
             <p className="text-3xl font-bold text-[#3A5B76] dark:!text-white ">{totalCustomer}</p>
           </div>
           <div className="bg-white dark:!bg-gray-800 p-4 shadow-md rounded-lg hover:bg-gray-100 relative group cursor-pointer">
-            <h3 className="text-lg font-semibold text-[#3A5B76] dark:!text-white">
+            <h3 className="text-lg font-semibold !text-[#3A5B76] dark:!text-white">
               Total Unpaid Invoices
             </h3>
             <p className="text-3xl font-bold text-[#3A5B76] dark:!text-white">
@@ -253,7 +253,7 @@ const Dashboard = () => {
             </p>
           </div>
           <div className="bg-white dark:!bg-gray-800 p-4 shadow-md rounded-lg hover:bg-gray-100 relative group">
-            <h3 className="text-lg font-semibold text-[#3A5B76] dark:!text-white">
+            <h3 className="text-lg font-semibold !text-[#3A5B76] dark:!text-white">
               Total Unpaid Purchases
             </h3>
             <p className="text-3xl font-bold text-[#3A5B76] dark:!text-white">

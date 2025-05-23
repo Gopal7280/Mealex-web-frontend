@@ -33,6 +33,7 @@ export function PaymentOut() {
   const column = [
     "Id",
     "Party Name",
+    "Purchase Id",
     "Payment method",
     "Remaining Amount",
     "Date"  
@@ -47,11 +48,12 @@ export function PaymentOut() {
         
         setPaymentIn(res.data);
         const formattedPaymentIn = res.data.map((paymentIn) => ({
-          Id: paymentIn.payment_out_id, // Use current date or modify as needed
-          partyName: paymentIn.customer_name,
-          Method: paymentIn.payment_method,
-          RemainingAmount: paymentIn.remaining_amount,
-          updateTime: paymentIn.update_at, // Modify as needed
+          Id: paymentIn.supplier_payment_number, // Use current date or modify as needed
+          partyName: paymentIn.supplier_payment_customer_name,
+          purchaseId: paymentIn.supplier_payment_prefix,
+          Method: paymentIn.supplier_payment_mode,
+          RemainingAmount: paymentIn.supplier_payment_remaining,
+          updateTime: paymentIn.create_at, // Modify as needed
         }));
         
         setPaymentIn(formattedPaymentIn);

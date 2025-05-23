@@ -492,7 +492,7 @@ function handleEdit(e) {
     <>
    {
     data != null && bussinessData != null?(
-      <div className="w-full mt-2">
+      <div className="w-full bg-white mt-2">
         <div className="flex justify-center">
       <div className=" bg-white w-4xl">
       <h3 className="text-center p-3 d-inline-block">Preview for Invoice</h3>
@@ -524,7 +524,7 @@ function handleEdit(e) {
               }
               <div className="" style={{color:"#364153"}}>
                 <div id="company-name" style={{ color: " #000000" }}>
-                  {bussinessData[0].business_name} ™
+                  {bussinessData[0].vendor_business_legal_name} ™
                 </div>
                 <div id="company-address">{bussinessData[0].address}</div>
                 <div className="text-sm" style={{color:"#364153"}}>
@@ -532,23 +532,23 @@ function handleEdit(e) {
                 </div>
                 <div id="company-gst-number-content">
                   <span>GSTIN : </span>
-                  <span id="company-gst-number">{bussinessData[0].gst}</span>
+                  <span id="company-gst-number">{bussinessData[0].vendor_gstin}</span>
                 </div>
                 <div id="company-mobile-number-content">
                   <span>Mobile :</span>&nbsp;
                   <span id="company-mobile-number">
-                    {bussinessData[0].mobile_no}
+                    {bussinessData[0].vendor_phone}
                   </span>
                 </div>
                 <div id="company-mobile-number-content">
                   <span>Email :</span>&nbsp;
                   <span id="company-mobile-number">
-                    {bussinessData[0].business_profile_email}
+                    {bussinessData[0].vendor_email}
                   </span>
                 </div>
                 <div id="company-pan-number-content">
                   <span>PAN Number :</span>&nbsp;
-                  <span id="company-pan-number">{bussinessData[0].pan_no}</span>
+                  <span id="company-pan-number">{bussinessData[0].vendor_pan}</span>
                 </div>
               </div>
             </div>
@@ -722,19 +722,19 @@ function handleEdit(e) {
                       <div id="bank-details-label">BANK DETAILS</div>
                       <div class="bank-details-info">
                         <div class="bank-details-info-label">Name:</div>
-                        <div id="bank-details-name" class="bank-details-value">{data[0].ifsccode} </div>
+                        <div id="bank-details-name" class="bank-details-value">{data[0].accountholder} </div>
                       </div>
                       <div class="bank-details-info">
                         <div class="bank-details-info-label">IFSC Code:</div>
-                        <div id="bank-details-ifsc" class="bank-details-value">BARB0MGRIND</div>
+                        <div id="bank-details-ifsc" class="bank-details-value">{data[0].bankifsc}</div>
                       </div>
                       <div class="bank-details-info">
                         <div class="bank-details-info-label">Account No:</div>
-                        <div id="bank-details-account" class="bank-details-value">42710400000548</div>
+                        <div id="bank-details-account" class="bank-details-value">{data[0].accountnumber}</div>
                       </div>
                       <div class="bank-details-info">
                         <div class="bank-details-info-label">Bank:</div>
-                        <div id="bank-details-bank-name" class="bank-details-value">Bank of Baroda,MG ROAD, INDORE,MP</div>
+                        <div id="bank-details-bank-name" class="bank-details-value">{data[0].bankbranch}</div>
                       </div>
                     </div>
                 </div>
@@ -761,7 +761,7 @@ function handleEdit(e) {
               </div>
               <div className="flex justify-between w-64 mt-2">
                 <span className="text-sm " style={{color:"#364153"}}>Received Amount</span>
-                <span className="text-sm " style={{color:"#364153"}}>₹ 0</span>
+                <span className="text-sm " style={{color:"#364153"}}>₹ {data[0].payment_remaining}</span>
               </div>
             </div>
           </div>

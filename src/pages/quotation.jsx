@@ -36,6 +36,7 @@ const QuotationTable = () => {
         
                 try {
                     const res = await apiGet("/quotation");
+                    console.log(res);
                     if (res && res.length > 0) {
                         const formattedQuotation = res.map((quotation) => ({
                             date: quotation.sales_quotation_date, 

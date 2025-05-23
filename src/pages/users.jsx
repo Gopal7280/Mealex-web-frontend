@@ -2,51 +2,57 @@ import React, { useEffect, useState, useRef } from "react";
 import { data, NavLink, useNavigate } from "react-router-dom";
 import "../styles/customerDisplay.css"; // Import the CSS file
 import Sidebar from "../layouts/Sidebar"; // Make sure Sidebar is correctly imported
-import axios from "axios";  
-import "../styles/Products.css"
+import axios from "axios";
+import "../styles/Products.css";
 import { Toast } from "primereact/toast";
 import { ButtonComponent } from "../components/Button";
 import { apiDelete, apiGet, apiPost } from "../services/api";
 import { TableComponent } from "../components/Table";
 import "../styles/layoutFix.css";
-import { Preview, ModeEdit, DeleteForever,CloudUpload } from "@mui/icons-material";
+import {
+  Preview,
+  ModeEdit,
+  DeleteForever,
+  CloudUpload,
+} from "@mui/icons-material";
 import { SearchComponent } from "../components/SerachBar";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
-import { Dialog } from 'primereact/dialog';
+import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { BulkActions } from "../components/bulkActions";
 import { config } from "../config/app.js";
 import { Loader } from "../layouts/Loader";
-import { Skeleton } from 'primereact/skeleton';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
+import { Skeleton } from "primereact/skeleton";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 import { User } from "lucide-react";
 import { InputText } from "primereact/inputtext";
 import { Checkbox } from "primereact/checkbox";
 import { initial } from "lodash";
 import { useFormik } from "formik";
 function Users() {
-    const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(false);
   const items = Array.from({ length: 5 }, (v, i) => i);
-  const column = ["S.No","Name", "Contact", "Email", "Access Privilage"];
-  const [customers, setCustomers] = useState([]);
+  const column = ["S.No", "Name", "Contact", "Email", "Access Privilage"];
+  const [users, setUsers] = useState([]);
   const [search, setSearch] = useState(""); // Search state
   const navigate = useNavigate();
   const printRef = useRef(); // Reference for printing
   const [loader, setLoader] = useState(false);
   const toast = useRef(null);
   const [total, setTotal] = useState(0);
-  const [categoryType,setCategoryType]=useState("")
+  const [categoryType, setCategoryType] = useState("");
   useEffect(() => {
-    const fetchCustomers = async () => {
+    const fecthUsers = async () => {
       setLoader(false); // Start loading
       try {
-        const res = await apiGet("/customers");
-        setCustomers(res);
-        setTotal(res.length);
+        const res = await apiGet("/user/all");
+        console.log(res.data);
+        setUsers(res.data);
+        setTotal(res.data.length);
         console.log("customer_response", res);
-  
+
         if (res.length === 0) {
           toast.current.show({
             severity: "info",
@@ -67,22 +73,22 @@ function Users() {
         setLoader(true); // Stop loading
       }
     };
-  
-    fetchCustomers();
+
+    fecthUsers();
   }, []);
-  
+
   // Filter customers based on search input
-  const filteredCustomers = customers.filter((customer) =>
-    `${customer.customer_id} ${customer.customer_name} ${customer.mobile_no} ${customer.email} ${customer.billing_address}`
+  const filteredUsers = users.filter((customer) =>
+    `${customer.employee_mobile_no} ${customer.employee_name} ${customer.employee_role} ${customer.employee_email}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
-  const dataTable = filteredCustomers.map((value) => ({
-    sNo:value.customer_number,
-    name: value.customer_name,
-    Address: value.billing_address,
-    Email: value.email,
-    Contact: value.mobile_no,
+  const dataTable = filteredUsers.map((value) => ({
+    sNo: value.employee_number,
+    name: value.employee_name,
+    mobileNo: value.employee_mobile_no,
+    employeEmail: value.employee_email,
+    employeRole: value.employee_role,
   }));
   const deleteCustomer = async (id) => {
     console.log(id);
@@ -91,10 +97,9 @@ function Users() {
       return;
 
     try {
-      const response = await fetch(
-        `${config.apiBaseUrl}/customers/${id}`,
-        { method: "DELETE" }
-      );
+      const response = await fetch(`${config.apiBaseUrl}/customers/${id}`, {
+        method: "DELETE",
+      });
 
       if (response.ok) {
         // alert("Customer deleted successfully");
@@ -106,103 +111,113 @@ function Users() {
       console.error("Error deleting customer:", error);
     }
   };
-  const handleEdit = (e, contact) => {
-    // alert(contact);
-    for (var i of filteredCustomers) {
-      if (i.mobile_no == contact) {
-        console.log(i);
-        console.log("i am match");
-        navigate("/customer_detail_edit", { state: { data: i } });
-      }
-    }
-  };
-  const handlePreview = (e, contact) => {
-    // alert(contact);
-    for (var i of filteredCustomers) {
-      if (i.mobile_no == contact) {
-        console.log(i);
-        console.log("i am match");
-        navigate("/customer-detail-display", { state: { data: i } });
-      }
-    }
-  };
-  const handledelete = async (e, contact) => {
-    const ans=confirm("Are you sure want to delete Customer");
-        console.log(ans);
-        if(ans==true)
-        {
-          const customer = filteredCustomers.find((i) => i.mobile_no === contact);
-          if (!customer) return;
-        
-          try {
-            await apiDelete(`customers/${customer.customer_id}`);
-            setCustomers((prev) =>
-              prev.filter((cust) => cust.customer_id !== customer.customer_id)
-            );
-            setTotal((prev) => prev - 1);
-            toast.current.show({
-              severity: "success",
-              summary: "Deleted",
-              detail: "Customer deleted successfully",
-              life: 2000,
-            });
-          } catch (error) {
-            console.error("Delete failed:", error);
-            toast.current.show({
-              severity: "error",
-              summary: "Error",
-              detail: "Failed to delete customer.",
-              life: 2000,
-            });
-          }
-        }
-        else{
-          alert("Customer not deleted");
-        }
-  };
-  
-  const categories = [
-    { name: 'Delivery Challan', key: 'dc' },
-    { name: 'Create Party Access', key: 'cp' },
-    { name: 'Add Product Access', key: 'ap' },
-    { name: 'Access to invoice,challan,quotation', key: 'ac' },
-    { name: 'Purchase Access', key: 'pa' },
-    { name: 'PaymentIn Payment Out Access', key: 'p' },
-    { name: 'Reports Access', key: 'ra' },
-    
-];
-const [selectedCategories, setSelectedCategories] = useState([]);
+  // const handleEdit = (e, contact) => {
+  //   // alert(contact);
+  //   for (var i of filteredUsers) {
+  //     if (i.employee_mobile_no == contact) {
+  //       console.log(i);
+  //       console.log("i am match");
+  //       navigate("/customer_detail_edit", { state: { data: i } });
+  //     }
+  //   }
+  // };
+  // const handlePreview = (e, contact) => {
+  //   // alert(contact);
+  //   for (var i of filteredCustomers) {
+  //     if (i.mobile_no == contact) {
+  //       console.log(i);
+  //       console.log("i am match");
+  //       navigate("/customer-detail-display", { state: { data: i } });
+  //     }
+  //   }
+  // };
+  // const handledelete = async (e, contact) => {
+  //   const ans=confirm("Are you sure want to delete Customer");
+  //       console.log(ans);
+  //       if(ans==true)
+  //       {
+  //         const customer = filteredCustomers.find((i) => i.mobile_no === contact);
+  //         if (!customer) return;
 
-const onCategoryChange = (e) => {
+  //         try {
+  //           await apiDelete(`customers/${customer.customer_id}`);
+  //           setCustomers((prev) =>
+  //             prev.filter((cust) => cust.customer_id !== customer.customer_id)
+  //           );
+  //           setTotal((prev) => prev - 1);
+  //           toast.current.show({
+  //             severity: "success",
+  //             summary: "Deleted",
+  //             detail: "Customer deleted successfully",
+  //             life: 2000,
+  //           });
+  //         } catch (error) {
+  //           console.error("Delete failed:", error);
+  //           toast.current.show({
+  //             severity: "error",
+  //             summary: "Error",
+  //             detail: "Failed to delete customer.",
+  //             life: 2000,
+  //           });
+  //         }
+  //       }
+  //       else{
+  //         alert("Customer not deleted");
+  //       }
+  // };
+
+  const categories = [
+    { name: "Delivery Challan", key: "dc" },
+    { name: "Create Party Access", key: "cp" },
+    { name: "Add Product Access", key: "ap" },
+    { name: "Access to invoice,challan,quotation", key: "ac" },
+    { name: "Purchase Access", key: "pa" },
+    { name: "PaymentIn Payment Out Access", key: "p" },
+    { name: "Reports Access", key: "ra" },
+  ];
+  const [selectedCategories, setSelectedCategories] = useState([]);
+
+  const onCategoryChange = (e) => {
     let _selectedCategories = [...selectedCategories];
 
-    if (e.checked)
-        _selectedCategories.push(e.value);
+    if (e.checked) _selectedCategories.push(e.value);
     else
-        _selectedCategories = _selectedCategories.filter(category => category.key !== e.value.key);
+      _selectedCategories = _selectedCategories.filter(
+        (category) => category.key !== e.value.key
+      );
 
     setSelectedCategories(_selectedCategories);
-};
-function handleUserCategory(e)
-{
-  console.log(e.target.value);
-  setCategoryType(e.target.value);
-}
-const formik=useFormik({
-    initialValues:{
-        userName:"",
-        mobileNo:"",
-        email:"",
-        password:"",
-        userCategory:""
+  };
+  function handleUserCategory(e) {
+    console.log(e.target.value);
+    setCategoryType(e.target.value);
+  }
+  const formik = useFormik({
+    initialValues: {
+      userName: "",
+      mobileNo: "",
+      email: "",
+      password: "",
+      userCategory: "",
     },
-    onSubmit:(values)=>{
+    onSubmit: (values) => {
+      setLoader(true);
       setVisible(false);
-        values.userCategory=categoryType;
-        console.log(values);
-        
-    }
-})
+      values.userCategory = categoryType;
+      console.log(values);
+      const addUser = async () => {
+        try {
+          const res = await apiPost("/user", values);
+          navigate("/users");
+        } catch (err) {
+          console.log(err);
+        } finally {
+          setLoader(true);
+        }
+      };
+      addUser();
+    },
+  });
   return (
     <div>
       {loader ? (
@@ -246,46 +261,81 @@ const formik=useFormik({
                 >
                   Bulk Upload
                 </button> */}
-            <div className="button-align">
-                <ButtonComponent
-                  onClick={() =>
-                    setVisible(true)
-                    }
-                  className="bg-[#3A5B76] text-white px-4 py-2 rounded hover:bg-[#2D465B]"
-                  label="Add user"
-                  value="addUser"
-                ></ButtonComponent>
-                 <Dialog header="Add user's" visible={visible} className="sm:w-1/2" onHide={() => {if (!visible) return; setVisible(false); }}>
-                 <form onSubmit={formik.handleSubmit}>
-            <div className="lg:grid grid-cols-2 gap-6 md:block">
-            <div className="flex flex-column gap-2">
-                <label htmlFor="username">Username</label>
-                <InputText id="username" name="userName" onChange={formik.handleChange} placeholder="enter username" aria-describedby="username-help" />
-            </div>
-            <div className="flex flex-column gap-2">
-                <label htmlFor="username">Mobile no</label>
-                <InputText id="username" name="mobileNo" onChange={formik.handleChange} placeholder="enter mobile no" aria-describedby="username-help" />
-            </div>
-            <div className="flex flex-column gap-2">
-                <label htmlFor="username">Email</label>
-                <InputText id="username" name="email" onChange={formik.handleChange} placeholder="enter email" aria-describedby="username-help" />
-            </div>
-            <div className="flex flex-column gap-2">
-                <label htmlFor="username">Password</label>
-                <InputText id="username" name="password" onChange={formik.handleChange} placeholder="enter password" aria-describedby="username-help" />
-            </div>
-            <div className="flex flex-column gap-2">
-                <label htmlFor="username">User Category</label>
-                <select onChange={handleUserCategory} className="w-80 p-2 border border-gray-300 hover:bg-gray-200" name="" id="">
-                  <option value="none">select</option>
-                  <option value="partner">Partner</option>
-                  <option value="accountant">Accountant</option>
-                  <option value="stockManager">Stock Manager</option>
-                  <option value="salesPerson">Sales Person</option>
-                  <option value="deliveryBoy">Delivery Boy</option>
-                </select>
-            </div>
-            {/* <div className="flex justify-content-center">
+                <div className="button-align">
+                  <ButtonComponent
+                    onClick={() => setVisible(true)}
+                    className="bg-[#3A5B76] text-white px-4 py-2 rounded hover:bg-[#2D465B]"
+                    label="Add user"
+                    value="addUser"
+                  ></ButtonComponent>
+                  <Dialog
+                    header="Add user's"
+                    visible={visible}
+                    className="sm:w-1/2"
+                    onHide={() => {
+                      if (!visible) return;
+                      setVisible(false);
+                    }}
+                  >
+                    <form onSubmit={formik.handleSubmit}>
+                      <div className="lg:grid grid-cols-2 gap-6 md:block mt-3">
+                        <div className="flex flex-column gap-2">
+                          <label htmlFor="username">Username</label>
+                          <InputText
+                            id="username"
+                            name="userName"
+                            onChange={formik.handleChange}
+                            placeholder="enter username"
+                            aria-describedby="username-help"
+                          />
+                        </div>
+                        <div className="flex flex-column gap-2">
+                          <label htmlFor="username">Mobile no</label>
+                          <InputText
+                            id="username"
+                            name="mobileNo"
+                            onChange={formik.handleChange}
+                            placeholder="enter mobile no"
+                            aria-describedby="username-help"
+                          />
+                        </div>
+                        <div className="flex flex-column gap-2">
+                          <label htmlFor="username">Email</label>
+                          <InputText
+                            id="username"
+                            name="email"
+                            onChange={formik.handleChange}
+                            placeholder="enter email"
+                            aria-describedby="username-help"
+                          />
+                        </div>
+                        <div className="flex flex-column gap-2">
+                          <label htmlFor="username">Password</label>
+                          <InputText
+                            id="username"
+                            name="password"
+                            onChange={formik.handleChange}
+                            placeholder="enter password"
+                            aria-describedby="username-help"
+                          />
+                        </div>
+                        <div className="flex flex-column gap-2">
+                          <label htmlFor="username">User Category</label>
+                          <select
+                            onChange={handleUserCategory}
+                            className="w-80 p-2 border border-gray-300 hover:bg-gray-200"
+                            name=""
+                            id=""
+                          >
+                            <option value="none">select</option>
+                            <option value="partner">Partner</option>
+                            <option value="accountant">Accountant</option>
+                            <option value="stockManager">Stock Manager</option>
+                            <option value="salesPerson">Sales Person</option>
+                            <option value="deliveryBoy">Delivery Boy</option>
+                          </select>
+                        </div>
+                        {/* <div className="flex justify-content-center">
                 <p>Access Privilage's</p>
             <div className="flex flex-column gap-3">
                 {categories.map((category) => {
@@ -300,50 +350,49 @@ const formik=useFormik({
                 })}
             </div>
         </div> */}
-        </div>
-        <div className="mt-10 float-end p-2">
-                    <ButtonComponent
-                      value="Submit"
-                      type="submit"
-                      label="Save"
-                      className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                    ></ButtonComponent>
-                  </div>
-            </form>
-            </Dialog>
-              </div>
-                    
+                      </div>
+                      <div className="mt-10 float-end p-2">
+                        <ButtonComponent
+                          value="Submit"
+                          type="submit"
+                          label="Save"
+                          className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                        ></ButtonComponent>
+                      </div>
+                    </form>
+                  </Dialog>
+                </div>
               </div>
             </div>
             {/* <TableComponent column={column} data={dataTable}></TableComponent> */}
 
             <TableComponent
-              name="customer"
+              name="User's"
               column={column}
               data={dataTable}
               pageSize={3} // Number of rows per page
-              actions={(row) => (
-                <div className="flex gap-2">
-                  <button
-                    className="text-[#3A5B76]"
-                    onClick={(e) => handlePreview(e, row.Contact)}
-                  >
-                    <Preview />
-                  </button>
-                  <button
-                    className="text-[#3A5B76]"
-                    onClick={(e) => handleEdit(e, row.Contact)}
-                  >
-                    <ModeEdit />
-                  </button>
-                  <button
-                    className="text-red-500"
-                    onClick={(e) => handledelete(e, row.Contact)}
-                  >
-                    <DeleteForever />
-                  </button>
-                </div>
-              )}
+              // actions={(row) => (
+              //   <div className="flex gap-2">
+              //     <button
+              //       className="text-[#3A5B76]"
+              //       onClick={(e) => handlePreview(e, row.Contact)}
+              //     >
+              //       <Preview />
+              //     </button>
+              //     <button
+              //       className="text-[#3A5B76]"
+              //       onClick={(e) => handleEdit(e, row.Contact)}
+              //     >
+              //       <ModeEdit />
+              //     </button>
+              //     <button
+              //       className="text-red-500"
+              //       onClick={(e) => handledelete(e, row.Contact)}
+              //     >
+              //       <DeleteForever />
+              //     </button>
+              //   </div>
+              // )}
             />
 
             {/* <TableComponent
@@ -362,19 +411,49 @@ const formik=useFormik({
       ) : (
         <div className="gop">
           <div className="max-w-7xl mt-3 mx-auto bg-white p-5 shadow-lg responsive-head rounded-lg">
-          <Skeleton width="100%" height="50px" className="mb-2"></Skeleton>
+            <Skeleton width="100%" height="50px" className="mb-2"></Skeleton>
             {/* <TableComponent column={column} data={dataTable}></TableComponent> */}
 
             <div className="card">
-            <DataTable value={items} className="p-datatable-striped">
-                <Column field="code" header="S.No" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="name" header="Name" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="category" header="Address" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="quantity" header="Email" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="quantity" header="Contact" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="quantity" header="Actions" style={{ width: '25%' }} body={<Skeleton />}></Column>
-            </DataTable>
-        </div>
+              <DataTable value={items} className="p-datatable-striped">
+                <Column
+                  field="code"
+                  header="S.No"
+                  style={{ width: "25%" }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="name"
+                  header="Name"
+                  style={{ width: "25%" }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="category"
+                  header="Address"
+                  style={{ width: "25%" }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="quantity"
+                  header="Email"
+                  style={{ width: "25%" }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="quantity"
+                  header="Contact"
+                  style={{ width: "25%" }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="quantity"
+                  header="Actions"
+                  style={{ width: "25%" }}
+                  body={<Skeleton />}
+                ></Column>
+              </DataTable>
+            </div>
 
             {/* <TableComponent
   column={column}

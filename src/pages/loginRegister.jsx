@@ -7,7 +7,10 @@ import { apiPost } from "../services/api";
 import { setToken } from "../services/authService";
 import imgLogo from "../assets/Bill365Logo.jpg"
 import emailjs from '@emailjs/browser';
+import { Loader } from "../layouts/Loader";
+import { Skeleton } from 'primereact/skeleton';
 const LoginRegister = ({ setAuth }) => {
+    const [loader, setLoader] = useState(false);
     const [formType, setFormType] = useState("login");
     const [email, setEmail] = useState("");
     const [username, setName] = useState("");
@@ -20,6 +23,7 @@ const LoginRegister = ({ setAuth }) => {
         e.preventDefault();
         setError("");
         try {
+            setLoader(true);
             const response=await apiPost("/auth/login",{email,password})
             console.log(response.data.token);
             console.log(response.data);
@@ -32,6 +36,9 @@ const LoginRegister = ({ setAuth }) => {
             }
         } catch (err) {
             setError(err.response?.message || "Login failed. Try again!");
+        }
+        finally{
+            setLoader(false);
         }
     };
 
@@ -66,6 +73,7 @@ const LoginRegister = ({ setAuth }) => {
         }
         sendEmail();
         try {
+            setLoader(true);
             const response=await apiPost("/auth/signUp",{username,email,password});
             console.log(response);
             const response1=await apiPost("/auth/login",{email,password});
@@ -82,9 +90,29 @@ const LoginRegister = ({ setAuth }) => {
         } catch (err) {
             setError(err.response?.data?.message || "Registration failed!");
         }
+        finally{
+            setLoader(false);
+        }
     };
 
     return (
+        <>
+        {
+            loader?(<div className="bg-white">
+        <div className="flex-1 p-6">
+            <Skeleton className="mb-4" width="100%" height="10vh"></Skeleton>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+        <Skeleton width="100%" height="150px"></Skeleton>
+        <Skeleton width="100%" height="150px"></Skeleton>
+        <Skeleton width="100%" height="150px"></Skeleton>
+        <Skeleton width="100%" height="150px"></Skeleton>
+        </div>
+
+        {/* Charts */}
+        <Skeleton width="100%" height="100vh"></Skeleton>
+      </div>
+      </div>):(
         <div className="flex justify-center items-center h-screen bg-gray-100">
             <div className="bg-white p-8 rounded-lg shadow-lg w-96">
                 {/* <h2 className="text-center text-2xl font-semibold text-gray-700 mb-5">Bill<span className="text-green-600">●</span>365</h2> */}
@@ -207,6 +235,9 @@ const LoginRegister = ({ setAuth }) => {
                 </p>
             </div>
         </div>
+      )
+        }
+        </>
     );
 };
 

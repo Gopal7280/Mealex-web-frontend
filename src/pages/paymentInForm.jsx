@@ -42,6 +42,7 @@ export function PaymentInForm() {
   const [companyName,setCompanyName]=useState(null);
   const [moreData,setMoreData]=useState([]);
   const [invoiceId,setInvoiceId]=useState([]);
+  const [invoicePre,setInvoicePre]=useState([]);
   const [selectedInvoiceId,setSelectedInvoiceId]=useState(null);
   const [invoiceTotal,setInvoiceTotal]=useState();
   const [total,setTotal]=useState(0);
@@ -52,7 +53,7 @@ export function PaymentInForm() {
             const res=await apiGet("/customers");
             console.log(res);
             const companyNamee = res.map(item=>({
-                name:`${item.customer_name}_${item.email}_${item.mobile_no}`
+                name:`${item.customer_name}_${item.customer_email}_${item.customer_phone}`
             }))
             const paymentType=[
                 {name:"CASH"},{name:"CHEQUE"},{name:"ONLINE"},{name:"BANK"},{name:"TDS"},{name:"Bad Debts / Kasar"}]
@@ -81,13 +82,15 @@ export function PaymentInForm() {
         paymentType:"",
         paidAmount:"",
         invoiceId:"",
+        invoicePrefix:"",
         totalAmount:"",
         reference:"",
     },
     onSubmit: (values) => {
       values.totalAmount=total;
       values.paymentPrefix=recieptNoPrefix==""?0:recieptNoPrefix;
-      values.invoiceId=invoiceId;
+      values.invoiceId=invoicePre;
+      values.invoicePrefix=invoiceId;
       values.paymentType=selectedPaymentType;
       values.companyName=selectedCompanyName;
       values.paymentDate=date;
@@ -134,12 +137,14 @@ export function PaymentInForm() {
                             {
                                     setMoreData(i);
                                     const res=await apiGet(`/invoices/getallinvoice/${i.customer_id}`)
+                                    console.log(res);
                                     const InvoiceId = res.data.map(item=>({
-                                      name:`${item.invoice_id}`
+                                      name:`${item.invoice_prefix}`,
+                                      id:`${item.invoice_id}`
                                   }))
                                   const InvoiceTotal = res.data.map(item=>({
-                                    totalAmount:`${item.payment_remaining}`,
-                                    invoiceIdd:`${item.invoice_id}`,
+                                    totalAmount:`${item.invoice_payment_remaining}`,
+                                    invoiceIdd:`${item.invoice_prefix}`,
                                 }))
                                     console.log(res.data);
                                     setInvoiceTotal(InvoiceTotal);
@@ -160,6 +165,7 @@ export function PaymentInForm() {
   function handleInvoiceChange(e,name){
     console.log(name);
     setInvoiceId(name.name);
+    setInvoicePre(name.id);
     for(var i of invoiceTotal)
     {
       if(i.invoiceIdd==name.name)

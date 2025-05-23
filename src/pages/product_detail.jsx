@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { InputComponent } from "../components/Input";
 import { Preview, ModeEdit, DeleteForever,Close } from "@mui/icons-material";
 import { ButtonComponent } from "../components/Button";
 import "../styles/layoutFix.css"
+import { FaDownload } from "react-icons/fa6";
+import { toWords } from "number-to-words";
+import { IoMdPrint } from "react-icons/io";
+import { FaFilePdf } from "react-icons/fa6";
+import { FaEdit } from "react-icons/fa";
 import Sidebar from '../layouts/Sidebar';
 export function Product_detail(){
+  const navigate=useNavigate();
     const location = useLocation();
     const [data, setData] = useState({});
     useEffect(() => {
@@ -17,20 +23,29 @@ export function Product_detail(){
     function handleClick() {
       console.log(data);
     }
+    function handleEdit(e) {
+      //   alert(JSON.stringify(invoiceId));
+      navigate("/product_detail_edit", { state: { data: location.state?.data } });
+  }
     return(
-        <div>
+        <div className="p-2">
             <div className="over max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-md">
-      <h1 className="text-2xl font-bold text-center mb-6">
+      <div className="flex justify-between">
+        <h1 className="text-2xl font-bold text-center mb-6">
       View Details
       </h1>
-      <NavLink to="/products" className="text-white text-decoration-none">
+      <div className="flex justify-between">
+        <button className="" onClick={(e)=>handleEdit(e)}><FaEdit className="iconSize"/></button>
+        <NavLink to="/products" className="text-white text-decoration-none mt-3">
       <ButtonComponent
               type="button"
-              className=" bg-[#3A5B76] float-end px-2 py-1 text-white font-bold rounded hover:bg-[#2E4A62]"
+              className=" bg-[#3A5B76] px-2 py-1 text-white font-bold rounded hover:bg-[#2E4A62]"
               value="close"
               children={<Close/>}
             />
         </NavLink>
+      </div>
+      </div>
       <form id="ProductForm" className="mt-6">
         <div className="sm:grid grid-cols-2 gap-6 block">
           <div>

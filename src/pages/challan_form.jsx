@@ -13,10 +13,15 @@ import { apiGet, apiPost } from "../services/api";
 import { Loader } from "../layouts/Loader";
 import "../styles/layoutFix.css";
 import Sidebar from "../layouts/Sidebar";
+import { CustomerModalView } from "./modalViews/customerModalView";
+import ProductModalView from "./modalViews/productModalView";
 export function ChallanForm() {
+  const [modalShow,setModalShow]=useState(false);
+  const [modalShow1,setModalShow1]=useState(false);
   const [loader, setLoader] = useState(false);
   const [products, setProducts] = useState([]);
   const [businessprofile, setBusinessProfile] = useState([]);
+  const [bankAccountDeatil, setBankAccountDeatil] = useState([]);
   const [date, setDate] = useState(new Date());
   const [customer, setCustomer] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
@@ -33,6 +38,7 @@ export function ChallanForm() {
   const [discountAmountPerc, setDiscountAmountPerc] = useState([]);
   const location = useLocation();
   const [disabl, setdisabl] = useState([]);
+    const [userRole,setUserRole]=useState("owner");
   const [productAmount, setProductAmount] = useState([
     {
       amount: "0",
@@ -45,9 +51,23 @@ export function ChallanForm() {
       setDate(dt.toLocaleDateString());
       //  setDueDate(date.getDate()+7+"/"+date.getMonth()+"/"+date.getFullYear());ji
       console.log(dt.toLocaleDateString());
+      const fetchUserRole=async ()=>{
+        try{
+              const res=await apiGet("/user");
+              console.log(res.data);
+              console.log(res.data[0].employee_role);
+              setUserRole(res.data[0].employee_role);
+        }
+        catch(err)
+        {
+          console.log(err);
+        }
+    }
+    fetchUserRole();
       const invoicePrefixSet = async () => {
         const res = await apiGet("/challan/challannumber/prefix");
         console.log(res);
+        setBankAccountDeatil(res.data[0]);
         setChallanPrefix(res.challan_prefix);
         setchallanNo(res.challan_number);
         setchallanDueDate(res.due_date);
@@ -83,7 +103,22 @@ export function ChallanForm() {
     } finally {
       setLoader(false);
     }
-  }, []);
+  }, [modalShow]);
+  useEffect(()=>{
+    setLoader(true); // Show loader when effect starts
+    const fetchProduct = async () => {
+      try {
+        const res = await apiGet("/products/productName");
+        setProducts(res);
+        console.log(res);
+        console.log("Product data fetched");
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    fetchProduct();
+    setLoader(false);
+  },[modalShow1])
   const handleAddProductRow = () => {
     setProductRows([
       ...productRows,
@@ -119,7 +154,7 @@ export function ChallanForm() {
       productName: "",
       hsnCode: "",
       gstRate: "",
-      gstCalculate: "",
+      // gstCalculate: "",
       unitPrice: "",
       quantity: "",
       total: "",
@@ -241,19 +276,22 @@ export function ChallanForm() {
   //     setProductAmount(update2);
   //     setProductRows(update1);
   // }
-
-  const handleProductChange = async (index, productName) => {
+  function handleOpenModalProduct()
+  {
+    setModalShow1(true);
+  }
+  const handleProductChange = async (index, productId) => {
+    console.log(productId);
     setCount(0);
-    const updateMe=[...disabl];
-    updateMe[index]=0;
+    const updateMe = [...disabl];
+    updateMe[index] = 0;
     setdisabl(updateMe);
     try {
       const token = localStorage.getItem("token");
-      if(productName=="addProduct")
-        {
-          navigate("/add-product",{state:{data:"FromInvoice"}})
-        }
-      const res = await apiGet(`products/detail/${productName}`);
+      // if (productId == "addProduct") {
+      //   navigate("/add-product", { state: { data: "FromInvoice" } });
+      // }
+      const res = await apiGet(`products/detail/${productId}`);
       const productDetail = res[0];
       const updatedRows = [...productRows];
       var rate = 100;
@@ -268,7 +306,7 @@ export function ChallanForm() {
         console.log(res);
         calculateGst = 1 + parseFloat(res[0].gst_rate / 100);
         calculateTax = parseFloat(res[0].selling_price) / calculateGst;
-        calculateTax = calculateTax.toFixed(2);
+        calculateTax = parseFloat(calculateTax).toFixed(2);
         calculateGst = 0;
         res[0].gst_rate = 0;
       }
@@ -277,10 +315,10 @@ export function ChallanForm() {
         console.log(res);
         calculateGst = (res[0].selling_price * res[0].gst_rate) / 100;
         calculateTax = res[0].selling_price;
-        calculateTax = calculateTax.toFixed(2);
+        calculateTax = parseFloat(calculateTax).toFixed(2);
         console.log(calculateGst);
       }
-      updatedRows[index].quantity="1"
+      updatedRows[index].quantity = "1";
       const updateTax = [...TaxAmount];
       const updateGst = [...gstRateS];
       updateGst[index] = parseFloat(res[0].gst_rate);
@@ -291,10 +329,11 @@ export function ChallanForm() {
         productName: productDetail.product_name,
         hsnCode: productDetail.product_hsn_code,
         gstRate: productDetail.gst_rate,
-        gstCalculate: rate + parseFloat(res[0].selling_price),
+        // gstCalculate: rate + parseFloat(res[0].selling_price),
         unitPrice: calculateTax,
         quantity: updatedRows[index].quantity,
-        total:calculateGst + calculateTax * parseFloat(updatedRows[index].quantity), // Update total based on quantity
+        total:
+          calculateGst + calculateTax * parseFloat(updatedRows[index].quantity), // Update total based on quantity
         discount_amount: "0",
         discount_amountPer: "0%",
         taxable_amount: calculateTax * parseFloat(updatedRows[index].quantity),
@@ -305,23 +344,23 @@ export function ChallanForm() {
       const update = [...productAmount];
       update[index].amount = 0;
       update[index].per = 0;
-      var taxableamount=0;
-      var totalAmount=0;
+      var taxableamount = 0;
+      var totalAmount = 0;
       for (let row of updatedRows) {
         totalAmount += parseFloat(row.total);
-         taxableamount += parseFloat(row.taxable_amount);
+        taxableamount += parseFloat(row.taxable_amount);
       }
-      var gstSumAmount=0
+      var gstSumAmount = 0;
       for (var i = 0; i < updateTax.length; i++) {
         gstSumAmount += parseFloat(updateTax[i]);
       }
-      setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
+      setGstAmount(parseFloat(gstSumAmount).toFixed(2));
       const gstSum = parseFloat(
         updateTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
       );
-      setGstSu((parseFloat(gstSum)));
+      setGstSu(parseFloat(gstSum));
       setAddTotal(totalAmount.toFixed(2));
-      setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
+      setTaxableAmount(parseFloat(taxableamount).toFixed(2));
       setProductAmount(update);
       setGstRateS(updateGst);
       setProductRows(updatedRows);
@@ -341,7 +380,7 @@ export function ChallanForm() {
     initialValues: {
       tax_amount: "",
       partyDetail: [{}],
-      bankDetails: "",
+      bankAccountId:"",
       challan_prefix: "",
       challan_number: "",
       sales_challan_date: "",
@@ -353,20 +392,20 @@ export function ChallanForm() {
       sgstAmount: "",
       cgstAmount: "",
       perTaxAmount: [],
-      businessDetail: [{}],
+      vendorId: [{}],
       // //////////////////////////////////////
       productdetail: [{}],
       productDescription: "",
     },
     onSubmit: (values) => {
+      values.vendorId = businessprofile[0].vendor_id;
       values.challan_prefix = challanPrefix;
       values.challan_number = challanNo;
-      values.businessDetail = businessprofile;
       values.sgstAmount = gstAmount / 2;
       values.cgstAmount = gstAmount / 2;
       values.perTaxAmount = TaxAmount;
       values.taxable_amount = taxableAmount;
-      values.bankDetails = bankDetails;
+      values.bankAccountId = bankAccountDeatil.bank_account_id;
       values.payment_terms = 7;
       values.sales_challan_date = date;
       values.add_notes = notes;
@@ -2238,7 +2277,6 @@ export function ChallanForm() {
   //   }
   // }
 
-
   function handleChange(e, item, index, quantity, getNotify) {
     // Create copies of the current state
     let updatedRows = [...productRows];
@@ -2276,19 +2314,19 @@ export function ChallanForm() {
           100;
         console.log(a2);
         const discount = a1 - a2;
-        updatedRows[index].taxable_amount = (parseFloat(discount)).toFixed(2);
+        updatedRows[index].taxable_amount = parseFloat(discount).toFixed(2);
         console.log(discount);
         const discount_amount = a1 - discount;
         console.log(discount_amount);
         const tax_amount = (discount * gstRate) / 100;
         console.log(tax_amount);
-        updatedRows[index].total = (parseFloat(tax_amount + discount)).toFixed(2);
+        updatedRows[index].total = parseFloat(tax_amount + discount).toFixed(2);
         console.log(updatedRows[index].total);
         updatedRows[index].gstRate = term[1];
-        updatedTax[index] = (parseFloat(tax_amount)).toFixed(2);
+        updatedTax[index] = parseFloat(tax_amount).toFixed(2);
         for (let row of updatedRows) {
           totalAmount += parseFloat(row.total);
-           taxableamount += parseFloat(row.taxable_amount);
+          taxableamount += parseFloat(row.taxable_amount);
         }
         for (var j = 0; j < updatedRows.length; j++) {
           if (updatedRows[j].gstRate == term[1]) {
@@ -2304,21 +2342,23 @@ export function ChallanForm() {
 
         // Calculate the total GST amount
         const gstSum = parseFloat(
-          updatedTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
+          updatedTax
+            .reduce((acc, val) => acc + parseFloat(val || 0), 0)
+            .toFixed(2)
         );
-        const gstR=[...gstRateS];
-        gstR[index]=term[1];
+        const gstR = [...gstRateS];
+        gstR[index] = term[1];
 
         // Update state
         console.log(gstSumAmount);
-        setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
-        setGstAmountPer((parseFloat(gstSumPer)).toFixed(2));
-        setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
-        setGstRateS((parseFloat(gstR)).toFixed(2));
+        setGstAmount(parseFloat(gstSumAmount).toFixed(2));
+        setGstAmountPer(parseFloat(gstSumPer).toFixed(2));
+        setTaxableAmount(parseFloat(taxableamount).toFixed(2));
+        setGstRateS(parseFloat(gstR).toFixed(2));
         setProductRows(updatedRows);
         setTaxAmount(updatedTax);
         setAddTotal(totalAmount.toFixed(2));
-        setGstSu((parseFloat(gstSum)));
+        setGstSu(parseFloat(gstSum));
         // const discount_amount=((updatedRows[index].quantity * updatedRows[index].unitPrice)-updatedRows[index].discount_amount);
       } else {
         const term = e.target.value.split("_");
@@ -2329,7 +2369,8 @@ export function ChallanForm() {
           updatedRows[index].quantity * updatedRows[index].unitPrice -
           updatedRows[index].discount_amount;
         // setTaxableAmount(discount_amount);
-        updatedRows[index].taxable_amount = (parseFloat(discount_amount)).toFixed(2);
+        updatedRows[index].taxable_amount =
+          parseFloat(discount_amount).toFixed(2);
         console.log(discount_amount);
         const tax_amount =
           ((item.quantity * item.unitPrice -
@@ -2337,14 +2378,16 @@ export function ChallanForm() {
             gstRate) /
           100;
         // Update the total for the current row
-        updatedRows[index].total = (parseFloat(tax_amount + discount_amount)).toFixed(2)
+        updatedRows[index].total = parseFloat(
+          tax_amount + discount_amount
+        ).toFixed(2);
         updatedRows[index].gstRate = term[1];
-        updatedTax[index] = (parseFloat(tax_amount)).toFixed(2);
+        updatedTax[index] = parseFloat(tax_amount).toFixed(2);
 
         // Calculate the total amount for all rows
         for (let row of updatedRows) {
           totalAmount += parseFloat(row.total);
-           taxableamount += parseFloat(row.taxable_amount);
+          taxableamount += parseFloat(row.taxable_amount);
         }
         for (var j = 0; j < updatedRows.length; j++) {
           if (updatedRows[j].gstRate == term[1]) {
@@ -2359,10 +2402,12 @@ export function ChallanForm() {
 
         // Calculate the total GST amount
         const gstSum = parseFloat(
-  updatedTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
-);
-        const gstR=[...gstRateS];
-        gstR[index]=term[1];
+          updatedTax
+            .reduce((acc, val) => acc + parseFloat(val || 0), 0)
+            .toFixed(2)
+        );
+        const gstR = [...gstRateS];
+        gstR[index] = term[1];
         // Update state
         // setGstAmount(gstSumAmount);
         // setGstAmountPer(gstSumPer);
@@ -2372,14 +2417,14 @@ export function ChallanForm() {
         // setTaxAmount(updatedTax);
         // setAddTotal(totalAmount.toFixed(2));
         // setGstSu(gstSum);
-        setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
-        setGstAmountPer((parseFloat(gstSumPer)).toFixed(2));
-        setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
-        setGstRateS((parseFloat(gstR)).toFixed(2));
+        setGstAmount(parseFloat(gstSumAmount).toFixed(2));
+        setGstAmountPer(parseFloat(gstSumPer).toFixed(2));
+        setTaxableAmount(parseFloat(taxableamount).toFixed(2));
+        setGstRateS(parseFloat(gstR).toFixed(2));
         setProductRows(updatedRows);
         setTaxAmount(updatedTax);
         setAddTotal(totalAmount.toFixed(2));
-        setGstSu((parseFloat(gstSum)));
+        setGstSu(parseFloat(gstSum));
       }
     }
 
@@ -2420,14 +2465,18 @@ export function ChallanForm() {
             100;
           console.log(a2);
           const discount = a1 - a2;
-          updatedRows[index].taxable_amount = (parseFloat(discount)).toFixed(2)
+          updatedRows[index].taxable_amount = parseFloat(discount).toFixed(2);
           const tax_amount = (discount * currentGstRate) / 100;
-          updatedRows[index].total = (parseFloat(tax_amount + discount)).toFixed(2)
+          updatedRows[index].total = parseFloat(tax_amount + discount).toFixed(
+            2
+          );
           console.log(updatedRows[index].total);
-          updatedTax[index] = (parseFloat(tax_amount)).toFixed(2);
+          updatedTax[index] = parseFloat(tax_amount).toFixed(2);
 
           // Recalculate the total for the current row
-          updatedRows[index].total = (parseFloat(tax_amount + discount)).toFixed(2)
+          updatedRows[index].total = parseFloat(tax_amount + discount).toFixed(
+            2
+          );
 
           // Calculate the total amount for all rows
           totalAmount = 0; // Reset totalAmount before recalculating
@@ -2441,9 +2490,11 @@ export function ChallanForm() {
           }
 
           // Calculate the total GST amount
-         const gstSum = parseFloat(
-  updatedTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
-);
+          const gstSum = parseFloat(
+            updatedTax
+              .reduce((acc, val) => acc + parseFloat(val || 0), 0)
+              .toFixed(2)
+          );
 
           // Update state
           // setGstAmount(gstSumAmount);
@@ -2452,12 +2503,12 @@ export function ChallanForm() {
           // setTaxAmount(updatedTax);
           // setAddTotal(totalAmount.toFixed(2));
           // setGstSu(gstSum);
-          setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
-          setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
+          setGstAmount(parseFloat(gstSumAmount).toFixed(2));
+          setTaxableAmount(parseFloat(taxableamount).toFixed(2));
           setProductRows(updatedRows);
           setTaxAmount(updatedTax);
           setAddTotal(totalAmount.toFixed(2));
-          setGstSu((parseFloat(gstSum)));
+          setGstSu(parseFloat(gstSum));
         } else {
           console.log("else block executingg");
           updatedRows[index].quantity = quantity;
@@ -2480,30 +2531,36 @@ export function ChallanForm() {
             quantity * updatedRows[index].unitPrice -
             updatedRows[index].discount_amount;
           updateDiscountAmount[index].per =
-            ((parseFloat(updateDiscountAmount[index].amount)).toFixed(2) /
-              (quantity * (parseFloat(updatedRows[index].unitPrice))).toFixed(2)) *
+            (parseFloat(updateDiscountAmount[index].amount).toFixed(2) /
+              (quantity * parseFloat(updatedRows[index].unitPrice)).toFixed(
+                2
+              )) *
             100;
-          updateDiscountAmount[index].amount =
-            (parseFloat(updatedRows[index].discount_amount)).toFixed(2);
+          updateDiscountAmount[index].amount = parseFloat(
+            updatedRows[index].discount_amount
+          ).toFixed(2);
           console.log(updateDiscountAmount);
           // setTaxableAmount(discount_amount);
-          updatedRows[index].taxable_amount = (parseFloat(discount_amount)).toFixed(2);
+          updatedRows[index].taxable_amount =
+            parseFloat(discount_amount).toFixed(2);
           // Recalculate the tax amount based on the new quantity
           const tax_amount =
             ((quantity * updatedRows[index].unitPrice -
               updatedRows[index].discount_amount) *
               currentGstRate) /
             100;
-          updatedTax[index] = (parseFloat(tax_amount)).toFixed(2);
+          updatedTax[index] = parseFloat(tax_amount).toFixed(2);
 
           // Recalculate the total for the current row
-          updatedRows[index].total = (parseFloat(tax_amount + discount_amount)).toFixed(2)
+          updatedRows[index].total = parseFloat(
+            tax_amount + discount_amount
+          ).toFixed(2);
 
           // Calculate the total amount for all rows
           totalAmount = 0; // Reset totalAmount before recalculating
           for (let row of updatedRows) {
             totalAmount += parseFloat(row.total);
-             taxableamount += parseFloat(row.taxable_amount);
+            taxableamount += parseFloat(row.taxable_amount);
           }
           for (var i = 0; i < updatedTax.length; i++) {
             gstSumAmount += parseFloat(updatedTax[i]);
@@ -2511,8 +2568,10 @@ export function ChallanForm() {
 
           // Calculate the total GST amount
           const gstSum = parseFloat(
-  updatedTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
-);
+            updatedTax
+              .reduce((acc, val) => acc + parseFloat(val || 0), 0)
+              .toFixed(2)
+          );
 
           // Update state
           // setGstAmount(gstSumAmount);
@@ -2522,13 +2581,13 @@ export function ChallanForm() {
           // setTaxAmount(updatedTax);
           // setAddTotal(totalAmount.toFixed(2));
           // setGstSu(gstSum);
-          setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
-          setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
+          setGstAmount(parseFloat(gstSumAmount).toFixed(2));
+          setTaxableAmount(parseFloat(taxableamount).toFixed(2));
           setProductAmount(updateDiscountAmount);
           setProductRows(updatedRows);
           setTaxAmount(updatedTax);
           setAddTotal(totalAmount.toFixed(2));
-          setGstSu((parseFloat(gstSum)));
+          setGstSu(parseFloat(gstSum));
         }
       } else {
         console.log("else block executing");
@@ -2560,28 +2619,31 @@ export function ChallanForm() {
         //     (quantity * updatedRows[index].unitPrice)) *
         //   100;
         updateDiscountAmount[index].per =
-        ((parseFloat(updateDiscountAmount[index].amount)).toFixed(2) /
-          (quantity * (parseFloat(updatedRows[index].unitPrice))).toFixed(2)) *
-        100;
+          (parseFloat(updateDiscountAmount[index].amount).toFixed(2) /
+            (quantity * parseFloat(updatedRows[index].unitPrice)).toFixed(2)) *
+          100;
         console.log(updateDiscountAmount);
         // setTaxableAmount(discount_amount);
-        updatedRows[index].taxable_amount = (parseFloat(discount_amount)).toFixed(2);
+        updatedRows[index].taxable_amount =
+          parseFloat(discount_amount).toFixed(2);
         // Recalculate the tax amount based on the new quantity
         const tax_amount =
           ((quantity * updatedRows[index].unitPrice -
             updatedRows[index].discount_amount) *
             currentGstRate) /
           100;
-          updatedTax[index] = (parseFloat(tax_amount)).toFixed(2);
+        updatedTax[index] = parseFloat(tax_amount).toFixed(2);
 
         // Recalculate the total for the current row
-        updatedRows[index].total = (parseFloat(tax_amount + discount_amount)).toFixed(2)
+        updatedRows[index].total = parseFloat(
+          tax_amount + discount_amount
+        ).toFixed(2);
 
         // Calculate the total amount for all rows
         totalAmount = 0; // Reset totalAmount before recalculating
         for (let row of updatedRows) {
           totalAmount += parseFloat(row.total);
-           taxableamount += parseFloat(row.taxable_amount);
+          taxableamount += parseFloat(row.taxable_amount);
         }
         for (var i = 0; i < updatedTax.length; i++) {
           gstSumAmount += parseFloat(updatedTax[i]);
@@ -2589,8 +2651,10 @@ export function ChallanForm() {
 
         // Calculate the total GST amount
         const gstSum = parseFloat(
-  updatedTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
-);
+          updatedTax
+            .reduce((acc, val) => acc + parseFloat(val || 0), 0)
+            .toFixed(2)
+        );
 
         // Update state
         // setGstAmount(gstSumAmount);
@@ -2599,12 +2663,12 @@ export function ChallanForm() {
         // setTaxAmount(updatedTax);
         // setAddTotal(totalAmount.toFixed(2));
         // setGstSu(gstSum);
-        setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
-        setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
+        setGstAmount(parseFloat(gstSumAmount).toFixed(2));
+        setTaxableAmount(parseFloat(taxableamount).toFixed(2));
         setProductRows(updatedRows);
         setTaxAmount(updatedTax);
         setAddTotal(totalAmount.toFixed(2));
-        setGstSu((parseFloat(gstSum)));
+        setGstSu(parseFloat(gstSum));
       }
     }
 
@@ -2628,7 +2692,7 @@ export function ChallanForm() {
 
       for (let row of updatedRows) {
         totalAmount += parseFloat(row.total) || 0; // Ensure to handle NaN
-        taxableAmount += (parseFloat(row.taxable_amount)).toFixed(2) || 0; // Ensure to handle NaN
+        taxableAmount += parseFloat(row.taxable_amount).toFixed(2) || 0; // Ensure to handle NaN
       }
 
       // Calculate GST sum from the updated tax array
@@ -2662,16 +2726,19 @@ export function ChallanForm() {
         // const gstRate = parseFloat(term[1]);
         updatedRows[index].discount_amountPer = "0";
         const discount_amoun = e.target.value != isNaN ? e.target.value : 0;
-        const discount_amount=discount_amoun==""?0:discount_amoun
-        updatedRows[index].discount_amount = (parseFloat(discount_amount)).toFixed(2);
-        updateDiscountAmount[index].per =
-          (parseFloat((discount_amount / (item.quantity * item.unitPrice)) * 100)).toFixed(2);
-        updateDiscountAmount[index].amount = (parseFloat(discount_amount)).toFixed(2);
+        const discount_amount = discount_amoun == "" ? 0 : discount_amoun;
+        updatedRows[index].discount_amount =
+          parseFloat(discount_amount).toFixed(2);
+        updateDiscountAmount[index].per = parseFloat(
+          (discount_amount / (item.quantity * item.unitPrice)) * 100
+        ).toFixed(2);
+        updateDiscountAmount[index].amount =
+          parseFloat(discount_amount).toFixed(2);
         console.log(updateDiscountAmount);
         console.log("calculating");
         const disamount = item.quantity * item.unitPrice - discount_amount;
         // setTaxableAmount(disamount);
-        updatedRows[index].taxable_amount = (parseFloat(disamount)).toFixed(2);
+        updatedRows[index].taxable_amount = parseFloat(disamount).toFixed(2);
         console.log(disamount);
         console.log(gstRateS);
         const currentGstRate = gstRateS[index]
@@ -2682,23 +2749,27 @@ export function ChallanForm() {
         console.log(tax_amount);
 
         // Update the total for the current row
-        updatedRows[index].total = (parseFloat(tax_amount + disamount)).toFixed(2)
-        updatedTax[index] = (parseFloat(tax_amount)).toFixed(2);
+        updatedRows[index].total = parseFloat(tax_amount + disamount).toFixed(
+          2
+        );
+        updatedTax[index] = parseFloat(tax_amount).toFixed(2);
         // updatedRows[index].gstRate = term[1];
 
         // Calculate the total amount for all rows
         for (let row of updatedRows) {
           totalAmount += parseFloat(row.total);
-           taxableamount += parseFloat(row.taxable_amount);
+          taxableamount += parseFloat(row.taxable_amount);
         }
         for (var i = 0; i < updatedTax.length; i++) {
           gstSumAmount += parseFloat(updatedTax[i]);
         }
 
         // // Calculate the total GST amount
-       const gstSum = parseFloat(
-  updatedTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
-);
+        const gstSum = parseFloat(
+          updatedTax
+            .reduce((acc, val) => acc + parseFloat(val || 0), 0)
+            .toFixed(2)
+        );
 
         // // Update state
         // setGstRateS([...gstRateS, term[1]]);
@@ -2709,13 +2780,13 @@ export function ChallanForm() {
         // setTaxAmount(updatedTax);
         // setAddTotal(totalAmount.toFixed(2));
         // setGstSu(gstSum);
-        setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
+        setGstAmount(parseFloat(gstSumAmount).toFixed(2));
         setProductAmount(updateDiscountAmount);
-        setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
+        setTaxableAmount(parseFloat(taxableamount).toFixed(2));
         setProductRows(updatedRows);
         setTaxAmount(updatedTax);
         setAddTotal(totalAmount.toFixed(2));
-        setGstSu((parseFloat(gstSum)));
+        setGstSu(parseFloat(gstSum));
       }
       if (e.target.name == "per") {
         setPer(true);
@@ -2730,10 +2801,11 @@ export function ChallanForm() {
           updatedRows[index].discount_amountPer = "0_%";
           updateDiscountAmount[index].amount = "0";
         } else {
-          updatedRows[index].discount_amountPer = (parseFloat(spl1)).toFixed(2);
-          updateDiscountAmount[index].amount =
-            (parseFloat((spl1 * item.quantity * item.unitPrice) / 100)).toFixed(2);
-          updateDiscountAmount[index].per = (parseFloat(spl1)).toFixed(2);
+          updatedRows[index].discount_amountPer = parseFloat(spl1).toFixed(2);
+          updateDiscountAmount[index].amount = parseFloat(
+            (spl1 * item.quantity * item.unitPrice) / 100
+          ).toFixed(2);
+          updateDiscountAmount[index].per = parseFloat(spl1).toFixed(2);
           console.log(updateDiscountAmount);
           updatedRows[index].discount_amount = "0";
         }
@@ -2741,7 +2813,7 @@ export function ChallanForm() {
         const disamount =
           item.quantity * item.unitPrice -
           (item.quantity * item.unitPrice * discount_amount) / 100;
-        updatedRows[index].taxable_amount = (parseFloat(disamount)).toFixed(2);
+        updatedRows[index].taxable_amount = parseFloat(disamount).toFixed(2);
         // updatedRows[index].discount_amount=disamount;
         console.log(disamount);
         console.log(gstRateS);
@@ -2753,14 +2825,16 @@ export function ChallanForm() {
         console.log(tax_amount);
 
         // Update the total for the current row
-        updatedRows[index].total = (parseFloat(tax_amount + disamount)).toFixed(2)
-        updatedTax[index] = (parseFloat(tax_amount)).toFixed(2);
+        updatedRows[index].total = parseFloat(tax_amount + disamount).toFixed(
+          2
+        );
+        updatedTax[index] = parseFloat(tax_amount).toFixed(2);
         // updatedRows[index].gstRate = term[1];
 
         // Calculate the total amount for all rows
         for (let row of updatedRows) {
           totalAmount += parseFloat(row.total);
-           taxableamount += parseFloat(row.taxable_amount);
+          taxableamount += parseFloat(row.taxable_amount);
         }
         for (var i = 0; i < updatedTax.length; i++) {
           gstSumAmount += parseFloat(updatedTax[i]);
@@ -2768,8 +2842,10 @@ export function ChallanForm() {
 
         // // Calculate the total GST amount
         const gstSum = parseFloat(
-  updatedTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
-);
+          updatedTax
+            .reduce((acc, val) => acc + parseFloat(val || 0), 0)
+            .toFixed(2)
+        );
 
         // // Update state
         // setGstRateS([...gstRateS, term[1]]);
@@ -2780,13 +2856,13 @@ export function ChallanForm() {
         // setTaxAmount(updatedTax);
         // setAddTotal(totalAmount.toFixed(2));
         // setGstSu(gstSum);
-        setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
+        setGstAmount(parseFloat(gstSumAmount).toFixed(2));
         setProductAmount(updateDiscountAmount);
-        setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
+        setTaxableAmount(parseFloat(taxableamount).toFixed(2));
         setProductRows(updatedRows);
         setTaxAmount(updatedTax);
         setAddTotal(totalAmount.toFixed(2));
-        setGstSu((parseFloat(gstSum)));
+        setGstSu(parseFloat(gstSum));
       }
     }
     if (getNotify == "unitchange") {
@@ -2803,17 +2879,18 @@ export function ChallanForm() {
           updatedRows[index].discount_amountPer =
             updatedRows[index].discount_amountPer + "_%";
           console.log(quantity);
-          updateDiscountAmount[index].amount =
-            (parseFloat((parseFloat(updateDiscountAmount[index].per) *
+          updateDiscountAmount[index].amount = parseFloat(
+            (parseFloat(updateDiscountAmount[index].per) *
               updatedRows[index].quantity *
               updatedRows[index].unitPrice) /
-            100)).toFixed(2);
+              100
+          ).toFixed(2);
           console.log(updateDiscountAmount);
           const spl = updatedRows[index].discount_amountPer.split("_");
           const spl1 = spl[0];
           console.log(spl1);
           console.log("spl");
-          updatedRows[index].discount_amountPer = (parseFloat(spl1)).toFixed(2);
+          updatedRows[index].discount_amountPer = parseFloat(spl1).toFixed(2);
           console.log(updatedRows[index].unitPrice);
           const a1 =
             parseFloat(updatedRows[index].quantity) *
@@ -2826,20 +2903,24 @@ export function ChallanForm() {
             100;
           console.log(a2);
           const discount = a1 - a2;
-          updatedRows[index].taxable_amount = (parseFloat(discount)).toFixed(2)
+          updatedRows[index].taxable_amount = parseFloat(discount).toFixed(2);
           const tax_amount = (discount * currentGstRate) / 100;
-          updatedRows[index].total = (parseFloat(tax_amount + discount)).toFixed(2)
+          updatedRows[index].total = parseFloat(tax_amount + discount).toFixed(
+            2
+          );
           console.log(updatedRows[index].total);
-          updatedTax[index] = (parseFloat(tax_amount)).toFixed(2);
+          updatedTax[index] = parseFloat(tax_amount).toFixed(2);
 
           // Recalculate the total for the current row
-          updatedRows[index].total = (parseFloat(tax_amount + discount)).toFixed(2)
+          updatedRows[index].total = parseFloat(tax_amount + discount).toFixed(
+            2
+          );
 
           // Calculate the total amount for all rows
           totalAmount = 0; // Reset totalAmount before recalculating
           for (let row of updatedRows) {
             totalAmount += parseFloat(row.total);
-             taxableamount += parseFloat(row.taxable_amount);
+            taxableamount += parseFloat(row.taxable_amount);
           }
           for (var i = 0; i < updatedTax.length; i++) {
             gstSumAmount += parseFloat(updatedTax[i]);
@@ -2847,8 +2928,10 @@ export function ChallanForm() {
 
           // Calculate the total GST amount
           const gstSum = parseFloat(
-  updatedTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
-);
+            updatedTax
+              .reduce((acc, val) => acc + parseFloat(val || 0), 0)
+              .toFixed(2)
+          );
 
           // Update state
           // setGstAmount(gstSumAmount);
@@ -2857,12 +2940,12 @@ export function ChallanForm() {
           // setTaxAmount(updatedTax);
           // setAddTotal(totalAmount.toFixed(2));
           // setGstSu(gstSum);
-          setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
-          setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
+          setGstAmount(parseFloat(gstSumAmount).toFixed(2));
+          setTaxableAmount(parseFloat(taxableamount).toFixed(2));
           setProductRows(updatedRows);
           setTaxAmount(updatedTax);
           setAddTotal(totalAmount.toFixed(2));
-          setGstSu((parseFloat(gstSum)));
+          setGstSu(parseFloat(gstSum));
         } else {
           console.log("else block executingg");
           const quantity = parseFloat(updatedRows[index].quantity);
@@ -2885,40 +2968,48 @@ export function ChallanForm() {
           const discount_amount =
             quantity * updatedRows[index].unitPrice -
             updatedRows[index].discount_amount;
-          updateDiscountAmount[index].per =
-            (parseFloat(updateDiscountAmount[index].amount /
-              (quantity * updatedRows[index].unitPrice)) *
-            100).toFixed(2);
-          updateDiscountAmount[index].amount =
-            (parseFloat(updatedRows[index].discount_amount)).toFixed(2);
+          updateDiscountAmount[index].per = (
+            parseFloat(
+              updateDiscountAmount[index].amount /
+                (quantity * updatedRows[index].unitPrice)
+            ) * 100
+          ).toFixed(2);
+          updateDiscountAmount[index].amount = parseFloat(
+            updatedRows[index].discount_amount
+          ).toFixed(2);
           console.log(updateDiscountAmount);
           // setTaxableAmount(discount_amount);
-          updatedRows[index].taxable_amount = (parseFloat(discount_amount)).toFixed(2);
+          updatedRows[index].taxable_amount =
+            parseFloat(discount_amount).toFixed(2);
           // Recalculate the tax amount based on the new quantity
           const tax_amount =
             ((quantity * updatedRows[index].unitPrice -
               updatedRows[index].discount_amount) *
               currentGstRate) /
             100;
-            updatedTax[index] = (parseFloat(tax_amount)).toFixed(2);
+          updatedTax[index] = parseFloat(tax_amount).toFixed(2);
 
           // Recalculate the total for the current row
-          updatedRows[index].total = (parseFloat(tax_amount + discount_amount)).toFixed(2)
+          updatedRows[index].total = parseFloat(
+            tax_amount + discount_amount
+          ).toFixed(2);
 
           // Calculate the total amount for all rows
           totalAmount = 0; // Reset totalAmount before recalculating
           for (let row of updatedRows) {
             totalAmount += parseFloat(row.total);
-             taxableamount += parseFloat(row.taxable_amount);
+            taxableamount += parseFloat(row.taxable_amount);
           }
           for (var i = 0; i < updatedTax.length; i++) {
             gstSumAmount += parseFloat(updatedTax[i]);
           }
 
           // Calculate the total GST amount
-         const gstSum = parseFloat(
-  updatedTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
-);
+          const gstSum = parseFloat(
+            updatedTax
+              .reduce((acc, val) => acc + parseFloat(val || 0), 0)
+              .toFixed(2)
+          );
 
           // Update state
           // setGstAmount(gstSumAmount);
@@ -2928,13 +3019,13 @@ export function ChallanForm() {
           // setTaxAmount(updatedTax);
           // setAddTotal(totalAmount.toFixed(2));
           // setGstSu(gstSum);
-          setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
+          setGstAmount(parseFloat(gstSumAmount).toFixed(2));
           setProductAmount(updateDiscountAmount);
-          setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
+          setTaxableAmount(parseFloat(taxableamount).toFixed(2));
           setProductRows(updatedRows);
           setTaxAmount(updatedTax);
           setAddTotal(totalAmount.toFixed(2));
-          setGstSu((parseFloat(gstSum)));
+          setGstSu(parseFloat(gstSum));
         }
       } else {
         console.log("else block executing");
@@ -2962,29 +3053,34 @@ export function ChallanForm() {
         const discount_amount =
           quantity * updatedRows[index].unitPrice -
           updatedRows[index].discount_amount;
-        updateDiscountAmount[index].per =
-          ((parseFloat(updateDiscountAmount[index].amount /
-            (quantity * updatedRows[index].unitPrice)) *
-          100)).toFixed(2);
+        updateDiscountAmount[index].per = (
+          parseFloat(
+            updateDiscountAmount[index].amount /
+              (quantity * updatedRows[index].unitPrice)
+          ) * 100
+        ).toFixed(2);
         console.log(updateDiscountAmount);
         // setTaxableAmount(discount_amount);
-        updatedRows[index].taxable_amount = (parseFloat(discount_amount)).toFixed(2);
+        updatedRows[index].taxable_amount =
+          parseFloat(discount_amount).toFixed(2);
         // Recalculate the tax amount based on the new quantity
         const tax_amount =
           ((quantity * updatedRows[index].unitPrice -
             updatedRows[index].discount_amount) *
             currentGstRate) /
           100;
-          updatedTax[index] = (parseFloat(tax_amount)).toFixed(2);
+        updatedTax[index] = parseFloat(tax_amount).toFixed(2);
 
         // Recalculate the total for the current row
-        updatedRows[index].total = (parseFloat(tax_amount + discount_amount)).toFixed(2)
+        updatedRows[index].total = parseFloat(
+          tax_amount + discount_amount
+        ).toFixed(2);
 
         // Calculate the total amount for all rows
         totalAmount = 0; // Reset totalAmount before recalculating
         for (let row of updatedRows) {
           totalAmount += parseFloat(row.total);
-           taxableamount += parseFloat(row.taxable_amount);
+          taxableamount += parseFloat(row.taxable_amount);
         }
         for (var i = 0; i < updatedTax.length; i++) {
           gstSumAmount += parseFloat(updatedTax[i]);
@@ -2992,7 +3088,9 @@ export function ChallanForm() {
 
         // Calculate the total GST amount
         const gstSum = parseFloat(
-          updatedTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
+          updatedTax
+            .reduce((acc, val) => acc + parseFloat(val || 0), 0)
+            .toFixed(2)
         );
 
         // Update state
@@ -3002,12 +3100,12 @@ export function ChallanForm() {
         // setTaxAmount(updatedTax);
         // setAddTotal(totalAmount.toFixed(2));
         // setGstSu(gstSum);
-        setGstAmount((parseFloat(gstSumAmount)).toFixed(2));
-        setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
+        setGstAmount(parseFloat(gstSumAmount).toFixed(2));
+        setTaxableAmount(parseFloat(taxableamount).toFixed(2));
         setProductRows(updatedRows);
         setTaxAmount(updatedTax);
         setAddTotal(totalAmount.toFixed(2));
-        setGstSu((parseFloat(gstSum)));
+        setGstSu(parseFloat(gstSum));
       }
     }
   }
@@ -3048,20 +3146,20 @@ export function ChallanForm() {
     setIsModalOpen(false);
   };
   const [round, setRound] = useState(false);
-    function handleRoundChange(e) {
-      if (e.target.checked) {
-        console.log("round");
-        var originalValue=addTotal;
-        var roundValue=Math.round(addTotal);
-        console.log(originalValue);
-        console.log(roundValue);
-        var roundedofValue=roundValue-originalValue;
-        setAddTotal(roundValue);
-        setRound(roundedofValue.toFixed(2));
-      } else {
-        console.log("not");
-      }
+  function handleRoundChange(e) {
+    if (e.target.checked) {
+      console.log("round");
+      var originalValue = addTotal;
+      var roundValue = Math.round(addTotal);
+      console.log(originalValue);
+      console.log(roundValue);
+      var roundedofValue = roundValue - originalValue;
+      setAddTotal(roundValue);
+      setRound(roundedofValue.toFixed(2));
+    } else {
+      console.log("not");
     }
+  }
 
   // const handleDeleteRow = (index) => {
   //   // Create copies of the current state to avoid direct mutation
@@ -3181,8 +3279,8 @@ export function ChallanForm() {
   const handleDeleteRow = (index) => {
     // Create copies of the current state to avoid direct mutation
     const updatedRows = [...productRows];
-    const updatedTax = [...TaxAmount];
     const updateddisp = [...disabl];
+    const updatedTax = [...TaxAmount];
     const updatedProductAmount = [...productAmount];
 
     // Log the index and the row being removed for debugging
@@ -3192,7 +3290,6 @@ export function ChallanForm() {
       setdisabl([1]);
     }
     console.log("Row details before deletion:", updatedRows[index]);
-
     for (var k = 0; k < updatedRows.length; k++) {
       if (updatedRows[k].quantity == "") {
         updatedRows[k].quantity = "0";
@@ -3202,8 +3299,8 @@ export function ChallanForm() {
     // Remove the row and corresponding tax amount
     if (index >= 0 && index < updatedRows.length) {
       updatedRows.splice(index, 1);
-      updatedTax.splice(index, 1);
       updateddisp.splice(index, 1);
+      updatedTax.splice(index, 1);
       updatedProductAmount.splice(index, 1);
     } else {
       console.error("Index out of bounds:", index);
@@ -3223,7 +3320,7 @@ export function ChallanForm() {
     }
     if (!updatedRows.length) {
       console.log(gstAmountPer);
-      setGstAmountPer(gstAmountPer + 1);
+      setGstAmountPer(gstAmountPer + 2);
     } else {
       setGstAmountPer(gstAmountPer - 1);
     }
@@ -3319,10 +3416,18 @@ export function ChallanForm() {
   }
   return (
     <>
-      {loader ? (<>
-      <Loader/>
-      </>) : (
+      {loader ? (
+        <>
+          <Loader />
+        </>
+      ) : (
         <div>
+          {
+            modalShow && (<CustomerModalView setModalShow={setModalShow}/>)
+          }
+          {
+            modalShow1 && (<ProductModalView setModalShow1={setModalShow1}/>)
+          }
           <div className="over bg-gray-100 p-4 max-w-7xl mx-auto bg-white">
             <h3 className="text-center">Delivery-Challan</h3>
             <form onSubmit={formik.handleSubmit}>
@@ -3334,15 +3439,15 @@ export function ChallanForm() {
                       <div>
                         {businessprofile.length > 0 ? (
                           <>
-                            {businessprofile[0].logo != null ? (
+                            {businessprofile[0].vendor_logo != null ? (
                               <img
-                                src={businessprofile[0].logo}
+                                src={businessprofile[0].vendor_logo}
                                 alt="Logo Preview"
-                                className="w-20 h-20 object-cover border rounded"
+                                className="w-20 h-20 object-contain  rounded"
                               />
                             ) : (
                               <div className="font-bold text-5xl rounded">
-                                {businessprofile[0].business_name
+                                {businessprofile[0].vendor_business_legal_name
                                   .substring(0, 1)
                                   .toUpperCase()}
                               </div>
@@ -3353,24 +3458,24 @@ export function ChallanForm() {
                         )}
                         <h6>
                           {businessprofile.length > 0
-                            ? businessprofile[0].business_name
+                            ? businessprofile[0].vendor_business_legal_name
                             : ""}
                         </h6>
                       </div>
                       <div>
                         <h6>
                           {businessprofile.length > 0
-                            ? businessprofile[0].mobile_no
+                            ? businessprofile[0].vendor_phone
                             : ""}
                         </h6>
                         <h6>
                           {businessprofile.length > 0
-                            ? businessprofile[0].pan_no
+                            ? businessprofile[0].vendor_pan
                             : ""}
                         </h6>
                         <h6>
                           {businessprofile.length > 0
-                            ? businessprofile[0].gst
+                            ? businessprofile[0].vendor_gstin
                             : ""}
                         </h6>
                       </div>
@@ -3401,13 +3506,33 @@ export function ChallanForm() {
                                 <div className="font-bold">
                                   Billing Address:
                                 </div>
-                                <div>{selectedCustomer.billing_address}</div>
+                                <div>
+                                  {selectedCustomer.billing_street_address +
+                                    " " +
+                                    selectedCustomer.billing_city +
+                                    " " +
+                                    selectedCustomer.billing_state +
+                                    " " +
+                                    selectedCustomer.billing_city +
+                                    " " +
+                                    selectedCustomer.billing_pincode}
+                                </div>
                               </div>
                               <div className="flex flex-col">
                                 <div className="font-bold">
                                   Shipping Address:
                                 </div>
-                                <div>{selectedCustomer.shipping_address}</div>
+                                <div>
+                                  {selectedCustomer.shipping_street_address +
+                                    " " +
+                                    selectedCustomer.shipping_city +
+                                    " " +
+                                    selectedCustomer.shipping_state +
+                                    " " +
+                                    selectedCustomer.billing_city +
+                                    " " +
+                                    selectedCustomer.shipping_pincode}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -3424,17 +3549,23 @@ export function ChallanForm() {
                                 />
                               </div>
                             ) : (
-                              <button
-                                type="button"
-                                className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                                onClick={() =>
-                                  navigate("/home", {
-                                    state: { data: "FromChallanTo" },
-                                  })
+                              <>
+                              {
+                                  userRole=="owner"?(
+                                    <button
+                                  type="button"
+                                  className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                  onClick={() =>
+                                  setModalShow(true)
+                                  }
+                                >
+                                  Create Party
+                                </button>
+                                  ):(
+                                    <></>
+                                  )
                                 }
-                              >
-                                Create Party
-                              </button>
+                              </>
                             )}
                           </div>
                         )}
@@ -3469,17 +3600,21 @@ export function ChallanForm() {
                                     {customer.billing_address}
                                   </li>
                                 ))}
-                                <button
+                                {
+                                  userRole=="owner"?(
+                                    <button
                                   type="button"
                                   className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
                                   onClick={() =>
-                                    navigate("/home", {
-                                      state: { data: "FromInvoice" },
-                                    })
+                                   setModalShow(true)
                                   }
                                 >
                                   Create Party
                                 </button>
+                                  ):(
+                                    <></>
+                                  )
+                                }
                               </ul>
                             ) : (
                               <div className="p-2 text-gray-500">
@@ -3588,206 +3723,226 @@ export function ChallanForm() {
                   </thead>
                   <tbody>
                     {productRows.map((product, index) => (
-                     <React.Fragment key={index}>
-                     <tr>
-                       <td className="w-10">
-                         <InputComponent
-                           onChange={formik.handleChange}
-                           type="number"
-                           name="sNo"
-                           value={index + 1}
-                           readOnly
-                           classNameInput="w-10 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                         />
-                       </td>
-                       <td className="w-80">
-                         <select
-                           disabled={disabl!=null && disabl[index]==0}
-                           className="w-80 p-2 border border-gray-300 hover:bg-gray-200"
-                           name="productdetail"
-                           onChange={(e) =>
-                             handleProductChange(index, e.target.value)
-                           }
-                           value={product.productName}
-                         >
-                           <option value="">Select</option>
-                           {products.map((product) => (
-                             <option
-                               key={product.product_name}
-                               value={product.product_name}
-                             >
-                               {product.product_name}
-                             </option>
-                           ))}
-                           <option value="addProduct" className="bg-[#2D465B] text-white">Add Product</option>
-                         </select>
-                       </td>
-                       <td className="w-30">
-                         <InputComponent
-                           onChange={formik.handleChange}
-                           type="text"
-                           name="HSNCode"
-                           value={product.hsnCode}
-                           min="0"
-                           classNameInput="w-full p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                         />
-                       </td>
-                       <td className="w-20">
-                         <InputComponent
-                           onChange={formik.handleChange}
-                           type="number"
-                           min="0"
-                           name="quantity"
-                           onFocus={(e) => handleFocus(e, index, "qty")}
-                           {...(product.quantity != ""
-                             ? { value: product.quantity }
-                             : {})}
-                           onBlur={(e) =>
-                             handleChange(
-                               e,
-                               product,
-                               index,
-                               e.target.value,
-                               "qtyChange"
-                             )
-                           }
-                           classNameInput="w-20 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                           placeholder="Quantity"
-                         />
-                       </td>
-                       <td className="w-40">
-                         <InputComponent
-                           type="number"
-                           step="any"
-                           name="unitPrice"
-                           onFocus={(e) => handleFocus(e, index, "unitChange")}
-                           {...(product.unitPrice != ""
-                             ? { value: product.unitPrice }
-                             : {})}
-                           onBlur={(e) =>
-                             handleChange(
-                               e,
-                               product,
-                               index,
-                               e.target.value,
-                               "unitchange"
-                             )
-                           }
-                           min="0"
-                           classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                         />
-                       </td>
-                       <td className="w-30">
-                         <InputComponent
-                           type="number"
-                           name="rupe"
-                           step="any"
-                           min="0"
-                           onFocus={(e) => handleFocus(e, index, "rupe")}
-                           {...(product.discount_amount != ""
-                             ? { value: productAmount[index].amount }
-                             : {})}
-                           onBlur={(e) =>
-                             handleChange(e, product, index, 0, "discount")
-                           }
-                           placeholder="₹"
-                           classNameInput="w-30 p-2 border border-gray-300  hover:bg-gray-200"
-                         />
-                       </td>
-                       <td className="w-40">
-                         <select
-                           onChange={(e) =>
-                             handleChange(e, product, index, 0, "gstChange")
-                           }
-                           // value={product.gstRate}
-                           className="w-40 border d-inline-block border-gray-300 rounded-md p-2"
-                         >
-                           <option className="bg-gray" readOnly value={"gst_"}>{count==0?product.gstRate:(productRows.length?product.gstRate:"")}</option>
-                           <option value="gst_0">0%</option>
-                           <option value="gst_0.1">0.1%</option>
-                           <option value="gst_0.25">0.25%</option>
-                           <option value="gst_1.5">1.5%</option>
-                           <option value="gst_3">3%</option>
-                           <option value="gst_5">5%</option>
-                           <option value="gst_6">6%</option>
-                           <option value="gst_12">12%</option>
-                           <option value="gst_13.8">13.8%</option>
-                           <option value="gst_18">18%</option>
-                           <option value="gst_28">GST @ 28%</option>
-                         </select>
-                       </td>
-                       <td className="w-40">
-                         <InputComponent
-                           onChange={formik.handleChange}
-                           type="number"
-                           step="any"
-                           name="taxableAmount"
-                           value={product.taxable_amount}
-                           min="0"
-                           readOnly
-                           classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                         />
-                       </td>
-                       <td>
-                         <ButtonComponent
-                           type="button"
-                           className="p-1 m-auto w-100 text-white bg-red-500 rounded hover:bg-red-600"
-                           value="remove"
-                           onClick={() => handleDeleteRow(index)}
-                         >
-                           <DeleteForever />
-                         </ButtonComponent>
-                       </td>
-                     </tr>
-                     <tr>
-                       <td></td>
-                       <td colSpan={4}>
-                         <textarea
-                           onFocus={(e) => handleFocus(e, index, "proD")}
-                           {...(product.productDescription != ""
-                             ? { value: product.productDescription }
-                             : {})}
-                           onBlur={(e) => handleDescriptionAdd(e, index)}
-                           name="productDescription"
-                           placeholder="Enter product description"
-                           className="bg-white w-full border border-gray-300 hover:bg-gray-200"
-                           id=""
-                         ></textarea>
-                       </td>
-                       <td className="w-30">
-                         <InputComponent
-                           onBlur={(e) =>
-                             handleChange(e, product, index, 0, "discount")
-                           }
-                           type="number"
-                           step="any"
-                           min="0"
-                           max="100"
-                           name="per"
-                           placeholder="%"
-                           onFocus={(e) => handleFocus(e, index, "dis")}
-                           {...(product.discount_amountPer != "0_%"
-                             ? { value: productAmount[index].per }
-                             : {})}
-                           classNameInput="w-30 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                         />
-                       </td>
-                       <td className="w-40">
-                         {TaxAmount[index] !== "NaN" ? (
-                           <div>
-                             <input
-                               className="w-40 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                               // value={"Rs." + TaxAmount[index]}
-                               value={TaxAmount[index]!=undefined?("₹" + TaxAmount[index]):("₹ 0.00")}
-                             ></input>
-                           </div>
-                         ) : (
-                           <span className="w-40">0.00</span>
-                         )}
-                       </td>
-                       <td></td>
-                     </tr>
-                   </React.Fragment>
+                      <React.Fragment key={index}>
+                        <tr>
+                          <td className="w-10">
+                            <InputComponent
+                              onChange={formik.handleChange}
+                              type="number"
+                              name="sNo"
+                              value={index + 1}
+                              readOnly
+                              classNameInput="w-10 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                            />
+                          </td>
+                          <td className="w-80">
+                            <select
+                              disabled={disabl != null && disabl[index] == 0}
+                              className="w-80 p-2 border border-gray-300 hover:bg-gray-200"
+                              name="productdetail"
+                              onChange={(e) =>
+                                handleProductChange(index, e.target.value)
+                              }
+                              value={product.productName}
+                            >
+                              <option value="">
+                                {disabl != null && disabl[index] == 0
+                                  ? product.productName
+                                  : "Select"}
+                              </option>
+                              {products.map((product) => (
+                                <option
+                                  key={product.product_id}
+                                  value={product.product_id}
+                                >
+                                  {product.product_name}
+                                </option>
+                              ))}
+                              
+                            </select>
+                          </td>
+                          <td className="w-30">
+                            <InputComponent
+                              onChange={formik.handleChange}
+                              type="text"
+                              name="HSNCode"
+                              value={product.hsnCode}
+                              min="0"
+                              classNameInput="w-full p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                            />
+                          </td>
+                          <td className="w-20">
+                            <InputComponent
+                              onChange={formik.handleChange}
+                              type="number"
+                              min="0"
+                              name="quantity"
+                              onFocus={(e) => handleFocus(e, index, "qty")}
+                              {...(product.quantity != ""
+                                ? { value: product.quantity }
+                                : {})}
+                              onBlur={(e) =>
+                                handleChange(
+                                  e,
+                                  product,
+                                  index,
+                                  e.target.value,
+                                  "qtyChange"
+                                )
+                              }
+                              classNameInput="w-20 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                              placeholder="Quantity"
+                            />
+                          </td>
+                          <td className="w-40">
+                            <InputComponent
+                              type="number"
+                              step="any"
+                              name="unitPrice"
+                              onFocus={(e) =>
+                                handleFocus(e, index, "unitChange")
+                              }
+                              {...(product.unitPrice != ""
+                                ? { value: product.unitPrice }
+                                : {})}
+                              onBlur={(e) =>
+                                handleChange(
+                                  e,
+                                  product,
+                                  index,
+                                  e.target.value,
+                                  "unitchange"
+                                )
+                              }
+                              min="0"
+                              classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                            />
+                          </td>
+                          <td className="w-30">
+                            <InputComponent
+                              type="number"
+                              name="rupe"
+                              step="any"
+                              min="0"
+                              onFocus={(e) => handleFocus(e, index, "rupe")}
+                              {...(product.discount_amount != ""
+                                ? { value: productAmount[index].amount }
+                                : {})}
+                              onBlur={(e) =>
+                                handleChange(e, product, index, 0, "discount")
+                              }
+                              placeholder="₹"
+                              classNameInput="w-30 p-2 border border-gray-300  hover:bg-gray-200"
+                            />
+                          </td>
+                          <td className="w-40">
+                            <select
+                              onChange={(e) =>
+                                handleChange(e, product, index, 0, "gstChange")
+                              }
+                              // value={product.gstRate}
+                              className="w-40 border d-inline-block border-gray-300 rounded-md p-2"
+                            >
+                              <option
+                                className="bg-gray"
+                                readOnly
+                                value={"gst_"}
+                              >
+                                {count == 0
+                                  ? product.gstRate
+                                  : productRows.length
+                                  ? product.gstRate
+                                  : ""}
+                              </option>
+                              <option value="gst_0">0%</option>
+                              <option value="gst_0.1">0.1%</option>
+                              <option value="gst_0.25">0.25%</option>
+                              <option value="gst_1.5">1.5%</option>
+                              <option value="gst_3">3%</option>
+                              <option value="gst_5">5%</option>
+                              <option value="gst_6">6%</option>
+                              <option value="gst_12">12%</option>
+                              <option value="gst_13.8">13.8%</option>
+                              <option value="gst_18">18%</option>
+                              <option value="gst_28">GST @ 28%</option>
+                            </select>
+                          </td>
+                          <td className="w-40">
+                            <InputComponent
+                              onChange={formik.handleChange}
+                              type="number"
+                              step="any"
+                              name="taxableAmount"
+                              value={product.taxable_amount}
+                              min="0"
+                              readOnly
+                              classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                            />
+                          </td>
+                          <td>
+                            <ButtonComponent
+                              type="button"
+                              className="p-1 m-auto w-100 text-white bg-red-500 rounded hover:bg-red-600"
+                              value="remove"
+                              onClick={() => handleDeleteRow(index)}
+                            >
+                              <DeleteForever />
+                            </ButtonComponent>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td></td>
+                          <td colSpan={4}>
+                            <textarea
+                              onFocus={(e) => handleFocus(e, index, "proD")}
+                              {...(product.productDescription != ""
+                                ? { value: product.productDescription }
+                                : {})}
+                              onBlur={(e) => handleDescriptionAdd(e, index)}
+                              name="productDescription"
+                              placeholder="Enter product description"
+                              className="bg-white w-full border border-gray-300 hover:bg-gray-200"
+                              id=""
+                            ></textarea>
+                          </td>
+                          <td className="w-30">
+                            <InputComponent
+                              onBlur={(e) =>
+                                handleChange(e, product, index, 0, "discount")
+                              }
+                              type="number"
+                              step="any"
+                              min="0"
+                              max="100"
+                              name="per"
+                              placeholder="%"
+                              onFocus={(e) => handleFocus(e, index, "dis")}
+                              {...(product.discount_amountPer != "0_%"
+                                ? { value: productAmount[index].per }
+                                : {})}
+                              classNameInput="w-30 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                            />
+                          </td>
+                          <td className="w-40">
+                            {TaxAmount[index] !== "NaN" ? (
+                              <div>
+                                <input
+                                  className="w-40 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                                  // value={"Rs." + TaxAmount[index]}
+                                  value={
+                                    TaxAmount[index] != undefined
+                                      ? "₹" + TaxAmount[index]
+                                      : "₹ 0.00"
+                                  }
+                                ></input>
+                              </div>
+                            ) : (
+                              <span className="w-40">0.00</span>
+                            )}
+                          </td>
+                          <td></td>
+                        </tr>
+                      </React.Fragment>
                     ))}
                   </tbody>
                 </table>
@@ -3801,12 +3956,21 @@ export function ChallanForm() {
                   </button>
                   <div>
                     <button
+                    onClick={handleOpenModalProduct}
+                      type="button"
+                      className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
+                    >
+                     + Add Product
+                    </button>
+                  </div>
+                  {/* <div>
+                    <button
                       type="button"
                       className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
                     >
                       Scan Barcode
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
@@ -3952,10 +4116,10 @@ export function ChallanForm() {
                   <div className="border p-6 h-60 bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
                     <h2 className="text-xl font-semibold mb-2">Bank Details</h2>
                     <div className="mt-1 p-2">
-                      <p className="text-sm">Account Number:</p>
-                      <p className="text-sm">Account Holder's Name:</p>
-                      <p className="text-sm">IFSC CODE: </p>
-                      <p className="text-sm">Branch Name:</p>
+                      <p className="text-sm">Account Number: {bankAccountDeatil.bank_account_number}</p>
+                      <p className="text-sm">Account Holder's Name: {bankAccountDeatil.bank_account_name}</p>
+                      <p className="text-sm">IFSC CODE: {bankAccountDeatil.bank_ifsc_code}</p>
+                      <p className="text-sm">Branch Name: {bankAccountDeatil.bank_name}</p>
                     </div>
                     {/* <ButtonComponent
                     type="button"
@@ -4038,21 +4202,23 @@ export function ChallanForm() {
                     />
                   </div>
                   <div className="block sm:flex sm:items-center sm:space-x-2 sm:mt-4">
-                                  <input
-                                    type="checkbox"
-                                    onChange={handleRoundChange}
-                                    className="h-4 w-4"
-                                  />
-                                  <label className="text-sm text-gray-700">Auto Round Off:</label>
-                                </div>
-                                <div>
-                                  <InputComponent
-                                    type="number"
-                                    className="w-full p-1 bg-white border border-gray-300"
-                                    value={round}
-                                    readOnly
-                                  />
-                                </div>
+                    <input
+                      type="checkbox"
+                      onChange={handleRoundChange}
+                      className="h-4 w-4"
+                    />
+                    <label className="text-sm text-gray-700">
+                      Auto Round Off:
+                    </label>
+                  </div>
+                  <div>
+                    <InputComponent
+                      type="number"
+                      className="w-full p-1 bg-white border border-gray-300"
+                      value={round}
+                      readOnly
+                    />
+                  </div>
                   <div>
                     <label className="text-xl text-gray-700">
                       Amount Receipt:
@@ -4097,11 +4263,11 @@ export function ChallanForm() {
                     Authorized signatory
                   </h2>
                   {businessprofile.length > 0 &&
-                  businessprofile[0].signature_box != null ? (
+                  businessprofile[0].vendor_signature_box != null ? (
                     <img
                       src={
                         businessprofile.length > 0
-                          ? businessprofile[0].signature_box
+                          ? businessprofile[0].vendor_signature_box
                           : ""
                       }
                       alt="Logo Preview"

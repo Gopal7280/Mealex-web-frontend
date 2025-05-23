@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { useReactToPrint } from "react-to-print";
-import "../styles/generateChallan.css"; // Ensure your CSS file is imported
+import "../styles/generateInvoice.css"; // Ensure your CSS file is imported
 import { Preview, ModeEdit, DeleteForever,Close } from "@mui/icons-material";
 import { NavLink } from "react-router-dom";
 import { ButtonComponent } from "../components/Button";
@@ -24,9 +24,9 @@ export function InvoiceSampleA5() {
     billingaddress: "456 Customer Street, Customer City",
     gst: "987654321",
     shippingaddress: "789 Shipping Street, Shipping City",
-    challan_id: "CM25-26/APR24",
+    Invoice_id: "INV25-26/APR24",
     due_date: "01/01/2023",
-    sales_challan_date: "01/01/2023",
+    sales_Invoice_date: "01/01/2023",
     taxable_amount: "1000",
     cgst: "90",
     sgst: "90",
@@ -34,7 +34,7 @@ export function InvoiceSampleA5() {
     signature_box: "https://via.placeholder.com/100", // Placeholder signature
   };
 
-  const challanProduct = [
+  const InvoiceProduct = [
     {
       productname: "Sample Product",
       hsncode: "1234",
@@ -50,7 +50,7 @@ export function InvoiceSampleA5() {
 
   return (
     <>
-    <button onClick={handlePrintInvoice}>Submit</button>
+    
       <div ref={contentRef} className="mx-auto w-3xl bg-white p-6">
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center">
@@ -94,13 +94,13 @@ export function InvoiceSampleA5() {
           <div id="invoice-details-meta" className="invoice_details" data-subsection-id="1">
             <div id="invoice-main-details">
               <div className="page-header-type">
-                <div className="page-header-type-value">Challan INVOICE</div>
+                <div className="page-header-type-value">INVOICE</div>
                 <div className="page-header-sub-type">Original for Recipient</div>
               </div>
               <div id="invoice-number-container">
                 <div id="invoice-number-label">Invoice No.</div>
                 <div className="middle-colon">:</div>
-                <div id="invoice-number" className="bold">{data.challan_id}</div>
+                <div id="invoice-number" className="bold">{data.Invoice_id}</div>
               </div>
               <div id="invoice-date-container">
                 <div id="invoice-date-label">Invoice Date</div>
@@ -208,14 +208,14 @@ export function InvoiceSampleA5() {
             <tbody className="border">
               <tr>
                 <td className="border p-1">1</td>
-                <td className="border p-1">{challanProduct[0].productname}</td>
-                <td className="border p-1">{challanProduct[0].hsncode}</td>
-                <td className="border p-1">{challanProduct[0].quantity} pcs</td>
-                <td className="border p-1">{challanProduct[0].unitprice}</td>
+                <td className="border p-1">{InvoiceProduct[0].productname}</td>
+                <td className="border p-1">{InvoiceProduct[0].hsncode}</td>
+                <td className="border p-1">{InvoiceProduct[0].quantity} pcs</td>
+                <td className="border p-1">{InvoiceProduct[0].unitprice}</td>
                 <td className="border p-1">
-                  {challanProduct[0].calculatedgst} <span className="" style={{ fontSize: "13px" }}>({challanProduct[0].gstrate}%)</span>
+                  {InvoiceProduct[0].calculatedgst} <span className="" style={{ fontSize: "13px" }}>({InvoiceProduct[0].gstrate}%)</span>
                 </td>
-                <td className="border p-1">{challanProduct[0].total}</td>
+                <td className="border p-1">{InvoiceProduct[0].total}</td>
               </tr>
             </tbody>
             <tfoot>
@@ -294,8 +294,7 @@ export function InvoiceSampleA5() {
                 <div className="font-serif text-lg text-invoice-signature mb-2">
                   {/* <img src={data.signature_box} alt="" style={{ width: "100px", height: "100px" }} /> */}
                   <br />
-                  Authorised Signature for
-                  <br />{data.business_name}
+                  Authorised Signature
                 </div>
               </div>
             </div>

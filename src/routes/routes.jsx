@@ -28,7 +28,6 @@ import Customer_detail_edit from "../pages/Customer_edit";
 import { Product_detail } from "../pages/product_detail";
 import { Product_edit } from "../pages/product_edit";
 import { QuotationFrom } from "../pages/QuotationForm";
-import { GenerateQuotation } from "./generateQuotation";
 import { ChallanPreview } from "../pages/challan_preview";
 import { ChallanEdit } from "../pages/challan_edit";
 import { Bussiness_profile } from "../pages/bussiness_profile";
@@ -55,6 +54,8 @@ import LandingPage from "../pages/landingPage"
 import Users from "../pages/users";
 import { UserForm } from "../pages/userForm";
 import { GeneratePurchase } from "../pages/generatePurchase";
+import SalesReportGSTIN from "../pages/reports/salesReport";
+import GstPurchaseReport from "../pages/reports/purchaseReport";
 
 function RouteComponent() {
     const [isAuthenticated, setIsAuthenticated] = useState(
@@ -72,6 +73,7 @@ function RouteComponent() {
                 {/* Public Routes */}
                 <Route path="/login" element={<PublicRoutes setAuth={setIsAuthenticated}></PublicRoutes>} />
                 <Route path="/" element={<LandingPage/>} />
+                {/* <Route path="*" element={<LandingPage/>} /> */}
                 
                 
                 {/* Protected Routes */}
@@ -130,6 +132,8 @@ function RouteComponent() {
                 <Route path="/settings/bankAccountChallan" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<BankAccountSettingChallan/>} />} />
                 <Route path="/settings/authorizedSignatureInvoice" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<AuthorizedSignatureInvoice/>} />} />
                 <Route path="/settings/authorizedSignatureChallan" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<AuthorizedSignatureChallan/>} />} />
+                <Route path="/salesReport" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<SalesReportGSTIN/>} />} />
+                <Route path="/gstPurchaseReport" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<GstPurchaseReport/>} />} />
             </Routes>
         </Router>
     );

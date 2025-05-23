@@ -88,16 +88,16 @@ function CustomerDisplay({ customerListUpdated }) {
   
   // Filter customers based on search input
   const filteredCustomers = customers.filter((customer) =>
-    `${customer.customer_number} ${customer.customer_name} ${customer.mobile_no} ${customer.email} ${customer.billing_address}`
+    `${customer.customer_number} ${customer.customer_name} ${customer.customer_phone} ${customer.customer_email} ${customer.billing_address}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
   const dataTable = filteredCustomers.map((value) => ({
     sNo:value.customer_number,
     name: value.customer_name,
-    Address: value.billing_address,
-    Email: value.email,
-    Contact: value.mobile_no,
+    Address: value.billing_street_address+" "+value.billing_city+" "+value.billing_state+" "+" "+value.billing_country,
+    Email: value.customer_email,
+    Contact: value.customer_phone,
   }));
   const deleteCustomer = async (id) => {
     console.log(id);
@@ -124,7 +124,7 @@ function CustomerDisplay({ customerListUpdated }) {
   const handleEdit = (e, contact) => {
     // alert(contact);
     for (var i of filteredCustomers) {
-      if (i.mobile_no == contact) {
+      if (i.customer_number == contact) {
         console.log(i);
         console.log("i am match");
         navigate("/customer_detail_edit", { state: { data: i } });
@@ -134,7 +134,7 @@ function CustomerDisplay({ customerListUpdated }) {
   const handlePreview = (e, contact) => {
     // alert(contact);
     for (var i of filteredCustomers) {
-      if (i.mobile_no == contact) {
+      if (i.customer_number == contact) {
         console.log(i);
         console.log("i am match");
         navigate("/customer-detail-display", { state: { data: i } });
@@ -146,7 +146,7 @@ function CustomerDisplay({ customerListUpdated }) {
         console.log(ans);
         if(ans==true)
         {
-          const customer = filteredCustomers.find((i) => i.mobile_no === contact);
+          const customer = filteredCustomers.find((i) => i.customer_number === contact);
           if (!customer) return;
         
           try {
@@ -176,7 +176,11 @@ function CustomerDisplay({ customerListUpdated }) {
         }
   };
   
-
+   function handleClick(e,row) {
+    console.log("clicked");
+    console.log(row);
+    handlePreview(e,row.sNo);
+  }
   return (
     <div>
       {loader ? (
@@ -240,27 +244,28 @@ function CustomerDisplay({ customerListUpdated }) {
             {/* <TableComponent column={column} data={dataTable}></TableComponent> */}
 
             <TableComponent
+            onClickRow={handleClick}
               name="customer"
               column={column}
               data={dataTable}
               pageSize={3} // Number of rows per page
               actions={(row) => (
-                <div className="flex gap-2">
-                  <button
+                <div className="text-center">
+                  {/* <button
                     className="text-[#3A5B76]"
-                    onClick={(e) => handlePreview(e, row.Contact)}
+                    onClick={(e) => handlePreview(e, row.sNo)}
                   >
                     <Preview />
-                  </button>
-                  <button
+                  </button> */}
+                  {/* <button
                     className="text-[#3A5B76]"
-                    onClick={(e) => handleEdit(e, row.Contact)}
+                    onClick={(e) => handleEdit(e, row.sNo)}
                   >
                     <ModeEdit />
-                  </button>
+                  </button> */}
                   <button
                     className="text-red-500"
-                    onClick={(e) => handledelete(e, row.Contact)}
+                    onClick={(e) => handledelete(e, row.sNo)}
                   >
                     <DeleteForever />
                   </button>

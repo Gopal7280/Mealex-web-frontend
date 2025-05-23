@@ -9,6 +9,12 @@ import Sidebar from "../layouts/Sidebar";
 import { InputComponent } from "../components/Input";
 import { ButtonComponent } from "../components/Button";
 import { apiPut } from "../services/api";
+import {
+  apiReuestLoadCountry,
+  apiReuestLoadDataUsingZipCode,
+  apiReuestLoadState,
+} from "../services/apiServicesOnline";
+import { config } from "../config/app";
 
 export default function Customer_detail_edit({
   onCustomerAdded,
@@ -20,6 +26,18 @@ export default function Customer_detail_edit({
   const location = useLocation();
   const [data, setData] = useState({});
   const navigate = useNavigate();
+  const [country, setCountry] = useState([{}]);
+  const [count, setCount] = useState(0);
+  const [count1, setCount1] = useState(0);
+  const [country1, setCountry1] = useState([{}]);
+  const [iso2Country, setIso2Country] = useState("");
+  const [iso2Country1, setIso2Country1] = useState("");
+  const [iso2State, setIso2State] = useState("");
+  const [iso2State1, setIso2State1] = useState("");
+  const [style1, setStyle1] = useState({ display: "none" });
+  const [style2, setStyle2] = useState({ display: "inline-block" });
+  const [style3, setStyle3] = useState({ display: "none" });
+  const [style4, setStyle4] = useState({ display: "inline-block" });
   const formik = useFormik({
     initialValues: {
       customer_name: "",
@@ -30,41 +48,94 @@ export default function Customer_detail_edit({
       pan_no: "",
       customer_category: "",
       customer_type: "",
-      billing_address: "",
-      shipping_address: "",
+      streetBillingAddress: "",
+      streetShippingAddress: "",
       opening_value: "",
-      country: "",
+      billingCountry: "",
       is_active: false,
-      state: "",
-      city: "",
-      zip_code: "",
+      billingState: "",
+      billingCity: "",
+      billingZip_code: "",
+      shippingState: "",
+      shippingCity: "",
+      shippingZip_code: "",
+      shippingCountry: "",
       notes: "",
       birth_date: "",
       anniversary_date: "",
       personal_notes: "",
       customer_id: "",
+      billingId: "",
+      shippingId: "",
+      customerContactPerson: "",
     },
     onSubmit: (values) => {
+      values.billingId = data.billing_address_id;
+      values.shippingId = data.shipping_address_id;
+      if (isshipCheck) {
+        values.streetShippingAddress = shipCheck;
+        if (names.cityName === "") {
+          values.shippingCountry = zipData.country;
+          values.shippingState = zipData.state;
+          values.shippingCity = zipData.city;
+          values.shippingZip_code = zip;
+          console.log("i am working");
+        } else {
+          values.shippingCountry = names.countryName;
+          values.shippingState = names.stateName;
+          values.shippingCity = names.cityName;
+          values.shippingZip_code = zip;
+          console.log("working");
+        }
+      } else {
+        if (names1.cityName === "") {
+          if (zipData1.country != "") {
+            values.shippingCountry = zipData1.country;
+            values.shippingState = zipData1.state;
+            values.shippingCity = zipData1.city;
+            console.log("i am working");
+          }
+        } else {
+          values.shippingCountry = names1.countryName;
+          values.shippingState = names1.stateName;
+          values.shippingCity = names1.cityName;
+          console.log("working");
+        }
+      }
+      if (names.cityName === "") {
+        values.billingCountry = zipData.country;
+        values.billingState = zipData.state;
+        values.billingCity = zipData.city;
+        console.log("i am working");
+      } else {
+        values.billingCountry = names.countryName;
+        values.billingState = names.stateName;
+        values.billingCity = names.cityName;
+        console.log("working");
+      }
       values.customer_id = location.state.data.customer_id;
       // alert(values.customer_id);
       // alert(JSON.stringify(values));
+      if (values.customerContactPerson == "") {
+        values.customerContactPerson = data.customer_contact_persone;
+      }
       if (values.customer_name == "") {
         values.customer_name = data.customer_name;
       }
       if (values.party_type == "") {
-        values.party_type = data.party;
+        values.party_type = data.customer_party_type;
       }
       if (values.email == "") {
-        values.email = data.email;
+        values.email = data.customer_email;
       }
       if (values.mobile_no == "") {
-        values.mobile_no = data.mobile_no;
+        values.mobile_no = data.customer_phone;
       }
       if (values.tax_id == "") {
-        values.tax_id = data.tax_id;
+        values.tax_id = data.customer_gstin;
       }
       if (values.pan_no == "") {
-        values.pan_no = data.pan_number;
+        values.pan_no = data.customer_pan;
       }
       if (values.customer_category == "") {
         values.customer_category = data.customer_category;
@@ -72,56 +143,351 @@ export default function Customer_detail_edit({
       if (values.customer_type == "") {
         values.customer_type = data.customer_type;
       }
-      if (values.billing_address == "") {
-        values.billing_address = data.billing_address;
+      if (values.streetBillingAddress == "") {
+        values.streetBillingAddress = data.billing_street_address;
       }
-      if (values.shipping_address == "") {
-        values.shipping_address = data.shipping_address;
+      if (values.streetShippingAddress == "") {
+        values.streetShippingAddress = data.shipping_street_address;
       }
       if (values.opening_value == "") {
-        values.opening_value = data.opening_value;
+        values.opening_value = data.customer_opening_value;
       }
-      if (values.country == "") {
-        values.country = data.country;
+      if (values.billingCountry == "") {
+        values.billingCountry = data.billing_country;
       }
-      if (values.state == "") {
-        values.state = data.state;
+      if (values.shippingCountry == undefined) {
+        console.log("working with");
+        values.shippingCountry = data.shipping_country;
       }
-      if (values.city == "") {
-        values.city = data.city;
+      if (values.billingState == undefined) {
+        values.billingState = data.billing_state;
       }
-      if (values.zip_code == "") {
-        values.zip_code = data.zip_code;
+      if (values.shippingState == undefined) {
+        values.shippingState = data.shipping_state;
+      }
+      if (values.billingCity == undefined) {
+        values.billingCity = data.billing_city;
+      }
+      if (values.shippingCity == undefined) {
+        values.shippingCity = data.shipping_city;
+      }
+      if (values.billingZip_code == "" || values.billingZip_code == undefined) {
+        values.billingZip_code = data.billing_pincode;
+      }
+      if (
+        values.shippingZip_code == "" ||
+        values.shippingZip_code == undefined
+      ) {
+        values.shippingZip_code = data.shipping_pincode;
       }
       if (values.notes == "") {
-        values.notes = data.notes;
+        values.notes = data.customer_notes;
       }
       if (values.birth_date == "") {
-        values.birth_date = data.date_of_birth;
+        values.birth_date = data.customer_birthdate;
       }
       if (values.anniversary_date == "") {
-        values.anniversary_date = data.anniversary_date;
+        values.anniversary_date = data.customer_anniversary;
       }
       if (values.personal_notes == "") {
-        values.personal_notes = data.personal_notes;
+        values.personal_notes = data.customer_personalnotes;
       }
       console.log(values);
       // alert(JSON.stringify(values));
-      const editdetail=async ()=>{
-            const res=await apiPut("/customers",values);
-            // alert(JSON.stringify(values));
-            navigate("/display");
-
-      }
+      const editdetail = async () => {
+        const res = await apiPut("/customers", values);
+        // alert(JSON.stringify(values));
+        navigate("/display");
+      };
       editdetail();
     },
   });
   useEffect(() => {
+    const getState = async () => {
+      try {
+        const config = {
+          method: "get",
+          url: `https://api.countrystatecity.in/v1/countries/In/states`,
+          headers: {
+            "X-CSCAPI-KEY":
+              "NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==",
+          },
+        };
+        const response = await axios(config);
+        setCountry("India");
+        setCountry1("India");
+        setState(response.data);
+        setState1(response.data);
+        setIso2Country("In");
+        setIso2Country1("In");
+        setNames({
+          countryName: "India",
+          stateName: location.state.data.state,
+          cityName: location.state.data.city,
+        });
+        setNames1({
+          countryName: "India",
+          stateName: location.state.data.state,
+          cityName: location.state.data.city,
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    getState();
     console.log(location.state.data);
     setData(location.state.data);
+    setNames({
+      countryName: location.state.data.country,
+      stateName: location.state.data.state,
+      cityName: location.state.data.city,
+    });
+    setZip(location.state.data.zip_code);
     console.log(data);
     console.log("execute");
   }, []);
+  const [names, setNames] = useState({
+    countryName: "",
+    stateName: "",
+    cityName: "",
+  });
+  const [names1, setNames1] = useState({
+    countryName: "",
+    stateName: "",
+    cityName: "",
+  });
+  const [state, setState] = useState([{}]);
+  const [state1, setState1] = useState([{}]);
+  function handleCountryChange(e, name) {
+    if (name == "billing") {
+      setCount(1);
+      if (e.target.value === "select") {
+        setCount(0);
+        setNames({ countryName: "", stateName: "", cityName: "" });
+        setState([{}]);
+        setCity([{}]);
+      }
+      const [iso, name] = e.target.value.split(".");
+      const getState = async () => {
+        try {
+          const config = {
+            method: "get",
+            url: `https://api.countrystatecity.in/v1/countries/${iso}/states`,
+            headers: {
+              "X-CSCAPI-KEY":
+                "NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==",
+            },
+          };
+          const response = await axios(config);
+          setState(response.data);
+          setIso2Country(iso);
+          setNames({ ...names, countryName: name });
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      getState();
+    }
+    if (name == "shipping") {
+      setCount1(1);
+      if (e.target.value === "select") {
+        setCount1(0);
+        setNames1({ countryName: "", stateName: "", cityName: "" });
+        setState1([{}]);
+        setCity1([{}]);
+      }
+      const [iso, name] = e.target.value.split(".");
+      const getState = async () => {
+        try {
+          const config = {
+            method: "get",
+            url: `https://api.countrystatecity.in/v1/countries/${iso}/states`,
+            headers: {
+              "X-CSCAPI-KEY":
+                "NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==",
+            },
+          };
+          const response = await axios(config);
+          setState1(response.data);
+          setIso2Country1(iso);
+          setNames1({ ...names1, countryName: name });
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      getState();
+    }
+  }
+  const [city, setCity] = useState([{}]);
+  const [city1, setCity1] = useState([{}]);
+  function handleStateChange(e, name) {
+    if (name == "billing") {
+      setCount(1);
+      if (e.target.value === "select") {
+        setCount(0);
+        setNames({ countryName: "", stateName: "", cityName: "" });
+        setState([{}]);
+        setCity([{}]);
+      }
+      const [iso, name] = e.target.value.split(".");
+      setIso2State(iso);
+      const getCity = async () => {
+        try {
+          const url = `https://api.countrystatecity.in/v1/countries/${iso2Country}/states/${iso}/cities`;
+          const headers = {
+            "X-CSCAPI-KEY":
+              "NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==",
+          };
+          const response = await apiReuestLoadState(url, headers);
+          setCity(response.data);
+          setNames({ ...names, stateName: name });
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      getCity();
+    }
+    if (name == "shipping") {
+      setCount1(1);
+      if (e.target.value === "select") {
+        setCount1(0);
+        setNames({ countryName: "", stateName: "", cityName: "" });
+        setState([{}]);
+        setCity([{}]);
+      }
+      const [iso, name] = e.target.value.split(".");
+      setIso2State1(iso);
+      const getCity = async () => {
+        try {
+          const url = `https://api.countrystatecity.in/v1/countries/${iso2Country1}/states/${iso}/cities`;
+          const headers = {
+            "X-CSCAPI-KEY":
+              "NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==",
+          };
+          const response = await apiReuestLoadState(url, headers);
+          setCity1(response.data);
+          setNames1({ ...names1, stateName: name });
+        } catch (err) {
+          console.log(err);
+        }
+      };
+      getCity();
+    }
+  }
+  function handleCityChange(e, name) {
+    if (name == "billing") {
+      setNames({ ...names, cityName: e.target.value });
+    }
+    if (name == "shipping") {
+      setNames1({ ...names1, cityName: e.target.value });
+    }
+  }
+  const [zipData, setZipdata] = useState([
+    {
+      country: "",
+      state: "",
+      city: "",
+    },
+  ]);
+  const [zipData1, setZipdata1] = useState([
+    {
+      country: "",
+      state: "",
+      city: "",
+    },
+  ]);
+  const [zip, setZip] = useState("");
+  const [zip1, setZip1] = useState("");
+  const handleDebounce = debounce((value) => {
+    const fetchUsingZipCode = async () => {
+      try {
+        const res = await axios.get(`${config.apiBaseUrl}/pincode/${value}`);
+        console.log(res.data);
+        setZipdata({
+          country: res.data[0].PostOffice[0].Country,
+          state: res.data[0].PostOffice[0].State,
+          city: res.data[0].PostOffice[0].Block,
+        });
+      } catch (error) {
+        console.error("Error fetching pincode data:", error);
+      }
+    };
+    fetchUsingZipCode();
+  }, 700);
+  const handleDebounce1 = debounce((value) => {
+    const fetchUsingZipCode = async () => {
+      try {
+        const res = await axios.get(`${config.apiBaseUrl}/pincode/${value}`);
+        console.log(res.data);
+        setZipdata1({
+          country: res.data[0].PostOffice[0].Country,
+          state: res.data[0].PostOffice[0].State,
+          city: res.data[0].PostOffice[0].Block,
+        });
+      } catch (error) {
+        console.error("Error fetching pincode data:", error);
+      }
+    };
+    fetchUsingZipCode();
+  }, 700);
+  const [shipCheck, setShipCheck] = useState("");
+  const [isshipCheck, setisShipCheck] = useState("");
+  const [style5, setStyle5] = useState("none");
+  function handleCheckBoxCheck(e) {
+    var bill = document.getElementById("billing_address").value;
+    if (e.target.checked) {
+      console.log("checked");
+      setShipCheck(bill);
+      setisShipCheck(true);
+      setStyle3({ display: "inline-block" });
+      setStyle4({ display: "none" });
+    } else {
+      setShipCheck("");
+      setisShipCheck(false);
+      setStyle3({ display: "none" });
+      setStyle4({ display: "inline-block" });
+    }
+  }
+  function handleZipCodeChange(e, name) {
+    if (name == "billing") {
+      handleDebounce(e.target.value);
+      setZip(e.target.value);
+      if (e.target.value === "") {
+        setStyle1({ display: "none" });
+        setStyle2({ display: "inline-block" });
+        setZipdata({ country: "", state: "", city: "" });
+        console.log("i am working");
+      } else {
+        if (names.cityName != "") {
+          setStyle1({ display: "none" });
+          setStyle2({ display: "inline-block" });
+          setZipdata({ country: "", state: "", city: "" });
+        } else {
+          setStyle1({ display: "inline-block" });
+          setStyle2({ display: "none" });
+        }
+      }
+    }
+    if (name == "shipping") {
+      handleDebounce1(e.target.value);
+      setZip1(e.target.value);
+      if (e.target.value === "") {
+        setStyle3({ display: "none" });
+        setStyle4({ display: "inline-block" });
+        setZipdata1({ country: "", state: "", city: "" });
+        console.log("i am working");
+      } else {
+        if (names1.cityName != "") {
+          setStyle3({ display: "none" });
+          setStyle4({ display: "inline-block" });
+          setZipdata1({ country: "", state: "", city: "" });
+        } else {
+          setStyle3({ display: "inline-block" });
+          setStyle4({ display: "none" });
+        }
+      }
+    }
+  }
   function handleClick() {
     console.log(data);
   }
@@ -134,16 +500,18 @@ export default function Customer_detail_edit({
   return (
     <div className="">
       <div className="over max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-md">
-        <h1 className="text-2xl font-bold text-center mb-6">Update Details</h1>
+        <div className="flex justify-between">
+          <h1 className="text-2xl font-bold text-center mb-6">Update Details</h1>
 
         <NavLink to="/display" className="text-white text-decoration-none">
           <ButtonComponent
             type="button"
-            className=" bg-[#3A5B76] float-end px-2 py-1 text-white font-bold rounded hover:bg-[#2E4A62]"
+            className=" bg-[#3A5B76]  px-2 py-1 text-white font-bold rounded hover:bg-[#2E4A62]"
             value="close"
             children={<Close />}
           />
         </NavLink>
+        </div>
         <form onSubmit={formik.handleSubmit} id="customerForm" className="mt-6">
           <div className="grid grid-cols-2 gap-6 max-sm:block">
             <div>
@@ -172,13 +540,15 @@ export default function Customer_detail_edit({
               <label className="block text-gray-600">Party Type</label>
               <select
                 onChange={formik.handleChange}
-                {...(isEdit ? {} : { value: data.party })}
+                {...(isEdit ? {} : { value: data.customer_party_type })}
                 name="party_type"
                 className="w-full p-2 border rounded mt-1"
                 value={formik.values.party_type}
               >
                 <option disabled value="">
-                  {data.party != "" ? data.party : "select"}
+                  {data.customer_party_type != ""
+                    ? data.customer_party_type
+                    : "select"}
                 </option>
                 <option>Customer</option>
                 <option>Vendor/Supplier</option>
@@ -192,7 +562,7 @@ export default function Customer_detail_edit({
                 labelInput="Email Id"
                 type="text"
                 // value={data.email}
-                {...(isEdit ? {} : { value: data.email })}
+                {...(isEdit ? {} : { value: data.customer_email })}
               ></InputComponent>
             </div>
             <div>
@@ -204,7 +574,7 @@ export default function Customer_detail_edit({
                 type="text"
                 readOnly
                 // value={data.mobile_no}
-                {...(isEdit ? {} : { value: data.mobile_no })}
+                {...(isEdit ? {} : { value: data.customer_phone })}
               ></InputComponent>
             </div>
             <div>
@@ -215,7 +585,7 @@ export default function Customer_detail_edit({
                 labelInput="GSTIN No."
                 type="text"
                 // value={data.tax_id}
-                {...(isEdit ? {} : { value: data.tax_id })}
+                {...(isEdit ? {} : { value: data.customer_gstin })}
               ></InputComponent>
             </div>
             <div>
@@ -226,7 +596,7 @@ export default function Customer_detail_edit({
                 labelInput="Pan No."
                 type="text"
                 // value={data.pan_number}
-                {...(isEdit ? {} : { value: data.pan_number })}
+                {...(isEdit ? {} : { value: data.customer_pan })}
               ></InputComponent>
             </div>
             {/* <div>
@@ -262,38 +632,193 @@ export default function Customer_detail_edit({
               </select>
             </div>
             <div>
-                            <label className="block text-gray-600">Customer Type</label>
-                            <select
-                            onChange={formik.handleChange}
-                            {...(isEdit ? {} : { value: data.customer_type })}
-                                name="customer_type"
-                                className="w-full p-2 border rounded mt-1"
-                                value={formik.values.customer_type}
-                            >
-                                <option disabled value="">{data.customer_type!=""?data.customer_type:"select"}</option>
-                                <option>Retail</option>
-                                <option>WholeSale</option>
-                            </select>
-                        </div>
+              <label className="block text-gray-600">Customer Type</label>
+              <select
+                onChange={formik.handleChange}
+                {...(isEdit ? {} : { value: data.customer_type })}
+                name="customer_type"
+                className="w-full p-2 border rounded mt-1"
+                value={formik.values.customer_type}
+              >
+                <option disabled value="">
+                  {data.customer_type != "" ? data.customer_type : "select"}
+                </option>
+                <option>Retail</option>
+                <option>WholeSale</option>
+              </select>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="opening_value"
+                labelInput="Opening Value"
+                type="text"
+                // value={data.opening_value}
+                onFocus={handleFieldChange}
+                {...(isEdit ? {} : { value: data.customer_opening_value })}
+              ></InputComponent>
+            </div>
+            <div>
+              <InputComponent
+                onChange={formik.handleChange}
+                name="customerContactPerson"
+                labelInput="Contact Person"
+                type="text"
+                // value={data.opening_value}
+                onFocus={handleFieldChange}
+                {...(isEdit ? {} : { value: data.customer_contact_persone })}
+              ></InputComponent>
+            </div>
+          </div>
+          <div className="mt-4 border border-1 p-3">
+            <h5>Billing Address</h5>
             <div>
               <label
                 htmlFor="billing_address"
                 className="block text-gray-600 mt-4"
               >
-                Billing Address:
+                Street Address:
               </label>
               <textarea
                 onChange={formik.handleChange}
                 id="billing_address"
-                name="billing_address"
+                name="streetBillingAddress"
                 // value={data.billing_address}
                 onFocus={handleFieldChange}
-                {...(isEdit ? {} : { value: data.billing_address })}
+                {...(isEdit ? {} : { value: data.billing_street_address })}
                 className="w-full p-2 border rounded mt-1"
-                placeholder="Enter Billing Address"
+                placeholder="Enter Street Address"
               ></textarea>
             </div>
-            <div>
+            <div class="grid grid-cols-2 gap-6 mt-6">
+              <div>
+                <InputComponent
+                  htmlFor="country"
+                  classNameLabel="text-sm font-semibold text-gray-700"
+                  labelInput="Country:"
+                  style={style1}
+                  type="text"
+                  name="billingCountry"
+                  value={zipData.country}
+                  onChange={formik.handleChange}
+                  classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                  placeholder="Enter Country Name"
+                />
+                <InputComponent
+                  htmlFor="country"
+                  readOnly
+                  classNameLabel="text-sm font-semibold text-gray-700"
+                  labelInput=""
+                  style={style2}
+                  type="text"
+                  name="billingCountry"
+                  value={country}
+                  onChange={formik.handleChange}
+                  classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                  placeholder="Enter Country Name"
+                />
+              </div>
+              <div>
+                <InputComponent
+                  htmlFor="state"
+                  classNameLabel="text-sm font-semibold text-gray-700"
+                  labelInput="State:"
+                  type="text"
+                  style={style1}
+                  value={zipData.state}
+                  name="billingState"
+                  onChange={formik.handleChange}
+                  classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                  placeholder="Enter State Name"
+                />
+                <select
+                  name="billingState"
+                  style={style2}
+                  className="form-select"
+                  onChange={(e) => handleStateChange(e, "billing")}
+                >
+                  <option
+                    readOnly
+                    value={count == 0 ? data.billing_state : "Select"}
+                  >
+                    {count == 0 ? data.billing_state : "Select"}
+                  </option>
+                  {state.map((values) => (
+                    <option
+                      value={values.iso2 + "." + values.name}
+                      className=" form-text"
+                      key={values.id}
+                    >
+                      {values.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <InputComponent
+                  htmlFor="city"
+                  classNameLabel="text-sm font-semibold text-gray-700"
+                  labelInput="City:"
+                  style={style1}
+                  type="text"
+                  id="billingCity"
+                  value={zipData.city}
+                  onChange={formik.handleChange}
+                  classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                  placeholder="Enter City Name"
+                />
+                <select
+                  style={style2}
+                  className="form-select"
+                  onChange={(e) => handleCityChange(e, "billing")}
+                  name="billingCity"
+                >
+                  <option
+                    readOnly
+                    value={count == 0 ? data.billing_city : "Select"}
+                  >
+                    {count == 0 ? data.billing_city : "Select"}
+                  </option>
+                  {city.map((values) => (
+                    <option
+                      value={values.name}
+                      className="form-text"
+                      key={values.id}
+                    >
+                      {values.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <InputComponent
+                  htmlFor="zip"
+                  classNameLabel="text-sm font-semibold text-gray-700"
+                  labelInput="Zip/Pincode:"
+                  type="number"
+                  min="0"
+                  name="billingZip_code"
+                  {...(isEdit ? {} : { value: data.billing_pincode })}
+                  onChange={(e) => handleZipCodeChange(e, "billing")}
+                  classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                  placeholder="Enter Zip/Pincode"
+                />
+              </div>
+            </div>
+          </div>
+          {/* <div className="mt-4 flex items-center">
+            <InputComponent
+              labelInput="want Shipping Address to be same? Check"
+              classNameLabel="me-2"
+              onChange={handleCheckBoxCheck}
+              type="checkbox"
+              id="sameShip"
+              // onChange={formik.handleChange}
+              name="want Shipping Address to be same? Check"
+              classNameInput="mr-2 mt-1"
+            />
+          </div> */}
+          {/* <div>
               <label htmlFor="" className="block text-gray-600 mt-4">
                 Shipping Address:
               </label>
@@ -306,76 +831,226 @@ export default function Customer_detail_edit({
                 className="w-full p-2 border rounded mt-1"
                 placeholder="Enter Billing Address"
               ></textarea>
-            </div>
+            </div> */}
+          <div className="mt-4 border border-1 p-3">
+            <h5>Shipping Address</h5>
             <div>
-              <InputComponent
+              <label
+                htmlFor="shipping_address"
+                className="block text-gray-600 mt-4"
+              >
+                Street Address:
+              </label>
+              <textarea
+                id="shipping_address"
+                name="streetShippingAddress"
                 onChange={formik.handleChange}
-                name="opening_value"
-                labelInput="Opening Value"
-                type="text"
-                // value={data.opening_value}
                 onFocus={handleFieldChange}
-                {...(isEdit ? {} : { value: data.opening_value })}
-              ></InputComponent>
+                {...(isEdit
+                  ? shipCheck != ""
+                    ? { value: shipCheck }
+                    : {}
+                  : { value: data.shipping_street_address })}
+                className="w-full p-2 border rounded mt-1"
+                placeholder="Enter Street Address"
+              ></textarea>
+              {/* <span>{formik.errors.shipping_address}</span> */}
             </div>
-            <div>
-              <InputComponent
-                onChange={formik.handleChange}
-                name="country"
-                labelInput="Country"
-                type="text"
-                // value={data.country}
-                onFocus={handleFieldChange}
-                {...(isEdit ? {} : { value: data.country })}
-              ></InputComponent>
-            </div>
-            <div>
-              <InputComponent
-                onChange={formik.handleChange}
-                name="state"
-                labelInput="State"
-                type="text"
-                // value={data.state}
-                onFocus={handleFieldChange}
-                {...(isEdit ? {} : { value: data.state })}
-              ></InputComponent>
-            </div>
-            <div>
-              <InputComponent
-                onChange={formik.handleChange}
-                name="city"
-                labelInput="City"
-                type="text"
-                // value={data.city}
-                onFocus={handleFieldChange}
-                {...(isEdit ? {} : { value: data.city })}
-              ></InputComponent>
-            </div>
-            <div>
-              <InputComponent
-                onChange={formik.handleChange}
-                name="zip_code"
-                labelInput="zip/PinCode"
-                type="text"
-                // value={data.zip_code}
-                onFocus={handleFieldChange}
-                {...(isEdit ? {} : { value: data.zip_code })}
-              ></InputComponent>
-            </div>
+            {isshipCheck == true ? (
+              <div className="grid grid-cols-2 gap-6 mt-6">
+                <div>
+                  <InputComponent
+                    htmlFor="country"
+                    classNameLabel="text-sm font-semibold text-gray-700"
+                    labelInput="Country:"
+                    style={style3}
+                    type="text"
+                    name="shippingCountry"
+                    {...(names.cityName != ""
+                      ? { value: names.countryName }
+                      : { value: zipData.country })}
+                    onChange={formik.handleChange}
+                    classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                    placeholder="Enter Country Name"
+                  />
+                </div>
+                <div>
+                  <InputComponent
+                    htmlFor="state"
+                    classNameLabel="text-sm font-semibold text-gray-700"
+                    labelInput="State:"
+                    type="text"
+                    style={style3}
+                    {...(names.cityName != ""
+                      ? { value: names.stateName }
+                      : { value: zipData.state })}
+                    name="shippingState"
+                    onChange={formik.handleChange}
+                    classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                    placeholder="Enter State Name"
+                  />
+                </div>
+                <div>
+                  <InputComponent
+                    htmlFor="city"
+                    classNameLabel="text-sm font-semibold text-gray-700"
+                    labelInput="City:"
+                    style={style3}
+                    type="text"
+                    id="shippingCity"
+                    {...(names.cityName != ""
+                      ? { value: names.cityName }
+                      : { value: zipData.city })}
+                    onChange={formik.handleChange}
+                    classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                    placeholder="Enter City Name"
+                  />
+                </div>
+                <div>
+                  <InputComponent
+                    htmlFor="zip"
+                    classNameLabel="text-sm font-semibold text-gray-700"
+                    labelInput="Zip/Pincode:"
+                    type="number"
+                    min="0"
+                    {...(zip != "" ? { value: zip } : { value: zip })}
+                    name="shippingZip_code"
+                    // onChange={(e)=>handleZipCodeChange(e,"shipping")}
+                    classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                    placeholder="Enter Zip/Pincode"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div class="grid grid-cols-2 gap-6 mt-6">
+                <div>
+                  <InputComponent
+                    htmlFor="country"
+                    classNameLabel="text-sm font-semibold text-gray-700"
+                    labelInput="Country:"
+                    style={style3}
+                    type="text"
+                    name="shippingCountry"
+                    value={zipData1.country}
+                    onChange={formik.handleChange}
+                    classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                    placeholder="Enter Country Name"
+                  />
+                  <InputComponent
+                    htmlFor="country"
+                    classNameLabel="text-sm font-semibold text-gray-700"
+                    labelInput=""
+                    style={style4}
+                    type="text"
+                    name="shippingCountry"
+                    value={country1}
+                    readOnly
+                    onChange={formik.handleChange}
+                    classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                    placeholder="Enter Country Name"
+                  />
+                </div>
+                <div>
+                  <InputComponent
+                    htmlFor="state"
+                    classNameLabel="text-sm font-semibold text-gray-700"
+                    labelInput="State:"
+                    type="text"
+                    style={style3}
+                    value={zipData1.state}
+                    name="shippingState"
+                    onChange={formik.handleChange}
+                    classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                    placeholder="Enter State Name"
+                  />
+                  <select
+                    name="shippingState"
+                    style={style4}
+                    className="form-select"
+                    onChange={(e) => handleStateChange(e, "shipping")}
+                  >
+                    <option
+                      readOnly
+                      value={count1 == 0 ? data.shipping_state : "Select"}
+                    >
+                      {count1 == 0 ? data.shipping_state : "Select"}
+                    </option>
+                    {state1.map((values) => (
+                      <option
+                        value={values.iso2 + "." + values.name}
+                        className=" form-text"
+                        key={values.id}
+                      >
+                        {values.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <InputComponent
+                    htmlFor="city"
+                    classNameLabel="text-sm font-semibold text-gray-700"
+                    labelInput="City:"
+                    style={style3}
+                    type="text"
+                    id="shippingCity"
+                    value={zipData1.city}
+                    onChange={formik.handleChange}
+                    classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                    placeholder="Enter City Name"
+                  />
+                  <select
+                    style={style4}
+                    className="form-select"
+                    onChange={(e) => handleCityChange(e, "shipping")}
+                    name="shippingCity"
+                  >
+                    <option
+                      readOnly
+                      value={count1 == 0 ? data.shipping_city : "Select"}
+                    >
+                      {count1 == 0 ? data.shipping_city : "Select"}
+                    </option>
+                    {city1.map((values) => (
+                      <option
+                        value={values.name}
+                        className="form-text"
+                        key={values.id}
+                      >
+                        {values.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <InputComponent
+                    htmlFor="zip"
+                    classNameLabel="text-sm font-semibold text-gray-700"
+                    labelInput="Zip/Pincode:"
+                    type="number"
+                    min="0"
+                    name="shippingZip_code"
+                    onFocus={handleFieldChange}
+                    {...(isEdit ? {} : { value: data.shipping_pincode })}
+                    onChange={(e) => handleZipCodeChange(e, "shipping")}
+                    classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
+                    placeholder="Enter Zip/Pincode"
+                  />
+                </div>
+              </div>
+            )}
           </div>
-          <div>
-            <label htmlFor="" className="block text-gray-600 mt-4">
-              Notes:
-            </label>
-            <textarea
-              onChange={formik.handleChange}
-              name="notes"
-              // value={data.notes}
-              onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.notes })}
-              className="w-full p-2 border rounded mt-1"
-            ></textarea>
-          </div>
+          <label htmlFor="" className="block text-gray-600 mt-4">
+            Notes:
+          </label>
+          <textarea
+            onChange={formik.handleChange}
+            name="notes"
+            // value={data.notes}
+            onFocus={handleFieldChange}
+            {...(isEdit ? {} : { value: data.customer_notes })}
+            className="w-full p-2 border rounded mt-1"
+          ></textarea>
           <h3 class="text-xl font-bold">Personal Information</h3>
           <div className="grid grid-cols-2 gap-6">
             <div>
@@ -386,7 +1061,7 @@ export default function Customer_detail_edit({
                 type="text"
                 // value={data.date_of_birth}
                 onFocus={handleFieldChange}
-                {...(isEdit ? {} : { value: data.date_of_birth })}
+                {...(isEdit ? {} : { value: data.customer_birthdate })}
               ></InputComponent>
             </div>
             <div>
@@ -397,7 +1072,7 @@ export default function Customer_detail_edit({
                 type="text"
                 // value={data.anniversary_date}
                 onFocus={handleFieldChange}
-                {...(isEdit ? {} : { value: data.anniversary_date })}
+                {...(isEdit ? {} : { value: data.customer_anniversary })}
               ></InputComponent>
             </div>
           </div>
@@ -410,7 +1085,7 @@ export default function Customer_detail_edit({
               name="personal_notes"
               // value={data.personal_notes}
               onFocus={handleFieldChange}
-              {...(isEdit ? {} : { value: data.personal_notes })}
+              {...(isEdit ? {} : { value: data.customer_personalnotes })}
               className="w-full p-2 border rounded mt-1"
             ></textarea>
           </div>

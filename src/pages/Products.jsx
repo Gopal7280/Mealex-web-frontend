@@ -139,6 +139,11 @@ const Products = () => {
         }
     // alert(product_id);
   };
+  function handleClick(e,row) {
+    console.log("clicked");
+    console.log(row);
+    handlePreview(e,row.product_id);
+  }
   return (
     <>
     {
@@ -212,6 +217,7 @@ const Products = () => {
         {/* <TableComponent column={column} data={tableData}/> */}
 
         <TableComponent
+        onClickRow={handleClick}
           column={column}
           data={tableData}
           name="product"
@@ -219,19 +225,19 @@ const Products = () => {
           pageSize={3} // Number of rows per page
           generateQr="true"
           actions={(row) => (
-            <div className="flex gap-2">
-              <button
+            <div className="text-center">
+              {/* <button
                 className="text-[#3A5B76] dark:!text-white"
                 onClick={(e) => handlePreview(e, row.product_id)}
               >
                 <Preview />
-              </button>
-              <button
+              </button> */}
+              {/* <button
                 className="text-[#3A5B76] dark:!text-white"
                 onClick={(e) => handleEdit(e, row.product_id)}
               >
                 <ModeEdit />
-              </button>
+              </button> */}
               <button
                 className="text-red-500"
                 onClick={(e) => handledelete(e, row.product_id)}

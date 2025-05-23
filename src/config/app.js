@@ -1,6 +1,6 @@
 export const config = {
     // apiBaseUrl: import.meta.env.VITE_API_BASE_URL,
-    // apiBaseUrl:"http://192.168.81.161:5003/api",
-    apiBaseUrl:"https://api.bill365.in/api"
+       apiBaseUrl:"http://192.168.1.18:5003/api",
+    // apiBaseUrl:"https://api.bill365.in/api"
     // apiBaseUrl:"http://localhost:5003/api"
 };

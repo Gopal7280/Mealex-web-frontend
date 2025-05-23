@@ -14,7 +14,10 @@ import "../styles/layoutFix.css";
 import Sidebar from "../layouts/Sidebar";
 import {Loader} from "../layouts/Loader"
 import ProductTable from "../components/tableForProduct";
+import ProductModalView from "./modalViews/productModalView";
+import { CustomerModalView } from "./modalViews/customerModalView";
 export function QuotationFrom() {
+    const [userRole,setUserRole]=useState("owner");
   const [loader,setLoader]=useState(false);
   const [products, setProducts] = useState([]);
   const [businessprofile, setBusinessProfile] = useState([]);
@@ -22,6 +25,7 @@ export function QuotationFrom() {
   const dropdownRef = useRef(null);
   const [customer, setCustomer] = useState([]);
   const [subtotal, setSubtotal] = useState(0);
+  const [bankAccountDeatil, setBankAccountDeatil] = useState([]);
   const [total, setTotal] = useState(0);
   const [amountReceipt, setAmountReceipt] = useState(0);
   const [paymentTerms, setPaymentTerms] = useState("");
@@ -32,6 +36,8 @@ export function QuotationFrom() {
   const [quotationDue, setquotationDue] = useState("");
   const [productDescription, setProductDescription] = useState(["null"]);
   const [disabl,setdisabl]=useState([]);
+  const [modalShow,setModalShow]=useState(false);
+  const [modalShow1,setModalShow1]=useState(false);
   const [productAmount, setProductAmount] = useState([
     {
       amount: "0",
@@ -43,7 +49,19 @@ export function QuotationFrom() {
     
     const dt = new Date();
     setDate(dt.toLocaleDateString());
-  
+  const fetchUserRole=async ()=>{
+        try{
+              const res=await apiGet("/user");
+              console.log(res.data);
+              console.log(res.data[0].employee_role);
+              setUserRole(res.data[0].employee_role);
+        }
+        catch(err)
+        {
+          console.log(err);
+        }
+    }
+    fetchUserRole();
     // Function to get business profile
     const getBussinessProfile = async () => {
       try {
@@ -60,6 +78,7 @@ export function QuotationFrom() {
       try {
         const res = await apiGet("/quotation//quotationnumber/prefix");
         console.log(res);
+        setBankAccountDeatil(res.data[0]);
         setquotationPrefix(res.quotation_prefix);
         setquotationNumber(res.quotation_number);
         setquotationDue(res.due_date);
@@ -101,8 +120,22 @@ export function QuotationFrom() {
       setLoader(false); // Hide the loader after all data has been fetched
     });
     
-  }, []); // Empty dependency array, ensures this effect runs only once after component mount
-  
+  }, [modalShow]); // Empty dependency array, ensures this effect runs only once after component mount
+  useEffect(()=>{
+    setLoader(true); // Show loader when effect starts
+    const fetchProduct = async () => {
+      try {
+        const res = await apiGet("/products/productName");
+        setProducts(res);
+        console.log(res);
+        console.log("Product data fetched");
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      }
+    };
+    fetchProduct();
+    setLoader(false);
+  },[modalShow1])
   const handleAddProductRow = () => {
     setProductRows([
       ...productRows,
@@ -136,7 +169,7 @@ export function QuotationFrom() {
       productName: "",
       hsnCode: "",
       gstRate: "",
-      gstCalculate: "",
+      // gstCalculate: "",
       unitPrice: "",
       quantity: "",
       total: "",
@@ -146,90 +179,100 @@ export function QuotationFrom() {
       taxable_amount: 0,
     },
   ]);
-  const handleProductChange = async (index, productName) => {
-    setCount(0);
-    const updateMe=[...disabl];
-    updateMe[index]=0;
-    setdisabl(updateMe);
-    try {
-      const token = localStorage.getItem("token");
-      if(productName=="addProduct")
-        {
-          navigate("/add-product",{state:{data:"FromInvoice"}})
+  function handleOpenModalProduct()
+  {
+    setModalShow1(true);
+  }
+  const handleProductChange = async (index, productId) => {
+      console.log(productId);
+      setCount(0);
+      const updateMe = [...disabl];
+      updateMe[index] = 0;
+      setdisabl(updateMe);
+      try {
+        const token = localStorage.getItem("token");
+        // if (productId == "addProduct") {
+        //   navigate("/add-product", { state: { data: "FromInvoice" } });
+        // }
+        const res = await apiGet(`products/detail/${productId}`);
+        const productDetail = res[0];
+        const updatedRows = [...productRows];
+        var rate = 100;
+        rate = parseInt(res[0].gst_rate) * parseFloat(res[0].selling_price);
+        console.log(res);
+        rate = rate / 100;
+        console.log("gstRate" + rate);
+        var calculateTax = 0;
+        var calculateGst = 0;
+        if (res[0].selling_status == "withGstSelling") {
+          console.log("yes");
+          console.log(res);
+          calculateGst = 1 + parseFloat(res[0].gst_rate / 100);
+          calculateTax = parseFloat(res[0].selling_price) / calculateGst;
+          calculateTax = parseFloat(calculateTax).toFixed(2);
+          calculateGst = 0;
+          res[0].gst_rate = 0;
         }
-      const res = await apiGet(`products/detail/${productName}`);
-      const productDetail = res[0];
-      const updatedRows = [...productRows];
-      var rate = 100;
-      rate = parseInt(res[0].gst_rate) * parseFloat(res[0].selling_price);
-      console.log(res);
-      rate = rate / 100;
-      console.log("gstRate" + rate);
-      var calculateTax = 0;
-      var calculateGst = 0;
-      if (res[0].selling_status == "withGstSelling") {
-        console.log("yes");
-        console.log(res);
-        calculateGst = 1 + parseFloat(res[0].gst_rate / 100);
-        calculateTax = parseFloat(res[0].selling_price) / calculateGst;
-        calculateTax = calculateTax.toFixed(2);
-        calculateGst = 0;
-        res[0].gst_rate = 0;
+        if (res[0].selling_status == "withoutGstSelling") {
+          console.log("no");
+          console.log(res);
+          calculateGst = (res[0].selling_price * res[0].gst_rate) / 100;
+          calculateTax = res[0].selling_price;
+          calculateTax = parseFloat(calculateTax).toFixed(2);
+          console.log(calculateGst);
+        }
+        updatedRows[index].quantity = "1";
+        const updateTax = [...TaxAmount];
+        const updateGst = [...gstRateS];
+        updateGst[index] = parseFloat(res[0].gst_rate);
+        updateTax[index] = calculateGst;
+        updatedRows[index] = {
+          ...updatedRows[index],
+          id: productDetail.product_id,
+          productName: productDetail.product_name,
+          hsnCode: productDetail.product_hsn_code,
+          gstRate: productDetail.gst_rate,
+          // gstCalculate: rate + parseFloat(res[0].selling_price),
+          unitPrice: calculateTax,
+          quantity: updatedRows[index].quantity,
+          total:
+            calculateGst + calculateTax * parseFloat(updatedRows[index].quantity), // Update total based on quantity
+          discount_amount: "0",
+          discount_amountPer: "0%",
+          taxable_amount: calculateTax * parseFloat(updatedRows[index].quantity),
+          productDescription: "",
+        };
+        console.log(res[0].gst_rate);
+        // ////////////////////////////////////////////////
+        const update = [...productAmount];
+        update[index].amount = 0;
+        update[index].per = 0;
+        var taxableamount = 0;
+        var totalAmount = 0;
+        for (let row of updatedRows) {
+          totalAmount += parseFloat(row.total);
+          taxableamount += parseFloat(row.taxable_amount);
+        }
+        var gstSumAmount = 0;
+        for (var i = 0; i < updateTax.length; i++) {
+          gstSumAmount += parseFloat(updateTax[i]);
+        }
+        setGstAmount(parseFloat(gstSumAmount).toFixed(2));
+        const gstSum = parseFloat(
+          updateTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
+        );
+        setGstSu(parseFloat(gstSum));
+        setAddTotal(totalAmount.toFixed(2));
+        setTaxableAmount(parseFloat(taxableamount).toFixed(2));
+        setProductAmount(update);
+        setGstRateS(updateGst);
+        setProductRows(updatedRows);
+        setTaxAmount(updateTax);
+        console.log(updateTax);
+      } catch (error) {
+        console.error("Error fetching product details:", error);
       }
-      if (res[0].selling_status == "withoutGstSelling") {
-        console.log("no");
-        console.log(res);
-        calculateGst = (res[0].selling_price * res[0].gst_rate) / 100;
-        calculateTax = res[0].selling_price;
-        calculateTax = calculateTax.toFixed(2);
-        console.log(calculateGst);
-      }
-      updatedRows[index].quantity="1"
-      const updateTax = [...TaxAmount];
-      const updateGst = [...gstRateS];
-      updateGst[index] = parseFloat(res[0].gst_rate);
-      updateTax[index] = calculateGst;
-      updatedRows[index] = {
-        ...updatedRows[index],
-        id: productDetail.product_id,
-        productName: productDetail.product_name,
-        hsnCode: productDetail.product_hsn_code,
-        gstRate: productDetail.gst_rate,
-        gstCalculate: rate + parseFloat(res[0].selling_price),
-        unitPrice: calculateTax,
-        quantity: updatedRows[index].quantity,
-        total:calculateGst + calculateTax * parseFloat(updatedRows[index].quantity), // Update total based on quantity
-        discount_amount: "0",
-        discount_amountPer: "0%",
-        taxable_amount: calculateTax * parseFloat(updatedRows[index].quantity),
-        productDescription: "",
-      };
-      console.log(res[0].gst_rate);
-      // ////////////////////////////////////////////////
-      const update = [...productAmount];
-      update[index].amount = 0;
-      update[index].per = 0;
-      var taxableamount=0;
-      var totalAmount=0;
-      for (let row of updatedRows) {
-        totalAmount += parseFloat(row.total);
-         taxableamount += parseFloat(row.taxable_amount);
-      }
-      const gstSum = parseFloat(
-        updateTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
-      );
-      setGstSu((parseFloat(gstSum)));
-      setAddTotal(totalAmount.toFixed(2));
-      setTaxableAmount((parseFloat(taxableamount)).toFixed(2));
-      setProductAmount(update);
-      setGstRateS(updateGst);
-      setProductRows(updatedRows);
-      setTaxAmount(updateTax);
-      console.log(updateTax);
-    } catch (error) {
-      console.error("Error fetching product details:", error);
-    }
-  };
+    };
   const [addTotal, setAddTotal] = useState(0);
   const [subTotal, setSubTotal] = useState(0);
   const [qty, setQty] = useState(0);
@@ -240,9 +283,8 @@ export function QuotationFrom() {
   const formik = useFormik({
     initialValues: {
       tax_amount: "",
-      businessDetail: [{}],
       partyDetail: [{}],
-      bankDetails: "",
+      bankAccountId:"",
       quotation_prefix: "",
        quotation_number:"",
       sales_quotation_date: "",
@@ -256,15 +298,16 @@ export function QuotationFrom() {
       perTaxAmount: [],
       // //////////////////////////////////////
       productdetail: [{}],
-      productDescription: "",
+      // productDescription: "",
+      vendorId: [{}],
     },
     onSubmit: (values) => {
-      values.businessDetail = businessprofile;
+       values.vendorId = businessprofile[0].vendor_id;
       values.sgstAmount = gstAmount / 2;
       values.cgstAmount = gstAmount / 2;
       values.perTaxAmount = TaxAmount;
       values.taxable_amount = taxableAmount;
-      values.bankDetails = bankDetails;
+      values.bankAccountId = bankAccountDeatil.bank_account_id;
       values.payment_terms = paymentTerms;
       values.sales_quotation_date = date;
       values.add_notes = notes;
@@ -274,7 +317,7 @@ export function QuotationFrom() {
        values.quotation_number=quotationNumber;
       // values.gstRateS=gstRateS
       values.tax_amount = gstSu;
-      values.productDescription = productDescription;
+      // values.productDescription = productDescription;
       values.partyDetail = [
         selectedCustomer.customer_id,
         selectedCustomer.customer_name,
@@ -2428,22 +2471,20 @@ export function QuotationFrom() {
       console.log("not");
     }
   }
-  const handleDeleteRow = (index) => {
+   const handleDeleteRow = (index) => {
     // Create copies of the current state to avoid direct mutation
     const updatedRows = [...productRows];
+    const updateddisp = [...disabl];
     const updatedTax = [...TaxAmount];
-    const updateddisp=[...disabl];
     const updatedProductAmount = [...productAmount];
 
     // Log the index and the row being removed for debugging
     console.log("Deleting row at index:", index);
-    if(updatedRows.length==1)
-      {
-        console.log("worked");
-        setdisabl([1]);
-      }
+    if (updatedRows.length == 1) {
+      console.log("worked");
+      setdisabl([1]);
+    }
     console.log("Row details before deletion:", updatedRows[index]);
-
     for (var k = 0; k < updatedRows.length; k++) {
       if (updatedRows[k].quantity == "") {
         updatedRows[k].quantity = "0";
@@ -2453,7 +2494,7 @@ export function QuotationFrom() {
     // Remove the row and corresponding tax amount
     if (index >= 0 && index < updatedRows.length) {
       updatedRows.splice(index, 1);
-      updateddisp.splice(index,1);
+      updateddisp.splice(index, 1);
       updatedTax.splice(index, 1);
       updatedProductAmount.splice(index, 1);
     } else {
@@ -2474,7 +2515,7 @@ export function QuotationFrom() {
     }
     if (!updatedRows.length) {
       console.log(gstAmountPer);
-      setGstAmountPer(gstAmountPer + 1);
+      setGstAmountPer(gstAmountPer + 2);
     } else {
       setGstAmountPer(gstAmountPer - 1);
     }
@@ -2561,6 +2602,12 @@ export function QuotationFrom() {
   }
   return (
     <div>
+      {
+            modalShow && (<CustomerModalView setModalShow={setModalShow}/>)
+          }
+          {
+            modalShow1 && (<ProductModalView setModalShow1={setModalShow1}/>)
+          }
       <div className="over bg-gray-100 p-4 max-w-7xl mx-auto bg-white">
         <h3 className="text-center">Quotation</h3>
         <form onSubmit={formik.handleSubmit}>
@@ -2572,13 +2619,13 @@ export function QuotationFrom() {
                   <div>
                   {businessprofile.length > 0 ? (
                       <>
-                      { businessprofile[0].logo!=null?(
+                      { businessprofile[0].vendor_logo!=null?(
                         <img
-                        src={businessprofile[0].logo}
+                        src={businessprofile[0].vendor_logo}
                         alt="Logo Preview"
-                        className="w-20 h-20 object-cover border rounded"
+                        className="w-20 h-20 object-contain rounded"
                       />):(<div className="font-bold text-5xl rounded">
-                            {(businessprofile[0].business_name).substring(0,1).toUpperCase()}
+                            {(businessprofile[0].vendor_business_legal_name).substring(0,1).toUpperCase()}
                       </div>)
                       }
                       </>
@@ -2587,23 +2634,23 @@ export function QuotationFrom() {
                     )}
                     <h6>
                       {businessprofile.length > 0
-                        ? businessprofile[0].business_name
+                        ? businessprofile[0].vendor_business_legal_name
                         : ""}
                     </h6>
                   </div>
                   <div>
                     <h6>
                       {businessprofile.length > 0
-                        ? businessprofile[0].mobile_no
+                        ? businessprofile[0].vendor_phone
                         : ""}
                     </h6>
                     <h6>
                       {businessprofile.length > 0
-                        ? businessprofile[0].pan_no
+                        ? businessprofile[0].vendor_pan
                         : ""}
                     </h6>
                     <h6>
-                      {businessprofile.length > 0 ? businessprofile[0].gst : ""}
+                      {businessprofile.length > 0 ? businessprofile[0].vendor_gstin : ""}
                     </h6>
                   </div>
                 </div>
@@ -2629,11 +2676,31 @@ export function QuotationFrom() {
                         <div className="flex justify-between">
                           <div className="flex flex-col">
                             <div className="font-bold">Billing Address:</div>
-                            <div>{selectedCustomer.billing_address}</div>
+                            <div>
+                                  {selectedCustomer.billing_street_address +
+                                    " " +
+                                    selectedCustomer.billing_city +
+                                    " " +
+                                    selectedCustomer.billing_state +
+                                    " " +
+                                    selectedCustomer.billing_city +
+                                    " " +
+                                    selectedCustomer.billing_pincode}
+                                </div>
                           </div>
                           <div className="flex flex-col">
                             <div className="font-bold">Shipping Address:</div>
-                            <div>{selectedCustomer.shipping_address}</div>
+                             <div>
+                                  {selectedCustomer.shipping_street_address +
+                                    " " +
+                                    selectedCustomer.shipping_city +
+                                    " " +
+                                    selectedCustomer.shipping_state +
+                                    " " +
+                                    selectedCustomer.billing_city +
+                                    " " +
+                                    selectedCustomer.shipping_pincode}
+                                </div>
                           </div>
                         </div>
                       </div>
@@ -2650,17 +2717,23 @@ export function QuotationFrom() {
                             />
                           </div>
                         ) : (
-                          <button
-                            type="button"
-                            className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                            onClick={() =>
-                              navigate("/home", {
-                                state: { data: "FromQuotation" },
-                              })
-                            }
-                          >
-                            Create Party
-                          </button>
+                          <>
+                          {
+                                  userRole=="owner"?(
+                                    <button
+                                  type="button"
+                                  className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                  onClick={() =>
+                                    setModalShow(true)
+                                  }
+                                >
+                                  Create Party
+                                </button>
+                                  ):(
+                                    <></>
+                                  )
+                                }
+                          </>
                         )}
                       </div>
                     )}
@@ -2694,17 +2767,21 @@ export function QuotationFrom() {
                                 {customer.billing_address}
                               </li>
                             ))}
-                            <button
-                              type="button"
-                              className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                              onClick={() =>
-                                navigate("/home", {
-                                  state: { data: "FromInvoice" },
-                                })
-                              }
-                            >
-                              Create Party
-                            </button>
+                            {
+                                  userRole=="owner"?(
+                                    <button
+                                  type="button"
+                                  className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                  onClick={() =>
+                                   setModalShow(true)
+                                  }
+                                >
+                                  Create Party
+                                </button>
+                                  ):(
+                                    <></>
+                                  )
+                                }
                           </ul>
                         ) : (
                           <div className="p-2 text-gray-500">
@@ -2813,206 +2890,226 @@ export function QuotationFrom() {
               </thead>
               <tbody>
                 {productRows.map((product, index) => (
-                  <React.Fragment key={index}>
-                  <tr>
-                    <td className="w-10">
-                      <InputComponent
-                        onChange={formik.handleChange}
-                        type="number"
-                        name="sNo"
-                        value={index + 1}
-                        readOnly
-                        classNameInput="w-10 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                      />
-                    </td>
-                    <td className="w-80">
-                      <select
-                        disabled={disabl!=null && disabl[index]==0}
-                        className="w-80 p-2 border border-gray-300 hover:bg-gray-200"
-                        name="productdetail"
-                        onChange={(e) =>
-                          handleProductChange(index, e.target.value)
-                        }
-                        value={product.productName}
-                      >
-                        <option value="">Select</option>
-                        {products.map((product) => (
-                          <option
-                            key={product.product_name}
-                            value={product.product_name}
-                          >
-                            {product.product_name}
-                          </option>
-                        ))}
-                        <option value="addProduct" className="bg-[#2D465B] text-white">Add Product</option>
-                      </select>
-                    </td>
-                    <td className="w-30">
-                      <InputComponent
-                        onChange={formik.handleChange}
-                        type="text"
-                        name="HSNCode"
-                        value={product.hsnCode}
-                        min="0"
-                        classNameInput="w-full p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                      />
-                    </td>
-                    <td className="w-20">
-                      <InputComponent
-                        onChange={formik.handleChange}
-                        type="number"
-                        min="0"
-                        name="quantity"
-                        onFocus={(e) => handleFocus(e, index, "qty")}
-                        {...(product.quantity != ""
-                          ? { value: product.quantity }
-                          : {})}
-                        onBlur={(e) =>
-                          handleChange(
-                            e,
-                            product,
-                            index,
-                            e.target.value,
-                            "qtyChange"
-                          )
-                        }
-                        classNameInput="w-20 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                        placeholder="Quantity"
-                      />
-                    </td>
-                    <td className="w-40">
-                      <InputComponent
-                        type="number"
-                        step="any"
-                        name="unitPrice"
-                        onFocus={(e) => handleFocus(e, index, "unitChange")}
-                        {...(product.unitPrice != ""
-                          ? { value: product.unitPrice }
-                          : {})}
-                        onBlur={(e) =>
-                          handleChange(
-                            e,
-                            product,
-                            index,
-                            e.target.value,
-                            "unitchange"
-                          )
-                        }
-                        min="0"
-                        classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                      />
-                    </td>
-                    <td className="w-30">
-                      <InputComponent
-                        type="number"
-                        name="rupe"
-                        step="any"
-                        min="0"
-                        onFocus={(e) => handleFocus(e, index, "rupe")}
-                        {...(product.discount_amount != ""
-                          ? { value: productAmount[index].amount }
-                          : {})}
-                        onBlur={(e) =>
-                          handleChange(e, product, index, 0, "discount")
-                        }
-                        placeholder="₹"
-                        classNameInput="w-30 p-2 border border-gray-300  hover:bg-gray-200"
-                      />
-                    </td>
-                    <td className="w-40">
-                      <select
-                        onChange={(e) =>
-                          handleChange(e, product, index, 0, "gstChange")
-                        }
-                        // value={product.gstRate}
-                        className="w-40 border d-inline-block border-gray-300 rounded-md p-2"
-                      >
-                        <option className="bg-gray" readOnly value={"gst_"}>{count==0?product.gstRate:(productRows.length?product.gstRate:"")}</option>
-                        <option value="gst_0">0%</option>
-                        <option value="gst_0.1">0.1%</option>
-                        <option value="gst_0.25">0.25%</option>
-                        <option value="gst_1.5">1.5%</option>
-                        <option value="gst_3">3%</option>
-                        <option value="gst_5">5%</option>
-                        <option value="gst_6">6%</option>
-                        <option value="gst_12">12%</option>
-                        <option value="gst_13.8">13.8%</option>
-                        <option value="gst_18">18%</option>
-                        <option value="gst_28">GST @ 28%</option>
-                      </select>
-                    </td>
-                    <td className="w-40">
-                      <InputComponent
-                        onChange={formik.handleChange}
-                        type="number"
-                        step="any"
-                        name="taxableAmount"
-                        value={product.taxable_amount}
-                        min="0"
-                        readOnly
-                        classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                      />
-                    </td>
-                    <td>
-                      <ButtonComponent
-                        type="button"
-                        className="p-1 m-auto w-100 text-white bg-red-500 rounded hover:bg-red-600"
-                        value="remove"
-                        onClick={() => handleDeleteRow(index)}
-                      >
-                        <DeleteForever />
-                      </ButtonComponent>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td></td>
-                    <td colSpan={4}>
-                      <textarea
-                        onFocus={(e) => handleFocus(e, index, "proD")}
-                        {...(product.productDescription != ""
-                          ? { value: product.productDescription }
-                          : {})}
-                        onBlur={(e) => handleDescriptionAdd(e, index)}
-                        name="productDescription"
-                        placeholder="Enter product description"
-                        className="bg-white w-full border border-gray-300 hover:bg-gray-200"
-                        id=""
-                      ></textarea>
-                    </td>
-                    <td className="w-30">
-                      <InputComponent
-                        onBlur={(e) =>
-                          handleChange(e, product, index, 0, "discount")
-                        }
-                        type="number"
-                        step="any"
-                        min="0"
-                        max="100"
-                        name="per"
-                        placeholder="%"
-                        onFocus={(e) => handleFocus(e, index, "dis")}
-                        {...(product.discount_amountPer != "0_%"
-                          ? { value: productAmount[index].per }
-                          : {})}
-                        classNameInput="w-30 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                      />
-                    </td>
-                    <td className="w-40">
-                      {TaxAmount[index] !== "NaN" ? (
-                        <div>
-                          <input
-                            className="w-40 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                            // value={"Rs." + TaxAmount[index]}
-                            value={TaxAmount[index]!=undefined?("₹" + TaxAmount[index]):("₹ 0.00")}
-                          ></input>
-                        </div>
-                      ) : (
-                        <span className="w-40">0.00</span>
-                      )}
-                    </td>
-                    <td></td>
-                  </tr>
-                </React.Fragment>
+                   <React.Fragment key={index}>
+                                          <tr>
+                                            <td className="w-10">
+                                              <InputComponent
+                                                onChange={formik.handleChange}
+                                                type="number"
+                                                name="sNo"
+                                                value={index + 1}
+                                                readOnly
+                                                classNameInput="w-10 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                                              />
+                                            </td>
+                                            <td className="w-80">
+                                              <select
+                                                disabled={disabl != null && disabl[index] == 0}
+                                                className="w-80 p-2 border border-gray-300 hover:bg-gray-200"
+                                                name="productdetail"
+                                                onChange={(e) =>
+                                                  handleProductChange(index, e.target.value)
+                                                }
+                                                value={product.productName}
+                                              >
+                                                <option value="">
+                                                  {disabl != null && disabl[index] == 0
+                                                    ? product.productName
+                                                    : "Select"}
+                                                </option>
+                                                {products.map((product) => (
+                                                  <option
+                                                    key={product.product_id}
+                                                    value={product.product_id}
+                                                  >
+                                                    {product.product_name}
+                                                  </option>
+                                                ))}
+                                                
+                                              </select>
+                                            </td>
+                                            <td className="w-30">
+                                              <InputComponent
+                                                onChange={formik.handleChange}
+                                                type="text"
+                                                name="HSNCode"
+                                                value={product.hsnCode}
+                                                min="0"
+                                                classNameInput="w-full p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                                              />
+                                            </td>
+                                            <td className="w-20">
+                                              <InputComponent
+                                                onChange={formik.handleChange}
+                                                type="number"
+                                                min="0"
+                                                name="quantity"
+                                                onFocus={(e) => handleFocus(e, index, "qty")}
+                                                {...(product.quantity != ""
+                                                  ? { value: product.quantity }
+                                                  : {})}
+                                                onBlur={(e) =>
+                                                  handleChange(
+                                                    e,
+                                                    product,
+                                                    index,
+                                                    e.target.value,
+                                                    "qtyChange"
+                                                  )
+                                                }
+                                                classNameInput="w-20 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                                                placeholder="Quantity"
+                                              />
+                                            </td>
+                                            <td className="w-40">
+                                              <InputComponent
+                                                type="number"
+                                                step="any"
+                                                name="unitPrice"
+                                                onFocus={(e) =>
+                                                  handleFocus(e, index, "unitChange")
+                                                }
+                                                {...(product.unitPrice != ""
+                                                  ? { value: product.unitPrice }
+                                                  : {})}
+                                                onBlur={(e) =>
+                                                  handleChange(
+                                                    e,
+                                                    product,
+                                                    index,
+                                                    e.target.value,
+                                                    "unitchange"
+                                                  )
+                                                }
+                                                min="0"
+                                                classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                                              />
+                                            </td>
+                                            <td className="w-30">
+                                              <InputComponent
+                                                type="number"
+                                                name="rupe"
+                                                step="any"
+                                                min="0"
+                                                onFocus={(e) => handleFocus(e, index, "rupe")}
+                                                {...(product.discount_amount != ""
+                                                  ? { value: productAmount[index].amount }
+                                                  : {})}
+                                                onBlur={(e) =>
+                                                  handleChange(e, product, index, 0, "discount")
+                                                }
+                                                placeholder="₹"
+                                                classNameInput="w-30 p-2 border border-gray-300  hover:bg-gray-200"
+                                              />
+                                            </td>
+                                            <td className="w-40">
+                                              <select
+                                                onChange={(e) =>
+                                                  handleChange(e, product, index, 0, "gstChange")
+                                                }
+                                                // value={product.gstRate}
+                                                className="w-40 border d-inline-block border-gray-300 rounded-md p-2"
+                                              >
+                                                <option
+                                                  className="bg-gray"
+                                                  readOnly
+                                                  value={"gst_"}
+                                                >
+                                                  {count == 0
+                                                    ? product.gstRate
+                                                    : productRows.length
+                                                    ? product.gstRate
+                                                    : ""}
+                                                </option>
+                                                <option value="gst_0">0%</option>
+                                                <option value="gst_0.1">0.1%</option>
+                                                <option value="gst_0.25">0.25%</option>
+                                                <option value="gst_1.5">1.5%</option>
+                                                <option value="gst_3">3%</option>
+                                                <option value="gst_5">5%</option>
+                                                <option value="gst_6">6%</option>
+                                                <option value="gst_12">12%</option>
+                                                <option value="gst_13.8">13.8%</option>
+                                                <option value="gst_18">18%</option>
+                                                <option value="gst_28">GST @ 28%</option>
+                                              </select>
+                                            </td>
+                                            <td className="w-40">
+                                              <InputComponent
+                                                onChange={formik.handleChange}
+                                                type="number"
+                                                step="any"
+                                                name="taxableAmount"
+                                                value={product.taxable_amount}
+                                                min="0"
+                                                readOnly
+                                                classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                                              />
+                                            </td>
+                                            <td>
+                                              <ButtonComponent
+                                                type="button"
+                                                className="p-1 m-auto w-100 text-white bg-red-500 rounded hover:bg-red-600"
+                                                value="remove"
+                                                onClick={() => handleDeleteRow(index)}
+                                              >
+                                                <DeleteForever />
+                                              </ButtonComponent>
+                                            </td>
+                                          </tr>
+                                          <tr>
+                                            <td></td>
+                                            <td colSpan={4}>
+                                              <textarea
+                                                onFocus={(e) => handleFocus(e, index, "proD")}
+                                                {...(product.productDescription != ""
+                                                  ? { value: product.productDescription }
+                                                  : {})}
+                                                onBlur={(e) => handleDescriptionAdd(e, index)}
+                                                name="productDescription"
+                                                placeholder="Enter product description"
+                                                className="bg-white w-full border border-gray-300 hover:bg-gray-200"
+                                                id=""
+                                              ></textarea>
+                                            </td>
+                                            <td className="w-30">
+                                              <InputComponent
+                                                onBlur={(e) =>
+                                                  handleChange(e, product, index, 0, "discount")
+                                                }
+                                                type="number"
+                                                step="any"
+                                                min="0"
+                                                max="100"
+                                                name="per"
+                                                placeholder="%"
+                                                onFocus={(e) => handleFocus(e, index, "dis")}
+                                                {...(product.discount_amountPer != "0_%"
+                                                  ? { value: productAmount[index].per }
+                                                  : {})}
+                                                classNameInput="w-30 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                                              />
+                                            </td>
+                                            <td className="w-40">
+                                              {TaxAmount[index] !== "NaN" ? (
+                                                <div>
+                                                  <input
+                                                    className="w-40 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                                                    // value={"Rs." + TaxAmount[index]}
+                                                    value={
+                                                      TaxAmount[index] != undefined
+                                                        ? "₹" + TaxAmount[index]
+                                                        : "₹ 0.00"
+                                                    }
+                                                  ></input>
+                                                </div>
+                                              ) : (
+                                                <span className="w-40">0.00</span>
+                                              )}
+                                            </td>
+                                            <td></td>
+                                          </tr>
+                                        </React.Fragment>
                 ))}
               </tbody>
             </table>
@@ -3038,13 +3135,22 @@ export function QuotationFrom() {
                 +ADD ITEM
               </button>
               <div>
+                    <button
+                    onClick={handleOpenModalProduct}
+                      type="button"
+                      className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
+                    >
+                     + Add Product
+                    </button>
+                  </div>
+              {/* <div>
                 <button
                   type="button"
                   className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
                 >
                   Scan Barcode
                 </button>
-              </div>
+              </div> */}
             </div>
           </div>
 
@@ -3188,33 +3294,27 @@ export function QuotationFrom() {
           <div className="block sm:grid grid-cols-2 px-6 h-max sm:flex justify-center items-center bg-white text-gray-500 text-lg font-medium cursor-pointer">
             <div>
               <div className="border p-6 h-60 bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
-                <h2 className="text-xl font-semibold mb-2">Bank Details</h2>
-                <div className="mt-1 p-2">
-                  <p className="text-sm">
-                    Account Number: 
-                  </p>
-                  <p className="text-sm">
-                    Account Holder's Name: 
-                  </p>
-                  <p className="text-sm">IFSC CODE: </p>
-                  <p className="text-sm">
-                    Branch Name: 
-                  </p>
-                </div>
-                {/* <ButtonComponent
+                    <h2 className="text-xl font-semibold mb-2">Bank Details</h2>
+                    <div className="mt-1 p-2">
+                      <p className="text-sm">Account Number: {bankAccountDeatil.bank_account_number}</p>
+                      <p className="text-sm">Account Holder's Name: {bankAccountDeatil.bank_account_name}</p>
+                      <p className="text-sm">IFSC CODE: {bankAccountDeatil.bank_ifsc_code}</p>
+                      <p className="text-sm">Branch Name: {bankAccountDeatil.bank_name}</p>
+                    </div>
+                    {/* <ButtonComponent
                   type="button"
                   onClick={() => setIsModalOpen(true)}
                   className="mt-1 p-1 text-sm text-[#3A5B76] border rounded border-[#3A5B76] hover:text-white hover:bg-[#2E4A62]"
                 >
                   Change Bank Account
-                </ButtonComponent>
-                <ButtonComponent
+                </ButtonComponent> */}
+                    {/* <ButtonComponent
                   type="button"
                   className="mt-1 p-1 text-sm text-[#3A5B76] border rounded border-[#3A5B76] hover:text-white hover:bg-[#2E4A62]"
                 >
                   Remove Bank Account
                 </ButtonComponent> */}
-              </div>
+                  </div>
 
               {isModalOpen && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -3337,11 +3437,11 @@ export function QuotationFrom() {
               Authorized signatory
               </h2>
               {
-                (businessprofile.length>0 && businessprofile[0].signature_box!=null)?(
+                (businessprofile.length>0 && businessprofile[0].vendor_signature_box!=null)?(
                   <img
                 src={
                   businessprofile.length > 0
-                    ? businessprofile[0].signature_box
+                    ? businessprofile[0].vendor_signature_box
                     : ""
                 }
                 alt="Logo Preview"

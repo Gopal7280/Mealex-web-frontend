@@ -42,6 +42,7 @@ export function PaymentOutForm() {
   const [companyName,setCompanyName]=useState(null);
   const [moreData,setMoreData]=useState([]);
   const [purchaseId,setPurchaseId]=useState([]);
+  const [purchasePre,setPurchasePre]=useState([]);
   const [selectedPurchaseId,setSelectedPurchaseId]=useState(null);
   const [purchaseTotal,setPurchaseTotal]=useState();
   const [total,setTotal]=useState(0);
@@ -52,7 +53,7 @@ export function PaymentOutForm() {
             const res=await apiGet("/customers");
             console.log(res);
             const companyNamee = res.map(item=>({
-                name:`${item.customer_name}_${item.email}_${item.mobile_no}`
+                name:`${item.customer_name}_${item.customer_email}_${item.customer_phone}`
             }))
             const paymentType=[
                 {name:"CASH"},{name:"CHEQUE"},{name:"ONLINE"},{name:"BANK"},{name:"TDS"},{name:"Bad Debts / Kasar"}]
@@ -81,13 +82,15 @@ export function PaymentOutForm() {
         paymentType:"",
         paidAmount:"",
         purchaseId:"",
+        purchasePrefix:"",
         totalAmount:"",
         referenceNo:""
     },
     onSubmit: (values) => {
       values.totalAmount=total=="null"?0:total;
       values.paymentPrefix=recieptNoPrefix;
-      values.purchaseId=purchaseId;
+      values.purchaseId=purchasePre;
+      values.purchasePrefix=purchaseId;
       values.paymentType=selectedPaymentType;
       values.companyName=selectedCompanyName;
       values.paymentDate=date;
@@ -135,11 +138,12 @@ export function PaymentOutForm() {
                                     setMoreData(i);
                                     const res=await apiGet(`/purchase/getallpurchase/${i.customer_id}`)
                                     const PurchaseId = res.data.map(item=>({
-                                      name:`${item.purchase_id}`
+                                      name:`${item.purchase_prefix}`,
+                                      id:`${item.purchase_id}`
                                   }))
                                   const PurchaseTotal = res.data.map(item=>({
-                                    totalAmount:`${item.payment_remaining}`,
-                                    purchaseId:`${item.purchase_id}`,
+                                    totalAmount:`${item.purchase_payment_remaining}`,
+                                    purchaseId:`${item.purchase_prefix}`,
                                 }))
                                     console.log(res.data);
                                     setPurchaseTotal(PurchaseTotal);
@@ -160,6 +164,7 @@ export function PaymentOutForm() {
   function handlePurchaseChange(e,name){
     console.log(name);
     setPurchaseId(name.name);
+    setPurchasePre(name.id);
     for(var i of purchaseTotal)
     {
       if(i.purchaseId==name.name)

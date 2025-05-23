@@ -187,7 +187,7 @@ function handleEdit(e) {
   return (
     <>
       {data != null && bussinessData != null ? (
-        <div className="mt-2">
+        <div className="mt-2 w-full bg-white">
         <div className="flex justify-center">
         <div className=" bg-white w-4xl">
         <h3 className="text-center p-3 d-inline-block">Preview for Purchase</h3>
@@ -204,16 +204,16 @@ function handleEdit(e) {
         >
           <div className="flex justify-between items-center mb-6">
             <div className="flex items-center">
-              <div className=" mr-4 flex items-center rounded-full justify-center">
+              {/* <div className=" mr-4 flex items-center rounded-full justify-center">
                 <img
                   className="w-16 h-16 text-white font-bold text-xl"
                   src={data[0].logo}
                   alt=""
                 />
-              </div>
+              </div> */}
               <div className="" style={{color:"#364153"}}>
                 <div id="company-name" style={{ color: " #000000" }}>
-                  {bussinessData[0].business_name} ™
+                  {bussinessData[0].vendor_business_legal_name} ™
                 </div>
                 <div id="company-address">{bussinessData[0].address}</div>
                 <div className="text-sm" style={{color:"#364153"}}>
@@ -221,23 +221,23 @@ function handleEdit(e) {
                 </div>
                 <div id="company-gst-number-content">
                   <span>GSTIN : </span>
-                  <span id="company-gst-number">{bussinessData[0].gst}</span>
+                  <span id="company-gst-number">{bussinessData[0].vendor_gstin}</span>
                 </div>
                 <div id="company-mobile-number-content">
                   <span>Mobile :</span>&nbsp;
                   <span id="company-mobile-number">
-                    {bussinessData[0].mobile_no}
+                    {bussinessData[0].vendor_phone}
                   </span>
                 </div>
                 <div id="company-mobile-number-content">
                   <span>Email :</span>&nbsp;
                   <span id="company-mobile-number">
-                    {bussinessData[0].business_profile_email}
+                    {bussinessData[0].vendor_email}
                   </span>
                 </div>
                 <div id="company-pan-number-content">
                   <span>PAN Number :</span>&nbsp;
-                  <span id="company-pan-number">{bussinessData[0].pan_no}</span>
+                  <span id="company-pan-number">{bussinessData[0].vendor_pan}</span>
                 </div>
               </div>
             </div>
@@ -275,9 +275,7 @@ function handleEdit(e) {
               <div className="text-sm" style={{color:"#364153"}}>
                 Customer Name : {data[0].customername}
               </div>
-              <div className="text-sm" style={{color:"#364153"}}>
-                Customer Billing Address : {data[0].billingaddress}
-              </div>
+              
               <div className="text-sm  mb-1" style={{color:"#364153"}}>
                 GSTIN : {data[0].gst}
               </div>
@@ -296,9 +294,7 @@ function handleEdit(e) {
               <div className="text-sm" style={{color:"#364153"}}>
                 Customer Name : {data[0].customername}
               </div>
-              <div className="text-sm" style={{color:"#364153"}}>
-                Customer Shipping Address : {data[0].shippingaddress}
-              </div>
+              
               <div className="text-sm  mb-1" style={{color:"#364153"}}>
                 GSTIN : {data[0].gst}
               </div>
@@ -448,10 +444,10 @@ function handleEdit(e) {
                   ₹ {data[0].total_amount}
                 </span>
               </div>
-              <div className="flex justify-between w-64 mt-2">
+              {/* <div className="flex justify-between w-64 mt-2">
                 <span className="text-sm " style={{color:"#364153"}}>Received Amount</span>
                 <span className="text-sm " style={{color:"#364153"}}>₹ 0</span>
-              </div>
+              </div> */}
             </div>
           </div>
           <div className="mt-5">

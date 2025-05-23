@@ -60,8 +60,8 @@ const Invoices = ({ onLoad }) => {
             unpaidd = 0;
           res.forEach((i) => {
             total += parseFloat(i.total_amount);
-            if (i.status === "Paid") paidd++;
-            if (i.status === "Unpaid") unpaidd++;
+            if (i.status === "paid") paidd++;
+            if (i.status === "unpaid") unpaidd++;
           });
           setPaid(paidd);
           setUnpaid(unpaidd);
@@ -363,7 +363,7 @@ const Invoices = ({ onLoad }) => {
                 >
                   <div className="text-start">
                     <h3 className="text-lg font-semibold">Paid</h3>
-                    {paid && <p className="text-3xl font-bold">{paid}</p>}
+                    {paid?(<p className="text-3xl font-bold">{paid}</p>):<p className="text-3xl font-bold">{paid}</p>}
                   </div>
                 </button>
                 <button
