@@ -256,7 +256,7 @@ export function ChallanSampleA4() {
               <span className="text-invoice-total text-right">₹ {data.total_amount}</span>
             </div>
             <div className="flex justify-between w-64 mt-2">
-              <span className="text-sm text-gray-700">Received Amount</span>
+              <span className="text-sm text-gray-700">Remaining Amount</span>
               <span className="text-sm text-gray-700">₹ 0</span>
             </div>
             <div className="mt-2">

@@ -55,7 +55,7 @@ const PurchaseTable = () => {
                 let unpaidd = 0;
                 res.data.forEach(i => {
                     total = parseFloat(i.total_amount) + total;
-                    if (i.status === "Paid") {
+                    if (i.status === "paid") {
                         paidd++;
                     }
                     if (i.status === "Unpaid") {
@@ -299,14 +299,25 @@ const PurchaseTable = () => {
                         <h3 className="text-lg font-semibold">Total Purchase</h3>
                         {totalPurchase && <p className="text-3xl font-bold">₹{totalPurchase}</p>}
                     </div>
-                    <div className="bg-gray-200 text-[#3A5B76] p-4 shadow-md rounded-lg hover:bg-[#3A5B76] hover:text-white">
-                        <h3 className="text-lg font-semibold">Paid</h3>
-                        <p className="text-3xl font-bold">{paid}</p>
-                    </div>
-                    <div className="bg-gray-200 text-[#3A5B76] p-4 shadow-md rounded-lg hover:bg-[#3A5B76] hover:text-white">
-                        <h3 className="text-lg font-semibold">Unpaid</h3>
-                        <p className="text-3xl font-bold">{unPaid}</p>
-                    </div>
+                    <button
+                  value="unpaid"
+                  className="bg-gray-200 text-[#3A5B76] p-4 shadow-md rounded-lg hover:bg-[#3A5B76] hover:text-white"
+                  onClick={(e) => setStatusFilter("Paid")}
+                >
+                  <div className="text-start">
+                    <h3 className="text-lg font-semibold">Paid</h3>
+                    {paid?(<p className="text-3xl font-bold">{paid}</p>):<p className="text-3xl font-bold">{paid}</p>}
+                  </div>
+                </button>
+                <button
+                  className="bg-gray-200 text-[#3A5B76] p-4 shadow-md rounded-lg hover:bg-[#3A5B76] hover:text-white"
+                  onClick={(e) => setStatusFilter("unPaid")}
+                >
+                  <div className="text-start">
+                    <h3 className="text-lg font-semibold">Unpaid</h3>
+                    {unPaid && <p className="text-3xl font-bold">{unPaid}</p>}
+                  </div>
+                </button>
                 </div>
                 {/* Search + Buttons + Filters */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-4">

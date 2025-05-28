@@ -727,7 +727,7 @@ export function PrefixSettingChallan() {
         <input
           type="text"
           value={prefix.challanPrefix}
-          placeholder="Set Invoice Prefix"
+          placeholder="Set Challan Prefix"
           onChange={handleChangePrefix}
           autoFocus
           className="px-20 bg-white rounded-2 rounded-e-none py-3"

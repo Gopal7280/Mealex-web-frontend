@@ -53,8 +53,8 @@ export function Bussiness_profile() {
         setState1(response.data);
         setIso2Country("In");
         setIso2Country1("In");
-        setNames({countryName: "India",stateName:location.state.data.state,cityName:location.state.data.city });
-        setNames1({countryName: "India",stateName:location.state.data.state,cityName:location.state.data.city });
+         setNames({ ...names, countryName: "India" });
+        setNames1({ ...names, countryName: "India" });
       } catch (err) {
         console.log(err);
       }
@@ -67,6 +67,15 @@ export function Bussiness_profile() {
         setData(res);
         setLogoPreview(res[0].vendor_logo);
         setSignature(res[0].vendor_signature_box);
+        setNames({countryName: "India",stateName:res[0].billing_state==null?"Select":res[0].billing_state,cityName:res[0].billing_city==null?"Select":res[0].billing_city});
+        setNames1({countryName: "India",stateName:res[0].shipping_state==null?"Select":res[0].shipping_state,cityName:res[0].shipping_state==null?"Select":res[0].shipping_state });
+         setZipdata({
+          country: "India",
+          state: res[0].billing_state==null?"Select":res[0].billing_state,
+          city: res[0].billing_city==null?"Select":res[0].billing_city,
+        });
+        setZip(res[0].billing_pincode);
+        setZip1(res[0].shipping_pincode);
       } catch (err) {
         console.log(err);
       } finally {
@@ -320,6 +329,8 @@ export function Bussiness_profile() {
   const formik = useFormik({
     initialValues: {
       name: "",
+      billingId:"",
+      shippingId:"",
       businessName: "",
       phone: "",
       email: "",
@@ -348,30 +359,73 @@ export function Bussiness_profile() {
     },
     onSubmit: (values) => {
       // setLoader(true);
-      if (values.billingCountry == "") {
-        values.billingCountry = data.billing_country;
+      values.billingId=data[0].billing_address_id;
+      values.shippingId=data[0].shipping_address_id;
+      values.billingZip_code = zip;
+      values.shippingZip_code = zip1;
+      if (isshipCheck) {
+        values.streetShippingAddress = shipCheck;
+        if (names.cityName === "") {
+          values.shippingCountry = zipData.country;
+          values.shippingState = zipData.state;
+          values.shippingCity = zipData.city;
+          values.shippingZip_code = zip;
+          console.log("i am working");
+        } else {
+          values.shippingCountry = names.countryName;
+          values.shippingState = names.stateName;
+          values.shippingCity = names.cityName;
+          values.shippingZip_code = zip;
+          console.log("working");
+        }
+      } else {
+        if (names1.cityName === "") {
+          values.shippingCountry = zipData1.country;
+          values.shippingState = zipData1.state;
+          values.shippingCity = zipData1.city;
+          console.log("i am working");
+        } else {
+          values.shippingCountry = names1.countryName;
+          values.shippingState = names1.stateName;
+          values.shippingCity = names1.cityName;
+          console.log("working");
+        }
       }
-      if (values.shippingCountry == undefined) {
+      if (names.cityName === "") {
+        values.billingCountry = zipData.country;
+        values.billingState = zipData.state;
+        values.billingCity = zipData.city;
+        console.log("i am working");
+      } else {
+        values.billingCountry = names.countryName;
+        values.billingState = names.stateName;
+        values.billingCity = names.cityName;
+        console.log("working");
+      }
+      if (values.billingCountry == "" || values.billingCountry==undefined) {
+        values.billingCountry = data[0].billing_country;
+      }
+      if (values.shippingCountry == undefined || values.shippingCountry == undefined) {
         console.log("working with");
-        values.shippingCountry = data.shipping_country;
+        values.shippingCountry = data[0].shipping_country;
       }
-      if (values.billingState == undefined) {
-        values.billingState = data.billing_state;
+      if (values.billingState == undefined || values.billingState == "") {
+        values.billingState = data[0].billing_state;
       }
-      if (values.shippingState == undefined) {
-        values.shippingState = data.shipping_state;
+      if (values.shippingState == undefined || values.shippingState == "") {
+        values.shippingState = data[0].shipping_state;
       }
-      if (values.billingCity == undefined) {
-        values.billingCity = data.billing_city;
+      if (values.billingCity == undefined || values.billingCity == "") {
+        values.billingCity = data[0].billing_city;
       }
-      if (values.shippingCity == undefined) {
-        values.shippingCity = data.shipping_city;
+      if (values.shippingCity == undefined ||values.shippingCity == ""  ) {
+        values.shippingCity = data[0].shipping_city;
       }
       if (values.billingZip_code == "" || values.billingZip_code==undefined) {
-        values.billingZip_code = data.billing_pincode;
+        values.billingZip_code = data[0].billing_pincode;
       }
       if (values.shippingZip_code == "" || values.shippingZip_code == undefined) {
-        values.shippingZip_code = data.shipping_pincode;
+        values.shippingZip_code = data[0].shipping_pincode;
       }
       values.businessId=data[0].vendor_id;
       if (values.name == "") {
@@ -416,18 +470,17 @@ export function Bussiness_profile() {
       values.signatureBox = signature;
       values.logo = logoPreview;
       console.log(values);
-      // const updateBusinessProfile = async () => {
-      //   try {
-      //     const res = await apiPut(`/businessprofile`, values);
-      //     console.log(res);
-      //   } catch (err) {
-      //     console.log(err);
-      //   } finally {
-      //     setLoader(false);
-      //     navigate("/dashboard");
-      //   }
-      // };
-      // updateBusinessProfile();
+      const updateBusinessProfile = async () => {
+        try {
+          const res = await apiPut(`/businessprofile`, values);
+          console.log(res);
+        } catch (err) {
+          console.log(err);
+        } finally {
+          setLoader(false);
+        }
+      };
+      updateBusinessProfile();
     },
   });
   function handleEdit() {
@@ -486,10 +539,9 @@ export function Bussiness_profile() {
         <div className="">
           {data.length ? (
             <div className="over max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-md">
-              <h1 className="text-2xl font-bold text-center mb-6">
+              <h1 className="text-2xl font-bold text-center mb-6 inline-block">
                 Update Details
               </h1>
-
               <NavLink
                 to="/dashboard"
                 className="text-white text-decoration-none"
@@ -501,7 +553,7 @@ export function Bussiness_profile() {
                   children={<Close />}
                 />
               </NavLink>
-              <form onSubmit={formik.handleSubmit}>
+              <form onSubmit={formik.handleSubmit} className="mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <InputComponent
@@ -638,7 +690,7 @@ export function Bussiness_profile() {
                   </div>
                 </div>
                 <div className="mt-4 border border-1 p-3">
-                            <h5>Billing Address</h5>
+                            <h5>Address 1</h5>
                             <div>
                               <label
                                 htmlFor="billing_address"
@@ -652,7 +704,7 @@ export function Bussiness_profile() {
                                 name="streetBillingAddress"
                                 // value={data.billing_address}
                                 onFocus={handleEdit}
-                                {...(edit ? {} : { value: data.billing_street_address })}
+                                {...(edit ? {} : { value: data[0].billing_street_address })}
                                 className="w-full p-2 border rounded mt-1"
                                 placeholder="Enter Street Address"
                               ></textarea>
@@ -704,8 +756,8 @@ export function Bussiness_profile() {
                                   className="form-select"
                                   onChange={(e) => handleStateChange(e, "billing")}
                                 >
-                                  <option readOnly value={count == 0 ? data.billing_state : "Select"}>
-                                    {count == 0 ? data.billing_state : "Select"}
+                                  <option readOnly value={count == 0 ? data[0].billing_state : "Select"}>
+                                    {count == 0 ? data[0].billing_state : "Select"}
                                   </option>
                                   {state.map((values) => (
                                     <option
@@ -737,8 +789,8 @@ export function Bussiness_profile() {
                                   onChange={(e) => handleCityChange(e, "billing")}
                                   name="billingCity"
                                 >
-                                  <option readOnly value={count == 0 ? data.billing_city : "Select"}>
-                                    {count == 0 ? data.billing_city : "Select"}
+                                  <option readOnly value={count == 0 ? data[0].billing_city : "Select"}>
+                                    {count == 0 ? data[0].billing_city : "Select"}
                                   </option>
                                   {city.map((values) => (
                                     <option
@@ -759,7 +811,7 @@ export function Bussiness_profile() {
                                   type="number"
                                   min="0"
                                   name="billingZip_code"
-                                  {...(edit ? {} : { value: data.billing_pincode })}
+                                  {...(edit ? {} : { value: data[0].billing_pincode })}
                                   onChange={(e) => handleZipCodeChange(e, "billing")}
                                   classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
                                   placeholder="Enter Zip/Pincode"
@@ -794,7 +846,7 @@ export function Bussiness_profile() {
                               ></textarea>
                             </div> */}
                           <div className="mt-4 border border-1 p-3">
-                            <h5>Shipping Address</h5>
+                            <h5>Address 2</h5>
                             <div>
                               <label
                                 htmlFor="shipping_address"
@@ -811,7 +863,7 @@ export function Bussiness_profile() {
                                   ? shipCheck != ""
                                     ? { value: shipCheck }
                                     : {}
-                                  : { value: data.shipping_street_address })}
+                                  : { value: data[0].shipping_street_address })}
                                 className="w-full p-2 border rounded mt-1"
                                 placeholder="Enter Street Address"
                               ></textarea>
@@ -932,9 +984,9 @@ export function Bussiness_profile() {
                                   >
                                     <option
                                       readOnly
-                                      value={count1 == 0 ? data.shipping_state : "Select"}
+                                      value={count1 == 0 ? data[0].shipping_state : "Select"}
                                     >
-                                      {count1 == 0 ? data.shipping_state : "Select"}
+                                      {count1 == 0 ? data[0].shipping_state : "Select"}
                                     </option>
                                     {state1.map((values) => (
                                       <option
@@ -966,8 +1018,8 @@ export function Bussiness_profile() {
                                     onChange={(e) => handleCityChange(e, "shipping")}
                                     name="shippingCity"
                                   >
-                                    <option readOnly value={count1 == 0 ? data.shipping_city : "Select"}>
-                                      {count1 == 0 ? data.shipping_city : "Select"}
+                                    <option readOnly value={count1 == 0 ? data[0].shipping_city : "Select"}>
+                                      {count1 == 0 ? data[0].shipping_city : "Select"}
                                     </option>
                                     {city1.map((values) => (
                                       <option
@@ -989,7 +1041,7 @@ export function Bussiness_profile() {
                                     min="0"
                                     name="shippingZip_code"
                                     onFocus={handleEdit}
-                                    {...(edit ? {} : { value: data.shipping_pincode })}
+                                    {...(edit ? {} : { value: data[0].shipping_pincode })}
                                     onChange={(e) => handleZipCodeChange(e, "shipping")}
                                     classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
                                     placeholder="Enter Zip/Pincode"
@@ -1077,8 +1129,26 @@ export function Bussiness_profile() {
                 <div className="mt-6">
                   <h3 className="text-xl font-bold">Personal Information</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
+                    {
+                      data[0].vendor_birthdate==""?(
+                        <div>
                       <InputComponent
+                        onFocus={handleEdit}
+                        labelName="birthdate"
+                        labelInput="Birthdate"
+                        type="date"
+                        name="birthdate"
+                        classNameInput="w-full p-2 border rounded mt-1"
+                        onChange={formik.handleChange}
+                        
+                      />
+                    </div>
+                      )
+                      :
+                      (
+                        <div>
+                      <InputComponent
+                      readOnly
                         onFocus={handleEdit}
                         labelName="birthdate"
                         labelInput="Birthdate"
@@ -1089,8 +1159,26 @@ export function Bussiness_profile() {
                         value={data[0].vendor_birthdate}
                       />
                     </div>
-                    <div>
+                      )
+                    }
+                    {
+                      data[0].vendor_anniversary==""?(
+                        <div>
                       <InputComponent
+                        onFocus={handleEdit}
+                        labelName="anniversary"
+                        labelInput="Anniversary"
+                        type="date"
+                        name="anniversary"
+                        classNameInput="w-full p-2 border rounded mt-1"
+                        onChange={formik.handleChange}
+                        
+                      />
+                    </div>
+                      ):(
+                        <div>
+                      <InputComponent
+                      readOnly
                         onFocus={handleEdit}
                         labelName="anniversary"
                         labelInput="Anniversary"
@@ -1101,6 +1189,8 @@ export function Bussiness_profile() {
                         value={data[0].vendor_anniversary}
                       />
                     </div>
+                      )
+                    }
                   </div>
                   <div className="mt-4">
                     <label className="block text-gray-600">
@@ -1116,7 +1206,7 @@ export function Bussiness_profile() {
                   </div>
                 </div>
 
-                <div className="mt-10 text-center">
+                <div className="mt-10 text-end">
                   <button
                     type="submit"
                     className="px-10 md:px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"

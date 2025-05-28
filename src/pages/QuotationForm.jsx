@@ -85,6 +85,14 @@ export function QuotationFrom() {
         setPaymentTerms(res.paymentTerms);
       } catch (error) {
         console.error("Error fetching quotation data:", error);
+        if(error.response.data.message=="bank account not found")
+              {
+                console.log("no bank data");
+                setquotationPrefix(error.response.data.quotation_prefix);
+              setquotationNumber(error.response.data.quotation_number);
+              setquotationDue(error.response.data.due_date);
+              setPaymentTerms(error.response.data.paymentTerms);
+              }
       }
     };
   
@@ -307,7 +315,7 @@ export function QuotationFrom() {
       values.cgstAmount = gstAmount / 2;
       values.perTaxAmount = TaxAmount;
       values.taxable_amount = taxableAmount;
-      values.bankAccountId = bankAccountDeatil.bank_account_id;
+      values.bankAccountId = bankAccountDeatil.length==0?"00a00a0a-0aaa-0aa0-a00a-00aa0a0a000a":bankAccountDeatil.bank_account_id;
       values.payment_terms = paymentTerms;
       values.sales_quotation_date = date;
       values.add_notes = notes;
@@ -2762,9 +2770,9 @@ export function QuotationFrom() {
                                 onClick={() => handleSelect(customer)}
                                 className="p-2 hover:bg-gray-200 cursor-pointer"
                               >
-                                {customer.customer_name},{customer.mobile_no}
+                                {customer.customer_name},{customer.customer_phone}
                                 <br />
-                                {customer.billing_address}
+                                
                               </li>
                             ))}
                             {

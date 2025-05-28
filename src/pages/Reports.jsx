@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 
 const ReportItem = ({ name,handleClick }) => (
   <button
+  disabled={name=="Purchase Report (GSTR-2)" || name=="Inventory Report" || name=="Invoice Report" || name=="Profit & Loss Statement Report" || name=="Creditors (Account Payable) Reports" || name=="Debtors (Account Receivable) Reports" || name=="Cash/Bank Book Report" || name=="Financial & Business Management Report" || name=="Purchase Report (GSTR-2)"}
   onClick={(e)=>handleClick(e,name)}
-    className="!block !py-2.5 !px-4 !text-[#3A5B76] hover:bg-slate-100 rounded-md transition-colors duration-150 flex items-start"
+    className="disabled:opacity-80 !block !py-2.5 !px-4 !text-[#3A5B76] hover:bg-slate-100 rounded-md transition-colors duration-150 flex items-start"
   >
     {name}
   </button>
@@ -23,7 +24,10 @@ const ReportCategory = ({ title, reports, initialShowCount = reports.length }) =
         if(name=="GSTR-1"){
           navigate("/salesReport");
         }
-        if(name=="Purchase Report (GSTR-3B)"){
+        if(name=="Sales Report"){
+          navigate("/salesReport1");
+        }
+        if(name=="Purchase Report (GSTR-2)"){
           navigate("/gstPurchaseReport");
         }
       }
@@ -50,7 +54,8 @@ const ReportCategory = ({ title, reports, initialShowCount = reports.length }) =
 const reportsData = {
   coreReports: [
     { name: 'GSTR-1' },
-    { name: 'Purchase Report (GSTR-3B)' },
+    { name: 'Sales Report' },
+    { name: 'Purchase Report (GSTR-2)' },
     { name: 'Financial & Business Management Report' },
     { name: 'Cash/Bank Book Report' },
     { name: 'Debtors (Account Receivable) Reports' },

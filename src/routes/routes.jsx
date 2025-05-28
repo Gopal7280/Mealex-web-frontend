@@ -56,6 +56,8 @@ import { UserForm } from "../pages/userForm";
 import { GeneratePurchase } from "../pages/generatePurchase";
 import SalesReportGSTIN from "../pages/reports/salesReport";
 import GstPurchaseReport from "../pages/reports/purchaseReport";
+import { ExpenseManager } from "../pages/expenseTracker/expenseManager";
+import SalesReport1 from "../pages/reports/salesReport1";
 
 function RouteComponent() {
     const [isAuthenticated, setIsAuthenticated] = useState(
@@ -133,7 +135,9 @@ function RouteComponent() {
                 <Route path="/settings/authorizedSignatureInvoice" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<AuthorizedSignatureInvoice/>} />} />
                 <Route path="/settings/authorizedSignatureChallan" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<AuthorizedSignatureChallan/>} />} />
                 <Route path="/salesReport" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<SalesReportGSTIN/>} />} />
+                <Route path="/salesReport1" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<SalesReport1/>} />} />
                 <Route path="/gstPurchaseReport" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<GstPurchaseReport/>} />} />
+                <Route path="/expenseManager" element={<ProtectedRoute isAuthenticated={isAuthenticated} element={<ExpenseManager/>} />} />
             </Routes>
         </Router>
     );

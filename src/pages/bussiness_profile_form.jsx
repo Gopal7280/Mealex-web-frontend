@@ -720,7 +720,7 @@ export function Bussiness_profile_from({ setRefresh }) {
                 </div>
               </div>
               <div className="mt-4 border border-1 p-3">
-                <h5>Billing Address</h5>
+                <h5>Address 1</h5>
                 <div className="mt-6">
                   <label className="block text-gray-600">Street Address</label>
                   <textarea
@@ -853,7 +853,7 @@ export function Bussiness_profile_from({ setRefresh }) {
                 />
               </div>
               <div className="mt-4 border border-1 p-3">
-                <h5>Shipping Address</h5>
+                <h5>Address 2</h5>
                 <div className="mt-6">
                   <label className="block text-gray-600">
                     Street Address

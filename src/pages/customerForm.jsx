@@ -719,6 +719,7 @@ function handleCheckBoxCheck(e) {
                 id="mobile"
                 onChange={(e)=>handleCheck(e,"number")}
                 name="mobile_no"
+                required
                 classNameInput="w-full p-2 border rounded mt-1"
                 placeholder="Enter Phone Number"
                 

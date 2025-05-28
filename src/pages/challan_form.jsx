@@ -64,16 +64,28 @@ export function ChallanForm() {
         }
     }
     fetchUserRole();
-      const invoicePrefixSet = async () => {
-        const res = await apiGet("/challan/challannumber/prefix");
+      const challanPrefixSet = async () => {
+        try{
+          const res = await apiGet("/challan/challannumber/prefix");
         console.log(res);
         setBankAccountDeatil(res.data[0]);
         setChallanPrefix(res.challan_prefix);
         setchallanNo(res.challan_number);
         setchallanDueDate(res.due_date);
         setPaymentTerms(res.paymentTerms);
+        }
+        catch(error){
+          if(error.response.data.message=="bank account not found")
+              {
+                console.log("no bank detail")
+                setChallanPrefix(error.response.data.challan_prefix);
+              setchallanNo(error.response.data.challan_number);
+              setchallanDueDate(error.response.data.due_date);
+              setPaymentTerms(error.response.data.paymentTerms);
+              }
+        }
       };
-      invoicePrefixSet();
+      challanPrefixSet();
       const getBussinessProfile = async () => {
         const responseb = await apiGet("/businessprofile");
         console.log(responseb);
@@ -98,8 +110,8 @@ export function ChallanForm() {
       } catch (err) {
         console.log("executing");
       }
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      console.log(error);
     } finally {
       setLoader(false);
     }
@@ -405,7 +417,7 @@ export function ChallanForm() {
       values.cgstAmount = gstAmount / 2;
       values.perTaxAmount = TaxAmount;
       values.taxable_amount = taxableAmount;
-      values.bankAccountId = bankAccountDeatil.bank_account_id;
+      values.bankAccountId = bankAccountDeatil.length==0?"00a00a0a-0aaa-0aa0-a00a-00aa0a0a000a":bankAccountDeatil.bank_account_id;
       values.payment_terms = 7;
       values.sales_challan_date = date;
       values.add_notes = notes;
@@ -3595,9 +3607,7 @@ export function ChallanForm() {
                                     className="p-2 hover:bg-gray-200 cursor-pointer"
                                   >
                                     {customer.customer_name},
-                                    {customer.mobile_no}
-                                    <br />
-                                    {customer.billing_address}
+                                    {customer.customer_phone}
                                   </li>
                                 ))}
                                 {

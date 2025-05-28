@@ -366,7 +366,9 @@ const ProductForm = () => {
                     <div className="mt-2">
                       <InputComponent
                         labelInput="Product HSN / SAC Code"
-                        type="text"
+                        type="number"
+                        min="0"
+                        step="any"
                         name="hsn_sac_code"
                         value={formik.values.hsn_sac_code}
                         onChange={formik.handleChange}

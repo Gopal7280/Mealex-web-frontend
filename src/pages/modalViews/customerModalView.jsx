@@ -13,10 +13,9 @@ import { Toast } from 'primereact/toast';
 import { Preview, ModeEdit, DeleteForever,Close } from "@mui/icons-material";
 import { InputComponent } from "../../components/Input";
 export function CustomerModalView({setModalShow}){
-    const [visible, setVisible] = useState(true);
     const [loader,setLoader]=useState(false);
-  const [country, setCountry] = useState([{}]);
-    const [country1, setCountry1] = useState([{}]);
+  const [billingCountry, setBillingCountry] = useState([{}]);
+    const [shippingCountry, setShippingCountry] = useState([{}]);
     const [iso2Country, setIso2Country] = useState("");
     const [iso2Country1, setIso2Country1] = useState("");
     const [iso2State, setIso2State] = useState("");
@@ -46,8 +45,8 @@ export function CustomerModalView({setModalShow}){
           },
         };
         const response = await axios(config);
-        setCountry("India");
-        setCountry1("India");
+        setBillingCountry("India");
+        setShippingCountry("India");
         setState(response.data);
         setState1(response.data);
         setIso2Country("In");
@@ -202,14 +201,14 @@ export function CustomerModalView({setModalShow}){
   }
   const [zipData, setZipdata] = useState([
     {
-      country: "",
+      billingCountry: "",
       state: "",
       city: "",
     },
   ]);
   const [zipData1, setZipdata1] = useState([
     {
-      country: "",
+      billingCountry: "",
       state: "",
       city: "",
     },
@@ -222,7 +221,7 @@ export function CustomerModalView({setModalShow}){
         const res = await axios.get(`${config.apiBaseUrl}/pincode/${value}`);
         console.log(res.data);
         setZipdata({
-          country: res.data[0].PostOffice[0].Country,
+          billingCountry: res.data[0].PostOffice[0].billingCountry,
           state: res.data[0].PostOffice[0].State,
           city: res.data[0].PostOffice[0].Block,
         });
@@ -238,7 +237,7 @@ export function CustomerModalView({setModalShow}){
         const res = await axios.get(`${config.apiBaseUrl}/pincode/${value}`);
         console.log(res.data);
         setZipdata1({
-          country: res.data[0].PostOffice[0].Country,
+          billingCountry: res.data[0].PostOffice[0].billingCountry,
           state: res.data[0].PostOffice[0].State,
           city: res.data[0].PostOffice[0].Block,
         });
@@ -274,13 +273,13 @@ function handleCheckBoxCheck(e) {
     if (e.target.value === "") {
       setStyle1({ display: "none" });
       setStyle2({ display: "inline-block" });
-      setZipdata({ country: "", state: "", city: "" });
+      setZipdata({ billingCountry: "", state: "", city: "" });
       console.log("i am working");
     } else {
       if (names.cityName != "") {
         setStyle1({ display: "none" });
         setStyle2({ display: "inline-block" });
-        setZipdata({ country: "", state: "", city: "" });
+        setZipdata({ billingCountry: "", state: "", city: "" });
       } else {
         setStyle1({ display: "inline-block" });
         setStyle2({ display: "none" });
@@ -294,13 +293,13 @@ function handleCheckBoxCheck(e) {
     if (e.target.value === "") {
       setStyle3({ display: "none" });
       setStyle4({ display: "inline-block" });
-      setZipdata1({ country: "", state: "", city: "" });
+      setZipdata1({ billingCountry: "", state: "", city: "" });
       console.log("i am working");
     } else {
       if (names1.cityName != "") {
         setStyle3({ display: "none" });
         setStyle4({ display: "inline-block" });
-        setZipdata1({ country: "", state: "", city: "" });
+        setZipdata1({ billingCountry: "", state: "", city: "" });
       } else {
         setStyle3({ display: "inline-block" });
         setStyle4({ display: "none" });
@@ -359,7 +358,7 @@ function handleCheckBoxCheck(e) {
       if (isshipCheck) {
         values.streetShipping_address = shipCheck;
         if (names.cityName === "") {
-        values.shippingCountry = zipData.country;
+        values.shippingCountry = zipData.billingCountry;
         values.shippingState = zipData.state;
         values.shippingCity = zipData.city;
         values.shippingZip_code = zip;
@@ -374,7 +373,7 @@ function handleCheckBoxCheck(e) {
       }
       else{
          if (names1.cityName === "") {
-        values.shippingCountry = zipData1.country;
+        values.shippingCountry = zipData1.billingCountry;
         values.shippingState = zipData1.state;
         values.shippingCity = zipData1.city;
         console.log("i am working");
@@ -386,7 +385,7 @@ function handleCheckBoxCheck(e) {
       }
       }
       if (names.cityName === "") {
-        values.billingCountry = zipData.country;
+        values.billingCountry = zipData.billingCountry;
         values.billingState = zipData.state;
         values.billingCity = zipData.city;
         console.log("i am working");
@@ -742,29 +741,29 @@ function handleCheckBoxCheck(e) {
             <div class="grid grid-cols-2 gap-6 mt-6">
                       <div>
                         <InputComponent
-                          htmlFor="country"
+                          htmlFor="billingCountry"
                           classNameLabel="text-sm font-semibold text-gray-700"
-                          labelInput="Country:"
+                          labelInput="billingCountry:"
                           style={style1}
                           type="text"
                           name="billingCountry"
-                          value={zipData.country}
+                          value={zipData.billingCountry}
                           onChange={formik.handleChange}
                           classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
-                          placeholder="Enter Country Name"
+                          placeholder="Enter billingCountry Name"
                         />
                          <InputComponent
-                          htmlFor="country"
+                          htmlFor="billingCountry"
                           readOnly
                           classNameLabel="text-sm font-semibold text-gray-700"
                           labelInput=""
                           style={style2}
                           type="text"
                           name="billingCountry"
-                          value={country}
+                          value={billingCountry}
                           onChange={formik.handleChange}
                           classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
-                          placeholder="Enter Country Name"
+                          placeholder="Enter billingCountry Name"
                         />
                       </div>
                       <div>
@@ -884,18 +883,18 @@ function handleCheckBoxCheck(e) {
                               <div class="grid grid-cols-2 gap-6 mt-6">
                       <div>
                         <InputComponent
-                          htmlFor="country"
+                          htmlFor="billingCountry"
                           classNameLabel="text-sm font-semibold text-gray-700"
-                          labelInput="Country:"
+                          labelInput="billingCountry:"
                           style={style3}
                           type="text"
                           name="shippingCountry"
                           {
-                            ...(names.cityName != ""?{value:names.countryName}:{value:zipData.country})
+                            ...(names.cityName != ""?{value:names.countryName}:{value:zipData.billingCountry})
                           }
                           onChange={formik.handleChange}
                           classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
-                          placeholder="Enter Country Name"
+                          placeholder="Enter billingCountry Name"
                         />
                         
                       </div>
@@ -952,28 +951,28 @@ function handleCheckBoxCheck(e) {
                               <div class="grid grid-cols-2 gap-6 mt-6">
                       <div>
                         <InputComponent
-                          htmlFor="country"
+                          htmlFor="billingCountry"
                           classNameLabel="text-sm font-semibold text-gray-700"
-                          labelInput="Country:"
+                          labelInput="billingCountry:"
                           style={style3}
                           type="text"
                           name="shippingCountry"
-                          value={zipData1.country}
+                          value={zipData1.billingCountry}
                           onChange={formik.handleChange}
                           classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
-                          placeholder="Enter Country Name"
+                          placeholder="Enter billingCountry Name"
                         />
                         <InputComponent
-                          htmlFor="country"
+                          htmlFor="billingCountry"
                           classNameLabel="text-sm font-semibold text-gray-700"
                           labelInput=""
                           style={style4}
                           type="text"
                           name="shippingCountry"
-                          value={country1}
+                          value={shippingCountry}
                           onChange={formik.handleChange}
                           classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
-                          placeholder="Enter Country Name"
+                          placeholder="Enter billingCountry Name"
                         />
                       </div>
                       <div>

@@ -15,6 +15,8 @@ import { apiGet, apiPost } from "../services/api";
 import "../styles/layoutFix.css"
 import Sidebar from '../layouts/Sidebar';
 import {Loader} from "../layouts/Loader"
+import { CustomerModalView } from "./modalViews/customerModalView";
+import ProductModalView from "./modalViews/productModalView";
 // 
 export function PurchaseForm(){
   const [loader,setLoader]=useState(true);
@@ -33,6 +35,9 @@ export function PurchaseForm(){
      const [TaxAmount,setTaxAmount]=useState([]);
      const [productDescription, setProductDescription] = useState(["null"]);
        const [disabl,setdisabl]=useState([]);
+       const [userRole,setUserRole]=useState("owner");
+       const [modalShow,setModalShow]=useState(false);
+         const [modalShow1,setModalShow1]=useState(false);
      const [productAmount, setProductAmount] = useState([
          {
            amount: "0",
@@ -110,8 +115,24 @@ export function PurchaseForm(){
           setLoader(false);
         });
       
-      }, []); // Empty dependency array ensures this runs only once after component mount
+      }, [modalShow]); // Empty dependency array ensures this runs only once after component mount
       
+     useEffect(() => {
+            // Function to fetch products
+            setLoader(true);
+        const fetchProduct = async () => {
+          try {
+            const res = await apiGet("/products/productName");
+            console.log(res);
+            setProducts(res);
+          } catch (error) {
+            console.error("Error fetching products:", error);
+          }
+        };
+        fetchProduct();
+        setLoader(false);
+        }, [modalShow1]); 
+
      const handleAddProductRow = () => {
        setProductRows([
          ...productRows,
@@ -1340,17 +1361,28 @@ export function PurchaseForm(){
     const blobUrl = URL.createObjectURL(blob);
     window.open(blobUrl, "_blank");
   };
+
+  function handleOpenModalProduct()
+  {
+    setModalShow1(true);
+  
+  }
      return (
       <>
       {
         loader?(<>
           <Loader/>
           </>):(
-          <div>
+          <div>{
+                      modalShow && (<CustomerModalView setModalShow={setModalShow}/>)
+                    }
+                    {
+                      modalShow1 && (<ProductModalView setModalShow1={setModalShow1}/>)
+                    }
        <div className="over bg-gray-100 p-4 max-w-7xl mx-auto bg-white mt-2">
         <h3 className="text-center">Purchase</h3>
          <form onSubmit={formik.handleSubmit}>
-         {/* Invoice Section */}
+         {/* Purchase Section */}
          <div className="bg-white rounded-lg">
     <div className="sm:grid block grid-cols-2 mt-2 border p-6 sm:flex justify-center items-center bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
         <div className="border p-6 h-90 bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
@@ -1420,11 +1452,26 @@ export function PurchaseForm(){
                             />
                         </div>
                             ):(
-                              <button type="button" className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]" onClick={()=>navigate("/home",{state:{data:"FromPurchase"}})}>Create Party</button>
-                            )
-                          }
-                        </div>
-                    )}
+                           <>
+                              {
+                                  userRole=="owner"?(
+                                    <button
+                                  type="button"
+                                  className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                  onClick={() =>
+                                    setModalShow(true)
+                                  }
+                                >
+                                  Create Party
+                                </button>
+                                  ):(
+                                    <></>
+                                  )
+                                }
+                              </>
+                            )}
+                          </div>
+                        )}
 
                     {isDropdownOpen && (
                         <div ref={dropdownRef} className="absolute z-10 w-full bg-white border border-gray-300 rounded-md shadow-lg mt-1">
@@ -1448,13 +1495,25 @@ export function PurchaseForm(){
                                             className="p-2 hover:bg-gray-200 cursor-pointer"
                                         >
                                             {customer.customer_name},
-                                            {customer.mobile_no}
+                                             {customer.customer_phone}
                                             <br />
-                                            {customer.billing_address}
                                         </li>
                                     ))}
-                                    <button type="button" className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]" onClick={()=>navigate("/home",{state:{data:"FromInvoice"}})}>Create Party</button>
-                                </ul>
+ {
+                                  userRole=="owner"?(
+                                    <button
+                                  type="button"
+                                  className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                  onClick={() =>
+                                    setModalShow(true)
+                                  }
+                                >
+                                  Create Party
+                                </button>
+                                  ):(
+                                    <></>
+                                  )
+                                }                                </ul>
                             ) : (
                               <div>
                                 <div className="p-2 text-gray-500">No customers found</div>
@@ -1592,12 +1651,7 @@ export function PurchaseForm(){
                                            {product.product_name}
                                          </option>
                                        ))}
-                                       <option
-                                         value="addProduct"
-                                         className="bg-[#2D465B] text-white"
-                                       >
-                                         Add Product
-                                       </option>
+                                       
                                      </select>
                                    </td>
                                    <td className="w-30">
@@ -1795,10 +1849,11 @@ export function PurchaseForm(){
              </button>
              <div>
                <button
+               onClick={handleOpenModalProduct}
                  type="button"
                  className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
                >
-                 Scan Barcode
+                 + Add Product
                </button>
              </div>
            </div>

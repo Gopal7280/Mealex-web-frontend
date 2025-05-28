@@ -40,6 +40,7 @@ function Users() {
   const navigate = useNavigate();
   const printRef = useRef(); // Reference for printing
   const [loader, setLoader] = useState(false);
+  const [load,setLoad]=useState(false);
   const toast = useRef(null);
   const [total, setTotal] = useState(0);
   const [categoryType, setCategoryType] = useState("");
@@ -75,7 +76,7 @@ function Users() {
     };
 
     fecthUsers();
-  }, []);
+  }, [load]);
 
   // Filter customers based on search input
   const filteredUsers = users.filter((customer) =>
@@ -208,7 +209,8 @@ function Users() {
       const addUser = async () => {
         try {
           const res = await apiPost("/user", values);
-          navigate("/users");
+          setVisible(false);
+          setLoad(!load);
         } catch (err) {
           console.log(err);
         } finally {
@@ -430,7 +432,7 @@ function Users() {
                 ></Column>
                 <Column
                   field="category"
-                  header="Address"
+                  header="Contact"
                   style={{ width: "25%" }}
                   body={<Skeleton />}
                 ></Column>
@@ -442,7 +444,7 @@ function Users() {
                 ></Column>
                 <Column
                   field="quantity"
-                  header="Contact"
+                  header="Access Privilage"
                   style={{ width: "25%" }}
                   body={<Skeleton />}
                 ></Column>

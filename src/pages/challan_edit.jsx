@@ -1521,8 +1521,14 @@ export function ChallanEdit() {
       setAddTotal(roundValue);
       setRound(roundedofValue.toFixed(2));
     } else {
-      originalValue = challanData.total_amount;
-      roundValue = Math.round(challanData.total_amount);
+      var sum=0;
+      for(var i of productRows)
+      {
+        sum=sum+parseFloat(i.total);
+        console.log(sum);
+      }
+      originalValue=sum;
+      roundValue = Math.round(sum);
       console.log(originalValue);
       console.log(roundValue);
       roundedofValue = roundValue - originalValue;
@@ -1751,9 +1757,7 @@ export function ChallanEdit() {
                                     className="p-2 hover:bg-gray-200 cursor-pointer"
                                   >
                                     {customer.customer_name},
-                                    {customer.mobile_no}
-                                    <br />
-                                    {customer.billing_address}
+                                    {customer.customer_phone}
                                     <br />
                                   </li>
                                 ))}

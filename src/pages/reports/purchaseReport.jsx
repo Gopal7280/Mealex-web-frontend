@@ -90,7 +90,7 @@ const GstPurchaseReport = () => {
     <div className="min-h-screen bg-gray-100 font-sans p-4 sm:p-6">
       <div className="bg-white p-4 sm:p-6 rounded-xl shadow-md">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
-          <h1 className="text-lg sm:text-xl font-semibold text-[#3A5B76]">GSTR-2 Purchase HSN</h1>
+          <h1 className="text-lg sm:text-xl font-semibold text-[#3A5B76]">GSTR-2</h1>
           <div>
         <button
         onClick={() => exportExcel(detailedData, 'SalesReportGSTIN')}
@@ -102,7 +102,7 @@ const GstPurchaseReport = () => {
         onClick={() => navigate("/reports")}
         className="bg-[#3A5B76] ms-2 hover:bg-[#2E4A5E] text-white font-semibold px-6 py-2 shadow-md transition-all duration-200"
       >
-        Move To Report's Dashboard
+        Go Report Dashboard
       </button>
       </div>
         </div>

@@ -23,15 +23,18 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 const columns=[
   {
-    Product_name: "",
-    Product_type: "",
-    Product_unit: "",
-    Category: "",
-    selling_price: "",
-    purchase_price: "",
-    Product_hsn_code: "",
-    gst_rate: "",
-    product_description: "",
+  product_number: "",
+  product_name: "",
+  product_hsn_code: "",
+  product_type: "",
+  product_unit: "",
+  product_description: "",
+  product_image: "",
+  category: "",
+  generate_barcode: "",
+  gst_rate: "",
+  purchase_price: "",
+  selling_price: "",
   },
 ];
 const items = Array.from({ length: 5 }, (v, i) => i);

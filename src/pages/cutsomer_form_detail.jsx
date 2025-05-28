@@ -6,6 +6,7 @@ import { Preview, ModeEdit, DeleteForever,Close } from "@mui/icons-material";
 import axios from "axios";
 import "../styles/layoutFix.css"
 import Sidebar from '../layouts/Sidebar';
+import "../styles/generateChallan.css"
 import { InputComponent } from "../components/Input";
 import { ButtonComponent } from "../components/Button";
 import { FaDownload } from "react-icons/fa6";

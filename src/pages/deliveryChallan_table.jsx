@@ -303,14 +303,24 @@ const DeliveryChallanTable = () => {
                             <h3 className="text-lg font-semibold">Total Purchase</h3>
                             {totalPurchase && <p className="text-3xl font-bold">₹{totalPurchase.toFixed(2)}</p>}
                         </div>
-                        <div className="bg-gray-200 text-[#3A5B76] p-4 shadow-md rounded-lg hover:bg-[#3A5B76] hover:text-white">
-                            <h3 className="text-lg font-semibold">Open Challan's</h3>
-                            <p className="text-3xl font-bold">{statusOpen}</p>
-                        </div>
-                        <div className="bg-gray-200 text-[#3A5B76] p-4 shadow-md rounded-lg hover:bg-[#3A5B76] hover:text-white">
-                            <h3 className="text-lg font-semibold">Closed Challan's</h3>
-                            <p className="text-3xl font-bold">{statusClose}</p>
-                        </div>
+                        <button
+                  className="bg-gray-200 text-[#3A5B76] p-4 shadow-md rounded-lg hover:bg-[#3A5B76] hover:text-white"
+                  onClick={(e) => setStatusFilter("Open")}
+                >
+                  <div className="text-start">
+                    <h3 className="text-lg font-semibold">Open</h3>
+                     <p className="text-3xl font-bold">{statusOpen}</p>
+                  </div>
+                </button>
+                        <button
+                  className="bg-gray-200 text-[#3A5B76] p-4 shadow-md rounded-lg hover:bg-[#3A5B76] hover:text-white"
+                  onClick={(e) => setStatusFilter("Close")}
+                >
+                  <div className="text-start">
+                    <h3 className="text-lg font-semibold">Close</h3>
+                    <p className="text-3xl font-bold">{statusClose}</p>
+                  </div>
+                </button>
                     </div>
                     {/* Search + Buttons + Filters */}
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-5 gap-4">

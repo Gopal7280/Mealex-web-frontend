@@ -80,7 +80,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
 
     const invoicePrefixSet = async () => {
       try {
-        const res = await apiGet("/invoices/invoicenumber/prefix");
+        var res = await apiGet("/invoices/invoicenumber/prefix");
         console.log(res);
         setBankAccountDeatil(res.data[0]);
         setInvoicePrefix(res.invoice_prefix);
@@ -89,6 +89,14 @@ export default function InvoiceForm({ onInvoiceAdded }) {
         setPaymentTerms(res.paymentTerms);
       } catch (error) {
         console.error("Error fetching invoice prefix:", error);
+        if(error.response.data.message=="bank account not found")
+        {
+          setInvoicePrefix(error.response.data.invoice_prefix);
+        setInvoiceNumber(error.response.data.invoice_number);
+        setDueDate(error.response.data.due_date);
+        setPaymentTerms(error.response.data.paymentTerms);
+        }
+        
       }
     };
     const fetchCustomers = async () => {
@@ -230,7 +238,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
         unitPrice: calculateTax,
         quantity: updatedRows[index].quantity,
         total:
-          calculateGst + calculateTax * parseFloat(updatedRows[index].quantity), // Update total based on quantity
+        calculateGst + calculateTax * parseFloat(updatedRows[index].quantity), // Update total based on quantity
         discount_amount: "0",
         discount_amountPer: "0%",
         taxable_amount: calculateTax * parseFloat(updatedRows[index].quantity),
@@ -300,7 +308,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
       values.cgstAmount = gstAmount / 2;
       values.perTaxAmount = TaxAmount;
       values.taxable_amount = taxableAmount;
-      values.bankAccountId = bankAccountDeatil.bank_account_id;
+      values.bankAccountId = bankAccountDeatil.length==0?"00a00a0a-0aaa-0aa0-a00a-00aa0a0a000a":bankAccountDeatil.bank_account_id;
       values.payment_terms = paymentTerms;
       values.sales_invoice_date = date;
       values.add_notes = notes;
@@ -1492,9 +1500,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                                     className="p-2 hover:bg-gray-200 cursor-pointer"
                                   >
                                     {customer.customer_name},
-                                    {customer.mobile_no}
-                                    <br />
-                                    {customer.billing_address}
+                                    {customer.customer_phone}
                                     <br />
                                   </li>
                                 ))}

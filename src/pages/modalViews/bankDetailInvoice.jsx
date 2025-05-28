@@ -10,10 +10,9 @@ import { InputSwitch } from 'primereact/inputswitch';
 export function BankAccountSettingInvoiceModalView(){
   const toast = useRef(null);
    const [visible, setVisible] = useState(false);
-  const [checked1,setChecked1]=useState(false);
-  const [checked2,setChecked2]=useState(false);
+  const [activeBankAccount,setActiveBankAccount]=useState(false);
    const [bankData, setBankData] = useState([]);
-   const [run,setRun]=useState(false);
+   const [loadApiAgain,setLoadApiAgain]=useState(false);
   const column = ["S.No", "Account Holder Name", "Account No", "Account Type", "IFSC Code", "Bank Name"];
   useEffect(() => {
     const fetchAccount = async () => {
@@ -25,7 +24,7 @@ export function BankAccountSettingInvoiceModalView(){
         for(var i of res.data)
         {
           if(i.is_active){
-            setChecked1(i.bank_serial_number);
+            setActiveBankAccount(i.bank_serial_number);
           }
         }
         // setTotal(res.data.length);
@@ -53,14 +52,14 @@ export function BankAccountSettingInvoiceModalView(){
     };
 
     fetchAccount();
-  }, [run]);
-  const [search, setSearch] = useState(""); // Search state
- const filteredUsers = bankData.filter((data) =>
+  }, [loadApiAgain]);
+  const [searchRow, setSearchRow] = useState(""); // searchRow state
+ const filteredBankAccount = bankData.filter((data) =>
     `${data.bank_account_name} ${data.bank_account_number} ${data.bank_account_type} ${data.bank_name}`
       .toLowerCase()
-      .includes(search.toLowerCase())
+      .includes(searchRow.toLowerCase())
   );
-  const dataTable = filteredUsers.map((value) => ({
+  const dataTable = filteredBankAccount.map((value) => ({
     sNo: value.bank_serial_number,
     name: value.bank_account_name,
     bankAccountNumber: value.bank_account_number,
@@ -81,7 +80,7 @@ export function BankAccountSettingInvoiceModalView(){
       const addBankAccount=async ()=>{
         try{
           const res=await apiPost("/bankaccount",values);
-          setRun(!run);
+          setLoadApiAgain(!loadApiAgain);
           setVisible(false);
         }
         catch(err){
@@ -96,7 +95,7 @@ export function BankAccountSettingInvoiceModalView(){
     {
       if(sno==i.bank_serial_number)
       {
-        setChecked1(sno);
+        setActiveBankAccount(sno);
         const bankAccountId={
           bankAccountId:i.bank_account_id,
         }
@@ -104,7 +103,7 @@ export function BankAccountSettingInvoiceModalView(){
         const addActiveStatus=async ()=>{
           try{
             const res=await apiPost("/setting/setbankaccount",bankAccountId);
-            setRun(!run);
+            setLoadApiAgain(!loadApiAgain);
           }
           catch(err){
             console.log(err);
@@ -165,7 +164,7 @@ export function BankAccountSettingInvoiceModalView(){
               labelInput="Account No:"
               type="text"
               name="accountNo"
-              placeholder="Enter Account no"
+              placeholder="Enter account no"
               required
               classNameInput="bg-white w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
             />
@@ -201,10 +200,10 @@ export function BankAccountSettingInvoiceModalView(){
               onChange={formik.handleChange}
               labelName="bankBranchName"
               classNameLabel=" block mb-2 font-semibold text-gray-700"
-              labelInput="Bank and Branch name:"
+              labelInput="Branch name:"
               type="text"
               name="bankBranchName"
-              placeholder="enter bank and branch name"
+              placeholder="enter branch name"
               required
               classNameInput="bg-white w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 hover:bg-gray-200"
             />
@@ -224,7 +223,7 @@ export function BankAccountSettingInvoiceModalView(){
                     </div>
                     </div>
         <div className="w-1/4 mb-4">
-        <SearchComponent className="" onChange={(e) => setSearch(e.target.value)} />
+        <SearchComponent className="" onChange={(e) => setSearchRow(e.target.value)} />
           </div>
         <TableComponent
               name="bank account"
@@ -233,7 +232,7 @@ export function BankAccountSettingInvoiceModalView(){
               pageSize={3} // Number of rows per page
               actions={(row) => (
                 <div className="flex gap-2">
-                <span className=""><InputSwitch checked={row.sNo==checked1} onChange={(e) => handleAccountAtiveStatus(e,row.bankAccountNumber,row.sNo)} /></span>
+                <span className=""><InputSwitch checked={row.sNo==activeBankAccount} onChange={(e) => handleAccountAtiveStatus(e,row.bankAccountNumber,row.sNo)} /></span>
                 </div>
               )}
             />
