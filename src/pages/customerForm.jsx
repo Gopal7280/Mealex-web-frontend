@@ -16,7 +16,7 @@ import {
 import axios from "axios";
 import { InputComponent } from "../components/Input";
 import { ButtonComponent } from "../components/Button";
-import { apiPost } from "../services/api";
+import { apiGet, apiPost } from "../services/api";
 import * as yup from "yup";
 import { config } from "../config/app.js";
 
@@ -46,6 +46,17 @@ export default function CustomerForm({
   const [status,setStatus]=useState(true);
   
   useEffect(() => {
+    const fetchBussiness = async () => {
+          try {
+            const res = await apiGet('/businessprofile');
+            if (res.length === 0) {
+              navigate('/profile_form');
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        };
+        fetchBussiness();
        const getState = async () => {
       try {
         const config = {

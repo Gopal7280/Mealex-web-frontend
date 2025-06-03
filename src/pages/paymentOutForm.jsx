@@ -26,6 +26,18 @@ export function PaymentOutForm() {
   const [locations,setLocationS]=useState("")
   const location=useLocation();
   useEffect(() => {
+     const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
     console.log(location.state?.data);
     setLocationS(location.state?.data);
   }, []);

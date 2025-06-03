@@ -1,34 +1,60 @@
-import React, { useEffect, useRef, useState } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
-import { Menubar } from "primereact/menubar";
-import myimage from "../assets/Logo2.png";
-import { CiSettings } from "react-icons/ci";
+import React, { useEffect, useRef, useState } from 'react';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Menubar } from 'primereact/menubar';
+import myimage from '../assets/Logo2.png';
+import { CiSettings } from 'react-icons/ci';
+import {
+  Box,
+  Button,
+  Menu,
+  MenuItem,
+  Drawer,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+  Collapse,
+  Typography,
+} from '@mui/material';
+import CloseIcon from '@mui/icons-material/Close';
+import MenuIcon from '@mui/icons-material/Menu';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import { ProgressSpinner } from 'primereact/progressspinner';
 //
-import imgLogo from "../assets/Bill365Logo.jpg";
-import { IoMdLogOut } from "react-icons/io";
-import { IoStorefrontSharp } from "react-icons/io5";
-import { PiStorefrontThin } from "react-icons/pi";
 //
-import "../styles/sidebar.css";
-import { Dropdown } from "primereact/dropdown";
-import { apiGet } from "../services/api";
-import { Toast } from "primereact/toast";
-import { Sidebar as KeyShortcut } from "primereact/sidebar";
-import { FaRegKeyboard } from "react-icons/fa6";
-const Sidebar = ({setRefresh}) => {
+import imgLogo from '../assets/Bill365Logo.jpg';
+import { IoMdLogOut } from 'react-icons/io';
+import { IoStorefrontSharp } from 'react-icons/io5';
+import { PiStorefrontThin } from 'react-icons/pi';
+//
+import '../styles/sidebar.css';
+import { Skeleton } from 'primereact/skeleton';
+import { Dropdown } from 'primereact/dropdown';
+import { apiGet } from '../services/api';
+import { Toast } from 'primereact/toast';
+import { Sidebar as KeyShortcut } from 'primereact/sidebar';
+import { FaRegKeyboard } from 'react-icons/fa6';
+import { OwnerSideBar } from './ownerSideBar/ownerSidebar';
+import { DeliveryBoySidebar } from './deliveryBoySidebar/deliveryBoySidebar';
+import { SalesPersonSidebar } from './salesPersonSidebar/salesPersonSidebar';
+import { StockManagerSidebar } from './stockManager/stockManager';
+const Sidebar = ({ setRefresh }) => {
+  const [loader, setLoader] = useState(false);
+  const [userName,setUserName]=useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const timeoutRef = useRef(null); // <== Ref for timeout
   const [dropdownOpen, setDropdownOpen] = useState(null);
   const dropdownRefs = useRef([]); // Store references to dropdowns
   const sidebarRef = useRef();
   // Toggle dropdown visibility
-  const toggleDropdown = (index) => {
-    console.log("drop");
+  const toggleDropdown = index => {
+    console.log('drop');
     setDropdownOpen(dropdownOpen === index ? null : index); // Toggle dropdown visibility
   };
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = event => {
       const clickY = event.clientY;
       const isClickInsideSidebar =
         sidebarRef.current && sidebarRef.current.contains(event.target);
@@ -48,9 +74,9 @@ const Sidebar = ({setRefresh}) => {
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [dropdownOpen, sidebarOpen]);
 
@@ -58,75 +84,85 @@ const Sidebar = ({setRefresh}) => {
   const toast = useRef(null);
   const disabledTrue = true;
   const [visibleRight, setVisibleRight] = useState(false);
-  const [business_name, setBusinessName] = useState("");
-  const [userRole,setUserRole]=useState("owner");
+  const [business_name, setBusinessName] = useState('');
+  const [userRole, setUserRole] = useState('owner');
   const navigate = useNavigate();
+  const [count,setCount]=useState(0);
   useEffect(() => {
-    console.log("working with use");
-    const fetchUserRole=async ()=>{
-        try{
-              const res=await apiGet("/user");
-              console.log(res.data);
-              console.log(res.data[0].employee_role);
-              setUserRole(res.data[0].employee_role);
-        }
-        catch(err)
+    console.log('working with use');
+    var name="";
+    const fetchUserRole = async () => {
+      try {
+        const res = await apiGet('/user');
+        console.log(res.data);
+        if(res.data.length)
         {
-          console.log(err);
+          name=res.data[0].employee_name;
+          setUserName(res.data[0].employee_name);
         }
-    }
+        console.log(res.data[0].employee_role);
+        setUserRole(res.data[0].employee_role);
+      } catch (err) {
+        console.log(err);
+      }
+    };
     fetchUserRole();
 
     const fetchBussinessProfile = async () => {
       try {
-        const res = await apiGet("/businessprofile");
+        const res = await apiGet('/businessprofile');
         console.log(res);
         timeoutRef.current = setTimeout(() => {
           if (res.length == 0) {
+            setCount(1);
             toast.current.show({
-              severity: "info",
-              summary: "info",
-              detail: "New User? Redirecting to bussiness profile form",
+              severity: 'info',
+              summary: 'info',
+              detail: 'New User? Redirecting to bussiness profile form',
               life: 3000,
             });
             timeoutRef.current = setTimeout(() => {
-              navigate("/profile_form");
-            }, 3000);
+              navigate('/profile_form');
+            }, 1000);
           } else {
+            setCount(0);
             setBusinessName(res);
+            if(name==""){
+          setUserName(res[0].vendor_name);
+        }
           }
-        }, 3000);
+        }, 1000);
       } catch (err) {
-        console.log("no bussiness Profile");
+        console.log('no bussiness Profile');
       }
     };
     fetchBussinessProfile();
   }, [setRefresh]);
   const cities = [
-    { name: "Create Invoice", code: "CI" },
-    { name: "Create Challan", code: "CC" },
-    { name: "Create Quotation", code: "CQ" },
-    { name: "Create Purchase", code: "CP" },
+    { name: 'Create Invoice', code: 'CI' },
+    { name: 'Create Challan', code: 'CC' },
+    { name: 'Create Quotation', code: 'CQ' },
+    { name: 'Create Purchase', code: 'CP' },
   ];
   function handleChange(e) {
     console.log(e.target.value.code);
     const fetchBussiness = async () => {
       try {
-        const res = await apiGet("/businessprofile");
+        const res = await apiGet('/businessprofile');
         if (res.length === 0) {
-          navigate("/profile_form");
+          navigate('/profile_form');
         } else {
-          if (e.target.value.code == "CI") {
-            navigate("/add-invoice");
+          if (e.target.value.code == 'CI') {
+            navigate('/add-invoice');
           }
-          if (e.target.value.code == "CC") {
-            navigate("/add-challan");
+          if (e.target.value.code == 'CC') {
+            navigate('/add-challan');
           }
-          if (e.target.value.code == "CQ") {
-            navigate("/add-quotation");
+          if (e.target.value.code == 'CQ') {
+            navigate('/add-quotation');
           }
-          if (e.target.value.code == "CP") {
-            navigate("/purchaseForm");
+          if (e.target.value.code == 'CP') {
+            navigate('/purchaseForm');
           }
         }
       } catch (err) {
@@ -137,67 +173,153 @@ const Sidebar = ({setRefresh}) => {
   }
   function handleBussinessCheck(e) {
     const fetchBussiness = async () => {
-      const res = await apiGet("/businessprofile");
+      const res = await apiGet('/businessprofile');
       console.log(res.length);
       if (res.length != 0) {
         toast.current.show({
-          severity: "success",
-          summary: "Info",
-          detail: "Bussiness Profile already exist redirecting update",
+          severity: 'success',
+          summary: 'Info',
+          detail: 'Bussiness Profile already exist redirecting update',
           life: 700,
         });
         setTimeout(() => {
-          navigate("/bussiness-profile");
+          navigate('/bussiness-profile');
         }, 700);
       } else {
-        navigate("/profile_form");
+        navigate('/profile_form');
       }
     };
     fetchBussiness();
   }
+  const isActive = path => location.pathname === path;
   function handleSideClose(name) {
     setDropdownOpen(null);
     setSidebarOpen(false);
   }
   function handleCheckClick(e, nav) {
+    setLoader(true);
     setDropdownOpen(null);
     setSidebarOpen(false);
-    const fetchBussiness = async () => {
-      try {
-        const res = await apiGet("/businessprofile");
-        if (res.length === 0) {
-          navigate("/profile_form");
-        } else {
-          navigate(`/${nav}`);
-        }
-      } catch (err) {
-        console.log(err);
-      }
-    };
-    fetchBussiness();
+    navigate(`/${nav}`);
+    
   }
+   const [anchorEl, setAnchorEl] = useState(null);
+    const [drawerOpen, setDrawerOpen] = useState(false);
   const [dark, setDark] = useState(() => {
-    return localStorage.getItem("theme") === "dark";
+    return localStorage.getItem('theme') === 'dark';
   });
   const [isdark, setIsdark] = useState(false);
   useEffect(() => {
     const root = document.documentElement;
     if (dark) {
       setIsdark(true);
-      root.classList.add("dark");
-      localStorage.setItem("theme", "dark");
+      root.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
       setIsdark(false);
-      root.classList.remove("dark");
-      localStorage.setItem("theme", "light");
+      root.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   }, [dark]);
+  function handleLogout(){
+    {
+                  if (timeoutRef.current) {
+                    clearTimeout(timeoutRef.current);
+                    timeoutRef.current = null;
+                  }
+                  localStorage.removeItem("token");
+                  localStorage.removeItem("isAuthenticated");
+                  localStorage.removeItem("mkddr");
+                  navigate("/login");
+                  window.location.reload();
+                }
+  }
   function toggleDarkMode() {}
+   const handleUserDetailClick = event => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleUserDetailClose = path => {
+    setAnchorEl(null);
+    if (path=="theme") {
+      // handleNavigate(path);
+      setDark(prev => !prev)
+    }
+    if(path=="logout")
+    {
+      handleLogout();
+    }
+    if(path=="keyBoardShortcut")
+    {
+      setVisibleRight(true);
+    }
+  };
+  const handleNavigate = path => {
+    setDrawerOpen(false); // Close the drawer when navigating
+    navigate(path);
+  };
+//
+
+//  const location = useLocation();
+//   const [anchorEl, setAnchorEl] = useState(null);
+//   const [purchaseShow, setPurchaseShow] = useState(null);
+//   const [settingShow, setSettingShow] = useState(null);
+//   const [reportsAndExpense, setReportsAndExpense] = useState(null);
+//   const [drawerOpen, setDrawerOpen] = useState(false);
+//   const [salesOpen, setSalesOpen] = useState(false);
+
+//   const handleNavigate = (path) => {
+//     setDrawerOpen(false); // Close the drawer when navigating
+//     navigate(path);
+//   };
+
+//   const handleUserDetailClick = (event) => {
+//     setAnchorEl(event.currentTarget);
+//   };
+//    const handleSettingClick = (event) => {
+//     setSettingShow(event.currentTarget);
+//   };
+//   const handleReportsAndExpenseClick = (event) => {
+//     setReportsAndExpense(event.currentTarget);
+//   };
+
+//   const handleUserDetailClose = (path) => {
+//     setAnchorEl(null);
+//     if (path) {
+//       handleNavigate(path);
+//     }
+//   };
+//   const handleSettingClose = (path) => {
+//     setSettingShow(null);
+//     if (path) {
+//       handleNavigate(path);
+//     }
+//   };
+//   const handlePurchaseClose = (path) => {
+//     setPurchaseShow(null);
+//     if (path) {
+//       handleNavigate(path);
+//     }
+//   };
+//   const handleReportsAndExpenseClose = (path) => {
+//     setReportsAndExpense(null);
+//     if (path) {
+//       handleNavigate(path);
+//     }
+//   };
+//   const handlePurchaseClick = (event) => {
+//     setPurchaseShow(event.currentTarget);
+//   };
+
+//   const isActive = (path) => location.pathname === path;
+
+
+
   return (
     <div className="font-roboto bg-gray-200">
       <Toast ref={toast} />
       <div className="flex h-14 items-center dark:bg-gray-800 justify-between gap-8 px-4 sm:px-6 bg-[#3A5B76] w-screen p-6">
         <div>
+          {/* here it is for logo */}
           {business_name.length > 0 ? (
             <>
               {business_name[0].vendor_logo != null ? (
@@ -208,20 +330,90 @@ const Sidebar = ({setRefresh}) => {
                 />
               ) : (
                 <span className="font-bold text-5xl rounded text-white">
-                  {business_name[0].vendor_business_legal_name.substring(0, 1).toUpperCase()}
+                  {business_name[0].vendor_business_legal_name
+                    .substring(0, 1)
+                    .toUpperCase()}
                 </span>
               )}
             </>
           ) : (
-            ""
+            <div className=''>
+            <Skeleton className='top-4' width="10rem" height="3rem"></Skeleton>
+            </div>
           )}
           <span className="text-white text-2xl ms-1 font-bold">
             {business_name.length > 0
               ? business_name[0].vendor_business_legal_name.toUpperCase()
-              : ""}
+              : ''}
           </span>
         </div>
-        <button
+        {
+          userName!=""?(
+            <div className='me-7'>
+              <Button
+          sx={{
+            backgroundColor:"white",
+            color: '#3a5b76',
+            fontWeight:"bold",
+            // borderBottom:
+            //   isActive(`/invoices`) ||
+            //   isActive(`/quotation`) ||
+            //   isActive(`/deliverychallan-table`) ||
+            //   isActive(`/inventory`) ||
+            //   isActive(`/paymentIn`) ||
+            //   anchorEl
+            //     ? '3px solid #3a5b76'
+            //     : 'none',
+            border:'1px solid white',
+            borderRadius: '10px',
+            px: 3,
+          }}
+          onClick={handleUserDetailClick}
+        >
+          {userName+""+"▼"}
+        </Button>
+        <Menu
+          id="user-menu"
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => handleUserDetailClose()}
+        >
+          {
+            !isdark ?(
+              <MenuItem onClick={() => handleUserDetailClose("theme")}>
+            Switch To Dark Mode
+          </MenuItem>
+            ):(
+              <MenuItem onClick={() => handleUserDetailClose("theme")}>
+            Switch To Light Mode
+          </MenuItem>
+            )
+          }
+          <MenuItem
+          sx={{
+            
+          }}
+          onClick={() => handleUserDetailClose('keyBoardShortcut')}>
+            Key Board Shortcut's
+          </MenuItem>
+          <Button
+            fullWidth
+            variant="contained"
+            color="error"
+            onClick={() => {
+              // Add your logout logic here
+              handleUserDetailClose("logout");
+            }}
+          >
+            Logout
+          </Button>
+        </Menu>
+        </div>
+          ):(
+            <></>
+          )
+        }
+        {/* <button
           id="menu-toggle"
           className="hidden text-white focus:outline-none"
         >
@@ -239,40 +431,38 @@ const Sidebar = ({setRefresh}) => {
               d="M4 6h16M4 12h16m-7 6h7"
             />
           </svg>
-        </button>
-        <div className="flex items-center gap-40 max-md:hidden">
-          <div className="flex items-center gap-10 max-md:hidden">
-            {
-              (userRole=="owner" || userRole=="partner" || userRole=="salesPerson")?(
-                <div className="justify-content p-1">
-              <Dropdown
-                value={selectedCity}
-                onChange={handleChange}
-                options={cities}
-                optionLabel="name"
-                placeholder="Create +"
-                className="w-full md:w-14rem"
-              />
-            </div>
-              ):(
-                <div className="justify-content p-1">
-              <Dropdown
-              disabled
-                value={selectedCity}
-                onChange={handleChange}
-                options={cities}
-                optionLabel="name"
-                placeholder="Create +"
-                className="disabled:opacity-70 disabled:text-gray-200 w-full md:w-14rem"
-              />
-            </div>
-              )
-            }
+        </button> */}
+            {/* {userRole == 'owner' ||
+            userRole == 'partner' ||
+            userRole == 'salesPerson' ? (
+              <div className="justify-content p-1">
+                <Dropdown
+                  value={selectedCity}
+                  onChange={handleChange}
+                  options={cities}
+                  optionLabel="name"
+                  placeholder="Create +"
+                  className="w-full md:w-14rem"
+                />
+              </div>
+            ) : (
+              <div className="justify-content p-1">
+                <Dropdown
+                  disabled
+                  value={selectedCity}
+                  onChange={handleChange}
+                  options={cities}
+                  optionLabel="name"
+                  placeholder="Create +"
+                  className="disabled:opacity-70 disabled:text-gray-200 w-full md:w-14rem"
+                />
+              </div>
+            )} */}
             {/* Shortcut Icon */}
-            <div className="justify-content p-1">
+            {/* <div className="justify-content p-1">
               <button type="button" onClick={() => setVisibleRight(true)}>
                 <svg
-                  className="absolute right-60 bg-white rounded-full top-2.5 w-9 p-2 text-gray-700"
+                  className="absolute right-48 bg-white rounded-full top-2.5 w-9 p-2 text-gray-700"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -294,7 +484,7 @@ const Sidebar = ({setRefresh}) => {
                   <line x1="18" y1="8" x2="18" y2="12" stroke-width="2" />
                 </svg>
               </button>
-            </div>
+            </div> */}
             <KeyShortcut
               visible={visibleRight}
               position="right"
@@ -368,11 +558,11 @@ const Sidebar = ({setRefresh}) => {
               </div>
             </KeyShortcut>
             {/* Theme Icon */}
-            {!isdark ? (
+            {/* {!isdark ? (
               <div className="justify-content p-1">
-                <button onClick={() => setDark((prev) => !prev)}>
+                <button onClick={() => setDark(prev => !prev)}>
                   <svg
-                    className="absolute right-48 bg-white rounded-full top-2.5 w-9 p-2 text-gray-700"
+                    className="absolute right-36 bg-white rounded-full top-2.5 w-9 p-2 text-gray-700"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -389,9 +579,9 @@ const Sidebar = ({setRefresh}) => {
               </div>
             ) : (
               <div className="justify-content p-1">
-                <button onClick={() => setDark((prev) => !prev)}>
+                <button onClick={() => setDark(prev => !prev)}>
                   <svg
-                    className="absolute right-48 bg-white rounded-full top-2.5 w-9 p-2 text-yellow-500 dark:bg-gray-800 dark:!text-gray-800"
+                    className="absolute right-36 bg-white rounded-full top-2.5 w-9 p-2 text-yellow-500 dark:bg-gray-800 dark:!text-gray-800"
                     xmlns="http://www.w3.org/2000/svg"
                     fill="none"
                     viewBox="0 0 24 24"
@@ -406,13 +596,13 @@ const Sidebar = ({setRefresh}) => {
                   </svg>
                 </button>
               </div>
-            )}
+            )} */}
 
             {/* Notification Icon */}
-            <form className="justify-content p-1">
+            {/* <form className="justify-content p-1">
               <button>
                 <svg
-                  className="absolute right-36 bg-white rounded-full top-2.5 w-9 p-2 text-gray-700"
+                  className="absolute right-24 bg-white rounded-full top-2.5 w-9 p-2 text-gray-700"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -426,12 +616,12 @@ const Sidebar = ({setRefresh}) => {
                   />
                 </svg>
               </button>
-            </form>
+            </form> */}
             {/* Shortcut icon */}
-            <form className="justify-content p-1">
+            {/* <form className="justify-content p-1">
               <button>
                 <svg
-                  className="absolute right-36 bg-white rounded-full top-2.5 w-9 p-2 text-gray-700"
+                  className="absolute right-24 bg-white rounded-full top-2.5 w-9 p-2 text-gray-700"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -445,10 +635,10 @@ const Sidebar = ({setRefresh}) => {
                   />
                 </svg>
               </button>
-            </form>
+            </form> */}
             {/* Profile Icon */}
-            <form className="justify-content p-1">
-              <button type="button" onClick={(e) => handleBussinessCheck(e)}>
+            {/* <form className="justify-content p-1">
+              <button type="button" onClick={e => handleBussinessCheck(e)}>
                 <svg
                   className="absolute right-24 bg-white rounded-full top-2.5 w-9 p-2 text-gray-700"
                   xmlns="http://www.w3.org/2000/svg"
@@ -464,19 +654,13 @@ const Sidebar = ({setRefresh}) => {
                   />
                 </svg>
               </button>
-            </form>
+            </form> */}
 
             {/* Logout Icon */}
-            <form className="justify-content p-1">
+            {/* <form className="justify-content p-1">
               <button
                 type="button"
-                onClick={() => {
-                  if (timeoutRef.current) {
-                    clearTimeout(timeoutRef.current);
-                    timeoutRef.current = null;
-                  }
-                  navigate("/login"); // Manually navigate after clearing timeout
-                }}
+                onClick={(e) => handleLogout(e)}
               >
                 <svg
                   className="absolute right-12 bg-blue-50 rounded-full top-2.5 w-9 p-2 text-gray-700 hover:bg-red-600 hover:text-white"
@@ -493,2175 +677,30 @@ const Sidebar = ({setRefresh}) => {
                   />
                 </svg>
               </button>
-            </form>
+            </form> */}
           </div>
-        </div>
-      </div>
-      <div className="bgSetSideBar">
-        <div>
-          {/* Navbar */}
-          {
-            userRole=="deliveryBoy" &&  <nav className=" bg-white px-4 py-3 shadow-md flex justify-between items-center">
-            <button
-              className="md:hidden text-2xl"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <span className="text-2xl">☰</span>
-            </button>
-
-            <div className="hidden md:flex space-x-6 items-center">
-              <NavLink
-                to="/dashboard"
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="pi pi-fw pi-home  d-inline-block"></span>
-                <span className="text-black">Dashboard</span>
-              </NavLink>
-
-              {/* Products Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  disabled
-                  style={{ borderRadius: "16px" }}
-                  onClick={(e) => handleCheckClick(e, "products")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2"
-                >
-                  <span className="pi pi-fw pi-list  d-inline-block"></span>
-                  <span className="text-black">Products</span>
-                </button>
-              </div>
-
-              {/* Customer's Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  disabled
-                  style={{ borderRadius: "16px" }}
-                  onClick={(e) => handleCheckClick(e, "display")}
-                  className="text-decoration-none disabled:opacity-70 disabled:text-gray-200 text-black hover:bg-gray-300 p-2"
-                >
-                  <span className="pi pi-fw pi-users d-inline-block"></span>
-                  <span className="text-black">Customer's</span>
-                </button>
-              </div>
-
-              {/* ₹ Sales Dropdown */}
-              {/* ₹ Sales Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[2] = el)}
-              >
-                <button
-                  onClick={() => toggleDropdown(2)}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>₹ Sales ▼</span>
-                </button>
-                {dropdownOpen === 2 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                    disabled
-                      onClick={(e) => handleCheckClick(e, "invoices")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Invoice's</span>
-                    </button>
-                    <button
-                      onClick={(e) =>
-                        handleCheckClick(e, "deliverychallan-table")
-                      }
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-truck d-inline-block"></span>
-                      <span>Delivery Challan</span>
-                    </button>
-                    <button
-                      disabled
-                      onClick={(e) => handleCheckClick(e, "quotation")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Quotation's</span>
-                    </button>
-                    <button
-                    disabled
-                      onClick={(e) => handleCheckClick(e, "paymentIn")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment In list</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Purchase Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[3] = el)}
-              >
-                <button
-                  disabled
-                  onClick={() => toggleDropdown(3)}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Purchase ▼</span>
-                </button>
-                {dropdownOpen === 3 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchase-table")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Purchase List</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchaseForm")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-arrow-left d-inline-block"></span>
-                      <span>Purchase Form</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "paymentOut")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment Out List</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "reports")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Report's</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "expenseManager")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Expense Manager</span>
-                </button>
-              </div>
-              
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <NavLink
-                  to="#"
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users text-black opacity-50  d-inline-block"></span>
-                  <span className="text-black opacity-50">Users</span>
-                </NavLink>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "settings")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-cog text-black d-inline-block"></span>
-                  <span className="text-black"> Settings</span>
-                </button>
-              </div>
-            </div>
-          </nav>
-          }
-          {
-            userRole=="stockManager" &&  <nav className=" bg-white px-4 py-3 shadow-md flex justify-between items-center">
-            <button
-              className="md:hidden text-2xl"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <span className="text-2xl">☰</span>
-            </button>
-
-            <div className="hidden md:flex space-x-6 items-center">
-              <NavLink
-                to="/dashboard"
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="pi pi-fw pi-home  d-inline-block"></span>
-                <span className="text-black">Dashboard</span>
-              </NavLink>
-
-              {/* Products Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  disabled
-                  style={{ borderRadius: "16px" }}
-                  onClick={(e) => handleCheckClick(e, "products")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2"
-                >
-                  <span className="pi pi-fw pi-list  d-inline-block"></span>
-                  <span className="text-black">Products</span>
-                </button>
-              </div>
-
-              {/* Customer's Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  disabled
-                  style={{ borderRadius: "16px" }}
-                  onClick={(e) => handleCheckClick(e, "display")}
-                  className="text-decoration-none disabled:opacity-70 disabled:text-gray-200 text-black hover:bg-gray-300 p-2"
-                >
-                  <span className="pi pi-fw pi-users d-inline-block"></span>
-                  <span className="text-black">Customer's</span>
-                </button>
-              </div>
-
-              {/* ₹ Sales Dropdown */}
-              {/* ₹ Sales Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[2] = el)}
-              >
-                <button
-                disabled
-                  onClick={() => toggleDropdown(2)}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>₹ Sales ▼</span>
-                </button>
-                {dropdownOpen === 2 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                    disabled
-                      onClick={(e) => handleCheckClick(e, "invoices")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Invoice's</span>
-                    </button>
-                    <button
-                      onClick={(e) =>
-                        handleCheckClick(e, "deliverychallan-table")
-                      }
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-truck d-inline-block"></span>
-                      <span>Delivery Challan</span>
-                    </button>
-                    <button
-                      disabled
-                      onClick={(e) => handleCheckClick(e, "quotation")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Quotation's</span>
-                    </button>
-                    <button
-                    disabled
-                      onClick={(e) => handleCheckClick(e, "paymentIn")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment In list</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Purchase Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[3] = el)}
-              >
-                <button
-              
-                  onClick={() => toggleDropdown(3)}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Purchase ▼</span>
-                </button>
-                {dropdownOpen === 3 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchase-table")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Purchase List</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchaseForm")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-arrow-left d-inline-block"></span>
-                      <span>Purchase Form</span>
-                    </button>
-                    <button
-                    disabled
-                      onClick={(e) => handleCheckClick(e, "paymentOut")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment Out List</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "reports")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Report's</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "expenseManager")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Expense Manager</span>
-                </button>
-              </div>
-              
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <NavLink
-                  to="#"
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users text-black opacity-50  d-inline-block"></span>
-                  <span className="text-black opacity-50">Users</span>
-                </NavLink>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "settings")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-cog text-black d-inline-block"></span>
-                  <span className="text-black"> Settings</span>
-                </button>
-              </div>
-            </div>
-          </nav>
-          }
-          {
-            userRole=="salesPerson" && 
-            <nav className=" bg-white px-4 py-3 shadow-md flex justify-between items-center">
-            <button
-              className="md:hidden text-2xl"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <span className="text-2xl">☰</span>
-            </button>
-
-            <div className="hidden md:flex space-x-6 items-center">
-              <NavLink
-                to="/dashboard"
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="pi pi-fw pi-home  d-inline-block"></span>
-                <span className="text-black">Dashboard</span>
-              </NavLink>
-
-              {/* Products Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  style={{ borderRadius: "16px" }}
-                  onClick={(e) => handleCheckClick(e, "products")}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2"
-                >
-                  <span className="pi pi-fw pi-list  d-inline-block"></span>
-                  <span className="text-black">Products</span>
-                </button>
-              </div>
-
-              {/* Customer's Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  style={{ borderRadius: "16px" }}
-                  onClick={(e) => handleCheckClick(e, "display")}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2"
-                >
-                  <span className="pi pi-fw pi-users d-inline-block"></span>
-                  <span className="text-black">Customer's</span>
-                </button>
-              </div>
-
-              {/* ₹ Sales Dropdown */}
-              {/* ₹ Sales Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[2] = el)}
-              >
-                <button
-                  onClick={() => toggleDropdown(2)}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>₹ Sales ▼</span>
-                </button>
-                {dropdownOpen === 2 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "invoices")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Invoice's</span>
-                    </button>
-                    <button
-                      onClick={(e) =>
-                        handleCheckClick(e, "deliverychallan-table")
-                      }
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-truck d-inline-block"></span>
-                      <span>Delivery Challan</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "quotation")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Quotation's</span>
-                    </button>
-                    <button
-                      disabled
-                      onClick={(e) => handleCheckClick(e, "paymentIn")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment In list</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Purchase Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[3] = el)}
-              >
-                <button
-                  disabled
-                  onClick={() => toggleDropdown(3)}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Purchase ▼</span>
-                </button>
-                {dropdownOpen === 3 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchase-table")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Purchase List</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchaseForm")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-arrow-left d-inline-block"></span>
-                      <span>Purchase Form</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "paymentOut")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment Out List</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "reports")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Report's</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "expenseManager")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Expense Manager</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <NavLink
-                  to="#"
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users text-black opacity-50  d-inline-block"></span>
-                  <span className="text-black opacity-50">Users</span>
-                </NavLink>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "settings")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-cog text-black d-inline-block"></span>
-                  <span className="text-black"> Settings</span>
-                </button>
-              </div>
-            </div>
-          </nav>
-          }
-          {
-            userRole=="owner" && <nav className=" bg-white px-4 py-3 shadow-md flex justify-between items-center">
-            <button
-              className="md:hidden text-2xl"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <span className="text-2xl">☰</span>
-            </button>
-
-            <div className="hidden md:flex space-x-6 items-center">
-              <NavLink
-                to="/dashboard"
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="pi pi-fw pi-home  d-inline-block"></span>
-                <span className="text-black">Dashboard</span>
-              </NavLink>
-
-              {/* Products Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  style={{ borderRadius: "16px" }}
-                  onClick={(e) => handleCheckClick(e, "products")}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2"
-                >
-                  <span className="pi pi-fw pi-list  d-inline-block"></span>
-                  <span className="text-black">Products</span>
-                </button>
-              </div>
-
-              {/* Customer's Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  style={{ borderRadius: "16px" }}
-                  onClick={(e) => handleCheckClick(e, "display")}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2"
-                >
-                  <span className="pi pi-fw pi-users d-inline-block"></span>
-                  <span className="text-black">Customer's</span>
-                </button>
-              </div>
-
-              {/* ₹ Sales Dropdown */}
-              {/* ₹ Sales Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[2] = el)}
-              >
-                <button
-                  onClick={() => toggleDropdown(2)}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>₹ Sales ▼</span>
-                </button>
-                {dropdownOpen === 2 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "invoices")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Invoice's</span>
-                    </button>
-                    <button
-                      onClick={(e) =>
-                        handleCheckClick(e, "deliverychallan-table")
-                      }
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-truck d-inline-block"></span>
-                      <span>Delivery Challan</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "quotation")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Quotation's</span>
-                    </button>
-                    <button
-                      
-                      onClick={(e) => handleCheckClick(e, "paymentIn")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment In list</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Purchase Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[3] = el)}
-              >
-                <button
-                  
-                  onClick={() => toggleDropdown(3)}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Purchase ▼</span>
-                </button>
-                {dropdownOpen === 3 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchase-table")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Purchase List</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchaseForm")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-arrow-left d-inline-block"></span>
-                      <span>Purchase Form</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "paymentOut")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment Out List</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "reports")}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Report's</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "expenseManager")}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Expense Manager</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "users")}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users text-black d-inline-block"></span>
-                  <span className="text-black">Users</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "settings")}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-cog text-black d-inline-block"></span>
-                  <span className="text-black"> Settings</span>
-                </button>
-              </div>
-  
-            </div>
-          </nav>
-          }
-          {
-            userRole=="partner" &&  <nav className=" bg-white px-4 py-3 shadow-md flex justify-between items-center">
-            <button
-              className="md:hidden text-2xl"
-              onClick={() => setSidebarOpen(true)}
-            >
-              <span className="text-2xl">☰</span>
-            </button>
-
-            <div className="hidden md:flex space-x-6 items-center">
-              <NavLink
-                to="/dashboard"
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="pi pi-fw pi-home  d-inline-block"></span>
-                <span className="text-black">Dashboard</span>
-              </NavLink>
-
-              {/* Products Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  
-                  style={{ borderRadius: "16px" }}
-                  onClick={(e) => handleCheckClick(e, "products")}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2"
-                >
-                  <span className="pi pi-fw pi-list  d-inline-block"></span>
-                  <span className="text-black">Products</span>
-                </button>
-              </div>
-
-              {/* Customer's Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  
-                  style={{ borderRadius: "16px" }}
-                  onClick={(e) => handleCheckClick(e, "display")}
-                  className="text-decoration-none  text-black hover:bg-gray-300 p-2"
-                >
-                  <span className="pi pi-fw pi-users d-inline-block"></span>
-                  <span className="text-black">Customer's</span>
-                </button>
-              </div>
-
-              {/* ₹ Sales Dropdown */}
-              {/* ₹ Sales Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[2] = el)}
-              >
-                <button
-                  onClick={() => toggleDropdown(2)}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>₹ Sales ▼</span>
-                </button>
-                {dropdownOpen === 2 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                    
-                      onClick={(e) => handleCheckClick(e, "invoices")}
-                      className=" block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Invoice's</span>
-                    </button>
-                    <button
-                      onClick={(e) =>
-                        handleCheckClick(e, "deliverychallan-table")
-                      }
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-truck d-inline-block"></span>
-                      <span>Delivery Challan</span>
-                    </button>
-                    <button
-                      
-                      onClick={(e) => handleCheckClick(e, "quotation")}
-                      className=" block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Quotation's</span>
-                    </button>
-                    <button
-                    
-                      onClick={(e) => handleCheckClick(e, "paymentIn")}
-                      className=" block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment In list</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Purchase Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[3] = el)}
-              >
-                <button
-                  
-                  onClick={() => toggleDropdown(3)}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Purchase ▼</span>
-                </button>
-                {dropdownOpen === 3 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchase-table")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Purchase List</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchaseForm")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-arrow-left d-inline-block"></span>
-                      <span>Purchase Form</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "paymentOut")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment Out List</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "reports")}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-cog text-black d-inline-block"></span>
-                  <span className="text-black"> Report's</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "expenseManager")}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Expense Manager</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "users")}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users text-black d-inline-block"></span>
-                  <span className="text-black">Users</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "settings")}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-cog text-black d-inline-block"></span>
-                  <span className="text-black"> Settings</span>
-                </button>
-              </div>
-            </div>
-          </nav>
-          }
-          {/* Offcanvas Sidebar */}
-          <div
-            className={`fixed overflow-scroll top-0 left-0 w-64 h-full bg-white shadow-lg z-50 transform transition-transform duration-300 ease-in-out ${
-              sidebarOpen ? "translate-x-0" : "-translate-x-full"
-            }`}
-            ref={sidebarRef}
-          >
-            <div className="p-2 border-b flex justify-between items-center">
-              <h2 className="text-lg font-bold">
-                <img className="w-20" src={imgLogo} alt="" />
-              </h2>
-              <button
-                className="text-4xl"
-                onClick={() => setSidebarOpen(false)}
-              >
-                <span className="text-4xl">×</span>
-              </button>
-            </div>
+      <div className='bg-white'>
             {
-              ((userRole=="owner") || (userRole=="partner")) && (
-                <nav className="flex flex-col p-4 space-y-4">
-              <NavLink
-                onClick={(e) => handleBussinessCheck(e)}
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="inline-block mr-1">
-                  <PiStorefrontThin />
-                </span>
-                <span className="text-black">
-                  {business_name.length
-                    ? business_name[0].vendor_business_legal_name.toUpperCase()
-                    : ""}
-                </span>
-              </NavLink>
-              <NavLink
-                to="/dashboard"
-                onClick={() => setSidebarOpen(false)}
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="pi pi-fw pi-home  d-inline-block"></span>
-                <span className="text-black">Dashboard</span>
-              </NavLink>
-
-              {/* Products Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "products")}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-list  d-inline-block"></span>
-                  <span className="text-black">Products</span>
-                </button>
-              </div>
-
-              {/* Customer's Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "display")}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users d-inline-block"></span>
-                  <span className="text-black">Customer's</span>
-                </button>
-              </div>
-
-              {/* ₹ Sales Dropdown */}
-              {/* ₹ Sales Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[2] = el)}
-              >
-                <button
-                  onClick={() => toggleDropdown(2)}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>₹ Sales ▼</span>
-                </button>
-                {dropdownOpen === 2 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "invoices")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Invoice's</span>
-                    </button>
-                    <button
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={(e) =>
-                        handleCheckClick(e, "deliverychallan-table")
-                      }
-                    >
-                      <span className="pi pi-fw pi-truck d-inline-block"></span>
-                      <span>Delivery Challan</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "quotation")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Quotation's</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "paymentIn")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment In list</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Purchase Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[3] = el)}
-              >
-                <button
-                  onClick={() => toggleDropdown(3)}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Purchase ▼</span>
-                </button>
-                {dropdownOpen === 3 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchase-table")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Purchase List</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchaseForm")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-arrow-left d-inline-block"></span>
-                      <span>Purchase Form</span>
-                    </button>
-                    <button
-                      to="/paymentOut"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={(e) => handleCheckClick(e, "paymentOut")}
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment Out List</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "reports")}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Report's</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "expenseManager")}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Expense Manager</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "users")}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users  d-inline-block"></span>
-                  <span className="text-black">Users</span>
-                </button>
-              </div>
-        
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[4] = el)}
-              >
-                <button
-                  onClick={() => toggleDropdown(4)}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Setting's ▼</span>
-                </button>
-                {dropdownOpen === 4 && (
-                  <div>
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <h6 className="p-2">Invoice setting</h6>
-                    <hr className="mb-1" />
-                    <NavLink
-                      to="/settings/prefixInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Prefix Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/themeInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Theme Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/bankAccountInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Bank Account Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/authorizedSignatureInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      <span>- Authorized Signature Invoice</span>
-                    </NavLink>
-                   <h6 className="p-2">Challan setting</h6>
-                   <hr className="mb-1" />
-                   <NavLink
-                     to="/settings/prefixChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Prefix Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/themeChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Theme Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/bankAccountChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Bank Account Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/authorizedSignatureChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     <span>- Authorized Signature Challan</span>
-                   </NavLink>
-                 </div>
-                 </div>
-                )}
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={() => {
-                    if (timeoutRef.current) {
-                      clearTimeout(timeoutRef.current);
-                      timeoutRef.current = null;
-                    }
-                    navigate("/login"); // Manually navigate after clearing timeout
-                  }}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="inline-block">
-                    <IoMdLogOut className="inline-block mr-1" />
-                    Logout
-                  </span>
-                </button>
-              </div>
-            </nav>
-              )
-            }
-            {
-              userRole=="salesPerson" && (
-                <nav className="flex flex-col p-4 space-y-4">
-              <NavLink
-                onClick={(e) => handleBussinessCheck(e)}
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="inline-block mr-1">
-                  <PiStorefrontThin />
-                </span>
-                <span className="text-black">
-                  {business_name.length
-                    ? business_name[0].vendor_business_legal_name.toUpperCase()
-                    : ""}
-                </span>
-              </NavLink>
-              <NavLink
-                to="/dashboard"
-                onClick={() => setSidebarOpen(false)}
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="pi pi-fw pi-home  d-inline-block"></span>
-                <span className="text-black">Dashboard</span>
-              </NavLink>
-
-              {/* Products Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "products")}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-list  d-inline-block"></span>
-                  <span className="text-black">Products</span>
-                </button>
-              </div>
-
-              {/* Customer's Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={(e) => handleCheckClick(e, "display")}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users d-inline-block"></span>
-                  <span className="text-black">Customer's</span>
-                </button>
-              </div>
-
-              {/* ₹ Sales Dropdown */}
-              {/* ₹ Sales Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[2] = el)}
-              >
-                <button
-                  onClick={() => toggleDropdown(2)}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>₹ Sales ▼</span>
-                </button>
-                {dropdownOpen === 2 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "invoices")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Invoice's</span>
-                    </button>
-                    <button
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={(e) =>
-                        handleCheckClick(e, "deliverychallan-table")
-                      }
-                    >
-                      <span className="pi pi-fw pi-truck d-inline-block"></span>
-                      <span>Delivery Challan</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "quotation")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Quotation's</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "paymentIn")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment In list</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Purchase Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[3] = el)}
-              >
-                <button
-                disabled
-                  onClick={() => toggleDropdown(3)}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Purchase ▼</span>
-                </button>
-                {dropdownOpen === 3 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchase-table")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Purchase List</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchaseForm")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-arrow-left d-inline-block"></span>
-                      <span>Purchase Form</span>
-                    </button>
-                    <button
-                      to="/paymentOut"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={(e) => handleCheckClick(e, "paymentOut")}
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment Out List</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-                <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "reports")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Report's</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "expenseManager")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Expense Manager</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "users")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users  d-inline-block"></span>
-                  <span className="text-black">Users</span>
-                </button>
-              </div>
-              
-              <div
-              
-                className="relative"
-                ref={(el) => (dropdownRefs.current[4] = el)}
-              >
-                <button
-                disabled
-                  onClick={() => toggleDropdown(4)}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Setting's ▼</span>
-                </button>
-                {dropdownOpen === 4 && (
-                  <div>
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <h6 className="p-2">Invoice setting</h6>
-                    <hr className="mb-1" />
-                    <NavLink
-                      to="/settings/prefixInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Prefix Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/themeInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Theme Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/bankAccountInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Bank Account Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/authorizedSignatureInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      <span>- Authorized Signature Invoice</span>
-                    </NavLink>
-                   <h6 className="p-2">Challan setting</h6>
-                   <hr className="mb-1" />
-                   <NavLink
-                     to="/settings/prefixChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Prefix Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/themeChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Theme Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/bankAccountChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Bank Account Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/authorizedSignatureChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     <span>- Authorized Signature Challan</span>
-                   </NavLink>
-                 </div>
-                 </div>
-                )}
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={() => {
-                    if (timeoutRef.current) {
-                      clearTimeout(timeoutRef.current);
-                      timeoutRef.current = null;
-                    }
-                    navigate("/login"); // Manually navigate after clearing timeout
-                  }}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="inline-block">
-                    <IoMdLogOut className="inline-block mr-1" />
-                    Logout
-                  </span>
-                </button>
-              </div>
-            </nav>
+              (userRole=="owner" || userRole=="partner") && (
+                <OwnerSideBar data={business_name}/>
               )
             }
             {
               userRole=="deliveryBoy" && (
-                <nav className="flex flex-col p-4 space-y-4">
-              <NavLink
-                onClick={(e) => handleBussinessCheck(e)}
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="inline-block mr-1">
-                  <PiStorefrontThin />
-                </span>
-                <span className="text-black">
-                  {business_name.length
-                    ? business_name[0].vendor_business_legal_name.toUpperCase()
-                    : ""}
-                </span>
-              </NavLink>
-              <NavLink
-                to="/dashboard"
-                onClick={() => setSidebarOpen(false)}
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="pi pi-fw pi-home  d-inline-block"></span>
-                <span className="text-black">Dashboard</span>
-              </NavLink>
-
-              {/* Products Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "products")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-list  d-inline-block"></span>
-                  <span className="text-black">Products</span>
-                </button>
-              </div>
-
-              {/* Customer's Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "display")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users d-inline-block"></span>
-                  <span className="text-black">Customer's</span>
-                </button>
-              </div>
-
-              {/* ₹ Sales Dropdown */}
-              {/* ₹ Sales Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[2] = el)}
-              >
-                <button
-                  onClick={() => toggleDropdown(2)}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>₹ Sales ▼</span>
-                </button>
-                {dropdownOpen === 2 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                    disabled
-                      onClick={(e) => handleCheckClick(e, "invoices")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Invoice's</span>
-                    </button>
-                    <button
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={(e) =>
-                        handleCheckClick(e, "deliverychallan-table")
-                      }
-                    >
-                      <span className="pi pi-fw pi-truck d-inline-block"></span>
-                      <span>Delivery Challan</span>
-                    </button>
-                    <button
-                    disabled
-                      onClick={(e) => handleCheckClick(e, "quotation")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Quotation's</span>
-                    </button>
-                    <button
-                    disabled
-                      onClick={(e) => handleCheckClick(e, "paymentIn")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment In list</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Purchase Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[3] = el)}
-              >
-                <button
-                disabled
-                  onClick={() => toggleDropdown(3)}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Purchase ▼</span>
-                </button>
-                {dropdownOpen === 3 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchase-table")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Purchase List</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchaseForm")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-arrow-left d-inline-block"></span>
-                      <span>Purchase Form</span>
-                    </button>
-                    <button
-                      to="/paymentOut"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={(e) => handleCheckClick(e, "paymentOut")}
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment Out List</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-                <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "reports")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Report's</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "expenseManager")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Expense Manager</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "users")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users  d-inline-block"></span>
-                  <span className="text-black">Users</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[4] = el)}
-              >
-                <button
-                  disabled
-                  onClick={() => toggleDropdown(4)}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Setting's ▼</span>
-                </button>
-                {dropdownOpen === 4 && (
-                  <div>
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <h6 className="p-2">Invoice setting</h6>
-                    <hr className="mb-1" />
-                    <NavLink
-                      to="/settings/prefixInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Prefix Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/themeInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Theme Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/bankAccountInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Bank Account Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/authorizedSignatureInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      <span>- Authorized Signature Invoice</span>
-                    </NavLink>
-                   <h6 className="p-2">Challan setting</h6>
-                   <hr className="mb-1" />
-                   <NavLink
-                     to="/settings/prefixChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Prefix Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/themeChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Theme Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/bankAccountChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Bank Account Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/authorizedSignatureChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     <span>- Authorized Signature Challan</span>
-                   </NavLink>
-                 </div>
-                 </div>
-                )}
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={() => {
-                    if (timeoutRef.current) {
-                      clearTimeout(timeoutRef.current);
-                      timeoutRef.current = null;
-                    }
-                    navigate("/login"); // Manually navigate after clearing timeout
-                  }}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="inline-block">
-                    <IoMdLogOut className="inline-block mr-1" />
-                    Logout
-                  </span>
-                </button>
-              </div>
-            </nav>
+                <DeliveryBoySidebar data={business_name}/>
+              )
+            }
+            {
+              userRole=="salesPerson" && (
+                <SalesPersonSidebar data={business_name}/>
               )
             }
              {
               userRole=="stockManager" && (
-                <nav className="flex flex-col p-4 space-y-4">
-              <NavLink
-                onClick={(e) => handleBussinessCheck(e)}
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="inline-block mr-1">
-                  <PiStorefrontThin />
-                </span>
-                <span className="text-black">
-                  {business_name.length
-                    ? business_name[0].vendor_business_legal_name.toUpperCase()
-                    : ""}
-                </span>
-              </NavLink>
-              <NavLink
-                to="/dashboard"
-                onClick={() => setSidebarOpen(false)}
-                className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-              >
-                <span className="pi pi-fw pi-home  d-inline-block"></span>
-                <span className="text-black">Dashboard</span>
-              </NavLink>
-
-              {/* Products Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "products")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-list  d-inline-block"></span>
-                  <span className="text-black">Products</span>
-                </button>
-              </div>
-
-              {/* Customer's Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "display")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users d-inline-block"></span>
-                  <span className="text-black">Customer's</span>
-                </button>
-              </div>
-
-              {/* ₹ Sales Dropdown */}
-              {/* ₹ Sales Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[2] = el)}
-              >
-                <button
-                disabled
-                  onClick={() => toggleDropdown(2)}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>₹ Sales ▼</span>
-                </button>
-                {dropdownOpen === 2 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                    disabled
-                      onClick={(e) => handleCheckClick(e, "invoices")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Invoice's</span>
-                    </button>
-                    <button
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={(e) =>
-                        handleCheckClick(e, "deliverychallan-table")
-                      }
-                    >
-                      <span className="pi pi-fw pi-truck d-inline-block"></span>
-                      <span>Delivery Challan</span>
-                    </button>
-                    <button
-                    disabled
-                      onClick={(e) => handleCheckClick(e, "quotation")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Quotation's</span>
-                    </button>
-                    <button
-                    disabled
-                      onClick={(e) => handleCheckClick(e, "paymentIn")}
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment In list</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-
-              {/* Purchase Dropdown */}
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[3] = el)}
-              >
-                <button
-                
-                  onClick={() => toggleDropdown(3)}
-                  className=" text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Purchase ▼</span>
-                </button>
-                {dropdownOpen === 3 && (
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchase-table")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-file d-inline-block"></span>
-                      <span>Purchase List</span>
-                    </button>
-                    <button
-                      onClick={(e) => handleCheckClick(e, "purchaseForm")}
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                    >
-                      <span className="pi pi-fw pi-arrow-left d-inline-block"></span>
-                      <span>Purchase Form</span>
-                    </button>
-                    <button
-                    disabled
-                      to="/paymentOut"
-                      className="disabled:opacity-70 disabled:text-gray-200 block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={(e) => handleCheckClick(e, "paymentOut")}
-                    >
-                      <span className="pi pi-fw pi-money-bill d-inline-block"></span>
-                      <span>Payment Out List</span>
-                    </button>
-                  </div>
-                )}
-              </div>
-                <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "reports")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Report's</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "expenseManager")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-book text-black d-inline-block"></span>
-                  <span className="text-black"> Expense Manager</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                disabled
-                  onClick={(e) => handleCheckClick(e, "users")}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="pi pi-fw pi-users  d-inline-block"></span>
-                  <span className="text-black">Users</span>
-                </button>
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[4] = el)}
-              >
-                <button
-                  disabled
-                  onClick={() => toggleDropdown(4)}
-                  className="disabled:opacity-70 disabled:text-gray-200 text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                  style={{ borderRadius: "16px" }}
-                >
-                  <span>Setting's ▼</span>
-                </button>
-                {dropdownOpen === 4 && (
-                  <div>
-                  <div className="absolute left-0 mt-2 w-52 bg-white border rounded shadow-lg z-50">
-                    <h6 className="p-2">Invoice setting</h6>
-                    <hr className="mb-1" />
-                    <NavLink
-                      to="/settings/prefixInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Prefix Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/themeInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Theme Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/bankAccountInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      
-                      <span>- Bank Account Invoice</span>
-                    </NavLink>
-                    <NavLink
-                      to="/settings/authorizedSignatureInvoice"
-                      className="block px-4 py-2 hover:bg-gray-100 text-black"
-                      onClick={() => handleSideClose(null)} // Close dropdown on click
-                    >
-                      <span>- Authorized Signature Invoice</span>
-                    </NavLink>
-                   <h6 className="p-2">Challan setting</h6>
-                   <hr className="mb-1" />
-                   <NavLink
-                     to="/settings/prefixChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Prefix Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/themeChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Theme Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/bankAccountChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     
-                     <span>- Bank Account Challan</span>
-                   </NavLink>
-                   <NavLink
-                     to="/settings/authorizedSignatureChallan"
-                     className="block px-4 py-2 hover:bg-gray-100 text-black"
-                     onClick={() => handleSideClose(null)} // Close dropdown on click
-                   >
-                     <span>- Authorized Signature Challan</span>
-                   </NavLink>
-                 </div>
-                 </div>
-                )}
-              </div>
-              <div
-                className="relative"
-                ref={(el) => (dropdownRefs.current[0] = el)}
-              >
-                <button
-                  onClick={() => {
-                    if (timeoutRef.current) {
-                      clearTimeout(timeoutRef.current);
-                      timeoutRef.current = null;
-                    }
-                    navigate("/login"); // Manually navigate after clearing timeout
-                  }}
-                  className="text-decoration-none text-black hover:bg-gray-300 p-2 rounded-2xl"
-                >
-                  <span className="inline-block">
-                    <IoMdLogOut className="inline-block mr-1" />
-                    Logout
-                  </span>
-                </button>
-              </div>
-            </nav>
+                <StockManagerSidebar data={business_name}/>
               )
             }
-          </div>
-
-          {/* Overlay Background */}
-          {sidebarOpen && (
-            <div
-              className="fixed inset-0 bg-black opacity-30 z-40"
-              onClick={() => setSidebarOpen(false)}
-            ></div>
-          )}
-        </div>
-      </div>
+    </div>
     </div>
   );
 };

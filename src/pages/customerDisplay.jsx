@@ -69,6 +69,17 @@ function CustomerDisplay({ customerListUpdated }) {
   const fileName="customer_add";
   const dialogName="customer's"
   useEffect(() => {
+    const fetchBussiness = async () => {
+          try {
+            const res = await apiGet('/businessprofile');
+            if (res.length === 0) {
+              navigate('/profile_form');
+            }
+          } catch (err) {
+            console.log(err);
+          }
+        };
+        fetchBussiness();
     const fetchCustomers = async () => {
       setLoader(false); // Start loading
       try {
@@ -263,7 +274,7 @@ function CustomerDisplay({ customerListUpdated }) {
               name="customer"
               column={column}
               data={dataTable}
-              pageSize={3} // Number of rows per page
+              pageSize={5} // Number of rows per page
               actions={(row) => (
                 <div className="text-center">
                   {/* <button

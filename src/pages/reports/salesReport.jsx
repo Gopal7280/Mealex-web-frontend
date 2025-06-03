@@ -74,7 +74,20 @@ import RangeSelect from "../../components/dateRangeSelection";
 const SalesReportGSTIN = () => {
   const navigate = useNavigate();
   const [detailedData, setDetailedData] = useState([]);
+  const [showCustomDate,setShowCustomDate]=useState(false);
   useEffect(() => {
+     const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
     const fetchSalesReport = async () => {
       try {
         const res = await apiGet("/reports/today");
@@ -293,6 +306,10 @@ const SalesReportGSTIN = () => {
       }
       lastMonth();
     }
+    if(e.target.value=="customDate")
+    {
+      setShowCustomDate(true);
+    }
   };
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -317,6 +334,7 @@ const SalesReportGSTIN = () => {
           }
         console.log(err)
       }
+      setShowCustomDate(false);
     }
     getDataBetweenRange();
     console.log("Start Date:", startDate);
@@ -333,6 +351,19 @@ const SalesReportGSTIN = () => {
           <div>
             <div className="inline-block">
               <RangeSelect onChange={handleRange} />
+              {
+                showCustomDate && (
+                  <DateRangePicker
+                  setShowCustomDate={setShowCustomDate}
+                  visiblity={showCustomDate}
+          startDate={startDate}
+          endDate={endDate}
+            onStartDateChange={(e) => setStartDate(e.target.value)}
+            onEndDateChange={(e) => setEndDate(e.target.value)}
+            onShow={handleShow}
+          />
+                )
+              }
             </div>
             <button
               onClick={() => exportExcel(detailedData, "SalesReportGSTIN")}
@@ -340,22 +371,9 @@ const SalesReportGSTIN = () => {
             >
               Export as Excel
             </button>
-            <button
-              onClick={() => navigate("/reports")}
-              className="bg-[#3A5B76] ms-2 hover:bg-[#2E4A5E] text-white font-semibold px-6 py-2 shadow-md transition-all duration-200"
-            >
-              Go to Report Dashboard
-            </button>
           </div>
         </div>
         <div>
-          <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-            onStartDateChange={(e) => setStartDate(e.target.value)}
-            onEndDateChange={(e) => setEndDate(e.target.value)}
-            onShow={handleShow}
-          />
         </div>
         {/* Scrollable Table Container */}
         <div className="overflow-x-auto max-h-[500px] overflow-y-auto">

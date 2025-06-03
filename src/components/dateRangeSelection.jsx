@@ -14,6 +14,7 @@ const RangeSelect = ({ onChange }) => {
       <option value="last30Days">Last 30 Days</option>
       <option value="thisMonth">This Month</option>
       <option value="lastMonth">Last Month</option>
+      <option value="customDate">Custom Date</option>
       {/* <option value="theQuarter">The Quarter</option>
       <option value="lastQuarter">Last Quarter</option>
       <option value="theFinancialYear">The Financial Year</option> */}

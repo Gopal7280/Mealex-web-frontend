@@ -1,37 +1,52 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { apiGet } from '../services/api';
 
-const ReportItem = ({ name,handleClick }) => (
+const ReportItem = ({ name, handleClick }) => (
   <button
-  disabled={name=="Purchase Report (GSTR-2)" || name=="Inventory Report" || name=="Invoice Report" || name=="Profit & Loss Statement Report" || name=="Creditors (Account Payable) Reports" || name=="Debtors (Account Receivable) Reports" || name=="Cash/Bank Book Report" || name=="Financial & Business Management Report" || name=="Purchase Report (GSTR-2)"}
-  onClick={(e)=>handleClick(e,name)}
+    disabled={
+      name == 'Purchase Report (GSTR-2)' ||
+      name == 'Inventory Report' ||
+      name == 'Invoice Report' ||
+      name == 'Profit & Loss Statement Report' ||
+      name == 'Creditors (Account Payable) Reports' ||
+      name == 'Debtors (Account Receivable) Reports' ||
+      name == 'Cash/Bank Book Report' ||
+      name == 'Financial & Business Management Report' ||
+      name == 'Purchase Report (GSTR-2)'
+    }
+    onClick={e => handleClick(e, name)}
     className="disabled:opacity-80 !block !py-2.5 !px-4 !text-[#3A5B76] hover:bg-slate-100 rounded-md transition-colors duration-150 flex items-start"
   >
     {name}
   </button>
 );
 
-const ReportCategory = ({ title, reports, initialShowCount = reports.length }) => {
-  const navigate=useNavigate();
+const ReportCategory = ({
+  title,
+  reports,
+  initialShowCount = reports.length,
+}) => {
+  const navigate = useNavigate();
   const [showAll, setShowAll] = useState(false);
-  const displayedReports = showAll ? reports : reports.slice(0, initialShowCount);
-  function handleNavigatePage(e,name){
+  const displayedReports = showAll
+    ? reports
+    : reports.slice(0, initialShowCount);
+  function handleNavigatePage(e, name) {
     console.log(name);
-    for(var i of displayedReports){
-      if(i.name==name)
-      {
-        console.log("match");
-        if(name=="GSTR-1"){
-          navigate("/salesReport");
+    for (var i of displayedReports) {
+      if (i.name == name) {
+        console.log('match');
+        if (name == 'GSTR-1') {
+          navigate('/salesReport');
         }
-        if(name=="Sales Report"){
-          navigate("/salesReport1");
+        if (name == 'Sales Report') {
+          navigate('/salesReport1');
         }
-        if(name=="Purchase Report (GSTR-2)"){
-          navigate("/gstPurchaseReport");
+        if (name == 'Purchase Report (GSTR-2)') {
+          navigate('/gstPurchaseReport');
         }
-      }
-      else{
+      } else {
         console.log(i);
       }
     }
@@ -43,8 +58,12 @@ const ReportCategory = ({ title, reports, initialShowCount = reports.length }) =
         {title}
       </h3>
       <div className="space-y-1">
-        {displayedReports.map((report) => (
-          <ReportItem key={report.name} handleClick={handleNavigatePage} name={report.name} />
+        {displayedReports.map(report => (
+          <ReportItem
+            key={report.name}
+            handleClick={handleNavigatePage}
+            name={report.name}
+          />
         ))}
       </div>
     </div>
@@ -67,16 +86,32 @@ const reportsData = {
 };
 
 function Reports() {
+  const navigate=useNavigate();
+  useEffect(()=>{
+         const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
+  },[])
   return (
     <div className="min-h-screen bg-slate-100 text-[#3A5B76] flex flex-col">
       {/* Header */}
-      <header className="bg-white shadow-sm p-4 sticky top-0 w-full">
-        <h1 className="text-xl font-semibold text-[#3A5B76] text-left">Core Transaction Reports</h1>
-      </header>
 
       {/* Content */}
       <main className="p-4 w-full max-w-8xl mx-auto flex-1">
-        <ReportCategory title="Core Reports" reports={reportsData.coreReports} initialShowCount={6} />
+        <ReportCategory
+          title="Core Reports"
+          reports={reportsData.coreReports}
+          initialShowCount={6}
+        />
       </main>
     </div>
   );

@@ -1,61 +1,61 @@
-import { useFormik } from "formik";
-import React, { useEffect, useState } from "react";
-import { InputComponent } from "../components/Input";
-import { NavLink, useNavigate } from "react-router-dom";
-import { ButtonComponent } from "../components/Button";
-import { apiPost } from "../services/api";
-import * as Yup from "yup";
-import { Loader } from "../layouts/Loader";
+import { useFormik } from 'formik';
+import React, { useEffect, useState } from 'react';
+import { InputComponent } from '../components/Input';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { ButtonComponent } from '../components/Button';
+import { apiPost } from '../services/api';
+import * as Yup from 'yup';
+import { Loader } from '../layouts/Loader';
 import {
   apiReuestLoadCountry,
   apiReuestLoadDataUsingZipCode,
   apiReuestLoadState,
-} from "../services/apiServicesOnline";
-import { Preview, ModeEdit, DeleteForever, Close } from "@mui/icons-material";
-import axios from "axios";
-import { debounce } from "lodash";
-import { config } from "../config/app";
+} from '../services/apiServicesOnline';
+import { Preview, ModeEdit, DeleteForever, Close } from '@mui/icons-material';
+import axios from 'axios';
+import { debounce } from 'lodash';
+import { config } from '../config/app';
 export function Bussiness_profile_from({ setRefresh }) {
   const [customFields, setCustomFields] = useState([]);
   const [loader, setLoader] = useState(false);
   const [logoPreview, setLogoPreview] = useState(null);
   const [signature, setSignature] = useState(null);
-  const [pan_no, setPan_no] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [gstIn, setGstIn] = useState("");
+  const [pan_no, setPan_no] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [gstIn, setGstIn] = useState('');
   const [status, setStatus] = useState(true);
   const maxSizeInMB = 1; // Limit size to 2MB
   const navigate = useNavigate();
   const [country, setCountry] = useState([{}]);
   const [country1, setCountry1] = useState([{}]);
-  const [iso2Country, setIso2Country] = useState("");
-  const [iso2Country1, setIso2Country1] = useState("");
-  const [iso2State, setIso2State] = useState("");
-  const [iso2State1, setIso2State1] = useState("");
-  const [style1, setStyle1] = useState({ display: "none" });
-  const [style2, setStyle2] = useState({ display: "inline-block" });
-  const [style3, setStyle3] = useState({ display: "none" });
-  const [style4, setStyle4] = useState({ display: "inline-block" });
+  const [iso2Country, setIso2Country] = useState('');
+  const [iso2Country1, setIso2Country1] = useState('');
+  const [iso2State, setIso2State] = useState('');
+  const [iso2State1, setIso2State1] = useState('');
+  const [style1, setStyle1] = useState({ display: 'none' });
+  const [style2, setStyle2] = useState({ display: 'inline-block' });
+  const [style3, setStyle3] = useState({ display: 'none' });
+  const [style4, setStyle4] = useState({ display: 'inline-block' });
   useEffect(() => {
     const getState = async () => {
       try {
         const config = {
-          method: "get",
+          method: 'get',
           url: `https://api.countrystatecity.in/v1/countries/In/states`,
           headers: {
-            "X-CSCAPI-KEY":
-              "NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==",
+            'X-CSCAPI-KEY':
+              'NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==',
           },
         };
         const response = await axios(config);
-        setCountry("India");
-        setCountry1("India");
+        setCountry('India');
+        setCountry1('India');
         setState(response.data);
         setState1(response.data);
-        setIso2Country("In");
-        setIso2Country1("In");
-        setNames({ ...names, countryName: "India" });
-        setNames1({ ...names, countryName: "India" });
+        setIso2Country('In');
+        setIso2Country1('In');
+        setNames({ ...names, countryName: 'India' });
+        setNames1({ ...names, countryName: 'India' });
       } catch (err) {
         console.log(err);
       }
@@ -63,33 +63,33 @@ export function Bussiness_profile_from({ setRefresh }) {
     getState();
   }, []);
   const [names, setNames] = useState({
-    countryName: "",
-    stateName: "",
-    cityName: "",
+    countryName: '',
+    stateName: '',
+    cityName: '',
   });
   const [names1, setNames1] = useState({
-    countryName: "",
-    stateName: "",
-    cityName: "",
+    countryName: '',
+    stateName: '',
+    cityName: '',
   });
   const [state, setState] = useState([{}]);
   const [state1, setState1] = useState([{}]);
   function handleCountryChange(e, name) {
-    if (name == "billing") {
-      if (e.target.value === "select") {
-        setNames({ countryName: "", stateName: "", cityName: "" });
+    if (name == 'billing') {
+      if (e.target.value === 'select') {
+        setNames({ countryName: '', stateName: '', cityName: '' });
         setState([{}]);
         setCity([{}]);
       }
-      const [iso, name] = e.target.value.split(".");
+      const [iso, name] = e.target.value.split('.');
       const getState = async () => {
         try {
           const config = {
-            method: "get",
+            method: 'get',
             url: `https://api.countrystatecity.in/v1/countries/${iso}/states`,
             headers: {
-              "X-CSCAPI-KEY":
-                "NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==",
+              'X-CSCAPI-KEY':
+                'NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==',
             },
           };
           const response = await axios(config);
@@ -102,21 +102,21 @@ export function Bussiness_profile_from({ setRefresh }) {
       };
       getState();
     }
-    if (name == "shipping") {
-      if (e.target.value === "select") {
-        setNames1({ countryName: "", stateName: "", cityName: "" });
+    if (name == 'shipping') {
+      if (e.target.value === 'select') {
+        setNames1({ countryName: '', stateName: '', cityName: '' });
         setState1([{}]);
         setCity1([{}]);
       }
-      const [iso, name] = e.target.value.split(".");
+      const [iso, name] = e.target.value.split('.');
       const getState = async () => {
         try {
           const config = {
-            method: "get",
+            method: 'get',
             url: `https://api.countrystatecity.in/v1/countries/${iso}/states`,
             headers: {
-              "X-CSCAPI-KEY":
-                "NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==",
+              'X-CSCAPI-KEY':
+                'NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==',
             },
           };
           const response = await axios(config);
@@ -133,20 +133,20 @@ export function Bussiness_profile_from({ setRefresh }) {
   const [city, setCity] = useState([{}]);
   const [city1, setCity1] = useState([{}]);
   function handleStateChange(e, name) {
-    if (name == "billing") {
-      if (e.target.value === "select") {
-        setNames({ countryName: "", stateName: "", cityName: "" });
+    if (name == 'billing') {
+      if (e.target.value === 'select') {
+        setNames({ countryName: '', stateName: '', cityName: '' });
         setState([{}]);
         setCity([{}]);
       }
-      const [iso, name] = e.target.value.split(".");
+      const [iso, name] = e.target.value.split('.');
       setIso2State(iso);
       const getCity = async () => {
         try {
           const url = `https://api.countrystatecity.in/v1/countries/${iso2Country}/states/${iso}/cities`;
           const headers = {
-            "X-CSCAPI-KEY":
-              "NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==",
+            'X-CSCAPI-KEY':
+              'NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==',
           };
           const response = await apiReuestLoadState(url, headers);
           setCity(response.data);
@@ -157,20 +157,20 @@ export function Bussiness_profile_from({ setRefresh }) {
       };
       getCity();
     }
-    if (name == "shipping") {
-      if (e.target.value === "select") {
-        setNames1({ countryName: "", stateName: "", cityName: "" });
+    if (name == 'shipping') {
+      if (e.target.value === 'select') {
+        setNames1({ countryName: '', stateName: '', cityName: '' });
         setState([{}]);
         setCity([{}]);
       }
-      const [iso, name] = e.target.value.split(".");
+      const [iso, name] = e.target.value.split('.');
       setIso2State1(iso);
       const getCity = async () => {
         try {
           const url = `https://api.countrystatecity.in/v1/countries/${iso2Country1}/states/${iso}/cities`;
           const headers = {
-            "X-CSCAPI-KEY":
-              "NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==",
+            'X-CSCAPI-KEY':
+              'NEMzaW5KOW1yVjhoalBQSmhKRzRBb1U1ZFZWVXh6Z0pZWFI5TXdMMg==',
           };
           const response = await apiReuestLoadState(url, headers);
           setCity1(response.data);
@@ -183,30 +183,30 @@ export function Bussiness_profile_from({ setRefresh }) {
     }
   }
   function handleCityChange(e, name) {
-    if (name == "billing") {
+    if (name == 'billing') {
       setNames({ ...names, cityName: e.target.value });
     }
-    if (name == "shipping") {
+    if (name == 'shipping') {
       setNames1({ ...names1, cityName: e.target.value });
     }
   }
   const [zipData, setZipdata] = useState([
     {
-      country: "",
-      state: "",
-      city: "",
+      country: '',
+      state: '',
+      city: '',
     },
   ]);
   const [zipData1, setZipdata1] = useState([
     {
-      country: "",
-      state: "",
-      city: "",
+      country: '',
+      state: '',
+      city: '',
     },
   ]);
-  const [zip, setZip] = useState("");
-  const [zip1, setZip1] = useState("");
-  const handleDebounce = debounce((value) => {
+  const [zip, setZip] = useState('');
+  const [zip1, setZip1] = useState('');
+  const handleDebounce = debounce(value => {
     const fetchUsingZipCode = async () => {
       try {
         const res = await axios.get(`${config.apiBaseUrl}/pincode/${value}`);
@@ -217,12 +217,12 @@ export function Bussiness_profile_from({ setRefresh }) {
           city: res.data[0].PostOffice[0].Block,
         });
       } catch (error) {
-        console.error("Error fetching pincode data:", error);
+        console.error('Error fetching pincode data:', error);
       }
     };
     fetchUsingZipCode();
   }, 700);
-  const handleDebounce1 = debounce((value) => {
+  const handleDebounce1 = debounce(value => {
     const fetchUsingZipCode = async () => {
       try {
         const res = await axios.get(`${config.apiBaseUrl}/pincode/${value}`);
@@ -233,155 +233,155 @@ export function Bussiness_profile_from({ setRefresh }) {
           city: res.data[0].PostOffice[0].Block,
         });
       } catch (error) {
-        console.error("Error fetching pincode data:", error);
+        console.error('Error fetching pincode data:', error);
       }
     };
     fetchUsingZipCode();
   }, 700);
-  const [shipCheck, setShipCheck] = useState("");
-  const [isshipCheck, setisShipCheck] = useState("");
-  const [style5, setStyle5] = useState("none");
+  const [shipCheck, setShipCheck] = useState('');
+  const [isshipCheck, setisShipCheck] = useState('');
+  const [style5, setStyle5] = useState('none');
   function handleCheckBoxCheck(e) {
-    var bill = document.getElementById("billing_address").value;
+    var bill = document.getElementById('billing_address').value;
     if (e.target.checked) {
-      console.log("checked");
+      console.log('checked');
       setShipCheck(bill);
       setisShipCheck(true);
-      setStyle3({ display: "inline-block" });
-      setStyle4({ display: "none" });
+      setStyle3({ display: 'inline-block' });
+      setStyle4({ display: 'none' });
     } else {
-      setShipCheck("");
+      setShipCheck('');
       setisShipCheck(false);
-      setStyle3({ display: "none" });
-      setStyle4({ display: "inline-block" });
+      setStyle3({ display: 'none' });
+      setStyle4({ display: 'inline-block' });
     }
   }
   function handleZipCodeChange(e, name) {
-    if (name == "billing") {
+    if (name == 'billing') {
       handleDebounce(e.target.value);
       setZip(e.target.value);
-      if (e.target.value === "") {
-        setStyle1({ display: "none" });
-        setStyle2({ display: "inline-block" });
-        setZipdata({ country: "", state: "", city: "" });
-        console.log("i am working");
+      if (e.target.value === '') {
+        setStyle1({ display: 'none' });
+        setStyle2({ display: 'inline-block' });
+        setZipdata({ country: '', state: '', city: '' });
+        console.log('i am working');
       } else {
-        if (names.cityName != "") {
-          setStyle1({ display: "none" });
-          setStyle2({ display: "inline-block" });
-          setZipdata({ country: "", state: "", city: "" });
+        if (names.cityName != '') {
+          setStyle1({ display: 'none' });
+          setStyle2({ display: 'inline-block' });
+          setZipdata({ country: '', state: '', city: '' });
         } else {
-          setStyle1({ display: "inline-block" });
-          setStyle2({ display: "none" });
+          setStyle1({ display: 'inline-block' });
+          setStyle2({ display: 'none' });
         }
       }
     }
-    if (name == "shipping") {
+    if (name == 'shipping') {
       handleDebounce1(e.target.value);
       setZip1(e.target.value);
-      if (e.target.value === "") {
-        setStyle3({ display: "none" });
-        setStyle4({ display: "inline-block" });
-        setZipdata1({ country: "", state: "", city: "" });
-        console.log("i am working");
+      if (e.target.value === '') {
+        setStyle3({ display: 'none' });
+        setStyle4({ display: 'inline-block' });
+        setZipdata1({ country: '', state: '', city: '' });
+        console.log('i am working');
       } else {
-        if (names1.cityName != "") {
-          setStyle3({ display: "none" });
-          setStyle4({ display: "inline-block" });
-          setZipdata1({ country: "", state: "", city: "" });
+        if (names1.cityName != '') {
+          setStyle3({ display: 'none' });
+          setStyle4({ display: 'inline-block' });
+          setZipdata1({ country: '', state: '', city: '' });
         } else {
-          setStyle3({ display: "inline-block" });
-          setStyle4({ display: "none" });
+          setStyle3({ display: 'inline-block' });
+          setStyle4({ display: 'none' });
         }
       }
     }
   }
   const formik = useFormik({
     initialValues: {
-      name: "",
-      businessName: "",
-      phone: "",
-      email: "",
-      pan: "",
-      gst: "",
-      businessType: "",
-      businessCategory: "",
-      openingValue: "",
-      streetBillingAddress: "",
-      notes: "",
-      birthdate: "",
-      anniversary: "",
-      billingCity: "",
-      billingState: "",
-      billingZip_code: "",
+      name: '',
+      businessName: '',
+      phone: '',
+      email: '',
+      pan: '',
+      gst: '',
+      businessType: '',
+      businessCategory: '',
+      openingValue: '',
+      streetBillingAddress: '',
+      notes: '',
+      birthdate: '',
+      anniversary: '',
+      billingCity: '',
+      billingState: '',
+      billingZip_code: '',
       //   fax: "",
-      streetShippingAddress: "",
-      billingCountry: "",
-      shippingCity: "",
-      shippingState: "",
-      shippingZip_code: "",
+      streetShippingAddress: '',
+      billingCountry: '',
+      shippingCity: '',
+      shippingState: '',
+      shippingZip_code: '',
       //   fax: "",
-      shippingCountry: "",
-      personalNotes: "",
+      shippingCountry: '',
+      personalNotes: '',
       // customFields: "",
-      logo: "",
+      logo: '',
     },
-    onSubmit: (values) => {
+    onSubmit: values => {
       values.billingZip_code = zip;
       values.shippingZip_code = zip1;
       if (isshipCheck) {
         values.streetShippingAddress = shipCheck;
-        if (names.cityName === "") {
+        if (names.cityName === '') {
           values.shippingCountry = zipData.country;
           values.shippingState = zipData.state;
           values.shippingCity = zipData.city;
           values.shippingZip_code = zip;
-          console.log("i am working");
+          console.log('i am working');
         } else {
           values.shippingCountry = names.countryName;
           values.shippingState = names.stateName;
           values.shippingCity = names.cityName;
           values.shippingZip_code = zip;
-          console.log("working");
+          console.log('working');
         }
       } else {
-        if (names1.cityName === "") {
+        if (names1.cityName === '') {
           values.shippingCountry = zipData1.country;
           values.shippingState = zipData1.state;
           values.shippingCity = zipData1.city;
-          console.log("i am working");
+          console.log('i am working');
         } else {
           values.shippingCountry = names1.countryName;
           values.shippingState = names1.stateName;
           values.shippingCity = names1.cityName;
-          console.log("working");
+          console.log('working');
         }
       }
-      if (names.cityName === "") {
+      if (names.cityName === '') {
         values.billingCountry = zipData.country;
         values.billingState = zipData.state;
         values.billingCity = zipData.city;
-        console.log("i am working");
+        console.log('i am working');
       } else {
         values.billingCountry = names.countryName;
         values.billingState = names.stateName;
         values.billingCity = names.cityName;
-        console.log("working");
+        console.log('working');
       }
       // setLoader(true);
       values.customFields = customFields;
       values.gst = gstIn;
       values.pan = pan_no;
       values.phone = phoneNumber;
-      values.logo = logoPreview != "" ? logoPreview : null;
-      values.signature = signature != "" ? signature : null;
+      values.logo = logoPreview != '' ? logoPreview : null;
+      values.signature = signature != '' ? signature : null;
       console.log(logoPreview);
       const addBussinessProfile = async () => {
         // setLoader(true);
         try {
-          const res =await apiPost("/businessprofile", values);
+          const res = await apiPost('/businessprofile', values);
           // alert(res);
-          navigate("/display");
+          navigate('/display');
           setRefresh(true);
         } catch (err) {
           console.log(err);
@@ -396,7 +396,7 @@ export function Bussiness_profile_from({ setRefresh }) {
   });
 
   const addCustomField = () => {
-    setCustomFields([...customFields, ""]);
+    setCustomFields([...customFields, '']);
   };
 
   const handleCustomFieldChange = (index, value) => {
@@ -406,152 +406,152 @@ export function Bussiness_profile_from({ setRefresh }) {
     setCustomFields(updatedFields);
   };
 
-  const handleLogoChange = (event) => {
+  const handleLogoChange = event => {
     const file = event.target.files[0];
     if (file) {
       const fileSizeInMB = file.size / (1024 * 1024); // Convert bytes to MB
 
       if (fileSizeInMB > maxSizeInMB) {
         setError(`File size should be less than ${maxSizeInMB} MB`);
-        alert("file size too long for logo");
-        event.target.value = ""; // Clear the input
+        alert('file size too long for logo');
+        event.target.value = ''; // Clear the input
       } else {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = e => {
           console.log(e.target.result);
           setLogoPreview(e.target.result);
-          localStorage.setItem("image", e.target.result);
+          localStorage.setItem('image', e.target.result);
         };
         reader.readAsDataURL(file);
       }
     }
   };
-  const handleSignatureChange = (event) => {
+  const handleSignatureChange = event => {
     const file = event.target.files[0];
     if (file) {
       const fileSizeInMB = file.size / (1024 * 1024); // Convert bytes to MB
 
       if (fileSizeInMB > maxSizeInMB) {
         setError(`File size should be less than ${maxSizeInMB} MB`);
-        alert("file size too long for signature");
-        event.target.value = ""; // Clear the input
+        alert('file size too long for signature');
+        event.target.value = ''; // Clear the input
       } else {
         const reader = new FileReader();
-        reader.onload = (e) => {
+        reader.onload = e => {
           console.log(e.target.result);
           setSignature(e.target.result);
-          localStorage.setItem("imageSign", e.target.result);
+          localStorage.setItem('imageSign', e.target.result);
         };
         reader.readAsDataURL(file);
       }
     }
   };
-  const [shipping, setShipping] = useState("");
+  const [shipping, setShipping] = useState('');
   function handleCheck(e) {
     if (e.target.checked) {
-      var bill = document.getElementById("bill");
+      var bill = document.getElementById('bill');
       console.log(bill.value);
       setShipping(bill.value);
     } else {
-      setShipping("");
+      setShipping('');
     }
   }
   const [error, setError] = useState({
-    panNo: "",
-    gstinNo: "",
-    phone_Number: "",
+    panNo: '',
+    gstinNo: '',
+    phone_Number: '',
   });
   function handleCheckCred(e, name) {
-    if (name == "pan") {
+    if (name == 'pan') {
       const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
       if (!panRegex.test(e.target.value.toUpperCase())) {
-        if (e.target.value == "") {
+        if (e.target.value == '') {
           setError({
-            panNo: "",
+            panNo: '',
             gstinNo: error.gstinNo,
             phone_Number: error.phone_Number,
           });
-          setPan_no("");
+          setPan_no('');
           setStatus(true);
         } else {
           setError({
             panNo:
-              "Invalid PAN format. Expected: 5 letters, 4 numbers, 1 letter",
+              'Invalid PAN format. Expected: 5 letters, 4 numbers, 1 letter',
             gstinNo: error.gstinNo,
             phone_Number: error.phone_Number,
           });
-          setPan_no("false");
+          setPan_no('false');
           setStatus(false);
         }
       } else {
         setPan_no(e.target.value.toUpperCase());
-        console.log("2");
+        console.log('2');
         setError({
-          panNo: "",
+          panNo: '',
           gstinNo: error.gstinNo,
           phone_Number: error.phone_Number,
         });
         setStatus(true);
       }
     }
-    if (name == "number") {
+    if (name == 'number') {
       const panRegex = /^[0-9]{10}$/;
       if (!panRegex.test(e.target.value)) {
-        if (e.target.value == "") {
+        if (e.target.value == '') {
           setError({
             panNo: error.panNo,
             gstinNo: error.gstinNo,
-            phone_Number: "",
+            phone_Number: '',
           });
-          setPhoneNumber("");
+          setPhoneNumber('');
           setStatus(true);
         } else {
           setError({
             panNo: error.panNo,
             gstinNo: error.gstinNo,
-            phone_Number: "Invalid Mobile no format. Expected: 10 numbers",
+            phone_Number: 'Invalid Mobile no format. Expected: 10 numbers',
           });
-          setPhoneNumber("false");
+          setPhoneNumber('false');
           setStatus(false);
         }
       } else {
         setPhoneNumber(e.target.value);
-        console.log("2");
+        console.log('2');
         setError({
           panNo: error.panNo,
           gstinNo: error.gstinNo,
-          phone_Number: "",
+          phone_Number: '',
         });
         setStatus(true);
       }
     }
-    if (name == "gstin") {
+    if (name == 'gstin') {
       const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9]{1}[A-Z]{2}$/;
       if (!gstRegex.test(e.target.value.toUpperCase())) {
-        if (e.target.value == "") {
+        if (e.target.value == '') {
           setError({
             panNo: error.panNo,
-            gstinNo: "",
+            gstinNo: '',
             phone_Number: error.phone_Number,
           });
-          setGstIn("");
+          setGstIn('');
           setStatus(true);
         } else {
           setError({
             panNo: error.panNo,
             gstinNo:
-              "Invalid GSTIN format. Expected: 2 numbers, 5 letters, 4 numbers, 1 letter , 1 number , 2 letters",
+              'Invalid GSTIN format. Expected: 2 numbers, 5 letters, 4 numbers, 1 letter , 1 number , 2 letters',
             phone_Number: error.phone_Number,
           });
-          setGstIn("false");
+          setGstIn('false');
           setStatus(false);
         }
       } else {
         setGstIn(e.target.value.toUpperCase());
-        console.log("2");
+        console.log('2');
         setError({
           panNo: error.panNo,
-          gstinNo: "",
+          gstinNo: '',
           phone_Number: error.phone_Number,
         });
         setStatus(true);
@@ -616,13 +616,13 @@ export function Bussiness_profile_from({ setRefresh }) {
                     type="text"
                     min="0"
                     id="mobile"
-                    onChange={(e) => handleCheckCred(e, "number")}
+                    onChange={e => handleCheckCred(e, 'number')}
                     name="phone"
                     classNameInput="w-full p-2 border rounded mt-1"
                     placeholder="Enter Phone Number"
                   />
                   <span className="text-red-500">
-                    {error.phone_Number != "" ? error.phone_Number : ""}
+                    {error.phone_Number != '' ? error.phone_Number : ''}
                   </span>
                 </div>
                 <div>
@@ -644,13 +644,13 @@ export function Bussiness_profile_from({ setRefresh }) {
                     labelInput="Pan No:"
                     type="text"
                     id="pan"
-                    onChange={(e) => handleCheckCred(e, "pan")}
+                    onChange={e => handleCheckCred(e, 'pan')}
                     name="pan"
                     classNameInput="w-full p-2 border rounded mt-1 text-transform: uppercase"
                     placeholder="Enter Pan Number"
                   />
                   <span className="text-red-500">
-                    {error.panNo != "" ? error.panNo : ""}
+                    {error.panNo != '' ? error.panNo : ''}
                   </span>
                 </div>
                 <div>
@@ -659,13 +659,13 @@ export function Bussiness_profile_from({ setRefresh }) {
                     labelInput="GSTN:"
                     type="text"
                     id="gst"
-                    onChange={(e) => handleCheckCred(e, "gstin")}
+                    onChange={e => handleCheckCred(e, 'gstin')}
                     name="gst"
                     classNameInput="w-full p-2 border rounded mt-1 text-transform: uppercase"
                     placeholder="Enter GSTN"
                   />
                   <span className="text-red-500">
-                    {error.gstinNo != "" ? error.gstinNo : ""}
+                    {error.gstinNo != '' ? error.gstinNo : ''}
                   </span>
                 </div>
                 <div>
@@ -776,14 +776,14 @@ export function Bussiness_profile_from({ setRefresh }) {
                       name="billingState"
                       style={style2}
                       className="form-select"
-                      onChange={(e) => handleStateChange(e, "billing")}
+                      onChange={e => handleStateChange(e, 'billing')}
                     >
                       <option readOnly value="select">
                         Select
                       </option>
-                      {state.map((values) => (
+                      {state.map(values => (
                         <option
-                          value={values.iso2 + "." + values.name}
+                          value={values.iso2 + '.' + values.name}
                           className=" form-text"
                           key={values.id}
                         >
@@ -808,13 +808,13 @@ export function Bussiness_profile_from({ setRefresh }) {
                     <select
                       style={style2}
                       className="form-select"
-                      onChange={(e) => handleCityChange(e, "billing")}
+                      onChange={e => handleCityChange(e, 'billing')}
                       name="billingCity"
                     >
                       <option readOnly value="select">
                         Select
                       </option>
-                      {city.map((values) => (
+                      {city.map(values => (
                         <option
                           value={values.name}
                           className="form-text"
@@ -833,7 +833,7 @@ export function Bussiness_profile_from({ setRefresh }) {
                       type="number"
                       min="0"
                       name="billingZip_code"
-                      onChange={(e) => handleZipCodeChange(e, "billing")}
+                      onChange={e => handleZipCodeChange(e, 'billing')}
                       classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
                       placeholder="Enter Zip/Pincode"
                     />
@@ -855,15 +855,13 @@ export function Bussiness_profile_from({ setRefresh }) {
               <div className="mt-4 border border-1 p-3">
                 <h5>Address 2</h5>
                 <div className="mt-6">
-                  <label className="block text-gray-600">
-                    Street Address
-                  </label>
+                  <label className="block text-gray-600">Street Address</label>
                   <textarea
                     name="streetShippingAddress"
                     className="w-full p-2 border rounded mt-1"
                     placeholder="Enter Street address"
                     onChange={formik.handleChange}
-                    {...(shipCheck != "" ? { value: shipCheck } : {})}
+                    {...(shipCheck != '' ? { value: shipCheck } : {})}
                   ></textarea>
                 </div>
                 {isshipCheck == true ? (
@@ -876,7 +874,7 @@ export function Bussiness_profile_from({ setRefresh }) {
                         style={style3}
                         type="text"
                         name="shippingCountry"
-                        {...(names.cityName != ""
+                        {...(names.cityName != ''
                           ? { value: names.countryName }
                           : { value: zipData.country })}
                         onChange={formik.handleChange}
@@ -891,7 +889,7 @@ export function Bussiness_profile_from({ setRefresh }) {
                         labelInput="State:"
                         type="text"
                         style={style3}
-                        {...(names.cityName != ""
+                        {...(names.cityName != ''
                           ? { value: names.stateName }
                           : { value: zipData.state })}
                         name="shippingState"
@@ -908,7 +906,7 @@ export function Bussiness_profile_from({ setRefresh }) {
                         style={style3}
                         type="text"
                         id="shippingCity"
-                        {...(names.cityName != ""
+                        {...(names.cityName != ''
                           ? { value: names.cityName }
                           : { value: zipData.city })}
                         onChange={formik.handleChange}
@@ -923,7 +921,7 @@ export function Bussiness_profile_from({ setRefresh }) {
                         labelInput="Zip/Pincode:"
                         type="number"
                         min="0"
-                        {...(zip != "" ? { value: zip } : { value: zip })}
+                        {...(zip != '' ? { value: zip } : { value: zip })}
                         name="shippingZip_code"
                         // onChange={(e)=>handleZipCodeChange(e,"shipping")}
                         classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
@@ -976,14 +974,14 @@ export function Bussiness_profile_from({ setRefresh }) {
                         name="shippingState"
                         style={style4}
                         className="form-select"
-                        onChange={(e) => handleStateChange(e, "shipping")}
+                        onChange={e => handleStateChange(e, 'shipping')}
                       >
                         <option readOnly value="select">
                           Select
                         </option>
-                        {state1.map((values) => (
+                        {state1.map(values => (
                           <option
-                            value={values.iso2 + "." + values.name}
+                            value={values.iso2 + '.' + values.name}
                             className=" form-text"
                             key={values.id}
                           >
@@ -1008,13 +1006,13 @@ export function Bussiness_profile_from({ setRefresh }) {
                       <select
                         style={style4}
                         className="form-select"
-                        onChange={(e) => handleCityChange(e, "shipping")}
+                        onChange={e => handleCityChange(e, 'shipping')}
                         name="shippingCity"
                       >
                         <option readOnly value="select">
                           Select
                         </option>
-                        {city1.map((values) => (
+                        {city1.map(values => (
                           <option
                             value={values.name}
                             className="form-text"
@@ -1033,7 +1031,7 @@ export function Bussiness_profile_from({ setRefresh }) {
                         type="number"
                         min="0"
                         name="shippingZip_code"
-                        onChange={(e) => handleZipCodeChange(e, "shipping")}
+                        onChange={e => handleZipCodeChange(e, 'shipping')}
                         classNameInput="w-full p-2 text-sm transition duration-300 border border-gray-300 rounded-md focus:border-blue-500 focus:ring focus:ring-blue-200 hover:bg-gray-100"
                         placeholder="Enter Zip/Pincode"
                       />
@@ -1093,7 +1091,7 @@ export function Bussiness_profile_from({ setRefresh }) {
                       name={`customField${index}`}
                       placeholder="Enter Custom Field"
                       classNameInput="w-full p-2 border rounded mt-2"
-                      onChange={(e) =>
+                      onChange={e =>
                         handleCustomFieldChange(index, e.target.value)
                       }
                       value={field}

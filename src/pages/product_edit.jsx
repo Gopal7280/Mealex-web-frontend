@@ -14,6 +14,8 @@ export function Product_edit() {
     const [loader, setLoader] = useState(true);
       const [unitSelected, setUnitSelected] = useState([]);
        const [productUnit, setProductUnuit] = useState("");
+       const [addCategory,setAddCategory] = useState("");
+         const [visible, setVisible] = useState(false);
   useEffect(() => {
      const fetchUnit = async () => {
           setLoader(true);

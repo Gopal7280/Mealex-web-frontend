@@ -4,6 +4,7 @@ import { apiGet, apiPost } from "../services/api";
 // import "../styles/generateChallan.css";
 import { useReactToPrint } from "react-to-print";
 import html2canvas from "html2canvas";
+import { ProgressSpinner } from 'primereact/progressspinner';
 import jsPDF from "jspdf";
 import { FaDownload } from "react-icons/fa6";
 import { toWords } from "number-to-words";
@@ -224,6 +225,7 @@ export function GeneratePurchase() {
   // Step 5: Save PDF
   pdf.save("purchase.pdf");
 };
+const [download,setDownload]=useState(false);
 function handlePdf(){
   const generatePdfData={
     purchaseData:data[0],
@@ -234,8 +236,9 @@ function handlePdf(){
   }
   console.log(generatePdfData);
   const pdf = async () => {
+    setDownload(true);
   try {
-    const res = await apiPost('/pdf/purchase',generatePdfData);
+    const res = await apiPost('/hardcopy/purchase',generatePdfData);
     console.log(res);
     const data = await res.data;
 
@@ -258,6 +261,11 @@ function handlePdf(){
     URL.revokeObjectURL(url);
   } catch (err) {
     console.error('Download error:', err);
+    setDownload(false);
+    handleDownloadPDF();
+  }
+  finally{
+    setDownload(false);
   }
 };
 pdf();
@@ -272,7 +280,20 @@ pdf();
             <div></div>
             <div className="">
 <button className="" onClick={handleDownloadPrint}><IoMdPrint className="!text-[#3A5B76] mr-3"/></button>
-<button className="" onClick={handlePdf}><FaDownload className="!text-[#3A5B76] mr-3"/></button>
+{!download?(
+                  <button className="" onClick={handlePdf}>
+                    <FaDownload className="!text-[#3A5B76] mr-3" />
+                  </button>
+                  ):(
+                  <button className="me-2">
+                    <ProgressSpinner
+                      style={{ width: '30px', height: '30px' }}
+                      strokeWidth="8"
+                      fill="var(--surface-ground)"
+                      animationDuration=".5s"
+                    />
+                  </button>
+                  )}
 <button className="" onClick={(e)=>handleEdit(e)}><FaEdit className="!text-[#3A5B76] mr-3"/></button>
 </div>
 </div>

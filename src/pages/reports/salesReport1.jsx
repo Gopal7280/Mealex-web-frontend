@@ -10,7 +10,20 @@ import DateRangePicker from '../../components/datePickerRange';
 const SalesReport1 = () => {
   const [detailedData, setDetailedData] = useState([]);
   const navigate = useNavigate();
+   const [showCustomDate,setShowCustomDate]=useState(false);
   useEffect(() => {
+     const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
     const fetchSalesReport = async () => {
       try {
         const res = await apiGet("/reports/customer");
@@ -202,6 +215,10 @@ const SalesReport1 = () => {
         }
         lastMonth();
       }
+      if(e.target.value=="customDate")
+    {
+      setShowCustomDate(true);
+    }
     };
     const [startDate, setStartDate] = useState("");
     const [endDate, setEndDate] = useState("");
@@ -226,6 +243,7 @@ const SalesReport1 = () => {
             }
           console.log(err)
         }
+        setShowCustomDate(false);
       }
       getDataBetweenRange();
       console.log("Start Date:", startDate);
@@ -240,6 +258,19 @@ const SalesReport1 = () => {
             <div>
               <div className="inline-block">
               <RangeSelect onChange={handleRange} />
+              {
+                showCustomDate && (
+                  <DateRangePicker
+                  setShowCustomDate={setShowCustomDate}
+                  visiblity={showCustomDate}
+          startDate={startDate}
+          endDate={endDate}
+            onStartDateChange={(e) => setStartDate(e.target.value)}
+            onEndDateChange={(e) => setEndDate(e.target.value)}
+            onShow={handleShow}
+          />
+                )
+              }
             </div>
             <button
               onClick={() => exportExcel(detailedData, 'salesreport2')}
@@ -247,24 +278,11 @@ const SalesReport1 = () => {
             >
               Export as Excel
             </button>
-            <button
-              onClick={() => navigate('/reports')}
-              className="bg-[#3A5B76] hover:bg-[#2E4A5E] ms-2 text-white font-semibold px-6 py-2 shadow-md transition-all duration-200"
-            >
-              Go to  Report Dashboard
-            </button>
             </div>
           </div>
         </div>
         <div>
            <div>
-          <DateRangePicker
-          startDate={startDate}
-          endDate={endDate}
-            onStartDateChange={(e) => setStartDate(e.target.value)}
-            onEndDateChange={(e) => setEndDate(e.target.value)}
-            onShow={handleShow}
-          />
         </div>
         </div>
         {

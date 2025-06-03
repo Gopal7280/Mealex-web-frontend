@@ -47,7 +47,18 @@ export function PurchaseForm(){
        useEffect(() => {
         // Start by showing the loader
         setLoader(true);
-        
+         const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
         const dt = new Date();
         setDate(dt.toLocaleDateString());
         console.log(dt.toLocaleDateString());

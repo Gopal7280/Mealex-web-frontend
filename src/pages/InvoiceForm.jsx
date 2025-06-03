@@ -68,10 +68,15 @@ export default function InvoiceForm({ onInvoiceAdded }) {
       try {
         const responseb = await apiGet("/businessprofile");
         console.log(responseb);
-        setBusinessProfile(responseb);
-        if (responseb[0].logo == null) {
+        if (responseb.length === 0) {
+          navigate('/profile_form');
+        }
+        else{
+          setBusinessProfile(responseb);
+          if (responseb[0].logo == null) {
           var name = responseb[0].business_name;
           console.log(name.substring(0, 1));
+        }
         }
       } catch (error) {
         console.error("Error fetching business profile:", error);

@@ -1,97 +1,113 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 // import Sidebar from "../container/Sidebar";
-import Sidebar from "../layouts/Sidebar"; // Make sure Sidebar is correctly imported
-import "../styles/Products.css"
-import axios from "axios";
-import { data, NavLink, useNavigate } from "react-router-dom";
-import { Dropdown } from "primereact/dropdown";
-import { useReactToPrint } from "react-to-print";
-import { useRef } from "react";
-import { Preview, ModeEdit, DeleteForever,CloudUpload } from "@mui/icons-material";
-import { ButtonComponent } from "../components/Button";
-import { apiDelete, apiGet } from "../services/api";
-import { TableComponent } from "../components/Table";
-import { SearchComponent } from "../components/SerachBar";
-import { Toast } from "primereact/toast";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
+import Sidebar from '../layouts/Sidebar'; // Make sure Sidebar is correctly imported
+import '../styles/Products.css';
+import axios from 'axios';
+import { data, NavLink, useNavigate } from 'react-router-dom';
+import { Dropdown } from 'primereact/dropdown';
+import { useReactToPrint } from 'react-to-print';
+import { useRef } from 'react';
+import {
+  Preview,
+  ModeEdit,
+  DeleteForever,
+  CloudUpload,
+} from '@mui/icons-material';
+import { ButtonComponent } from '../components/Button';
+import { apiDelete, apiGet } from '../services/api';
+import { TableComponent } from '../components/Table';
+import { SearchComponent } from '../components/SerachBar';
+import { Toast } from 'primereact/toast';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 import { Dialog } from 'primereact/dialog';
-import { BulkActions } from "../components/bulkActions";
-import {Loader} from "../layouts/Loader"
+import { BulkActions } from '../components/bulkActions';
+import { Loader } from '../layouts/Loader';
 import { Skeleton } from 'primereact/skeleton';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-const columns=[
+const columns = [
   {
-  product_number: "",
-  product_name: "",
-  product_hsn_code: "",
-  product_type: "",
-  product_unit: "",
-  product_description: "",
-  product_image: "",
-  category: "",
-  generate_barcode: "",
-  gst_rate: "",
-  purchase_price: "",
-  selling_price: "",
+    product_number: '',
+    product_name: '',
+    product_hsn_code: '',
+    product_type: '',
+    product_unit: '',
+    product_description: '',
+    product_image: '',
+    category: '',
+    generate_barcode: '',
+    gst_rate: '',
+    purchase_price: '',
+    selling_price: '',
   },
 ];
 const items = Array.from({ length: 5 }, (v, i) => i);
-const fileName="product_add";
-const dialogName="product's"
+const fileName = 'product_add';
+const dialogName = "product's";
 const Products = () => {
   const column = [
-    "UID",
-    "Product Name",
-    "HSNCode",
-    "ProductUnit",
-    "ProductRate",
-    "GSTRate",
-    "QRCode",
+    'UID',
+    'Product Name',
+    'HSNCode',
+    'ProductUnit',
+    'ProductRate',
+    'GSTRate',
+    'QRCode',
   ];
   const [selectedAction, setSelectedAction] = useState(null);
-  const [loader,setLoader]=useState(true);
-  const actions = [{ name: "Download" }, { name: "Upload" }];
+  const [loader, setLoader] = useState(true);
+  const actions = [{ name: 'Download' }, { name: 'Upload' }];
   const [excelData, setExcelData] = useState([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const toast = useRef(null);
   const [productList, setProductList] = useState([]);
   const [total, setTotal] = useState(0);
   const navigate = useNavigate();
-  const [uplaod,setUpload]=useState(true);
+  const [uplaod, setUpload] = useState(true);
   const [visible, setVisible] = useState(false);
   useEffect(() => {
+     const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
     const fetchProduct = async () => {
       try {
-        const res = await apiGet("/products");
+        const res = await apiGet('/products');
         console.log(res);
         setProductList(res);
         setTotal(res.length);
       } catch (err) {
         console.log(err);
         toast.current.show({
-          severity: "info",
-          summary: "Error",
-          detail: "No Products available please add products",
+          severity: 'info',
+          summary: 'Error',
+          detail: 'No Products available please add products',
           life: 1500,
         });
       } finally {
         setLoader(false); // This now works properly
       }
     };
-  
+
     fetchProduct(); // call async function
   }, []);
-  
-  
+
   // Filter products based on search input
-  const filteredProducts = productList.filter((product) =>
+  const filteredProducts = productList.filter(product =>
     ` ${product.product_name} ${product.product_number} ${product.product_hsn_code}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
-  const tableData = filteredProducts.map((value) => ({
+  const tableData = filteredProducts.map(value => ({
     product_id: value.product_number,
     product_name: value.product_name,
     product_hsn_code: value.product_hsn_code,
@@ -104,8 +120,8 @@ const Products = () => {
     for (var i of filteredProducts) {
       if (i.product_number == product_id) {
         console.log(i);
-        console.log("i am match");
-        navigate("/product_detail_edit", { state: { data: i } });
+        console.log('i am match');
+        navigate('/product_detail_edit', { state: { data: i } });
       }
     }
   };
@@ -114,146 +130,188 @@ const Products = () => {
     for (var i of filteredProducts) {
       if (i.product_number == product_id) {
         console.log(i);
-        console.log("i am match");
-        navigate("/product_detail_display", { state: { data: i } });
+        console.log('i am match');
+        navigate('/product_detail_display', { state: { data: i } });
       }
     }
   };
   const handledelete = (e, product_id) => {
-    const ans=confirm("Are you sure want to delete Product");
-        console.log(ans);
-        if(ans==true)
-        {
-          for (var i of filteredProducts) {
-            if (i.product_number == product_id) {
-              console.log(i);
-              console.log("i am match");
-              const deleteProduct = async () => {
-                const res = await apiDelete(`products/${i.product_id}`);
-                // alert(res);
-              };
-              deleteProduct();
-              window.location.reload();
-            }
-          }
+    const ans = confirm('Are you sure want to delete Product');
+    console.log(ans);
+    if (ans == true) {
+      for (var i of filteredProducts) {
+        if (i.product_number == product_id) {
+          console.log(i);
+          console.log('i am match');
+          const deleteProduct = async () => {
+            const res = await apiDelete(`products/${i.product_id}`);
+            // alert(res);
+          };
+          deleteProduct();
+          window.location.reload();
         }
-        else{
-          alert("Product not deleted");
-        }
+      }
+    } else {
+      alert('Product not deleted');
+    }
     // alert(product_id);
   };
-  function handleClick(e,row) {
-    console.log("clicked");
+  function handleClick(e, row) {
+    console.log('clicked');
     console.log(row);
-    handlePreview(e,row.product_id);
+    handlePreview(e, row.product_id);
   }
   return (
     <>
-    {
-      loader?(<div className="">
-        {/* <a href="/add-product">
+      {loader ? (
+        <div className="">
+          {/* <a href="/add-product">
             <button className="add-customer-button">Add Product</button>
           </a> */}
-        <div className="max-w-7xl mt-3 mx-auto  bg-white p-5 responsive-head shadow-lg rounded-lg">
-        <Skeleton width="100%" height="50px" className="mb-2"></Skeleton>
-          {/* <TableComponent column={column} data={tableData}/> */}
-  
-          <div className="card">
-            <DataTable value={items} className="p-datatable-striped">
-                <Column field="code" header="UID" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="name" header="Product Name" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="category" header="HSNCode" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="quantity" header="ProductUnit" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="quantity" header="ProductRate" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="quantity" header="GSTRate" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="quantity" header="QRCode" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                <Column field="quantity" header="Action" style={{ width: '25%' }} body={<Skeleton />}></Column>
-            </DataTable>
+          <div className="max-w-7xl mt-3 mx-auto  bg-white p-5 responsive-head shadow-lg rounded-lg">
+            <Skeleton width="100%" height="50px" className="mb-2"></Skeleton>
+            {/* <TableComponent column={column} data={tableData}/> */}
+
+            <div className="card">
+              <DataTable value={items} className="p-datatable-striped">
+                <Column
+                  field="code"
+                  header="UID"
+                  style={{ width: '25%' }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="name"
+                  header="Product Name"
+                  style={{ width: '25%' }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="category"
+                  header="HSNCode"
+                  style={{ width: '25%' }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="quantity"
+                  header="ProductUnit"
+                  style={{ width: '25%' }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="quantity"
+                  header="ProductRate"
+                  style={{ width: '25%' }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="quantity"
+                  header="GSTRate"
+                  style={{ width: '25%' }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="quantity"
+                  header="QRCode"
+                  style={{ width: '25%' }}
+                  body={<Skeleton />}
+                ></Column>
+                <Column
+                  field="quantity"
+                  header="Action"
+                  style={{ width: '25%' }}
+                  body={<Skeleton />}
+                ></Column>
+              </DataTable>
+            </div>
+          </div>
         </div>
-        </div>
-      </div>):(
+      ) : (
         <div className="">
-      {/* <a href="/add-product">
+          {/* <a href="/add-product">
           <button className="add-customer-button">Add Product</button>
         </a> */}
-      <div className="max-w-7xl mt-3 mx-auto dark:!bg-gray-800 bg-white p-5 responsive-head shadow-lg rounded-lg">
-        <div className="flex justify-between items-center mb-4 responsive-header">
-          <Toast ref={toast} />
-          <h2 className="text-xl font-semibold dark:!text-white">
-            Product's
-            <span className="bg-gray-400 ms-2 total-align dark:!text-white text-white px-3 py-1 rounded-full text-sm">
-              Total {total}
-            </span>
-          </h2>
-          {/* <input
+          <div className="max-w-7xl mt-3 mx-auto dark:!bg-gray-800 bg-white p-5 responsive-head shadow-lg rounded-lg">
+            <div className="flex justify-between items-center mb-4 responsive-header">
+              <Toast ref={toast} />
+              <h2 className="text-xl font-semibold dark:!text-white">
+                Product's
+                <span className="bg-gray-400 ms-2 total-align dark:!text-white text-white px-3 py-1 rounded-full text-sm">
+                  Total {total}
+                </span>
+              </h2>
+              {/* <input
           type="text"
           placeholder="Search customers..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="search-bar"
         /> */}
-          <SearchComponent onChange={(e) => setSearch(e.target.value)} />
-          <div className="flex space-x-3">
-            {/* <button
+              <SearchComponent onChange={e => setSearch(e.target.value)} />
+              <div className="flex space-x-3">
+                {/* <button
               onClick={handleDownload}
               className="disabled:opacity-80 disabled:bg-gray-400  bg-[#3A5B76] text-white me-3 px-4 py-2 rounded hover:bg-[#2D465B]"
             >
               Bulk Upload
             </button> */}
-            <div className="bulk-action-align">
-           <BulkActions columns={columns} fileName={fileName} dialogName={dialogName}/>
-           </div>
-           <div className="button-align">
-            <ButtonComponent
-              onClick={() =>
-                navigate("/add-product", {
-                  state: { data: "FromProduct" },
-                })
-              }
-              className="bg-[#3A5B76] text-white px-4 py-2 rounded hover:bg-[#2D465B]"
-              label="Add Product"
-              value="addProduct"
-            ></ButtonComponent>
+                <div className="bulk-action-align">
+                  <BulkActions
+                    columns={columns}
+                    fileName={fileName}
+                    dialogName={dialogName}
+                  />
+                </div>
+                <div className="button-align">
+                  <ButtonComponent
+                    onClick={() =>
+                      navigate('/add-product', {
+                        state: { data: 'FromProduct' },
+                      })
+                    }
+                    className="bg-[#3A5B76] text-white px-4 py-2 rounded hover:bg-[#2D465B]"
+                    label="Add Product"
+                    value="addProduct"
+                  ></ButtonComponent>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-        {/* <TableComponent column={column} data={tableData}/> */}
+            {/* <TableComponent column={column} data={tableData}/> */}
 
-        <TableComponent
-        onClickRow={handleClick}
-          column={column}
-          data={tableData}
-          name="product"
-          fullData={filteredProducts}
-          pageSize={3} // Number of rows per page
-          generateQr="true"
-          actions={(row) => (
-            <div className="text-center">
-              {/* <button
+            <TableComponent
+              onClickRow={handleClick}
+              column={column}
+              data={tableData}
+              name="product"
+              fullData={filteredProducts}
+              pageSize={5} // Number of rows per page
+              generateQr="true"
+              actions={row => (
+                <div className="text-center">
+                  {/* <button
                 className="text-[#3A5B76] dark:!text-white"
                 onClick={(e) => handlePreview(e, row.product_id)}
               >
                 <Preview />
               </button> */}
-              {/* <button
+                  {/* <button
                 className="text-[#3A5B76] dark:!text-white"
                 onClick={(e) => handleEdit(e, row.product_id)}
               >
                 <ModeEdit />
               </button> */}
-              <button
-                className="text-red-500"
-                onClick={(e) => handledelete(e, row.product_id)}
-              >
-                <DeleteForever />
-              </button>
-            </div>
-          )}
-        />
-      </div>
-    </div>
-      )
-    }
+                  <button
+                    className="text-red-500"
+                    onClick={e => handledelete(e, row.product_id)}
+                  >
+                    <DeleteForever />
+                  </button>
+                </div>
+              )}
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };

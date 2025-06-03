@@ -1,10 +1,11 @@
-import React from 'react';
-
-const DateRangePicker = ({ onStartDateChange, onEndDateChange, onShow,startDate,endDate }) => {
+import React, { useState } from 'react';
+import { Dialog } from 'primereact/dialog';
+const DateRangePicker = ({ onStartDateChange, onEndDateChange, onShow,startDate,endDate,visiblity,setShowCustomDate }) => {
+  const [customDateOpen,setCustomDateOpen]=useState(false);
   return (
-    <div>
-      <h5 className="mb-4">Custom Date Picker:</h5>
-      <div className="grid grid-cols-3 gap-4 mb-8">
+    <Dialog header="Select Date Range" visible={visiblity} style={{ width: '50vw' }} onHide={() => {if (!visiblity) return; setShowCustomDate(false); }}>
+                <div>
+      <div className="grid grid-cols-3 gap-4 mb-8 mt-3">
         <div className="flex flex-col gap-2">
           <label htmlFor="startDate">Start Date:</label>
           <input
@@ -29,7 +30,7 @@ const DateRangePicker = ({ onStartDateChange, onEndDateChange, onShow,startDate,
         </div>
         <div className="mt-9">
           <button
-            onClick={onShow}
+          onClick={onShow}
             className="bg-[#3A5B76] hover:bg-[#2E4A5E] text-white font-semibold px-10 py-2 shadow-md transition-all duration-200"
           >
             View
@@ -37,6 +38,7 @@ const DateRangePicker = ({ onStartDateChange, onEndDateChange, onShow,startDate,
         </div>
       </div>
     </div>
+            </Dialog>
   );
 };
 

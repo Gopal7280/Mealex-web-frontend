@@ -6,6 +6,7 @@ import { Image } from "primereact/image";
 import { Dialog } from "primereact/dialog";
 import { Preview, ModeEdit, DeleteForever, Close, Dashboard } from "@mui/icons-material";
 import { InputSwitch } from 'primereact/inputswitch';
+import { useNavigate } from "react-router-dom";
 
 export function BankAccountSettingInvoiceModalView(){
   const toast = useRef(null);
@@ -13,8 +14,21 @@ export function BankAccountSettingInvoiceModalView(){
   const [activeBankAccount,setActiveBankAccount]=useState(false);
    const [bankData, setBankData] = useState([]);
    const [loadApiAgain,setLoadApiAgain]=useState(false);
+   const navigate=useNavigate();
   const column = ["S.No", "Account Holder Name", "Account No", "Account Type", "IFSC Code", "Bank Name"];
   useEffect(() => {
+     const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
     const fetchAccount = async () => {
       // setLoader(false); // Start loading
       try {
@@ -229,7 +243,7 @@ export function BankAccountSettingInvoiceModalView(){
               name="bank account"
               column={column}
               data={dataTable}
-              pageSize={3} // Number of rows per page
+              pageSize={5} // Number of rows per page
               actions={(row) => (
                 <div className="flex gap-2">
                 <span className=""><InputSwitch checked={row.sNo==activeBankAccount} onChange={(e) => handleAccountAtiveStatus(e,row.bankAccountNumber,row.sNo)} /></span>

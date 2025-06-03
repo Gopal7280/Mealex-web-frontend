@@ -14,7 +14,7 @@ import { Skeleton } from "primereact/skeleton";
 
 import "../styles/ProductForm.css";
 // import { BarcodeComp } from "../components/QrCode";
-
+import { Dialog } from 'primereact/dialog';
 const ProductForm = () => {
   const [loader, setLoader] = useState(true);
   const navigate = useNavigate(); // useNavigate hook
@@ -24,13 +24,27 @@ const ProductForm = () => {
   const [unitSelected, setUnitSelected] = useState([]);
   const [locations, setLocationS] = useState("");
   const location = useLocation();
+   const [visible, setVisible] = useState(false);
   const toast = useRef(null);
+  const [addCategory,setAddCategory] = useState("");
   const [gstSet, setGstSet] = useState({
     sellingPrice: "withGstSelling",
     purchasePrice: "withGstPurchase",
   });
   const [productUnit, setProductUnuit] = useState("");
   useEffect(() => {
+     const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
     const fetchUnit = async () => {
       setLoader(true);
       try {
@@ -52,6 +66,12 @@ const ProductForm = () => {
     setProducttype(e.target.value);
   }
   function handleCategoryChange(e) {
+    setAddCategory("");
+    if(e.target.value=="otherCategory")
+    {
+      setVisible(true);
+      return
+    }
     console.log(e.target.value);
     setProduct_category(e.target.value);
   }
@@ -211,7 +231,14 @@ const ProductForm = () => {
     console.log(e.target.value);
     setProductUnuit(e.target.value);
   }
-
+  function handleProductCategoryAdd(e){
+    const newCategory=document.getElementById("newCategory").value;
+    // formik.values.product_category=newCategory;
+    setAddCategory(newCategory);
+    setProduct_category(newCategory);
+    // console.log(formik.values.product_category);
+    setVisible(false);
+  }
   return (
     <>
       {loader ? (
@@ -220,6 +247,19 @@ const ProductForm = () => {
         </>
       ) : (
         <div>
+          <Dialog header="Add Category" visible={visible} onHide={() => {if (!visible) return; setVisible(false); }}
+                style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
+                <dl>
+                  <dt className="mb-2 mt-2">Category Name</dt>
+                  <dd><input id="newCategory" type="text" className="p-[0.76rem] w-full border-1 border-[#d1d5db] rounded-[6px]" placeholder="Enter Product category" /></dd>
+                </dl>
+                 <ButtonComponent
+                      onClick={(e)=>handleProductCategoryAdd(e)}
+                      label="Add"
+                      type="submit"
+                      className="bg-[#3A5B76] text-white px-8 py-2 rounded hover:bg-[#2E4A63]"
+                    ></ButtonComponent>
+            </Dialog>
           <div className="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md">
             <div className="">
               <div className="">
@@ -306,11 +346,12 @@ const ProductForm = () => {
                         class="w-full p-2 border rounded"
                       >
                         <option readOnly value="select">
-                          Select Category
+                          select category
                         </option>
                         <option value="Electronics">Electronics</option>
                         <option value="clothing">Clothing</option>
                         <option value="food">Food</option>
+                        <option value="otherCategory" className="bg-[#3A5B76] text-white">{addCategory==""?"add category":addCategory}</option>
                       </select>
                     </div>
                     <div className="lg:grid grid-cols-2 gap-3 sm:grid mt-2 block">

@@ -51,6 +51,17 @@ export function Challan() {
   // }
   useEffect(() => {
     try{
+    const fetchBussiness = async () => {
+      try {
+        const res = await apiGet('/businessprofile');
+        if (res.length === 0) {
+          navigate('/profile_form');
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    };
+    fetchBussiness();
     const fetchChallan = async () => {
       const token = localStorage.getItem("token");
       try {

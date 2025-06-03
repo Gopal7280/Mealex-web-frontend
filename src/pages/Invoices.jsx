@@ -41,6 +41,18 @@ const Invoices = ({ onLoad }) => {
   useEffect(() => {
     setLoader(true); // Setting loader to true at the beginning
     try {
+       const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
       const fetchCustomers = async () => {
         try {
           const res = await apiGet("/invoices");
@@ -485,7 +497,7 @@ const Invoices = ({ onLoad }) => {
                   name="Invoice"
                   column={column}
                   data={filterInvoice()}
-                  pageSize={3} // Number of rows per page
+                  pageSize={5} // Number of rows per page
                   actions={(row) => (
                     <div className="text-center">
                       {/* <button

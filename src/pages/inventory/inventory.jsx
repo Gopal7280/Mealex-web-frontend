@@ -11,11 +11,11 @@ import { TableComponent } from "../../components/Table";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { useNavigate } from "react-router-dom";
-export function ExpenseManager() {
+export function Inventory() {
   const items = Array.from({ length: 5 }, (v, i) => i);
-  const column = ["Date", "Name", "Category", "Amount", "Mode"];
+  const column = ["Sno", "Name", "Quantity", "Status"];
   const [serarchRow, setSearchRow] = useState(""); // serarchRow state
-  const [expenseData,setExpenseData]=useState([]);
+  const [inventoryData,setInventoryData]=useState([]);
   const [total,setTotal]=useState([]);
   const [visible, setVisible] = useState(false);
   const [load,setLoad]=useState(false);
@@ -34,63 +34,62 @@ export function ExpenseManager() {
               }
             };
             fetchBussiness();
-    const fecthUsers = async () => {
+    const fetchStock = async () => {
       // setLoader(false); // Start loading
       try {
         setLoader(false);
-        const res = await apiGet("/expenses");
-        console.log(res.data);
-        setExpenseData(res.data);
+        const res = await apiGet("/inventory");
+        console.log(res);
+        setInventoryData(res.data);
         setTotal(res.data.length);
-        console.log("Expense_Response", res);
+        console.log("inventory", res);
       } catch (error) {
-        console.error("Error fetching expenseData data:", error);
+        console.error("Error fetching inventory data:", error);
       } finally {
         setLoader(true); // Stop loading
       }
     };
 
-    fecthUsers();
+    fetchStock();
   }, [load]);
-  const filteredExpenses = expenseData.filter((expenseData) =>
-    `${expenseData.expense_date} ${expenseData.expense_employee_name} ${expenseData.expense_category_name} ${expenseData.expense_amount} ${expenseData.expense_payment_mode}`
+  const filteredStock = inventoryData.filter((inventoryData) =>
+    `${inventoryData.inventory_number} ${inventoryData.inventory_status} ${inventoryData.item_name}`
       .toLowerCase()
       .includes(serarchRow.toLowerCase())
   );
-  const dataTable = filteredExpenses.map((value) => ({
-    date: value.expense_date,
-    name: value.expense_employee_name,
-    categoryName: value.expense_category_name,
-    amount: value.expense_amount,
-    paymentMode: value.expense_payment_mode,
+  const dataTable = filteredStock.map((value,index) => ({
+    sno: value.inventory_number==undefined?index+1:value.inventory_number,
+    name: value.item_name,
+    quantity: value.inventory_quantity,
+    status: value.inventory_status,
   }));
-  const formik=useFormik({
-    initialValues:{
-        employeName:"",
-        expenseAmount:"",
-        date:"",
-        categoryOfPayment:"",
-        expenseCategory:"",
-        expenseDescription:"",
-    },
-    onSubmit:(values)=>{
-      console.log(values);
-      const addExpenseData=async ()=>{
-          try{
-            const res=apiPost("/expenses",values);
-            console.log(res);
-            setLoad(!load);
-            setVisible(false);
-          }
-      catch(err)
-      {
-        console.log(err);
-      }
+//   const formik=useFormik({
+//     initialValues:{
+//         employeName:"",
+//         expenseAmount:"",
+//         date:"",
+//         categoryOfPayment:"",
+//         expenseCategory:"",
+//         expenseDescription:"",
+//     },
+//     onSubmit:(values)=>{
+//       console.log(values);
+//       const addExpenseData=async ()=>{
+//           try{
+//             const res=apiPost("/expenses",values);
+//             console.log(res);
+//             setLoad(!load);
+//             setVisible(false);
+//           }
+//       catch(err)
+//       {
+//         console.log(err);
+//       }
     
-    }
-    addExpenseData();
-    }
-  })
+//     }
+//     addExpenseData();
+//     }
+//   })
   return (
     <>
       {
@@ -100,19 +99,19 @@ export function ExpenseManager() {
                 <div className="max-w-7xl mx-auto bg-white p-2 shadow-lg responsive-head rounded-lg">
                   <div className="flex justify-between items-center responsive-header mb-4">
                     <h2 className="text-xl font-semibold">
-                      Expense Details
+                      Inventory Details
                       <span className="bg-gray-400 ms-2 text-white px-3 py-1 rounded-full text-sm">
                         Total {total}
                       </span>
                     </h2>
                     <SearchComponent onChange={(e) => setSearchRow(e.target.value)} />
-                      <ButtonComponent
+                      {/* <ButtonComponent
                                           onClick={() => setVisible(true)}
                                           className="bg-[#3A5B76] text-white px-4 py-2 rounded hover:bg-[#2D465B]"
                                           label="Add Expense Data"
                                           value="addExpense"
-                                        ></ButtonComponent>
-                                        <Dialog
+                                        ></ButtonComponent> */}
+                                        {/* <Dialog
                     header="Add expense"
                     visible={visible}
                     className="sm:w-1/2 mt-2"
@@ -166,7 +165,7 @@ export function ExpenseManager() {
                   ></ButtonComponent>
                   </form>
       </div>
-                  </Dialog>
+                  </Dialog> */}
                     <div className="flex space-x-3">
                       {/* <button
                         disabled
@@ -179,7 +178,7 @@ export function ExpenseManager() {
                   {/* <TableComponent column={column} data={dataTable}></TableComponent> */}
       
                   <TableComponent
-                    name="expense's"
+                    name="User's"
                     column={column}
                     data={dataTable}
                     pageSize={5} // Number of rows per page

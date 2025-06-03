@@ -40,7 +40,18 @@ export function PaymentOut() {
   ];
   useEffect(() => {
     setLoader(true); // Ensure loader is visible when the effect runs
-    
+     const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
     const fetchCustomers = async () => {
       try {
         const res = await apiGet("/payment/payment_out");
@@ -361,7 +372,7 @@ export function PaymentOut() {
               name="Payment Out"
               column={column}
               data={filterPaymentIn()}
-              pageSize={3} // Number of rows per page
+              pageSize={5} // Number of rows per page
               // generate={(row) => (
               //   <div className="flex gap-2">
               //     <button

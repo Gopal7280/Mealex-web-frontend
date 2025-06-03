@@ -3,13 +3,13 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../node_modules/bootstrap/dist/css/bootstrap.min.css";
 import "../../node_modules/bootstrap-icons/font/bootstrap-icons.css";
-import { apiPost } from "../services/api";
+import { apiGet, apiPost } from "../services/api";
 import { setToken } from "../services/authService";
 import imgLogo from "../assets/Bill365Logo.jpg"
 import emailjs from '@emailjs/browser';
 import { Loader } from "../layouts/Loader";
 import { Skeleton } from 'primereact/skeleton';
-const LoginRegister = ({ setAuth }) => {
+const LoginRegister = ({ setAuth,setUserRoleRoutes }) => {
     const [loader, setLoader] = useState(false);
     const [formType, setFormType] = useState("login");
     const [email, setEmail] = useState("");
@@ -32,6 +32,22 @@ const LoginRegister = ({ setAuth }) => {
                 axios.defaults.headers.common["Authorization"] = "Bearer " + response.data.token;
                     setToken(response.data.token);
                     setAuth(true);
+                    if(response)
+            {
+                const fetchUserRole = async () => {
+                      try {
+                        const res = await apiGet('/user');
+                        console.log(res.data);
+                        console.log(typeof setUserRoleRoutes)
+                        console.log(res.data[0].employee_role);
+                        setUserRoleRoutes(res.data[0].employee_role);
+                      } catch (err) {
+                        console.log(err);
+                        setUserRoleRoutes("owner");
+                      }
+                    };
+                    fetchUserRole();
+            }
                     navigate("/dashboard");
             }
         } catch (err) {

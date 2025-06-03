@@ -31,6 +31,18 @@ const QuotationTable = () => {
         const [statusClose,setStatusClose]=useState(null);
         const column=["Date","Quotation Number","Party Name","Due In","Amount","Status"];
         useEffect(() => {
+             const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
             const fetchQuotations = async () => {
                 setLoader(true); // Show the loader when the data fetching starts
         
@@ -404,7 +416,7 @@ const QuotationTable = () => {
                                 name="Quotation"
                           column={column}
                           data={filterQuotation()}
-                          pageSize={3} // Number of rows per page
+                          pageSize={5} // Number of rows per page
                         //   generate={(row)=>(
                         //                               <div className="flex gap-2">
                         //                                   <button className="text-red-500" onClick={(e)=>handleCheckboxClick(e,row.quotationNumber)}><Checkbox  color="success" /></button>

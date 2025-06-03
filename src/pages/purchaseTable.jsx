@@ -33,6 +33,18 @@ const PurchaseTable = () => {
     const [loader,setLoader]=useState(true);
     const column=["Date","Purchase Number","Party Name","Due In","Amount","Status"];
     useEffect(() => {
+         const fetchBussiness = async () => {
+              try {
+                const res = await apiGet('/businessprofile');
+                if (res.length === 0) {
+                  navigate('/profile_form');
+                }
+              } catch (err) {
+                console.log("working");
+                console.log(err);
+              }
+            };
+            fetchBussiness();
         const fetchPurchases = async () => {
             try {
                 const res = await apiGet("/purchase");
@@ -398,7 +410,7 @@ const PurchaseTable = () => {
                             name="Purchase's"
                       column={column}
                       data={filterPurchase()}
-                      pageSize={3} // Number of rows per page
+                      pageSize={5} // Number of rows per page
                     //   generate={(row)=>(
                     //     <div className="flex gap-2">
                     //         <button className="text-red-500" onClick={(e)=>handleCheckboxClick(e,row.purchaseNumber)}><Checkbox {...label}  color="success" /></button>

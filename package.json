@@ -13,9 +13,10 @@
     "@emailjs/browser": "^4.4.1",
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.4.11",
-    "@mui/material": "^6.4.11",
+    "@mui/icons-material": "^7.1.1",
+    "@mui/material": "^7.1.1",
     "@tailwindcss/vite": "^4.0.12",
+    "@toolpad/core": "^0.15.0",
     "axios": "^1.8.2",
     "bootstrap": "^5.3.6",
     "bootstrap-icons": "^1.13.1",
@@ -51,6 +52,8 @@
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.6.11",
     "vite": "^6.3.2"
   }
 }

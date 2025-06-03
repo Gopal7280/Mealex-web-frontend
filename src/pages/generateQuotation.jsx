@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { apiGet, apiPost } from "../services/api";
 // import "../styles/generateChallan.css";
 import {ButtonComponent} from '../components/Button';
-
+import { ProgressSpinner } from 'primereact/progressspinner';
 import { useReactToPrint } from "react-to-print";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -15,6 +15,7 @@ import { FaEdit } from "react-icons/fa";
 import { Loader } from "../layouts/Loader";
 import { useLocation, useNavigate } from "react-router-dom";
 export function GenerateQuotationn() {
+  const [download,setDownload]=useState(false);
   const [loader, setLoader] = useState(true);
   const [bussinessData, setBussinessData] = useState(null);
   const [data, setData] = useState(null);
@@ -236,31 +237,35 @@ function handlePdf(){
   }
   console.log(generatePdfData);
   const pdf = async () => {
+    setDownload(true);
   try {
-    const res = await apiPost('/pdf/quotation',generatePdfData);
-    console.log(res);
-    const data = await res.data;
+    // Step 1: Send API request and get raw PDF response
+    const res = await apiPost('/hardcopy/quotation', generatePdfData, { responseType: 'arraybuffer' });
+    console.log(res)
+    // Step 2: Convert raw response into a Blob
+    const blob = new Blob([res.data], { type: 'application/pdf' });
 
-    if (!data || !data.pdfBase64) {
-      throw new Error('Invalid PDF response');
-    }
-
-    // Convert comma-separated string to Uint8Array
-    const byteArray = data.pdfBase64.split(',').map(Number);
-    const uint8Array = new Uint8Array(byteArray);
-
-    // Create blob and download
-    const blob = new Blob([uint8Array], { type: 'application/pdf' });
+    // Step 3: Create an object URL for the Blob
     const url = URL.createObjectURL(blob);
 
+    // Step 4: Open the PDF in a new tab (optional)
+    window.open(url, '_blank'); // Opens PDF in a new tab for viewing
+
+    // Step 5: Trigger PDF download
     const a = document.createElement('a');
     a.href = url;
     a.download = 'quotation.pdf';
+    document.body.appendChild(a); // Append to the DOM to trigger download
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a); // Remove element after download
+    URL.revokeObjectURL(url); // Revoke the URL to free resources
   } catch (err) {
     console.error('Download error:', err);
+    handleDownloadPDF();
+  } finally {
+    setDownload(false);
   }
+
 };
 pdf();
 }
@@ -284,7 +289,15 @@ pdf();
             <div></div>
             <div>
 <button className="" onClick={handleDownloadPrint}><IoMdPrint className="!text-[#3A5B76] mr-3"/></button>
-<button className="" onClick={handlePdf}><FaDownload className="!text-[#3A5B76] mr-3"/></button>
+{
+  !download?(
+    <button className="" onClick={handlePdf}><FaDownload className="!text-[#3A5B76] mr-3"/></button>
+  ):(
+    <button className="me-2">
+            <ProgressSpinner style={{width: '30px', height: '30px'}} strokeWidth="8" fill="var(--surface-ground)" animationDuration=".5s" />
+        </button>
+  )
+}
 <button className="" onClick={(e)=>handleEdit(e)}><FaEdit className="!text-[#3A5B76] mr-3"/></button>
 </div>
 </div>
