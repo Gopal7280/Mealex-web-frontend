@@ -15,6 +15,8 @@ import { ButtonComponent } from "../components/Button";
 import { InputComponent } from "../components/Input";
 import { apiGet, apiPost, apiPut } from "../services/api";
 import { Loader } from "../layouts/Loader";
+import { CustomerModalView } from "./modalViews/customerModalView";
+import ProductModalView from "./modalViews/productModalView";
 export function PurchaseEdit() {
   const [loader, setLoader] = useState(false);
   const [purchasePreview, setPurchasePreview] = useState([]);
@@ -1125,6 +1127,9 @@ export function PurchaseEdit() {
       }
     }
   }
+   const [userRole,setUserRole]=useState("owner");
+     const [modalShow,setModalShow]=useState(false);
+     const [modalShow1,setModalShow1]=useState(false);
   useEffect(() => {
     console.log("Updated productRows:", productRows);
   }, [productRows]);
@@ -1230,6 +1235,19 @@ export function PurchaseEdit() {
     setDate(dt.toLocaleDateString());
     //  setDueDate(dt.getDate()+7+"/"+date.getMonth()+"/"+date.getFullYear());
     console.log(dt.toLocaleDateString());
+    const fetchUserRole=async ()=>{
+        try{
+              const res=await apiGet("/user");
+              console.log(res.data);
+              console.log(res.data[0].employee_role);
+              setUserRole(res.data[0].employee_role);
+        }
+        catch(err)
+        {
+          console.log(err);
+        }
+    }
+    fetchUserRole();
     const getBussinessProfile = async () => {
       const responseb = await apiGet("/businessprofile");
       console.log(responseb);
@@ -1255,7 +1273,22 @@ export function PurchaseEdit() {
       console.log(res1);
     };
     fetchProduct();
-  }, []);
+  }, [modalShow]);
+  useEffect(()=>{
+        setLoader(true); // Show loader when effect starts
+        const fetchProduct = async () => {
+          try {
+            const res = await apiGet("/products/productName");
+            setProducts(res);
+            console.log(res);
+            console.log("Product data fetched");
+          } catch (error) {
+            console.error("Error fetching products:", error);
+          }
+        };
+        fetchProduct();
+        setLoader(false);
+      },[modalShow1])
   useEffect(() => {
     const number = location.state?.data?.mobile_no; // Use optional chaining
     const id = location.state?.data?.purchase_id; // Use optional chaining
@@ -1403,12 +1436,23 @@ export function PurchaseEdit() {
   const handleNotesChange = (event) => {
     setNotes(event.target.value);
   };
+   function handleOpenModalProduct()
+  {
+    setModalShow1(true);
+  
+  }
   return (
     <>
       {loader ? (
         <Loader />
       ) : (
         <div>
+          {
+                                modalShow && (<CustomerModalView setModalShow={setModalShow}/>)
+                              }
+                              {
+                                modalShow1 && (<ProductModalView setModalShow1={setModalShow1}/>)
+                              }
           <div className="over bg-gray-100 p-4 max-w-7xl mx-auto bg-white">
             <h2 className="mb-6 text-3xl font-semibold text-center text-gray-800 d-inline-block">
               Update Details
@@ -1520,17 +1564,23 @@ export function PurchaseEdit() {
                                 />
                               </div>
                             ) : (
-                              <button
-                                type="button"
-                                className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                                onClick={() =>
-                                  navigate("/home", {
-                                    state: { data: "FromInvoice" },
-                                  })
+                              <>
+                              {
+                                  (userRole == 'owner' || userRole=="salesPerson" || userRole=="partner")?(
+                                    <button
+                                  type="button"
+                                  className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                  onClick={() =>
+                                    setModalShow(true)
+                                  }
+                                >
+                                  Create Party
+                                </button>
+                                  ):(
+                                    <></>
+                                  )
                                 }
-                              >
-                                Create Party
-                              </button>
+                              </>
                             )}
                           </div>
                         )}
@@ -1563,17 +1613,21 @@ export function PurchaseEdit() {
                                     <br />
                                   </li>
                                 ))}
-                                <button
+                                {
+                                  (userRole == 'owner' || userRole=="salesPerson" || userRole=="partner")?(
+                                    <button
                                   type="button"
                                   className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
                                   onClick={() =>
-                                    navigate("/home", {
-                                      state: { data: "FromInvoice" },
-                                    })
+                                    setModalShow(true)
                                   }
                                 >
                                   Create Party
                                 </button>
+                                  ):(
+                                    <></>
+                                  )
+                                }
                               </ul>
                             ) : (
                               <div className="p-2 text-gray-500">
@@ -1735,12 +1789,6 @@ export function PurchaseEdit() {
                                   {product.product_name}
                                 </option>
                               ))}
-                              <option
-                                value="addProduct"
-                                className="bg-[#2D465B] text-white"
-                              >
-                                Add Product
-                              </option>
                             </select>
                           </td>
                           <td className="w-30">
@@ -1936,14 +1984,24 @@ export function PurchaseEdit() {
                   >
                     +ADD ITEM
                   </button>
-                  <div>
-                    <button
+                  {
+                      (userRole == 'owner' || userRole=="stockManager" || userRole=="partner") ? (
+                        <button
+                      onClick={handleOpenModalProduct}
                       type="button"
                       className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
                     >
-                      Scan Barcode
+                      + Add Product
                     </button>
-                  </div>
+                      ):(<><button
+                      disabled
+                      onClick={handleOpenModalProduct}
+                      type="button"
+                      className="disabled:bg-gray-200 px-20 py-3 w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white disabled:hover:text-[#3A5B76]"
+                    >
+                      + Add Product
+                    </button></>)
+                    }
                 </div>
               </div>
 

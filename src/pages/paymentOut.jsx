@@ -1,3 +1,5 @@
+// Description: This file contains the PaymentOut component which displays a list of payment outs, allows searching, filtering, and performing actions like previewing, editing, and deleting payment outs.
+// Import necessary libraries and components
 import React, { useState, useEffect, useRef } from "react";
 import { SearchComponent } from "../components/SerachBar";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -15,21 +17,21 @@ import { Column } from 'primereact/column';
 import { update } from "lodash";
 import {Loader} from "../layouts/Loader"
 export function PaymentOut() {
-  const items = Array.from({ length: 5 }, (v, i) => i);
-  const [loader,setLoader]=useState(true);
-  const [searchTerm, setSearchTerm] = useState(""); //working
-  const [statusFilter, setStatusFilter] = useState("unPaid");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [paymentIn, setPaymentIn] = useState([]);
-  const [fetchPaymentIn, setFetchPaymentIn] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [match, setMatch] = useState([]);
-  const toast = useRef(null);
-  const [totalPurchase, setTotalPurchase] = useState(null);
+  const items = Array.from({ length: 5 }, (v, i) => i); //array of 5 items for skeleton loading
+  const [loader,setLoader]=useState(true); //loader state to show/hide loading spinner
+  const [searchTerm, setSearchTerm] = useState(""); // Search term for filtering payment outs
+  const [statusFilter, setStatusFilter] = useState("unPaid"); // Status filter for payment outs 
+  const [dropdownOpen, setDropdownOpen] = useState(false);// State to manage dropdown visibility
+  const [paymentIn, setPaymentIn] = useState([]); // State to store payment outs data
+  const [fetchPaymentIn, setFetchPaymentIn] = useState([]);// State to store fetched payment outs data
+  const [modalOpen, setModalOpen] = useState(false);// State to manage modal visibility
+  const [selectedInvoice, setSelectedInvoice] = useState(null);// State to store selected invoice data for modal
+  const [open, setOpen] = useState(false);// State to manage confirm dialog visibility  
+  const [match, setMatch] = useState([]);// State to store matched payment outs for bulk actions
+  const toast = useRef(null);// Reference for toast notifications
+  const [totalPurchase, setTotalPurchase] = useState(null);// State to store total purchase amount
   
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // Navigation hook from react-router-dom to navigate between routes
   const column = [
     "Id",
     "Party Name",
@@ -37,9 +39,11 @@ export function PaymentOut() {
     "Payment method",
     "Remaining Amount",
     "Date"  
-  ];
+  ]; // Column headers for the payment outs table
+  // useEffect to fetch business profile and payment outs data when component mounts
   useEffect(() => {
     setLoader(true); // Ensure loader is visible when the effect runs
+    // Function to fetch business profile data
      const fetchBussiness = async () => {
               try {
                 const res = await apiGet('/businessprofile');
@@ -52,6 +56,7 @@ export function PaymentOut() {
               }
             };
             fetchBussiness();
+            // Function to fetch customers data
     const fetchCustomers = async () => {
       try {
         const res = await apiGet("/payment/payment_out");
@@ -105,17 +110,22 @@ export function PaymentOut() {
   
   }, []);  // Empty dependency array, effect runs only once after component mounts
   
-
+  // Function to toggle dropdown visibility
+  // This function is called when the user clicks on the "Bulk Actions" button
   const toggleDropdown = (event) => {
     event.stopPropagation();
     setDropdownOpen(!dropdownOpen);
   };
 
+  // Function to handle bulk actions when a dropdown item is clicked
+  // This function is called when the user clicks on a bulk action in the dropdown
   const handleDropdownClick = (action) => {
     console.log(action); // Handle bulk actions here
     setDropdownOpen(false);
   };
 
+  // Function to filter payment outs based on search term
+  // This function filters the payment outs based on the search term entered by the user
   const filterPaymentIn = () => {
     return paymentIn.filter((paymentIn) => {
       const matchesSearch = `${paymentIn.partyName} ${paymentIn.Id} ${paymentIn.RemainingAmount}`
@@ -130,6 +140,8 @@ export function PaymentOut() {
     setModalOpen(true);
   };
 
+  // Function to close the modal and reset selected invoice
+  // This function is called when the user clicks on the close button in the modal
   const closeModal = () => {
     setModalOpen(false);
     setSelectedInvoice(null);
@@ -179,12 +191,16 @@ export function PaymentOut() {
       console.log("unchecked");
     }
   }
+  // Function to handle the generation of payment in
+  // This function is called when the user confirms the generation of payment in
   const handleGenerate = (e) => {
     setOpen(false);
     console.log(match);
     navigate("/generate-paymentIn", { state: { data: match } });
     console.log("generate");
   };
+  // Function to handle closing the confirm dialog
+  // This function is called when the user clicks on the close button in the confirm dialog
   const handleClose = (e) => {
     setOpen(false);
     console.log("close");
@@ -194,6 +210,7 @@ export function PaymentOut() {
     <>
     {
       loader?(<div>
+        {/* //skeleton loading */}
       <div className="over bg-gray-100 font-roboto p-2">
           <div className="max-w-7xl mx-auto bg-white p-6 shadow-lg rounded-lg">
           <Toast ref={toast} />

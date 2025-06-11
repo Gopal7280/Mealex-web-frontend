@@ -1,6 +1,6 @@
 
 import { useEffect, useRef, useState } from "react";
-import { apiGet, apiPost } from "../services/api";
+import { apiDelete, apiGet, apiPost } from "../services/api";
 // import "../styles/generateChallan.css";
 import {ButtonComponent} from '../components/Button';
 import { ProgressSpinner } from 'primereact/progressspinner';
@@ -269,6 +269,25 @@ function handlePdf(){
 };
 pdf();
 }
+const handledelete = async (e) => {
+    const ans = confirm('Are you sure want to delete quotation no-'+data[0].quotation_prefix);
+    console.log(ans);
+    if (ans == true) {
+      try {
+        setLoader(true);
+       const res= await apiDelete(`quotation/${data[0].quotation_id}`);
+        console.log(res);
+        navigate("/quotation");
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+      finally{
+        setLoader(false);
+      }
+    } else {
+      alert('Quotation not deleted');
+    }
+  };
   function handleChallanToInvoice(){
                 console.log(location.state.data[0].quotation_id);
                 const quotationId=location.state.data[0].quotation_id;
@@ -357,7 +376,7 @@ pdf();
               <p className="text-sm text-[#314158] font-semibold mb-1">
                 BILL TO:
               </p>
-              <h3 className="text-xl font-semibold text-[#1d293d]">{data[0].customername}</h3>
+              <h3 className="text-xl font-semibold text-[#1d293d]">{data[0].customername.toUpperCase()}</h3>
       <p className="text-sm text-[#45556c]">{data[0].billingaddress != "  null null null"
                 ? data[0].billingaddress
                    : ""}</p>
@@ -515,15 +534,26 @@ pdf();
               </div>
             </div>
           </div>
+          <div className="flex justify-end">
           <div className="mt-10 mb-20 text-end">
                               <ButtonComponent
                               onClick={handleChallanToInvoice}
                                 value="convert_invoice"
                                 type="button"
                                 label="Convert Quotation to Invoice"
-                                className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                className="px-8 me-2 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
                               ></ButtonComponent>
                            </div>
+                           <div className="mt-10 text-end">
+                      <ButtonComponent
+                      onClick={handledelete}
+                        value="submit"
+                        type="button"
+                        label="Delete Quotation"
+                        className="disabled:opacity-80 disabled:bg-gray-400 px-4 py-3 bg-red-500 text-white font-bold rounded hover:bg-red-600"
+                      ></ButtonComponent>
+                    </div>
+                    </div>
         </div>
         </div>
       ) : (

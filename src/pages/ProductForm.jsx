@@ -1,54 +1,65 @@
-import React, { useEffect, useRef, useState } from "react";
-import { useFormik } from "formik";
-import axios from "axios";
-import { Preview, ModeEdit, DeleteForever, Close } from "@mui/icons-material";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
-import { ButtonComponent } from "../components/Button";
-import { InputComponent } from "../components/Input";
-import { apiGet, apiPost } from "../services/api";
-import "../styles/layoutFix.css";
-import Sidebar from "../layouts/Sidebar";
-import { Toast } from "primereact/toast";
-import { Loader } from "../layouts/Loader";
-import { Skeleton } from "primereact/skeleton";
+// ProductForm.jsx
+// This component allows users to add a new product with various details like name, category, price, etc.
+// It uses Formik for form handling and validation, and Axios for API requests.
+// It also includes a dialog for adding a new category if the user selects "Other Category".
+// It integrates with a sidebar layout and uses PrimeReact components for UI elements like Toast, Dialog, and Loader.
 
-import "../styles/ProductForm.css";
+import React, { useEffect, useRef, useState } from 'react';
+import { useFormik } from 'formik';
+import axios from 'axios';
+import { Preview, ModeEdit, DeleteForever, Close } from '@mui/icons-material';
+import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { ButtonComponent } from '../components/Button';
+import { InputComponent } from '../components/Input';
+import { apiGet, apiPost } from '../services/api';
+import '../styles/layoutFix.css';
+import Sidebar from '../layouts/Sidebar';
+import { Toast } from 'primereact/toast';
+import { Loader } from '../layouts/Loader';
+import { Skeleton } from 'primereact/skeleton';
+
+import '../styles/ProductForm.css';
 // import { BarcodeComp } from "../components/QrCode";
 import { Dialog } from 'primereact/dialog';
 const ProductForm = () => {
-  const [loader, setLoader] = useState(true);
+  const [loader, setLoader] = useState(false); // State to manage loading state
   const navigate = useNavigate(); // useNavigate hook
-  const [producttype, setProducttype] = useState("");
-  const [customField, setCustomField] = useState([""]);
-  const [gstSelected, setGstSelected] = useState([""]);
-  const [unitSelected, setUnitSelected] = useState([]);
-  const [locations, setLocationS] = useState("");
-  const location = useLocation();
-   const [visible, setVisible] = useState(false);
-  const toast = useRef(null);
-  const [addCategory,setAddCategory] = useState("");
+  const [producttype, setProducttype] = useState(''); // State to manage product type
+  const [customField, setCustomField] = useState(['']); // State to manage custom fields
+  const [gstSelected, setGstSelected] = useState(['']); // State to manage selected GST rate
+  const [unitSelected, setUnitSelected] = useState([]); // State to manage selected units
+  const [locations, setLocationS] = useState(''); // State to manage locations
+  const location = useLocation(); // Get the current location
+  const [visible, setVisible] = useState(false); // State to manage visibility of the dialog for adding a new category
+  const toast = useRef(null); // Reference for the Toast component
+  const [addCategory, setAddCategory] = useState(''); // State to manage the new category name
+  // Default values for selling and purchase prices
   const [gstSet, setGstSet] = useState({
-    sellingPrice: "withGstSelling",
-    purchasePrice: "withGstPurchase",
+    sellingPrice: 'withGstSelling',
+    purchasePrice: 'withGstPurchase',
   });
-  const [productUnit, setProductUnuit] = useState("");
+  const [productUnit, setProductUnuit] = useState(''); // State to manage selected product unit
+
   useEffect(() => {
-     const fetchBussiness = async () => {
-              try {
-                const res = await apiGet('/businessprofile');
-                if (res.length === 0) {
-                  navigate('/profile_form');
-                }
-              } catch (err) {
-                console.log("working");
-                console.log(err);
-              }
-            };
-            fetchBussiness();
+    // If the business profile is not found, redirect to the profile form page
+    const fetchBussiness = async () => {
+      try {
+        const res = await apiGet('/businessprofile');
+        if (res.length === 0) {
+          navigate('/profile_form');
+        }
+      } catch (err) {
+        console.log('working');
+        console.log(err);
+      }
+    };
+    fetchBussiness();
+    // Fetch units from the API when the component mounts
+    // This will populate the unitSelected state with available units
     const fetchUnit = async () => {
       setLoader(true);
       try {
-        const res = await apiGet("products/units");
+        const res = await apiGet('products/units');
         console.log(res.data);
         setUnitSelected(res.data);
       } catch (err) {
@@ -61,62 +72,73 @@ const ProductForm = () => {
     fetchUnit();
   }, []);
 
+  // Function to handle product type change
   function handleProductChange(e) {
     console.log(e.target.value);
     setProducttype(e.target.value);
   }
+
+  // Function to handle category change
+  // If the user selects "Other Category", show the dialog to add a new category
   function handleCategoryChange(e) {
-    setAddCategory("");
-    if(e.target.value=="otherCategory")
-    {
+    setAddCategory('');
+    if (e.target.value == 'otherCategory') {
       setVisible(true);
-      return
+      return;
     }
     console.log(e.target.value);
     setProduct_category(e.target.value);
   }
+
+  // Function to handle adding a new custom field
+  // It appends an empty string to the customField state, allowing the user to input a new field
   function handleCustomField() {
-    setCustomField((prevCustomField) => [...prevCustomField, ""]);
+    setCustomField(prevCustomField => [...prevCustomField, '']);
   }
+
+  // Function to handle changes in custom fields
   function handleCustomFieldChange(index, value) {
     const updatedFields = [...customField];
     updatedFields[index] = value;
     setCustomField(updatedFields);
   }
-  const [product_category, setProduct_category] = useState("");
+  const [product_category, setProduct_category] = useState(''); // State to manage product category
+ 
+  // Formik setup for handling form submission and validation
+  // It initializes the form values and handles the submission logic
   const formik = useFormik({
     initialValues: {
-      product_name: "",
-      product_category: "",
+      product_name: '',
+      product_category: '',
       // product_id: "",
-      product_unit: "",
+      product_unit: '',
       // productType:"",
       selling_price: 0,
       purchase_price: 0,
-      hsn_sac_code: "",
-      product_description: "",
-      custom_field: "",
-      generate_barcode: "",
-      product_type: "",
-      gst_rate: "",
+      hsn_sac_code: '',
+      product_description: '',
+      custom_field: '',
+      generate_barcode: '',
+      product_type: '',
+      gst_rate: '',
       product_image_pdf: null, // Added for file input
       gstWithWithout: {},
     },
-    onSubmit: async (values) => {
+    onSubmit: async values => {
       setLoader(true);
-      if (values.purchase_price == "") {
+      if (values.purchase_price == '') {
         values.purchase_price = 0;
       }
-      if (values.selling_price == "") {
+      if (values.selling_price == '') {
         values.selling_price = 0;
       }
 
       values.product_unit = productUnit;
       values.gstWithWithout = gstSet;
-      values.gst_rate = gstSelected == "" ? 0 : gstSelected;
+      values.gst_rate = gstSelected == '' ? 0 : gstSelected;
       values.product_type = producttype;
-      const keyValuePairs = customField.map((field) => {
-        const [key, value] = field.split("/").map((item) => item.trim());
+      const keyValuePairs = customField.map(field => {
+        const [key, value] = field.split('/').map(item => item.trim());
         return { key, value };
       });
 
@@ -125,28 +147,31 @@ const ProductForm = () => {
       values.product_category = product_category;
       // alert(JSON.stringify(values));
       console.log(values);
+
+      // API call to add the product
+      // It uses the apiPost function to send a POST request to the '/products' endpoint
       const addProduct = async () => {
         try {
-          // setLoader(true);
-          const res = await apiPost("/products", values);
-          if (location.state?.data == "FromInvoice") {
-            navigate("/add-invoice");
+          setLoader(true);
+          const res = await apiPost('/products', values);
+          if (location.state?.data == 'FromInvoice') {
+            navigate('/add-invoice');
           }
-          if (location.state?.data === "FromProduct") {
-            navigate("/products");
+          if (location.state?.data === 'FromProduct') {
+            navigate('/products');
           }
-          if (location.state?.data == "FromPurchase") {
-            navigate("/purchaseForm");
+          if (location.state?.data == 'FromPurchase') {
+            navigate('/purchaseForm');
           }
-          if (location.state?.data == "FromChallan") {
-            console.log("working");
-            navigate("/add-challan");
+          if (location.state?.data == 'FromChallan') {
+            console.log('working');
+            navigate('/add-challan');
           }
-          if (location.state?.data == "FromQuotation") {
-            navigate("/add-quotation");
+          if (location.state?.data == 'FromQuotation') {
+            navigate('/add-quotation');
           }
           if (location.state?.data == undefined) {
-            navigate("/products");
+            navigate('/products');
           }
           // else{
           //   if(location.state?.data=="FromChallanTo"){
@@ -160,9 +185,9 @@ const ProductForm = () => {
         } catch (err) {
           console.log(err.status);
           toast.current.show({
-            severity: "error",
-            summary: "Error",
-            detail: "Please enter all fields",
+            severity: 'error',
+            summary: 'Error',
+            detail: 'Please enter all fields',
             life: 3000,
           });
         } finally {
@@ -172,67 +197,80 @@ const ProductForm = () => {
       addProduct();
     },
   });
-  const [gvalue, setGvalue] = useState("");
+  const [gvalue, setGvalue] = useState('');
+
   function handleBarcodeGenerate(e) {
     setGvalue(e.target.value);
   }
+
+  // Function to handle the selection of GST rates
+  // It updates the gstSet state based on whether the user selects "with GST" or "without GST"
   function handleGstSelect(e, name) {
     console.log(gstSet);
-    if (name == "selling") {
-      if (e.target.value == "withGst") {
+    if (name == 'selling') {
+      if (e.target.value == 'withGst') {
         console.log(e.target.value);
         setGstSet({
-          sellingPrice: "withGstSelling",
+          sellingPrice: 'withGstSelling',
           purchasePrice:
             gstSet.purchasePrice != undefined
               ? gstSet.purchasePrice
-              : "withGstPurchase",
+              : 'withGstPurchase',
         });
       }
-      if (e.target.value == "withoutGst") {
+      if (e.target.value == 'withoutGst') {
         console.log(e.target.value);
         setGstSet({
-          sellingPrice: "withoutGstSelling",
+          sellingPrice: 'withoutGstSelling',
           purchasePrice:
             gstSet.purchasePrice != undefined
               ? gstSet.purchasePrice
-              : "withGstPurchase",
+              : 'withGstPurchase',
         });
       }
     }
-    if (name == "purchase") {
-      if (e.target.value == "withGst") {
+    if (name == 'purchase') {
+      if (e.target.value == 'withGst') {
         console.log(e.target.value);
         setGstSet({
           sellingPrice:
             gstSet.sellingPrice != undefined
               ? gstSet.sellingPrice
-              : "withGstSelling",
-          purchasePrice: "withGstPurchase",
+              : 'withGstSelling',
+          purchasePrice: 'withGstPurchase',
         });
       }
-      if (e.target.value == "withoutGst") {
+      if (e.target.value == 'withoutGst') {
         console.log(e.target.value);
         setGstSet({
           sellingPrice:
             gstSet.sellingPrice != undefined
               ? gstSet.sellingPrice
-              : "withGstSelling",
-          purchasePrice: "withoutGstPurchase",
+              : 'withGstSelling',
+          purchasePrice: 'withoutGstPurchase',
         });
       }
     }
   }
+
+  // Function to handle changes in the GST selection dropdown
+  // It updates the gstSelected state with the selected value
   function handleChange(e) {
     console.log(e.target.value);
     setGstSelected(e.target.value);
   }
+
+  // Function to handle changes in the product unit selection dropdown
+  // It updates the productUnit state with the selected value
   function handleChangeUnit(e) {
     console.log(e.target.value);
     setProductUnuit(e.target.value);
   }
-  function handleProductCategoryAdd(e){
-    const newCategory=document.getElementById("newCategory").value;
+
+  // Function to handle adding a new product category
+  // It retrieves the value from the input field, updates the product_category state, and closes the dialog
+  function handleProductCategoryAdd(e) {
+    const newCategory = document.getElementById('newCategory').value;
     // formik.values.product_category=newCategory;
     setAddCategory(newCategory);
     setProduct_category(newCategory);
@@ -243,23 +281,40 @@ const ProductForm = () => {
     <>
       {loader ? (
         <>
+          {/* // Display a loader while data is being fetched or processed */}
           <Loader />
         </>
       ) : (
         <div>
-          <Dialog header="Add Category" visible={visible} onHide={() => {if (!visible) return; setVisible(false); }}
-                style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
-                <dl>
-                  <dt className="mb-2 mt-2">Category Name</dt>
-                  <dd><input id="newCategory" type="text" className="p-[0.76rem] w-full border-1 border-[#d1d5db] rounded-[6px]" placeholder="Enter Product category" /></dd>
-                </dl>
-                 <ButtonComponent
-                      onClick={(e)=>handleProductCategoryAdd(e)}
-                      label="Add"
-                      type="submit"
-                      className="bg-[#3A5B76] text-white px-8 py-2 rounded hover:bg-[#2E4A63]"
-                    ></ButtonComponent>
-            </Dialog>
+          {/* //this is the dialog for adding a new product category */}
+          <Dialog
+            header="Add Category"
+            visible={visible}
+            onHide={() => {
+              if (!visible) return;
+              setVisible(false);
+            }}
+            style={{ width: '50vw' }}
+            breakpoints={{ '960px': '75vw', '641px': '100vw' }}
+          >
+            <dl>
+              <dt className="mb-2 mt-2">Category Name</dt>
+              <dd>
+                <input
+                  id="newCategory"
+                  type="text"
+                  className="p-[0.76rem] w-full border-1 border-[#d1d5db] rounded-[6px]"
+                  placeholder="Enter Product category"
+                />
+              </dd>
+            </dl>
+            <ButtonComponent
+              onClick={e => handleProductCategoryAdd(e)}
+              label="Add"
+              type="submit"
+              className="bg-[#3A5B76] text-white px-8 py-2 rounded hover:bg-[#2E4A63]"
+            ></ButtonComponent>
+          </Dialog>
           <div className="max-w-5xl mx-auto bg-white p-8 rounded-lg shadow-md">
             <div className="">
               <div className="">
@@ -323,11 +378,11 @@ const ProductForm = () => {
                         Product Unit
                       </label>
                       <select
-                        onChange={(e) => handleChangeUnit(e)}
+                        onChange={e => handleChangeUnit(e)}
                         className="w-full  p-2 border rounded"
                       >
                         {unitSelected.length > 0 ? (
-                          unitSelected.map((item) => (
+                          unitSelected.map(item => (
                             <option value={item.unit_name}>
                               {item.unit_name}
                             </option>
@@ -351,7 +406,12 @@ const ProductForm = () => {
                         <option value="Electronics">Electronics</option>
                         <option value="clothing">Clothing</option>
                         <option value="food">Food</option>
-                        <option value="otherCategory" className="bg-[#3A5B76] text-white">{addCategory==""?"add category":addCategory}</option>
+                        <option
+                          value="otherCategory"
+                          className="bg-[#3A5B76] text-white"
+                        >
+                          {addCategory == '' ? 'add category' : addCategory}
+                        </option>
                       </select>
                     </div>
                     <div className="lg:grid grid-cols-2 gap-3 sm:grid mt-2 block">
@@ -371,7 +431,7 @@ const ProductForm = () => {
                           Select with/without gst
                         </label>
                         <select
-                          onChange={(e) => handleGstSelect(e, "selling")}
+                          onChange={e => handleGstSelect(e, 'selling')}
                           class="w-full p-2 border rounded"
                         >
                           <option value="withGst">With GST</option>
@@ -396,7 +456,7 @@ const ProductForm = () => {
                           Select with/without gst
                         </label>
                         <select
-                          onChange={(e) => handleGstSelect(e, "purchase")}
+                          onChange={e => handleGstSelect(e, 'purchase')}
                           class="w-full p-2 border rounded"
                         >
                           <option value="withGst">With GST</option>
@@ -422,7 +482,7 @@ const ProductForm = () => {
                         GST Category
                       </label>
                       <select
-                        onChange={(e) => handleChange(e)}
+                        onChange={e => handleChange(e)}
                         class="w-full p-2 border rounded"
                       >
                         <option value="0">Select</option>
@@ -468,7 +528,7 @@ const ProductForm = () => {
                         placeholder="Enter Product Description"
                       ></textarea>
                     </div>
-                    <div style={{ marginTop: "10px" }}>
+                    <div style={{ marginTop: '10px' }}>
                       <label className="block text-gray-600">
                         Custom Fields
                       </label>
@@ -478,7 +538,7 @@ const ProductForm = () => {
                           type="text"
                           disabled
                           value={field}
-                          onChange={(e) =>
+                          onChange={e =>
                             handleCustomFieldChange(index, e.target.value)
                           }
                           className="w-full p-2 border rounded mt-1"

@@ -1,3 +1,5 @@
+// Description: This file contains the Invoices component which displays a list of invoices with search, filter, and action functionalities.
+//// It includes features like viewing, editing, deleting invoices, and generating new invoices from selected ones.
 import React, { useState, useEffect, useRef } from "react";
 import { SearchComponent } from "../components/SerachBar";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -14,22 +16,22 @@ import { Skeleton } from "primereact/skeleton";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 const Invoices = ({ onLoad }) => {
-  const [loader, setLoader] = useState(true);
+  const [loader, setLoader] = useState(true); // Initialize loader state to true
   const [searchTerm, setSearchTerm] = useState(""); //working
-  const [statusFilter, setStatusFilter] = useState("unPaid");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [invoice, setInvoice] = useState([]);
-  const [fetchInvoice, setFetchInvoice] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [match, setMatch] = useState([]);
-  const toast = useRef(null);
-  const [paid, setPaid] = useState(null);
-  const [unPaid, setUnpaid] = useState(null);
-  const [totalPurchase, setTotalPurchase] = useState(null);
-  const navigate = useNavigate();
-  const items = Array.from({ length: 5 }, (v, i) => i);
+  const [statusFilter, setStatusFilter] = useState("unPaid"); // Default filter to show unpaid invoices
+  const [dropdownOpen, setDropdownOpen] = useState(false); // State to manage dropdown visibility 
+  const [invoice, setInvoice] = useState([]); // State to hold invoice data
+  const [fetchInvoice, setFetchInvoice] = useState([]); // State to hold fetched invoice data
+  const [modalOpen, setModalOpen] = useState(false); // State to manage modal visibility
+  const [selectedInvoice, setSelectedInvoice] = useState(null); // State to hold the selected invoice for modal display
+  const [open, setOpen] = useState(false);// State to manage the open state of the generate invoice modal
+  const [match, setMatch] = useState([]); // State to hold matched invoice data for generation
+  const toast = useRef(null); // Reference for toast notifications
+  const [paid, setPaid] = useState(null); // State to hold the count of paid invoices
+  const [unPaid, setUnpaid] = useState(null); // State to hold the count of unpaid invoices
+  const [totalPurchase, setTotalPurchase] = useState(null); // State to hold the total purchase amount
+  const navigate = useNavigate(); // Hook to navigate programmatically
+  const items = Array.from({ length: 5 }, (v, i) => i); // Generate an array of 5 items for the skeleton loader 
   const column = [
     "Date",
     "Invoice Number",
@@ -37,10 +39,12 @@ const Invoices = ({ onLoad }) => {
     "Due In",
     "Amount",
     "Status",
-  ];
+  ]; // Define the columns for the invoice table
   useEffect(() => {
     setLoader(true); // Setting loader to true at the beginning
     try {
+      // Function to check if business profile exists
+      // If not, redirect to profile form
        const fetchBussiness = async () => {
               try {
                 const res = await apiGet('/businessprofile');
@@ -97,17 +101,17 @@ const Invoices = ({ onLoad }) => {
       setLoader(false); // Hide loader if error occurs outside of async function
     }
   }, []);
-
+  
   const toggleDropdown = (event) => {
     event.stopPropagation();
     setDropdownOpen(!dropdownOpen);
-  };
-
+  }; // Toggle dropdown visibility
+  // Function to handle dropdown click actions
   const handleDropdownClick = (action) => {
     console.log(action); // Handle bulk actions here
     setDropdownOpen(false);
   };
-
+  // Function to filter invoices based on search term and status
   const filterInvoice = () => {
     return invoice.filter((invoice) => {
       const matchesSearch = `${invoice.partyName} ${invoice.invoiceNumber}`
@@ -124,7 +128,7 @@ const Invoices = ({ onLoad }) => {
     setSelectedInvoice(challan);
     setModalOpen(true);
   };
-
+  // Function to close the modal and reset selected invoice 
   const closeModal = () => {
     setModalOpen(false);
     setSelectedInvoice(null);
@@ -139,36 +143,7 @@ const Invoices = ({ onLoad }) => {
       }
     }
   }
-  const handledelete = async (e, invoicePrefix) => {
-    const ans = confirm("Are you sure want to delete Invoice");
-    console.log(ans);
-    if (ans == true) {
-      const invoice = fetchInvoice.find(
-        (i) => i.invoice_prefix === invoicePrefix
-      );
-      if (!invoice) return;
-
-      setLoader(true); // ✅ Show loader
-
-      try {
-        await apiDelete(`/invoices/${invoice.invoice_id}`);
-        // ✅ Remove invoice from state instead of reloading the page
-        setInvoice((prev) =>
-          prev.filter((i) => i.invoiceNumber !== invoicePrefix)
-        );
-        setFetchInvoice((prev) =>
-          prev.filter((i) => i.invoice_prefix !== invoicePrefix)
-        );
-      } catch (error) {
-        console.error("Delete failed", error);
-      } finally {
-        setLoader(false); // ✅ Hide loader
-      }
-    } else {
-      alert("Invoice not deleted");
-    }
-  };
-
+  
   function handleEdit(e, invoiceId) {
     console.log(invoiceId);
     console.log(invoiceId);
@@ -180,6 +155,7 @@ const Invoices = ({ onLoad }) => {
       }
     }
   }
+  // Function to handle checkbox click for generating invoice
   function handleCheckboxClick(e, id) {
     if (!e.target.checked) {
       console.log("checked");
@@ -216,6 +192,7 @@ const Invoices = ({ onLoad }) => {
   return (
     <>
       {loader ? (
+        //This is a Skeleton loader that displays while the data is being fetched 
         <div>
           <div className="over bg-gray-100 font-roboto p-2">
             <div className="max-w-7xl mx-auto bg-white p-6 shadow-lg rounded-lg">
@@ -295,18 +272,18 @@ const Invoices = ({ onLoad }) => {
                       style={{ width: "25%" }}
                       body={<Skeleton />}
                     ></Column>
-                    <Column
+                    {/* <Column
                       field="quantity"
                       header="Generate-Invoice"
                       style={{ width: "25%" }}
                       body={<Skeleton />}
-                    ></Column>
-                    <Column
+                    ></Column> */}
+                    {/* <Column
                       field="quantity"
                       header="Action"
                       style={{ width: "25%" }}
                       body={<Skeleton />}
-                    ></Column>
+                    ></Column> */}
                   </DataTable>
                 </div>
               </div>
@@ -359,6 +336,7 @@ const Invoices = ({ onLoad }) => {
               <h2 className="text-xl font-bold text-[#2D465B] mb-4">
                 Invoice's
               </h2>
+              {/* // Display total purchase, paid, and unpaid counts */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 <div className="bg-gray-200 text-[#3A5B76] p-4 shadow-md rounded-lg hover:bg-[#3A5B76] hover:text-white">
                   <h3 className="text-lg font-semibold">Total Purchase</h3>
@@ -458,6 +436,7 @@ const Invoices = ({ onLoad }) => {
                       </div>
                     )}
                   </div>
+                  {/* // This button is used to navigate to the add invoice page   */}
                   <NavLink to="/add-invoice">
                     <button className="bg-[#3A5B76] sm:mt-0 mt-1 text-white px-4 py-2 rounded hover:bg-[#2D465B]">
                       Create Invoice
@@ -492,36 +471,37 @@ const Invoices = ({ onLoad }) => {
                               ))}
                           </tbody>
                       </table> */}
+                      {/* // This is the main table component that displays the invoice data   */}
                 <TableComponent
                   onClickRow={handleClick}
                   name="Invoice"
                   column={column}
                   data={filterInvoice()}
                   pageSize={5} // Number of rows per page
-                  actions={(row) => (
-                    <div className="text-center">
-                      {/* <button
-                        className="text-[#3A5B76]"
-                        onClick={(e) =>
-                          handlePreview(e, row.invoiceNumber, row)
-                        }
-                      >
-                        <Preview />
-                      </button> */}
-                      {/* <button
-                        className="text-[#3A5B76]"
-                        onClick={(e) => handleEdit(e, row.invoiceNumber)}
-                      >
-                        <ModeEdit />
-                      </button> */}
-                      <button
-                        className="text-red-500"
-                        onClick={(e) => handledelete(e, row.invoiceNumber)}
-                      >
-                        <DeleteForever />
-                      </button>
-                    </div>
-                  )}
+                  // actions={(row) => (
+                  //   <div className="text-center">
+                  //     {/* <button
+                  //       className="text-[#3A5B76]"
+                  //       onClick={(e) =>
+                  //         handlePreview(e, row.invoiceNumber, row)
+                  //       }
+                  //     >
+                  //       <Preview />
+                  //     </button> */}
+                  //     {/* <button
+                  //       className="text-[#3A5B76]"
+                  //       onClick={(e) => handleEdit(e, row.invoiceNumber)}
+                  //     >
+                  //       <ModeEdit />
+                  //     </button> */}
+                  //     <button
+                  //       className="text-red-500"
+                  //       onClick={(e) => handledelete(e, row.invoiceNumber)}
+                  //     >
+                  //       <DeleteForever />
+                  //     </button>
+                  //   </div>
+                  // )}
                 />
               </div>
             </div>

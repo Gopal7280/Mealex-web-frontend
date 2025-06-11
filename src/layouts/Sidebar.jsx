@@ -54,6 +54,7 @@ const Sidebar = ({ setRefresh }) => {
   };
 
   useEffect(() => {
+    // Function to handle clicks outside the sidebar and dropdowns
     const handleClickOutside = event => {
       const clickY = event.clientY;
       const isClickInsideSidebar =
@@ -91,6 +92,7 @@ const Sidebar = ({ setRefresh }) => {
   useEffect(() => {
     console.log('working with use');
     var name="";
+     // Fetch user role and business profile on component mount and when refresh changes
     const fetchUserRole = async () => {
       try {
         const res = await apiGet('/user');
@@ -146,6 +148,7 @@ const Sidebar = ({ setRefresh }) => {
   ];
   function handleChange(e) {
     console.log(e.target.value.code);
+     // Navigate to different create forms based on dropdown selection, after checking business profile existence
     const fetchBussiness = async () => {
       try {
         const res = await apiGet('/businessprofile');
@@ -171,6 +174,7 @@ const Sidebar = ({ setRefresh }) => {
     };
     fetchBussiness();
   }
+   // Check if a business profile exists, and navigate to create or update form accordingly
   function handleBussinessCheck(e) {
     const fetchBussiness = async () => {
       const res = await apiGet('/businessprofile');
@@ -205,11 +209,13 @@ const Sidebar = ({ setRefresh }) => {
   }
    const [anchorEl, setAnchorEl] = useState(null);
     const [drawerOpen, setDrawerOpen] = useState(false);
+     // Manages dark mode state and persists it in localStorage
   const [dark, setDark] = useState(() => {
     return localStorage.getItem('theme') === 'dark';
   });
   const [isdark, setIsdark] = useState(false);
   useEffect(() => {
+     // Apply or remove dark mode class based on state
     const root = document.documentElement;
     if (dark) {
       setIsdark(true);
@@ -221,6 +227,7 @@ const Sidebar = ({ setRefresh }) => {
       localStorage.setItem('theme', 'light');
     }
   }, [dark]);
+   // Clear timeout and remove user data from localStorage, then redirect to login
   function handleLogout(){
     {
                   if (timeoutRef.current) {
@@ -235,9 +242,11 @@ const Sidebar = ({ setRefresh }) => {
                 }
   }
   function toggleDarkMode() {}
+   // Handles opening the user detail menu
    const handleUserDetailClick = event => {
     setAnchorEl(event.currentTarget);
   };
+  // Handles closing the user detail menu and performing actions based on the selected path
   const handleUserDetailClose = path => {
     setAnchorEl(null);
     if (path=="theme") {
@@ -326,7 +335,7 @@ const Sidebar = ({ setRefresh }) => {
                 <img
                   src={business_name[0].vendor_logo}
                   alt="Logo Preview"
-                  className="w-20 h-10 object-contain"
+                  className="sm:w-20 sm:h-10 h-5 w-10 object-contain"
                 />
               ) : (
                 <span className="font-bold text-5xl rounded text-white">
@@ -372,6 +381,7 @@ const Sidebar = ({ setRefresh }) => {
         >
           {userName+""+"▼"}
         </Button>
+         {/* User detail menu */}
         <Menu
           id="user-menu"
           anchorEl={anchorEl}
@@ -381,11 +391,11 @@ const Sidebar = ({ setRefresh }) => {
           {
             !isdark ?(
               <MenuItem onClick={() => handleUserDetailClose("theme")}>
-            Switch To Dark Mode
+             Switch To Dark Mode
           </MenuItem>
             ):(
               <MenuItem onClick={() => handleUserDetailClose("theme")}>
-            Switch To Light Mode
+             Switch To Light Mode
           </MenuItem>
             )
           }
@@ -394,12 +404,15 @@ const Sidebar = ({ setRefresh }) => {
             
           }}
           onClick={() => handleUserDetailClose('keyBoardShortcut')}>
-            Key Board Shortcut's
+             Key Board Shortcut's
           </MenuItem>
           <Button
             fullWidth
-            variant="contained"
-            color="error"
+            color='black'
+            sx={{
+              px:2,
+              justifyContent:"left",
+            }}
             onClick={() => {
               // Add your logout logic here
               handleUserDetailClose("logout");
@@ -485,6 +498,7 @@ const Sidebar = ({ setRefresh }) => {
                 </svg>
               </button>
             </div> */}
+             {/* Keyboard shortcut sidebar */}
             <KeyShortcut
               visible={visibleRight}
               position="right"
@@ -680,6 +694,7 @@ const Sidebar = ({ setRefresh }) => {
             </form> */}
           </div>
       <div className='bg-white'>
+             {/* Render sidebar based on user role */}
             {
               (userRole=="owner" || userRole=="partner") && (
                 <OwnerSideBar data={business_name}/>

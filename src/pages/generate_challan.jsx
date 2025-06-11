@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { apiGet, apiPost } from '../services/api';
+import { apiDelete, apiGet, apiPost } from '../services/api';
 // import "../styles/generateChallan.css";
 import { useReactToPrint } from 'react-to-print';
 import html2canvas from 'html2canvas';
@@ -273,27 +273,25 @@ export function GenerateChallan() {
     const pdf = async () => {
       setDownload(true);
       try {
-        const res = await apiPost('/hardcopy/challan', generatePdfData);
-        console.log(res);
-        const data = await res.data;
+        const res = await apiPost('/hardcopy/challan', generatePdfData, { responseType: 'arraybuffer' });
+    console.log(res)
+    // Step 2: Convert raw response into a Blob
+    const blob = new Blob([res.data], { type: 'application/pdf' });
 
-        if (!data || !data.pdfBase64) {
-          throw new Error('Invalid PDF response');
-        }
+    // Step 3: Create an object URL for the Blob
+    const url = URL.createObjectURL(blob);
 
-        // Convert comma-separated string to Uint8Array
-        const byteArray = data.pdfBase64.split(',').map(Number);
-        const uint8Array = new Uint8Array(byteArray);
+    // Step 4: Open the PDF in a new tab (optional)
+    window.open(url, '_blank'); // Opens PDF in a new tab for viewing
 
-        // Create blob and download
-        const blob = new Blob([uint8Array], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'challan.pdf';
-        a.click();
-        URL.revokeObjectURL(url);
+    // Step 5: Trigger PDF download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'challan.pdf';
+    document.body.appendChild(a); // Append to the DOM to trigger download
+    a.click();
+    document.body.removeChild(a); // Remove element after download
+    URL.revokeObjectURL(url); // Revoke the URL to free resources
       } catch (err) {
         console.error('Download error:', err);
         setDownload(false);
@@ -304,7 +302,25 @@ export function GenerateChallan() {
     };
     pdf();
   }
-
+  const handledelete = async (e) => {
+    const ans = confirm('Are you sure want to delete challan no-'+data[0].challan_prefix);
+    console.log(ans);
+    if (ans == true) {
+      try {
+        setLoader(true);
+       const res= await apiDelete(`/challan/${data[0].challan_id}`);
+        console.log(res);
+        navigate("/deliverychallan-table");
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+      finally{
+        setLoader(false);
+      }
+    } else {
+      alert('Challan not deleted');
+    }
+  };
   return (
     <>
       {data != null && bussinessData != null ? (
@@ -396,7 +412,7 @@ export function GenerateChallan() {
                   BILL TO:
                 </p>
                 <h3 className="text-xl font-semibold text-[#1d293d]">
-                  {data[0].customername}
+                  {data[0].customername.toUpperCase()}
                 </h3>
                 <p className="text-sm text-[#45556c]">
                   {data[0].billingaddress != '  null null null'
@@ -580,15 +596,26 @@ export function GenerateChallan() {
                 </div>
               </div>
             </div>
+            <div className='flex justify-end'>
             <div className="mt-10 mb-20 text-end">
               <ButtonComponent
                 onClick={handleChallanToInvoice}
                 value="convert_invoice"
                 type="button"
                 label="Convert Challan to Invoice"
-                className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                className="px-8 me-2 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
               ></ButtonComponent>
             </div>
+            <div className="mt-10 text-end">
+                      <ButtonComponent
+                      onClick={handledelete}
+                        value="submit"
+                        type="button"
+                        label="Delete Challan"
+                        className="disabled:opacity-80 disabled:bg-gray-400 px-4 py-3 bg-red-500 text-white font-bold rounded hover:bg-red-600"
+                      ></ButtonComponent>
+                    </div>
+          </div>
           </div>
         </div>
       ) : (

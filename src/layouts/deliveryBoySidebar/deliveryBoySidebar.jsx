@@ -1,3 +1,7 @@
+// This component is used to create a sidebar for the delivery boy dashboard.
+// It includes navigation links to different sections of the dashboard, such as
+// Dashboard, Delivery Challan, and other sections based on the user's role.
+import React from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -18,23 +22,26 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useState } from 'react';
 export function DeliveryBoySidebar({ data }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [purchaseShow, setPurchaseShow] = useState(null);
-  const [settingShow, setSettingShow] = useState(null);
-  const [reportsAndExpense, setReportsAndExpense] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [salesOpen, setSalesOpen] = useState(false);
-  const [purchaseOpen, setPurchaseOpen] = useState(false);
-  const [reportsAndExpenseOpen, setReportsAndExpenseOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-
+  const navigate = useNavigate(); // Use the useNavigate hook to programmatically navigate  
+  const location = useLocation(); // Get the current location to determine active links
+  const [anchorEl, setAnchorEl] = useState(null); // State for the sales menu anchor element
+  const [purchaseShow, setPurchaseShow] = useState(null); // State for the purchase menu anchor element
+  const [settingShow, setSettingShow] = useState(null); // State for the settings menu anchor element
+  const [reportsAndExpense, setReportsAndExpense] = useState(null); // State for the reports and expense menu anchor element
+  const [drawerOpen, setDrawerOpen] = useState(false); // State to control the drawer open/close state
+  const [salesOpen, setSalesOpen] = useState(false); // State to control the sales menu open/close state
+  const [purchaseOpen, setPurchaseOpen] = useState(false); // State to control the purchase menu open/close state
+  const [reportsAndExpenseOpen, setReportsAndExpenseOpen] = useState(false); // State to control the reports and expense menu open/close state
+  const [settingsOpen, setSettingsOpen] = useState(false); // State to control the settings menu open/close state
+  
+  // Function to handle navigation when a menu item is clicked
+  // This function closes the drawer and navigates to the specified path  
   const handleNavigate = path => {
     setDrawerOpen(false); // Close the drawer when navigating
     navigate(path);
   };
 
+  // Functions to handle clicks on different menu items
   const handleSalesClick = event => {
     setAnchorEl(event.currentTarget);
   };
@@ -72,7 +79,8 @@ export function DeliveryBoySidebar({ data }) {
   const handlePurchaseClick = event => {
     setPurchaseShow(event.currentTarget);
   };
-
+  // Function to check if a given path is active
+  // This function compares the current location's pathname with the provided path    
   const isActive = path => location.pathname === path;
   const handleListShow = data => {
     if (data == 'sales') {
@@ -100,6 +108,8 @@ export function DeliveryBoySidebar({ data }) {
       setSettingsOpen(!settingsOpen);
     }
   };
+  // Function to handle logout
+  // This function removes the token and authentication status from localStorage,
   function handleLogout(e) {
     {
       localStorage.removeItem('token');
@@ -122,9 +132,10 @@ export function DeliveryBoySidebar({ data }) {
       >
         <Button
           sx={{
-            color: 'black',
+            color: '#3A5B7A',
             borderBottom: isActive('/dashboard') ? '3px solid #3a5b76' : 'none',
             borderRadius: 0,
+            fontWeight: 'bold',
             px: 2,
           }}
           onClick={() => handleNavigate('/dashboard')}
@@ -133,14 +144,15 @@ export function DeliveryBoySidebar({ data }) {
         </Button>
         <Button
           sx={{
-            color: 'black',
-            borderBottom: isActive('/deliveryChallan-table')
+            color: '#3A5B7A',
+            borderBottom: isActive('/deliverychallan-table')
               ? '3px solid #3a5b76'
               : 'none',
             borderRadius: 0,
+            fontWeight: 'bold',
             px: 2,
           }}
-          onClick={() => handleNavigate('/deliveryChallan-table')}
+          onClick={() => handleNavigate('/deliverychallan-table')}
         >
           Delivery Challan
         </Button>
@@ -155,7 +167,7 @@ export function DeliveryBoySidebar({ data }) {
       <Drawer
         sx={{
           '& .MuiDrawer-paper': {
-            width: { xs: '40%', sm: '30%', md: '30%' }, // Width adjustment for different screen sizes
+            width: { xs: '50%', sm: '30%', md: '30%' }, // Width adjustment for different screen sizes
           },
         }}
         anchor="left"
@@ -200,18 +212,36 @@ export function DeliveryBoySidebar({ data }) {
             onClick={() => handleNavigate('/dashboard')}
             selected={isActive('/dashboard')}
           >
-            <ListItemText primary="Dashboard" />
+            <ListItemText
+              className="!text-[#3A5B76]"
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Dashboard
+                </Typography>
+              }
+            />
           </ListItem>
+        </List>
+        <List className="">
           <ListItem
             button
-            onClick={() => handleNavigate('/deliveryChallan-table')}
-            selected={isActive('/deliveryChallan-table')}
+            onClick={() => handleNavigate('/deliverychallan-table')}
+            selected={isActive('/deliverychallan-table')}
           >
-            <ListItemText primary="Delivery Challan" />
+            <ListItemText
+              className="!text-[#3A5B76]"
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Delivery Challan
+                </Typography>
+              }
+            />
           </ListItem>
         </List>
         <Box
           sx={{
+            display: 'absolute',
+            marginTop: '3vh',
             p: 2,
             borderTop: '1px solid #ddd',
           }}

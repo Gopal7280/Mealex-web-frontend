@@ -1,3 +1,5 @@
+// File: src/pages/Products.jsx
+// This file is part of the Bill365 project.
 import React, { useState, useEffect } from 'react';
 // import Sidebar from "../container/Sidebar";
 import Sidebar from '../layouts/Sidebar'; // Make sure Sidebar is correctly imported
@@ -28,18 +30,15 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 const columns = [
   {
-    product_number: '',
-    product_name: '',
-    product_hsn_code: '',
-    product_type: '',
-    product_unit: '',
-    product_description: '',
-    product_image: '',
-    category: '',
-    generate_barcode: '',
-    gst_rate: '',
-    purchase_price: '',
-    selling_price: '',
+    item_name: '',
+    item_hsn_sac: '',
+    item_gst_rate: '',
+    item_unit_of_measure: '',
+    item_description: '',
+    item_category: '',
+    item_type: '',
+    item_selling_price: '',
+    item_purchase_price: '',
   },
 ];
 const items = Array.from({ length: 5 }, (v, i) => i);
@@ -55,30 +54,35 @@ const Products = () => {
     'GSTRate',
     'QRCode',
   ];
-  const [selectedAction, setSelectedAction] = useState(null);
-  const [loader, setLoader] = useState(true);
-  const actions = [{ name: 'Download' }, { name: 'Upload' }];
-  const [excelData, setExcelData] = useState([]);
-  const [search, setSearch] = useState('');
-  const toast = useRef(null);
-  const [productList, setProductList] = useState([]);
-  const [total, setTotal] = useState(0);
-  const navigate = useNavigate();
-  const [uplaod, setUpload] = useState(true);
-  const [visible, setVisible] = useState(false);
+  const [selectedAction, setSelectedAction] = useState(null); // State to hold selected action
+  const [loader, setLoader] = useState(true); // State to control loading state
+  const actions = [{ name: 'Download' }, { name: 'Upload' }]; // Actions for the dropdown
+  const [excelData, setExcelData] = useState([]); // State to hold Excel data
+  const [search, setSearch] = useState(''); // State for search input
+  const toast = useRef(null); // Reference for toast notifications
+  const [productList, setProductList] = useState([]); // State to hold product list
+  const [total, setTotal] = useState(0); // State to hold total number of products
+  const navigate = useNavigate(); // Hook for navigation
+  const [uplaod, setUpload] = useState(true); // State to control upload button visibility
+  const [visible, setVisible] = useState(false); // State to control dialog visibility
+
   useEffect(() => {
-     const fetchBussiness = async () => {
-              try {
-                const res = await apiGet('/businessprofile');
-                if (res.length === 0) {
-                  navigate('/profile_form');
-                }
-              } catch (err) {
-                console.log("working");
-                console.log(err);
-              }
-            };
-            fetchBussiness();
+    // Check if the user has a business profile
+    // If not, redirect to the profile form
+    const fetchBussiness = async () => {
+      try {
+        const res = await apiGet('/businessprofile');
+        if (res.length === 0) {
+          navigate('/profile_form');
+        }
+      } catch (err) {
+        console.log('working');
+        console.log(err);
+      }
+    };
+    fetchBussiness();
+    // Fetch product data from the API
+    // This function fetches product data and updates the state
     const fetchProduct = async () => {
       try {
         const res = await apiGet('/products');
@@ -107,6 +111,9 @@ const Products = () => {
       .toLowerCase()
       .includes(search.toLowerCase())
   );
+  // Prepare table data from filtered products
+  // This maps the filtered products to the format required for the table
+  // Each product is transformed into an object with specific fields
   const tableData = filteredProducts.map(value => ({
     product_id: value.product_number,
     product_name: value.product_name,
@@ -125,6 +132,8 @@ const Products = () => {
       }
     }
   };
+  // Function to handle preview of product details
+  // This function navigates to the product detail display page with the selected product data
   const handlePreview = (e, product_id) => {
     // alert(product_id);
     for (var i of filteredProducts) {
@@ -135,28 +144,9 @@ const Products = () => {
       }
     }
   };
-  const handledelete = (e, product_id) => {
-    const ans = confirm('Are you sure want to delete Product');
-    console.log(ans);
-    if (ans == true) {
-      for (var i of filteredProducts) {
-        if (i.product_number == product_id) {
-          console.log(i);
-          console.log('i am match');
-          const deleteProduct = async () => {
-            const res = await apiDelete(`products/${i.product_id}`);
-            // alert(res);
-          };
-          deleteProduct();
-          window.location.reload();
-        }
-      }
-    } else {
-      alert('Product not deleted');
-    }
-    // alert(product_id);
-  };
   function handleClick(e, row) {
+    // This function handles the click event on a row in the table
+    // It logs the clicked row and calls the handlePreview function with the product_id
     console.log('clicked');
     console.log(row);
     handlePreview(e, row.product_id);
@@ -164,6 +154,7 @@ const Products = () => {
   return (
     <>
       {loader ? (
+        // If loader is true, show the skeleton loader
         <div className="">
           {/* <a href="/add-product">
             <button className="add-customer-button">Add Product</button>
@@ -216,12 +207,6 @@ const Products = () => {
                   style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>
-                <Column
-                  field="quantity"
-                  header="Action"
-                  style={{ width: '25%' }}
-                  body={<Skeleton />}
-                ></Column>
               </DataTable>
             </div>
           </div>
@@ -247,7 +232,11 @@ const Products = () => {
           onChange={(e) => setSearch(e.target.value)}
           className="search-bar"
         /> */}
+
+              {/* Search and action buttons */}
               <SearchComponent onChange={e => setSearch(e.target.value)} />
+
+              {/* Dropdown for actions */}
               <div className="flex space-x-3">
                 {/* <button
               onClick={handleDownload}
@@ -262,6 +251,8 @@ const Products = () => {
                     dialogName={dialogName}
                   />
                 </div>
+
+                {/* button to navigate to add product form */}
                 <div className="button-align">
                   <ButtonComponent
                     onClick={() =>
@@ -269,7 +260,7 @@ const Products = () => {
                         state: { data: 'FromProduct' },
                       })
                     }
-                    className="bg-[#3A5B76] text-white px-4 py-2 rounded hover:bg-[#2D465B]"
+                    className="bg-[#3A5B76] text-white px-4 py-[13px] rounded hover:bg-[#2D465B]"
                     label="Add Product"
                     value="addProduct"
                   ></ButtonComponent>
@@ -277,7 +268,8 @@ const Products = () => {
               </div>
             </div>
             {/* <TableComponent column={column} data={tableData}/> */}
-
+            
+             {/* Table component to display products */}
             <TableComponent
               onClickRow={handleClick}
               column={column}
@@ -286,28 +278,7 @@ const Products = () => {
               fullData={filteredProducts}
               pageSize={5} // Number of rows per page
               generateQr="true"
-              actions={row => (
-                <div className="text-center">
-                  {/* <button
-                className="text-[#3A5B76] dark:!text-white"
-                onClick={(e) => handlePreview(e, row.product_id)}
-              >
-                <Preview />
-              </button> */}
-                  {/* <button
-                className="text-[#3A5B76] dark:!text-white"
-                onClick={(e) => handleEdit(e, row.product_id)}
-              >
-                <ModeEdit />
-              </button> */}
-                  <button
-                    className="text-red-500"
-                    onClick={e => handledelete(e, row.product_id)}
-                  >
-                    <DeleteForever />
-                  </button>
-                </div>
-              )}
+             
             />
           </div>
         </div>

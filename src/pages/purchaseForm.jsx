@@ -73,7 +73,19 @@ export function PurchaseForm(){
             console.error("Error fetching business profile:", error);
           }
         };
-      
+        const fetchUserRole=async ()=>{
+        try{
+              const res=await apiGet("/user");
+              console.log(res.data);
+              console.log(res.data[0].employee_role);
+              setUserRole(res.data[0].employee_role);
+        }
+        catch(err)
+        {
+          console.log(err);
+        }
+    }
+    fetchUserRole();
         // Function to fetch products
         const fetchProduct = async () => {
           try {
@@ -1465,7 +1477,7 @@ export function PurchaseForm(){
                             ):(
                            <>
                               {
-                                  userRole=="owner"?(
+                                  (userRole == 'owner' || userRole=="partner")?(
                                     <button
                                   type="button"
                                   className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
@@ -1511,7 +1523,7 @@ export function PurchaseForm(){
                                         </li>
                                     ))}
  {
-                                  userRole=="owner"?(
+                                  (userRole == 'owner' || userRole=="partner")?(
                                     <button
                                   type="button"
                                   className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
@@ -1859,13 +1871,24 @@ export function PurchaseForm(){
                +ADD ITEM
              </button>
              <div>
-               <button
-               onClick={handleOpenModalProduct}
-                 type="button"
-                 className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
-               >
-                 + Add Product
-               </button>
+                {
+                      (userRole == 'owner' || userRole=="stockManager" || userRole=="partner") ? (
+                        <button
+                      onClick={handleOpenModalProduct}
+                      type="button"
+                      className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
+                    >
+                      + Add Product
+                    </button>
+                      ):(<><button
+                      disabled
+                      onClick={handleOpenModalProduct}
+                      type="button"
+                      className="disabled:bg-gray-200 px-20 py-3 w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white disabled:hover:text-[#3A5B76]"
+                    >
+                      + Add Product
+                    </button></>)
+                    }
              </div>
            </div>
          </div>

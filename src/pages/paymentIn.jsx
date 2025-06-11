@@ -1,3 +1,5 @@
+// Description: This file contains the PaymentIn component which displays a list of payment transactions, allows searching, filtering, and performing actions like previewing, editing, and deleting transactions.
+
 import React, { useState, useEffect, useRef } from "react";
 import { SearchComponent } from "../components/SerachBar";
 import { NavLink, useNavigate } from "react-router-dom";
@@ -15,20 +17,20 @@ import { Skeleton } from 'primereact/skeleton';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 export function PaymentIn() {
-  const items = Array.from({ length: 5 }, (v, i) => i);
+  const items = Array.from({ length: 5 }, (v, i) => i); // Create an array of 5 items for the skeleton loader
   const [loader,setLoader]=useState(true);
-  const [searchTerm, setSearchTerm] = useState(""); //working
-  const [statusFilter, setStatusFilter] = useState("unPaid");
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [paymentIn, setPaymentIn] = useState([]);
-  const [fetchPaymentIn, setFetchPaymentIn] = useState([]);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [match, setMatch] = useState([]);
-  const toast = useRef(null);
-  const [totalPurchase, setTotalPurchase] = useState(null);
-  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState(""); // State for search term
+  const [statusFilter, setStatusFilter] = useState("unPaid"); // State for status filter
+  const [dropdownOpen, setDropdownOpen] = useState(false); // State for dropdown visibility
+  const [paymentIn, setPaymentIn] = useState([]); // State for paymentIn data
+  const [fetchPaymentIn, setFetchPaymentIn] = useState([]); // State for fetched paymentIn data
+  const [modalOpen, setModalOpen] = useState(false); // State for modal visibility
+  const [selectedInvoice, setSelectedInvoice] = useState(null); // State for selected invoice
+  const [open, setOpen] = useState(false); // State for confirm dialog visibility
+  const [match, setMatch] = useState([]); // State for matched rows
+  const toast = useRef(null); // Reference for toast notifications
+  const [totalPurchase, setTotalPurchase] = useState(null); // State for total purchase amount
+  const navigate = useNavigate(); // Hook for navigation
   const column = [
     "Id",
     "Party Name",
@@ -36,10 +38,11 @@ export function PaymentIn() {
     "Payment method",
     "Remaining Amount",
     "Date"  
-  ];
+  ]; // Column headers for the table
   useEffect(() => {
     // Start by setting the loader to true when the effect runs
     setLoader(true);
+    // Function to fetch business profile and check if it exists
        const fetchBussiness = async () => {
               try {
                 const res = await apiGet('/businessprofile');
@@ -52,6 +55,7 @@ export function PaymentIn() {
               }
             };
             fetchBussiness();
+            // Function to fetch customer data
     const fetchCustomers = async () => {
       try {
         const res = await apiGet("/payment/payment_in");
@@ -107,16 +111,19 @@ export function PaymentIn() {
   }, []);  // Empty dependency array means this effect runs only once, after the component mounts.
   
 
+  // Function to toggle the dropdown visibility
   const toggleDropdown = (event) => {
     event.stopPropagation();
     setDropdownOpen(!dropdownOpen);
   };
 
+  // Function to handle dropdown item click
   const handleDropdownClick = (action) => {
     console.log(action); // Handle bulk actions here
     setDropdownOpen(false);
   };
 
+  // Function to filter paymentIn data based on search term
   const filterPaymentIn = () => {
     return paymentIn.filter((paymentIn) => {
       const matchesSearch = `${paymentIn.partyName} ${paymentIn.Id} ${paymentIn.RemainingAmount}`
@@ -131,10 +138,12 @@ export function PaymentIn() {
     setModalOpen(true);
   };
 
+  // Function to close the modal
   const closeModal = () => {
     setModalOpen(false);
     setSelectedInvoice(null);
   };
+  // Function to handle preview, edit, and delete actions
   function handlePreview(e, paymentInId, row) {
     console.log(paymentInId);
     for (var i of fetchPaymentIn) {
@@ -144,6 +153,7 @@ export function PaymentIn() {
       }
     }
   }
+  // Function to handle delete action
   function handledelete(e, paymentInId) {
     console.log(paymentInId);
     const deleteInvoice = async () => {
@@ -180,12 +190,15 @@ export function PaymentIn() {
       console.log("unchecked");
     }
   }
+  // Function to handle the generation of paymentIn
   const handleGenerate = (e) => {
     setOpen(false);
     console.log(match);
     navigate("/generate-paymentIn", { state: { data: match } });
     console.log("generate");
   };
+  // Function to handle closing the confirm dialog
+  // This function is called when the user clicks the close button on the confirm dialog
   const handleClose = (e) => {
     setOpen(false);
     console.log("close");
@@ -194,6 +207,7 @@ export function PaymentIn() {
   return (
    <>
    {loader?(<div>
+    {/* // Skeleton to show while data is being fetched */}
           <div className="over bg-gray-100 font-roboto p-2">
               <div className="max-w-7xl mx-auto bg-white p-6 shadow-lg rounded-lg">
               <Toast ref={toast} />
@@ -335,6 +349,7 @@ export function PaymentIn() {
                  </div>
                )}
              </div>
+             {/* // Button to create new payment in */}
              <NavLink to="/paymentInForm">
                <button className="bg-[#3A5B76] text-white px-4 py-2 rounded hover:bg-[#2D465B]">
                  Create Payment In
@@ -369,6 +384,7 @@ export function PaymentIn() {
                              ))}
                          </tbody>
                      </table> */}
+                     {/* // Using TableComponent to display paymentIn data */}
            <TableComponent
              name="Payment In"
              column={column}

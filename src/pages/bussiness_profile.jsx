@@ -1,3 +1,6 @@
+// Bussiness_profile.jsx
+// This is component for updating business profile details.
+// same functionality as the previous code bussiness profile creation form but with a update fields.
 import { useEffect, useState } from 'react';
 import { Loader } from '../layouts/Loader';
 import Sidebar from '../layouts/Sidebar';
@@ -15,6 +18,7 @@ import {
 } from '../services/apiServicesOnline';
 import { debounce } from 'lodash';
 import { config } from '../config/app';
+import { NAME_REGEX } from '../utils/regularExpression';
 export function Bussiness_profile({ setRefresh }) {
   const [search, setSearch] = useState(''); // Search state
   const [logoPreview, setLogoPreview] = useState(null);
@@ -23,6 +27,10 @@ export function Bussiness_profile({ setRefresh }) {
   const [loader, setLoader] = useState(false);
   const [edit, setEdit] = useState(false);
   const navigate = useNavigate();
+  const [pan_no, setPan_no] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
+    const [gstIn, setGstIn] = useState('');
+    const [status, setStatus] = useState(true);
   const [error, setError] = useState('');
   const maxSizeInMB = 2; // Limit size to 2MB
   const [country, setCountry] = useState([{}]);
@@ -455,17 +463,29 @@ export function Bussiness_profile({ setRefresh }) {
       if (values.businessName == '') {
         values.businessName = data[0].vendor_business_legal_name;
       }
-      if (values.phone == '') {
+      if (phoneNumber == '') {
         values.phone = data[0].vendor_phone;
+      }
+      if(phoneNumber!='')
+      {
+        values.phone=phoneNumber;
       }
       if (values.email == '') {
         values.email = data[0].vendor_email;
       }
-      if (values.pan == '') {
+      if (pan_no == '') {
         values.pan = data[0].vendor_pan;
       }
-      if (values.gst == '') {
+      if(pan_no!="")
+      {
+        values.pan=pan_no;
+      }
+      if (gstIn == '') {
         values.gst = data[0].vendor_gstin;
+      }
+      if(gstIn !='')
+      {
+        values.gst=gstIn;
       }
       if (values.businessType == '') {
         values.businessType = data[0].vendor_industry_type;
@@ -487,6 +507,13 @@ export function Bussiness_profile({ setRefresh }) {
       }
       if (values.anniversary == '') {
         values.anniversary = data[0].vendor_anniversary;
+      }
+      if(values.streetBillingAddress=="")
+      {
+        values.streetBillingAddress=data[0].billing_street_address;
+      }if(values.streetShippingAddress=="")
+      {
+          values.streetShippingAddress=data[0].shipping_street_address
       }
       values.signatureBox = signature;
       values.logo = logoPreview;
@@ -553,6 +580,148 @@ export function Bussiness_profile({ setRefresh }) {
       }
     }
   };
+  function handleCheckCred(e, name) {
+    if(name=="name")
+    {
+      if (!NAME_REGEX.test(e.target.value)) {
+        if (e.target.value == '') {
+          setError({
+            name:'',
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          formik.values.name='';
+          setStatus(true);
+        } else {
+          setError({
+            name:
+              'Invalid name. Only letters and spaces are allowed, and it must be 2-50 characters long.',
+              panNo:error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          formik.values.name=e.target.value;
+          setStatus(false);
+        }
+      } else {
+        formik.values.name=e.target.value;
+        console.log('2');
+        setError({
+          name:'',
+          panNo: error.panNo,
+          gstinNo: error.gstinNo,
+          phone_Number: error.phone_Number,
+        });
+        setStatus(true);
+      }
+    }
+    if (name == 'pan') {
+      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+      if (!panRegex.test(e.target.value.toUpperCase())) {
+        if (e.target.value == '') {
+          setError({
+            ...error,
+            panNo: '',
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          setPan_no('');
+          setStatus(true);
+        } else {
+          setError({
+            ...error,
+            panNo:
+              'Invalid PAN format. Expected: 5 letters, 4 numbers, 1 letter',
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          setPan_no('false');
+          setStatus(false);
+        }
+      } else {
+        setPan_no(e.target.value.toUpperCase());
+        console.log('2');
+        setError({
+          ...error,
+          panNo: '',
+          gstinNo: error.gstinNo,
+          phone_Number: error.phone_Number,
+        });
+        setStatus(true);
+      }
+    }
+    if (name == 'number') {
+      const panRegex = /^[0-9]{10}$/;
+      if (!panRegex.test(e.target.value)) {
+        if (e.target.value == '') {
+          setError({
+            ...error,
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: '',
+          });
+          setPhoneNumber('');
+          setStatus(true);
+        } else {
+          setError({
+            ...error,
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: 'Invalid Mobile no format. Expected: 10 numbers',
+          });
+          setPhoneNumber('false');
+          setStatus(false);
+        }
+      } else {
+        setPhoneNumber(e.target.value);
+        console.log('2');
+        setError({
+          ...error,
+          panNo: error.panNo,
+          gstinNo: error.gstinNo,
+          phone_Number: '',
+        });
+        setStatus(true);
+      }
+    }
+    if (name == 'gstin') {
+      const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9]{1}[A-Z]{2}$/;
+      if (!gstRegex.test(e.target.value.toUpperCase())) {
+        if (e.target.value == '') {
+          setError({
+            ...error,
+            panNo: error.panNo,
+            gstinNo: '',
+            phone_Number: error.phone_Number,
+          });
+          setGstIn('');
+          setStatus(true);
+        } else {
+          setError({
+            ...error,
+            panNo: error.panNo,
+            gstinNo:
+              'Invalid GSTIN format. Expected: 2 numbers, 5 letters, 4 numbers, 1 letter , 1 number , 2 letters',
+            phone_Number: error.phone_Number,
+          });
+          setGstIn('false');
+          setStatus(false);
+        }
+      } else {
+        setGstIn(e.target.value.toUpperCase());
+        console.log('2');
+        setError({
+          ...error,
+          panNo: error.panNo,
+          gstinNo: '',
+          phone_Number: error.phone_Number,
+        });
+        setStatus(true);
+      }
+    }
+    console.log(e.target.value);
+  }
   return (
     <>
       {loader ? (
@@ -562,7 +731,7 @@ export function Bussiness_profile({ setRefresh }) {
           {data.length ? (
             <div className="over max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-md">
               <h1 className="text-2xl font-bold text-center mb-6 inline-block">
-                Update Details
+                Update Profile Details
               </h1>
               <NavLink
                 to="/dashboard"
@@ -588,8 +757,11 @@ export function Bussiness_profile({ setRefresh }) {
                       placeholder="Name"
                       {...(edit ? {} : { value: data[0].vendor_name })}
                       classNameInput="w-full p-2 border rounded mt-1"
-                      onChange={formik.handleChange}
+                      onChange={(e)=>handleCheckCred(e,"name")}
                     />
+                    <span className="text-red-500">
+                    {error.name != '' ? error.name : ''}
+                  </span>
                   </div>
                   <div>
                     <InputComponent
@@ -617,10 +789,12 @@ export function Bussiness_profile({ setRefresh }) {
                       name="phone"
                       placeholder="Enter Phone Number"
                       classNameInput="w-full p-2 border rounded mt-1"
-                      onChange={formik.handleChange}
+                      onChange={e => handleCheckCred(e, 'number')}
                       {...(edit ? {} : { value: data[0].vendor_phone })}
                     />
-                    <span className="text-red-500">{formik.errors.phone}</span>
+                    <span className="text-red-500">
+                    {error.phone_Number != '' ? error.phone_Number : ''}
+                  </span>
                   </div>
                   <div>
                     <InputComponent
@@ -644,11 +818,14 @@ export function Bussiness_profile({ setRefresh }) {
                       labelInput="Pan No."
                       type="text"
                       name="pan"
+                      onChange={e => handleCheckCred(e, 'pan')}
                       placeholder="Enter Pan No."
-                      classNameInput="w-full p-2 border rounded mt-1"
-                      onChange={formik.handleChange}
+                      classNameInput="w-full p-2 border rounded mt-1 text-transform: uppercase"
                       {...(edit ? {} : { value: data[0].vendor_pan })}
                     />
+                    <span className="text-red-500">
+                    {error.panNo != '' ? error.panNo : ''}
+                  </span>
                   </div>
                   <div>
                     <InputComponent
@@ -658,10 +835,13 @@ export function Bussiness_profile({ setRefresh }) {
                       type="text"
                       name="gst"
                       placeholder="Enter GST"
-                      classNameInput="w-full p-2 border rounded mt-1"
-                      onChange={formik.handleChange}
+                      classNameInput="w-full p-2 border rounded mt-1 text-transform: uppercase"
+                      onChange={e => handleCheckCred(e, 'gstin')}
                       {...(edit ? {} : { value: data[0].vendor_gstin })}
                     />
+                                      <span className="text-red-500">
+                    {error.gstinNo != '' ? error.gstinNo : ''}
+                  </span>
                   </div>
                   <div>
                     <label className="block text-gray-600">Business Type</label>
@@ -1189,7 +1369,7 @@ export function Bussiness_profile({ setRefresh }) {
                     ) : (
                       <div>
                         <InputComponent
-                          readOnly
+                          
                           onFocus={handleEdit}
                           labelName="birthdate"
                           labelInput="Birthdate"
@@ -1197,7 +1377,7 @@ export function Bussiness_profile({ setRefresh }) {
                           name="birthdate"
                           classNameInput="w-full p-2 border rounded mt-1"
                           onChange={formik.handleChange}
-                          value={data[0].vendor_birthdate}
+                          {...(edit ? {type:'date'} : { value: data[0].vendor_birthdate })}
                         />
                       </div>
                     )}
@@ -1216,7 +1396,7 @@ export function Bussiness_profile({ setRefresh }) {
                     ) : (
                       <div>
                         <InputComponent
-                          readOnly
+                          
                           onFocus={handleEdit}
                           labelName="anniversary"
                           labelInput="Anniversary"
@@ -1224,7 +1404,7 @@ export function Bussiness_profile({ setRefresh }) {
                           name="anniversary"
                           classNameInput="w-full p-2 border rounded mt-1"
                           onChange={formik.handleChange}
-                          value={data[0].vendor_anniversary}
+                          {...(edit ? {type:'date'} : { value: data[0].vendor_anniversary })}
                         />
                       </div>
                     )}
@@ -1244,13 +1424,14 @@ export function Bussiness_profile({ setRefresh }) {
                 </div>
 
                 <div className="mt-10 text-end">
-                  <button
-                    type="submit"
-                    className="px-10 md:px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                  >
-                    Submit
-                  </button>
-                </div>
+                                <ButtonComponent
+                                  {...(status ? {} : { disabled: true })}
+                                  value="Submit"
+                                  type="submit"
+                                  label="Save"
+                                  className="disabled:opacity-80 disabled:bg-gray-400 px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                ></ButtonComponent>
+                              </div>
               </form>
             </div>
           ) : (

@@ -221,7 +221,7 @@ export function CustomerModalView({setModalShow}){
         const res = await axios.get(`${config.apiBaseUrl}/pincode/${value}`);
         console.log(res.data);
         setZipdata({
-          billingCountry: res.data[0].PostOffice[0].billingCountry,
+          billingCountry: res.data[0].PostOffice[0].Country,
           state: res.data[0].PostOffice[0].State,
           city: res.data[0].PostOffice[0].Block,
         });
@@ -237,7 +237,7 @@ export function CustomerModalView({setModalShow}){
         const res = await axios.get(`${config.apiBaseUrl}/pincode/${value}`);
         console.log(res.data);
         setZipdata1({
-          billingCountry: res.data[0].PostOffice[0].billingCountry,
+          billingCountry: res.data[0].PostOffice[0].Country,
           state: res.data[0].PostOffice[0].State,
           city: res.data[0].PostOffice[0].Block,
         });

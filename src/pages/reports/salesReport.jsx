@@ -396,7 +396,7 @@ const SalesReportGSTIN = () => {
                   <tr key={index} className="hover:bg-gray-100">
                     {Object.values(item).map((value, idx) => (
                       <td key={idx} className="border px-1 sm:px-2 py-1">
-                        {value == null ? "Not defined" : value}
+                        {(value == null || value == "") ? "---" : value}
                       </td>
                     ))}
                   </tr>

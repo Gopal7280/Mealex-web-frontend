@@ -13,6 +13,8 @@ import { apiGet, apiPost, apiPut } from "../services/api";
 import { Loader } from "../layouts/Loader";
 import "../styles/layoutFix.css";
 import Sidebar from "../layouts/Sidebar";
+import { CustomerModalView } from "./modalViews/customerModalView";
+import ProductModalView from "./modalViews/productModalView";
 export function Quotation_edit() {
   const [userRole, setUserRole] = useState("owner");
   const [loader, setLoader] = useState(false);
@@ -1260,6 +1262,8 @@ export function Quotation_edit() {
     }
   }
   const [isEditable, setIsEditable] = useState(false);
+   const [modalShow,setModalShow]=useState(false);
+  const [modalShow1,setModalShow1]=useState(false);
   useEffect(() => {
     const dt = new Date();
     setDate(dt.toLocaleDateString());
@@ -1300,7 +1304,22 @@ export function Quotation_edit() {
       console.log(res1);
     };
     fetchProduct();
-  }, []);
+  }, [modalShow]);
+   useEffect(()=>{
+      setLoader(true); // Show loader when effect starts
+      const fetchProduct = async () => {
+        try {
+          const res = await apiGet("/products/productName");
+          setProducts(res);
+          console.log(res);
+          console.log("Product data fetched");
+        } catch (error) {
+          console.error("Error fetching products:", error);
+        }
+      };
+      fetchProduct();
+      setLoader(false);
+    },[modalShow1])
   useEffect(() => {
     const number = location.state?.data?.mobile_no; // Use optional chaining
     const id = location.state?.data?.quotation_id; // Use optional chaining
@@ -1446,12 +1465,19 @@ export function Quotation_edit() {
   const handleNotesChange = (event) => {
     setNotes(event.target.value);
   };
+
   return (
     <>
       {loader ? (
         <Loader />
       ) : (
         <div>
+          {
+            modalShow && (<CustomerModalView setModalShow={setModalShow}/>)
+          }
+          {
+            modalShow1 && (<ProductModalView setModalShow1={setModalShow1}/>)
+          }
           <div className="over bg-gray-100 p-4 max-w-7xl mx-auto bg-white">
             <h2 className="mb-6 text-3xl font-semibold text-center text-gray-800 d-inline-block">
               Update Details
@@ -1589,21 +1615,21 @@ export function Quotation_edit() {
                               </div>
                             ) : (
                               <>
-                                {userRole == "owner" ? (
-                                  <button
-                                    type="button"
-                                    className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                                    onClick={() =>
-                                      navigate("/home", {
-                                        state: { data: "FromInvoice" },
-                                      })
-                                    }
-                                  >
-                                    Create Party
-                                  </button>
-                                ) : (
-                                  <></>
-                                )}
+                               {
+                                  (userRole == 'owner' || userRole=="salesPerson" || userRole=="partner")?(
+                                    <button
+                                  type="button"
+                                  className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                  onClick={() =>
+                                    setModalShow(true)
+                                  }
+                                >
+                                  Create Party
+                                </button>
+                                  ):(
+                                    <></>
+                                  )
+                                }
                               </>
                             )}
                           </div>
@@ -1637,21 +1663,21 @@ export function Quotation_edit() {
                                     <br />
                                   </li>
                                 ))}
-                                {userRole == "owner" ? (
-                                  <button
-                                    type="button"
-                                    className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                                    onClick={() =>
-                                      navigate("/home", {
-                                        state: { data: "FromInvoice" },
-                                      })
-                                    }
-                                  >
-                                    Create Party
-                                  </button>
-                                ) : (
-                                  <></>
-                                )}
+                                {
+                                  (userRole == 'owner' || userRole=="salesPerson" || userRole=="partner")?(
+                                    <button
+                                  type="button"
+                                  className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                  onClick={() =>
+                                   setModalShow(true)
+                                  }
+                                >
+                                  Create Party
+                                </button>
+                                  ):(
+                                    <></>
+                                  )
+                                }
                               </ul>
                             ) : (
                               <div className="p-2 text-gray-500">
@@ -2000,12 +2026,24 @@ export function Quotation_edit() {
                     +ADD ITEM
                   </button>
                   <div>
-                    <button
+                    {
+                      (userRole == 'owner' || userRole=="partner") ? (
+                        <button
+                      onClick={(e)=>setModalShow1(true)}
                       type="button"
                       className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
                     >
-                      Scan Barcode
+                      + Add Product
                     </button>
+                      ):(<><button
+                      disabled
+                      onClick={(e)=>setModalShow1(true)}
+                      type="button"
+                      className="disabled:bg-gray-200 px-20 py-3 w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white disabled:hover:text-[#3A5B76]"
+                    >
+                      + Add Product
+                    </button></>)
+                    }
                   </div>
                 </div>
               </div>

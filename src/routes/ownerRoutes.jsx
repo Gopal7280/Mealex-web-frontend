@@ -77,6 +77,10 @@ import { apiGet } from '../services/api';
 import { BankAccountSetting } from '../pages/settings/bankAccountSetting';
 import { InvoiceSetting } from '../pages/settings/invoiceSetting';
 import { ChallanSetting } from '../pages/settings/challanSetting';
+import { AdminPanel } from '../pages/adminPanel';
+import AdminRoutes from './adminRoutes';
+import { ExpenseView } from '../pages/expenseTracker/expenseView';
+import { ResetPassword } from '../pages/resetPassword/resetPassword';
 export function OwnerRoutes({setIsAuthenticated,isAuthenticated,isRefresh,setIsRefresh,setUserRoleRoutes}){
     return(
         <Router>
@@ -86,6 +90,14 @@ export function OwnerRoutes({setIsAuthenticated,isAuthenticated,isRefresh,setIsR
         <Route
           path="/login"
           element={<PublicRoutes setUserRoleRoutes={setUserRoleRoutes} setAuth={setIsAuthenticated}></PublicRoutes>}
+        />
+         <Route
+          path="/lmtzerwdsqr"
+          element={<AdminRoutes/>}
+        />
+        <Route
+          path="/resetPassword"
+          element={<ResetPassword/>}
         />
         <Route path="/" element={<LandingPage />} />
         {/* <Route path="*" element={<LandingPage/>} /> */}
@@ -612,6 +624,15 @@ export function OwnerRoutes({setIsAuthenticated,isAuthenticated,isRefresh,setIsR
             <ProtectedRoute
               isAuthenticated={isAuthenticated}
               element={<ExpenseManager />}
+            />
+          }
+        />
+        <Route
+          path="/expenseManagerView"
+          element={
+            <ProtectedRoute
+              isAuthenticated={isAuthenticated}
+              element={<ExpenseView />}
             />
           }
         />

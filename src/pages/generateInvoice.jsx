@@ -944,7 +944,7 @@
 // }
 
 import { useEffect, useRef, useState } from 'react';
-import { apiGet, apiPost } from '../services/api';
+import { apiDelete, apiGet, apiPost } from '../services/api';
 import { ProgressSpinner } from 'primereact/progressspinner';
 // import "../styles/generateChallan.css";
 import { useReactToPrint } from 'react-to-print';
@@ -957,6 +957,7 @@ import { FaFilePdf } from 'react-icons/fa6';
 import { FaEdit } from 'react-icons/fa';
 import { Loader } from '../layouts/Loader';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ButtonComponent } from '../components/Button';
 export function GenerateInvoice() {
   const [loader, setLoader] = useState(true);
   const [bussinessData, setBussinessData] = useState(null);
@@ -1152,27 +1153,25 @@ export function GenerateInvoice() {
     const pdf = async () => {
       try {
         setDownload(true);
-        const res = await apiPost('/hardcopy/invoice', generatePdfData);
-        console.log(res);
-        const data = await res.data;
+        const res = await apiPost('/hardcopy/invoice', generatePdfData, { responseType: 'arraybuffer' });
+    console.log(res)
+    // Step 2: Convert raw response into a Blob
+    const blob = new Blob([res.data], { type: 'application/pdf' });
 
-        if (!data || !data.pdfBase64) {
-          throw new Error('Invalid PDF response');
-        }
+    // Step 3: Create an object URL for the Blob
+    const url = URL.createObjectURL(blob);
 
-        // Convert comma-separated string to Uint8Array
-        const byteArray = data.pdfBase64.split(',').map(Number);
-        const uint8Array = new Uint8Array(byteArray);
+    // Step 4: Open the PDF in a new tab (optional)
+    window.open(url, '_blank'); // Opens PDF in a new tab for viewing
 
-        // Create blob and download
-        const blob = new Blob([uint8Array], { type: 'application/pdf' });
-        const url = URL.createObjectURL(blob);
-
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'invoice.pdf';
-        a.click();
-        URL.revokeObjectURL(url);
+    // Step 5: Trigger PDF download
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'invoice.pdf';
+    document.body.appendChild(a); // Append to the DOM to trigger download
+    a.click();
+    document.body.removeChild(a); // Remove element after download
+    URL.revokeObjectURL(url); // Revoke the URL to free resources
       } catch (err) {
         console.error('Download error:', err);
         setDownload(false);
@@ -1183,6 +1182,25 @@ export function GenerateInvoice() {
     };
     pdf();
   }
+   const handledelete = async (e) => {
+    const ans = confirm('Are you sure want to delete invoice no-'+data[0].invoice_prefix);
+    console.log(ans);
+    if (ans == true) {
+      try {
+        setLoader(true);
+       const res= await apiDelete(`/invoices/${data[0].invoice_id}`);
+        console.log(res);
+        navigate("/invoices");
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+      finally{
+        setLoader(false);
+      }
+    } else {
+      alert('Invoice not deleted');
+    }
+  };
   return (
     <>
       {data != null && bussinessData != null ? (
@@ -1277,7 +1295,7 @@ export function GenerateInvoice() {
                   BILL TO:
                 </p>
                 <h3 className="text-xl font-semibold text-[#1d293d]">
-                  {data[0].customername}
+                  {data[0].customername.toUpperCase()}
                 </h3>
                 <p className="text-sm text-[#45556c]">
                   {data[0].billingaddress != '  null null null'
@@ -1286,7 +1304,7 @@ export function GenerateInvoice() {
                 </p>
                 <p className="text-sm text-[#45556c]">
                   {data[0].gst != ''
-                    ? 'GSTIN' + '-' + data[0].gst + '|'
+                    ? 'GSTIN' + '-' + data[0].gst
                     : ''}{' '}
                 </p>{' '}
                 <p className="text-sm text-[#45556c]">
@@ -1461,6 +1479,15 @@ export function GenerateInvoice() {
                 </div>
               </div>
             </div>
+            <div className="mt-10 text-end">
+                      <ButtonComponent
+                      onClick={handledelete}
+                        value="submit"
+                        type="button"
+                        label="Delete Invoice"
+                        className="disabled:opacity-80 disabled:bg-gray-400 px-4 py-3 bg-red-500 text-white font-bold rounded hover:bg-red-600"
+                      ></ButtonComponent>
+                    </div>
           </div>
         </div>
       ) : (

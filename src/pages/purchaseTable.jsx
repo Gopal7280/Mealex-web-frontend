@@ -273,8 +273,8 @@ const PurchaseTable = () => {
                     <Column field="quantity" header="Due In" style={{ width: '25%' }} body={<Skeleton />}></Column>
                     <Column field="quantity" header="Amount" style={{ width: '25%' }} body={<Skeleton />}></Column>
                     <Column field="quantity" header="Status" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                    <Column field="quantity" header="Generate-Purchase" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                    <Column field="quantity" header="Actions" style={{ width: '25%' }} body={<Skeleton />}></Column>
+                    {/* <Column field="quantity" header="Generate-Purchase" style={{ width: '25%' }} body={<Skeleton />}></Column>
+                    <Column field="quantity" header="Actions" style={{ width: '25%' }} body={<Skeleton />}></Column> */}
                 </DataTable>
             </div>
                         

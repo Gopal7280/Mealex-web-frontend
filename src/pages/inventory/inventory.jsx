@@ -13,7 +13,7 @@ import { DataTable } from "primereact/datatable";
 import { useNavigate } from "react-router-dom";
 export function Inventory() {
   const items = Array.from({ length: 5 }, (v, i) => i);
-  const column = ["Sno", "Name", "Quantity", "Status"];
+  const column = ["Sno", "Name", "Quantity"];
   const [serarchRow, setSearchRow] = useState(""); // serarchRow state
   const [inventoryData,setInventoryData]=useState([]);
   const [total,setTotal]=useState([]);
@@ -58,10 +58,9 @@ export function Inventory() {
       .includes(serarchRow.toLowerCase())
   );
   const dataTable = filteredStock.map((value,index) => ({
-    sno: value.inventory_number==undefined?index+1:value.inventory_number,
+    sno: value.inventory_number==undefined?index+1:index+1,
     name: value.item_name,
     quantity: value.inventory_quantity,
-    status: value.inventory_status,
   }));
 //   const formik=useFormik({
 //     initialValues:{
@@ -230,7 +229,7 @@ export function Inventory() {
                         <DataTable value={items} className="p-datatable-striped">
                           <Column
                             field="code"
-                            header="Date"
+                            header="S.no"
                             style={{ width: "25%" }}
                             body={<Skeleton />}
                           ></Column>
@@ -241,26 +240,8 @@ export function Inventory() {
                             body={<Skeleton />}
                           ></Column>
                           <Column
-                            field="category"
-                            header="Category"
-                            style={{ width: "25%" }}
-                            body={<Skeleton />}
-                          ></Column>
-                          <Column
                             field="quantity"
-                            header="Amount"
-                            style={{ width: "25%" }}
-                            body={<Skeleton />}
-                          ></Column>
-                          <Column
-                            field="quantity"
-                            header="Mode"
-                            style={{ width: "25%" }}
-                            body={<Skeleton />}
-                          ></Column>
-                          <Column
-                            field="quantity"
-                            header="Status"
+                            header="quantity"
                             style={{ width: "25%" }}
                             body={<Skeleton />}
                           ></Column>

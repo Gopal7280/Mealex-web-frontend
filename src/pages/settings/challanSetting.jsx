@@ -6,13 +6,14 @@ import { InputSwitch } from "primereact/inputswitch";
 import { useNavigate } from 'react-router-dom';
 
 export function ChallanSetting() {
-    const [receiverChecked, setReceiverChecked] = useState(true);
-    const [authorizedChecked, setAuthorizedChecked] = useState(true);
+    const [receiverChecked, setReceiverChecked] = useState(true); // Default value for receiver's signature
+    const [authorizedChecked, setAuthorizedChecked] = useState(true); // Default value for authorized's signature
     const [prefix, setPrefix] = useState({
     challanPrefix: '',
-  });
-  const navigate=useNavigate();
+  }); // State to hold the challan prefix
+  const navigate=useNavigate(); // hook  to navigate to another page
   useEffect(() => {
+    // Fetch the business profile to check if it exists
     const fetchBussiness = async () => {
           try {
             const res = await apiGet('/businessprofile');
@@ -24,6 +25,8 @@ export function ChallanSetting() {
           }
         };
         fetchBussiness();
+        // Fetch the challan prefix from the server
+    // This function retrieves the current challan prefix from the server
     const getChallanPrefix = async () => {
       try {
         const res = await apiGet('/setting/challanPrefix');
@@ -37,6 +40,7 @@ export function ChallanSetting() {
     };
     getChallanPrefix();
   }, []);
+  // This function handles the change event for the input field
   function handleChangePrefix(e) {
     // setPrefix("");
     console.log(e.target.value);
@@ -44,6 +48,8 @@ export function ChallanSetting() {
       challanPrefix: e.target.value,
     });
   }
+  // This function handles the submission of the prefix
+  // It sends the updated prefix to the server and retrieves the updated prefix
   function handlePrefixSubmit(e) {
     console.log(prefix);
     const postPrefix = async () => {
@@ -102,11 +108,11 @@ export function ChallanSetting() {
                 <div className="p-inputgroup flex-1">
                   <InputText onChange={handleChangePrefix}
                      value={prefix.challanPrefix} placeholder="Enter challan prefix" />
-                  <Button onClick={handlePrefixSubmit} label="Submit" />
+                  <Button className='!bg-[#3A5B76]' onClick={handlePrefixSubmit} label="Submit" />
                 </div>
               </div>
             </div>
-            <div className="w-50 mt-3">
+            {/* <div className="w-50 mt-3">
               <div className="flex flex-column gap-2">
                 <h6 htmlFor="receiverSignature">Receiver's Signature</h6>
                 <p className=''>Want to show  reciever signature Box? <InputSwitch checked={receiverChecked} onChange={(e) => handleReceiverSetting(e)} /></p>
@@ -117,7 +123,7 @@ export function ChallanSetting() {
                 <h6 htmlFor="authorizedSignature">Authorized's Signature</h6>
                 <p className=''>Want to show authorized signature? <InputSwitch checked={authorizedChecked} onChange={(e) => handleAuthorizedSetting(e)} /></p>
               </div>
-            </div>
+            </div> */}
           </div>
         </main>
       </div>

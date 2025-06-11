@@ -1,8 +1,12 @@
+// Description: This file contains the Reports component which displays various report categories and allows navigation to specific report pages.
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiGet } from '../services/api';
 
+
+// Component to render each report item
 const ReportItem = ({ name, handleClick }) => (
+  // Button for each report
   <button
     disabled={
       name == 'Purchase Report (GSTR-2)' ||
@@ -22,6 +26,7 @@ const ReportItem = ({ name, handleClick }) => (
   </button>
 );
 
+// Component to render a category of reports
 const ReportCategory = ({
   title,
   reports,
@@ -70,6 +75,7 @@ const ReportCategory = ({
   );
 };
 
+// Main Reports component that uses ReportCategory to display reports
 const reportsData = {
   coreReports: [
     { name: 'GSTR-1' },
@@ -85,6 +91,7 @@ const reportsData = {
   ],
 };
 
+// Main Reports component
 function Reports() {
   const navigate=useNavigate();
   useEffect(()=>{

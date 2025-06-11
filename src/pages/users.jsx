@@ -1,85 +1,89 @@
-import React, { useEffect, useState, useRef } from "react";
-import { data, NavLink, useNavigate } from "react-router-dom";
-import "../styles/customerDisplay.css"; // Import the CSS file
-import Sidebar from "../layouts/Sidebar"; // Make sure Sidebar is correctly imported
-import axios from "axios";
-import "../styles/Products.css";
-import { Toast } from "primereact/toast";
-import { ButtonComponent } from "../components/Button";
-import { apiDelete, apiGet, apiPost } from "../services/api";
-import { TableComponent } from "../components/Table";
-import "../styles/layoutFix.css";
+// Description: This file contains the Users component which displays a list of users with options to add, edit, and delete users. It also includes search functionality and a dialog for adding new users.
+import React, { useEffect, useState, useRef } from 'react';
+import { data, NavLink, useNavigate } from 'react-router-dom';
+import '../styles/customerDisplay.css'; // Import the CSS file
+import Sidebar from '../layouts/Sidebar'; // Make sure Sidebar is correctly imported
+import axios from 'axios';
+import '../styles/Products.css';
+import { Toast } from 'primereact/toast';
+import { ButtonComponent } from '../components/Button';
+import { apiDelete, apiGet, apiPost } from '../services/api';
+import { TableComponent } from '../components/Table';
+import '../styles/layoutFix.css';
 import {
   Preview,
   ModeEdit,
   DeleteForever,
   CloudUpload,
-} from "@mui/icons-material";
-import { SearchComponent } from "../components/SerachBar";
-import * as XLSX from "xlsx";
-import { saveAs } from "file-saver";
-import { Dialog } from "primereact/dialog";
-import { Dropdown } from "primereact/dropdown";
-import { BulkActions } from "../components/bulkActions";
-import { config } from "../config/app.js";
-import { Loader } from "../layouts/Loader";
-import { Skeleton } from "primereact/skeleton";
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { User } from "lucide-react";
-import { InputText } from "primereact/inputtext";
-import { Checkbox } from "primereact/checkbox";
-import { initial } from "lodash";
-import { useFormik } from "formik";
+} from '@mui/icons-material';
+import { SearchComponent } from '../components/SerachBar';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+import { Dialog } from 'primereact/dialog';
+import { Dropdown } from 'primereact/dropdown';
+import { BulkActions } from '../components/bulkActions';
+import { config } from '../config/app.js';
+import { Loader } from '../layouts/Loader';
+import { Skeleton } from 'primereact/skeleton';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { User } from 'lucide-react';
+import { InputText } from 'primereact/inputtext';
+import { Checkbox } from 'primereact/checkbox';
+import { initial } from 'lodash';
+import { useFormik } from 'formik';
 function Users() {
-  const [visible, setVisible] = useState(false);
-  const items = Array.from({ length: 5 }, (v, i) => i);
-  const column = ["S.No", "Name", "Contact", "Email", "Access Privilage"];
-  const [users, setUsers] = useState([]);
-  const [search, setSearch] = useState(""); // Search state
-  const navigate = useNavigate();
+  const [visible, setVisible] = useState(false); // State to control the visibility of the dialog
+  const items = Array.from({ length: 5 }, (v, i) => i); // Create an array of 5 items for the skeleton loader
+  const column = ['S.No', 'Name', 'Contact', 'Email', 'User Role']; // Define the columns for the table
+  const [users, setUsers] = useState([]); // State to hold the list of users
+  const [search, setSearch] = useState(''); // Search state
+  const navigate = useNavigate(); // Hook to navigate between routes
   const printRef = useRef(); // Reference for printing
-  const [loader, setLoader] = useState(false);
-  const [load,setLoad]=useState(false);
-  const toast = useRef(null);
-  const [total, setTotal] = useState(0);
-  const [categoryType, setCategoryType] = useState("");
+  const [loader, setLoader] = useState(false); // Loader state to control loading spinner
+  const [load, setLoad] = useState(false); // State to trigger re-fetching of data
+  const toast = useRef(null); // Reference for the toast notifications
+  const [total, setTotal] = useState(0); // State to hold the total number of users
+  const [categoryType, setCategoryType] = useState(''); // State to hold the selected user category
   useEffect(() => {
-     const fetchBussiness = async () => {
-              try {
-                const res = await apiGet('/businessprofile');
-                if (res.length === 0) {
-                  navigate('/profile_form');
-                }
-              } catch (err) {
-                console.log("working");
-                console.log(err);
-              }
-            };
-            fetchBussiness();
+    // Check if the business profile exists, if not redirect to profile form
+    const fetchBussiness = async () => {
+      try {
+        const res = await apiGet('/businessprofile');
+        if (res.length === 0) {
+          navigate('/profile_form');
+        }
+      } catch (err) {
+        console.log('working');
+        console.log(err);
+      }
+    };
+    fetchBussiness();
+    // Fetch users from the API
+    // This function fetches the list of users from the API and updates the state
     const fecthUsers = async () => {
       setLoader(false); // Start loading
       try {
-        const res = await apiGet("/user/all");
+        const res = await apiGet('/user/all');
         console.log(res.data);
         setUsers(res.data);
         setTotal(res.data.length);
-        console.log("customer_response", res);
+        console.log('customer_response', res);
 
         if (res.length === 0) {
           toast.current.show({
-            severity: "info",
-            summary: "Info",
-            detail: "No customers available. Please add a customer.",
+            severity: 'info',
+            summary: 'Info',
+            detail: 'No Users available. Please add a users.',
             life: 2000,
           });
         }
       } catch (error) {
-        console.error("Error fetching customers:", error);
+        console.error('Error fetching users:', error);
         toast.current.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Failed to fetch customers.",
+          severity: 'error',
+          summary: 'Error',
+          detail: 'Failed to fetch users.',
           life: 2000,
         });
       } finally {
@@ -91,27 +95,29 @@ function Users() {
   }, [load]);
 
   // Filter customers based on search input
-  const filteredUsers = users.filter((customer) =>
+  const filteredUsers = users.filter(customer =>
     `${customer.employee_mobile_no} ${customer.employee_name} ${customer.employee_role} ${customer.employee_email}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
-  const dataTable = filteredUsers.map((value) => ({
+  // Map the filtered users to the format required for the table
+  // Each object in the array represents a row in the table
+  const dataTable = filteredUsers.map(value => ({
     sNo: value.employee_number,
     name: value.employee_name,
     mobileNo: value.employee_mobile_no,
     employeEmail: value.employee_email,
     employeRole: value.employee_role,
   }));
-  const deleteCustomer = async (id) => {
+  const deleteCustomer = async id => {
     console.log(id);
     // alert(id);
-    if (!window.confirm("Are you sure you want to delete this customer?"))
+    if (!window.confirm('Are you sure you want to delete this customer?'))
       return;
 
     try {
       const response = await fetch(`${config.apiBaseUrl}/customers/${id}`, {
-        method: "DELETE",
+        method: 'DELETE',
       });
 
       if (response.ok) {
@@ -121,7 +127,7 @@ function Users() {
         // alert("Error deleting customer");
       }
     } catch (error) {
-      console.error("Error deleting customer:", error);
+      console.error('Error deleting customer:', error);
     }
   };
   // const handleEdit = (e, contact) => {
@@ -180,47 +186,52 @@ function Users() {
   // };
 
   const categories = [
-    { name: "Delivery Challan", key: "dc" },
-    { name: "Create Party Access", key: "cp" },
-    { name: "Add Product Access", key: "ap" },
-    { name: "Access to invoice,challan,quotation", key: "ac" },
-    { name: "Purchase Access", key: "pa" },
-    { name: "PaymentIn Payment Out Access", key: "p" },
-    { name: "Reports Access", key: "ra" },
+    { name: 'Delivery Challan', key: 'dc' },
+    { name: 'Create Party Access', key: 'cp' },
+    { name: 'Add Product Access', key: 'ap' },
+    { name: 'Access to invoice,challan,quotation', key: 'ac' },
+    { name: 'Purchase Access', key: 'pa' },
+    { name: 'PaymentIn Payment Out Access', key: 'p' },
+    { name: 'Reports Access', key: 'ra' },
   ];
+  // State to hold the selected categories for user access privileges
+  // This state is used to manage which categories are checked in the UI
   const [selectedCategories, setSelectedCategories] = useState([]);
 
-  const onCategoryChange = (e) => {
+  const onCategoryChange = e => {
     let _selectedCategories = [...selectedCategories];
 
     if (e.checked) _selectedCategories.push(e.value);
     else
       _selectedCategories = _selectedCategories.filter(
-        (category) => category.key !== e.value.key
+        category => category.key !== e.value.key
       );
 
     setSelectedCategories(_selectedCategories);
   };
+  // Function to handle the change in user category selection
+  // This function updates the categoryType state based on the selected value
   function handleUserCategory(e) {
     console.log(e.target.value);
     setCategoryType(e.target.value);
   }
+  // Formik setup for handling form submission
   const formik = useFormik({
     initialValues: {
-      userName: "",
-      mobileNo: "",
-      email: "",
-      password: "",
-      userCategory: "",
+      userName: '',
+      mobileNo: '',
+      email: '',
+      password: '',
+      userCategory: '',
     },
-    onSubmit: (values) => {
+    onSubmit: values => {
       setLoader(true);
       setVisible(false);
       values.userCategory = categoryType;
       console.log(values);
       const addUser = async () => {
         try {
-          const res = await apiPost("/user", values);
+          const res = await apiPost('/user', values);
           setVisible(false);
           setLoad(!load);
         } catch (err) {
@@ -267,7 +278,7 @@ function Users() {
                         />
                     </svg>
                     </form> */}
-              <SearchComponent onChange={(e) => setSearch(e.target.value)} />
+              <SearchComponent onChange={e => setSearch(e.target.value)} />
               <div className="flex space-x-3">
                 {/* <button
                   disabled
@@ -282,8 +293,9 @@ function Users() {
                     label="Add user"
                     value="addUser"
                   ></ButtonComponent>
+                  {/* //dialog for adding a new user */}
                   <Dialog
-                    header="Add user's"
+                    header="Add user"
                     visible={visible}
                     className="sm:w-1/2"
                     onHide={() => {
@@ -433,39 +445,39 @@ function Users() {
                 <Column
                   field="code"
                   header="S.No"
-                  style={{ width: "25%" }}
+                  style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>
                 <Column
                   field="name"
                   header="Name"
-                  style={{ width: "25%" }}
+                  style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>
                 <Column
                   field="category"
                   header="Contact"
-                  style={{ width: "25%" }}
+                  style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>
                 <Column
                   field="quantity"
                   header="Email"
-                  style={{ width: "25%" }}
+                  style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>
                 <Column
                   field="quantity"
-                  header="Access Privilage"
-                  style={{ width: "25%" }}
+                  header="User Role"
+                  style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>
-                <Column
+                {/* <Column
                   field="quantity"
                   header="Actions"
-                  style={{ width: "25%" }}
+                  style={{ width: '25%' }}
                   body={<Skeleton />}
-                ></Column>
+                ></Column> */}
               </DataTable>
             </div>
 

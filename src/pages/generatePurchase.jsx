@@ -238,27 +238,25 @@ function handlePdf(){
   const pdf = async () => {
     setDownload(true);
   try {
-    const res = await apiPost('/hardcopy/purchase',generatePdfData);
-    console.log(res);
-    const data = await res.data;
+    const res = await apiPost('/hardcopy/purchase', generatePdfData, { responseType: 'arraybuffer' });
+    console.log(res)
+    // Step 2: Convert raw response into a Blob
+    const blob = new Blob([res.data], { type: 'application/pdf' });
 
-    if (!data || !data.pdfBase64) {
-      throw new Error('Invalid PDF response');
-    }
-
-    // Convert comma-separated string to Uint8Array
-    const byteArray = data.pdfBase64.split(',').map(Number);
-    const uint8Array = new Uint8Array(byteArray);
-
-    // Create blob and download
-    const blob = new Blob([uint8Array], { type: 'application/pdf' });
+    // Step 3: Create an object URL for the Blob
     const url = URL.createObjectURL(blob);
 
+    // Step 4: Open the PDF in a new tab (optional)
+    window.open(url, '_blank'); // Opens PDF in a new tab for viewing
+
+    // Step 5: Trigger PDF download
     const a = document.createElement('a');
     a.href = url;
     a.download = 'purchase.pdf';
+    document.body.appendChild(a); // Append to the DOM to trigger download
     a.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(a); // Remove element after download
+    URL.revokeObjectURL(url); // Revoke the URL to free resources
   } catch (err) {
     console.error('Download error:', err);
     setDownload(false);
@@ -353,7 +351,7 @@ pdf();
               <p className="text-sm text-[#314158] font-semibold mb-1">
                 BILL TO:
               </p>
-              <h3 className="text-xl font-semibold text-[#1d293d]">{data[0].customername}</h3>
+              <h3 className="text-xl font-semibold text-[#1d293d]">{data[0].customername.toUpperCase()}</h3>
       <p className="text-sm text-[#45556c]">{data[0].billingaddress != "  null null null"
                 ? data[0].billingaddress
                    : ""}</p>

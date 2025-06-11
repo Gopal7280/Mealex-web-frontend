@@ -1,3 +1,5 @@
+// CustomerFormDetailDisplay.jsx  
+// This component displays the details of a customer in a read-only format.
 import React, { useState, useEffect } from "react";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useFormik } from "formik";
@@ -14,27 +16,45 @@ import { toWords } from "number-to-words";
 import { IoMdPrint } from "react-icons/io";
 import { FaFilePdf } from "react-icons/fa6";
 import { FaEdit } from "react-icons/fa";
+import { apiDelete } from "../services/api";
 export default function CustomerFormDetailDisplay({
   onCustomerAdded,
   editCustomer,
   onCancelEdit,
 }) {
-  const location = useLocation();
-  const navigate=useNavigate();
-  const [data, setData] = useState({});
+  const location = useLocation(); // Get the location object to access state passed from the previous component
+  const navigate=useNavigate(); // Use useNavigate hook to programmatically navigate  
+  const [data, setData] = useState({}); // Initialize state to hold customer data 
   useEffect(() => {
+    // Check if location.state.data exists before accessing it
     console.log(location.state.data);
-    setData(location.state.data);
+    setData(location.state.data); // Set the data state with the customer data passed from the previous component 
     console.log(data);
     console.log("execute");
   }, []);
   function handleClick() {
     console.log(data);
   }
+  // Function to handle the edit button click
   function handleEdit(e) {
       //   alert(JSON.stringify(invoiceId));
       navigate("/customer_detail_edit", { state: { data: location.state?.data } });
   }
+  const handledelete = async (e) => {
+    const ans = confirm('Are you sure want to delete Customer-'+data.customer_name);
+    console.log(ans);
+    if (ans == true) {
+      try {
+       const res= await apiDelete(`/customers/${data.customer_id}`);
+        console.log(res);
+        navigate("/display");
+      } catch (error) {
+        console.error('Delete failed:', error);
+      }
+    } else {
+      alert('Customer not deleted');
+    }
+  };
   return (
     <div>
     <div className="over max-w-6xl mx-auto bg-white p-8 shadow-lg rounded-md">
@@ -286,11 +306,19 @@ export default function CustomerFormDetailDisplay({
               <textarea 
               readOnly 
                 value={data.customer_personalnotes}
-                className="w-full p-2 border rounded mt-1"
-                
+                className="w-full p-2 border rounded mt-1"  
               ></textarea>
           </div>
       </form>
+      <div className="mt-10 text-end">
+                      <ButtonComponent
+                      onClick={handledelete}
+                        value="submit"
+                        type="button"
+                        label="Delete Customer"
+                        className="disabled:opacity-80 disabled:bg-gray-400 px-10 py-3 bg-red-500 text-white font-bold rounded hover:bg-red-600"
+                      ></ButtonComponent>
+                    </div>
     </div>
     </div>
   );

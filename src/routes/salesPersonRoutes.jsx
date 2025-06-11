@@ -88,7 +88,7 @@ export function SalesPersonRoutes({
             />
           }
         />
-        <Route
+        {/* <Route
           path="/add-product"
           element={
             <ProtectedRoute
@@ -96,7 +96,7 @@ export function SalesPersonRoutes({
               element={<ProductForm />}
             />
           }
-        />
+        /> */}
         <Route
           path="/display"
           element={
@@ -153,7 +153,7 @@ export function SalesPersonRoutes({
             />
           }
         />
-        <Route
+        {/* <Route
           path="/products"
           element={
             <ProtectedRoute
@@ -161,7 +161,7 @@ export function SalesPersonRoutes({
               element={<Products />}
             />
           }
-        />
+        /> */}
 
         <Route
           path="/generate-invoice"
@@ -199,7 +199,7 @@ export function SalesPersonRoutes({
             />
           }
         />
-        <Route
+        {/* <Route
           path="/product_detail_display"
           element={
             <ProtectedRoute
@@ -207,7 +207,7 @@ export function SalesPersonRoutes({
               element={<Product_detail />}
             />
           }
-        />
+        /> */}
         <Route
           path="/product_detail_edit"
           element={

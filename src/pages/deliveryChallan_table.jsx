@@ -133,45 +133,7 @@ const DeliveryChallanTable = () => {
     //     }
     //     deleteChallan();
     // }
-
-    function handledelete(e, challanPrefix) {
-        console.log(challanPrefix);
-        const ans=confirm("Are you sure want to delete Challan");
-        console.log(ans);
-        if(ans==true)
-        {
-           let id = "";
-        // Find the corresponding challan ID
-        for (let i of fetchChallan) {
-            if (challanPrefix === i.challan_prefix) {
-                id = i.challan_id;
-            }
-        }
     
-        // Check if ID is valid
-        if (id) {
-            const deleteChallan = async () => {
-                try {
-                    const res = await apiDelete(`/challan/${id}`);
-                    // alert("Challan deleted successfully");
-                    // Refresh data after deletion
-                    setChallan(challan.filter(item => item.challanNumber !== challanPrefix));
-                } catch (error) {
-                    console.error("Error deleting challan:", error);
-                    // alert("Failed to delete challan.");
-                }
-            };
-            deleteChallan();
-        } else {
-            // alert("Invalid Challan ID");
-        } 
-        }
-        else{
-            alert("Challan not deleted")
-        }
-    }
-    
-
     function handleEdit(e,challanId){
                 console.log(challanId);
                 console.log(challanId);
@@ -278,8 +240,6 @@ const DeliveryChallanTable = () => {
                     <Column field="quantity" header="Due In" style={{ width: '25%' }} body={<Skeleton />}></Column>
                     <Column field="quantity" header="Amount" style={{ width: '25%' }} body={<Skeleton />}></Column>
                     <Column field="quantity" header="Status" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                    <Column field="quantity" header="Generate-Challan" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                    <Column field="quantity" header="Action" style={{ width: '25%' }} body={<Skeleton />}></Column>
                 </DataTable>
             </div>
                         
@@ -419,14 +379,14 @@ const DeliveryChallanTable = () => {
                         //         <button className="text-red-500" onClick={(e)=>handleCheckboxClick(e,row.challanNumber)}><Checkbox {...label}  color="success" /></button>
                         //     </div>
                         //   )}
-                          actions={(row) => (
-                            <div className="text-center">
-                              {/* <button className="text-[#3A5B76]" onClick={(e)=>handlePreview(e,row.challanNumber,row)}><Preview/></button>
-                              <button className="text-[#3A5B76]" onClick={(e)=>handleEdit(e,row.challanNumber)}><ModeEdit/></button> */}
-                              <button className="text-red-500" onClick={(e) =>handledelete(e,row.challanNumber)}><DeleteForever/></button>
+                        //   actions={(row) => (
+                        //     <div className="text-center">
+                        //       {/* <button className="text-[#3A5B76]" onClick={(e)=>handlePreview(e,row.challanNumber,row)}><Preview/></button>
+                        //       <button className="text-[#3A5B76]" onClick={(e)=>handleEdit(e,row.challanNumber)}><ModeEdit/></button> */}
+                        //       <button className="text-red-500" onClick={(e) =>handledelete(e,row.challanNumber)}><DeleteForever/></button>
                               
-                            </div>
-                          )}
+                        //     </div>
+                        //   )}
                         />
                         
                     </div>

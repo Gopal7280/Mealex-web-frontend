@@ -148,34 +148,6 @@ const QuotationTable = () => {
         //         deleteQuotation();
         // }
 
-        function handledelete(e,quotationId){
-            console.log(quotationId);
-            const ans=confirm("Are you sure want to delete Quotation");
-            console.log(ans);
-            if(ans==true)
-            {
-                var id="";
-                for(var i of fetchQuotation)
-                  {
-                      
-                    if(quotationId==i.quotation_prefix)
-                    {
-                    //   alert(JSON.stringify(quotationId));
-                      id=i.quotation_id;
-                    }
-                  }
-                //   alert(id);
-                  const deleteInvoice=async ()=>{
-                      const res=await apiDelete(`/quotation/${id}`);
-                    //   alert(res);
-                      window.location.reload();
-                  }
-                  deleteInvoice();
-            }
-            else{
-                alert("Quotation not deleted")
-            }
-        }
 
         function handleEdit(e,quotationId){
             console.log(quotationId);
@@ -280,8 +252,6 @@ const QuotationTable = () => {
                     <Column field="quantity" header="Due In" style={{ width: '25%' }} body={<Skeleton />}></Column>
                     <Column field="quantity" header="Amount" style={{ width: '25%' }} body={<Skeleton />}></Column>
                     <Column field="quantity" header="Status" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                    <Column field="quantity" header="Generate-Quotation" style={{ width: '25%' }} body={<Skeleton />}></Column>
-                    <Column field="quantity" header="Actions" style={{ width: '25%' }} body={<Skeleton />}></Column>
                 </DataTable>
             </div>
                         
@@ -422,14 +392,14 @@ const QuotationTable = () => {
                         //                                   <button className="text-red-500" onClick={(e)=>handleCheckboxClick(e,row.quotationNumber)}><Checkbox  color="success" /></button>
                         //                               </div>
                         //                             )}
-                          actions={(row) => (
-                            <div className="text-center">
-                                {/* flex gap-2 */}
-                              {/* <button className="text-[#3A5B76]" onClick={(e)=>handlePreview(e,row.quotationNumber,row)}><Preview/></button>
-                              <button className="text-[#3A5B76]" onClick={(e)=>handleEdit(e,row.quotationNumber)}><ModeEdit/></button> */}
-                              <button className="text-red-500" onClick={(e) =>handledelete(e,row.quotationNumber)}><DeleteForever/></button>
-                            </div>
-                          )}
+                        //   actions={(row) => (
+                        //     <div className="text-center">
+                        //         {/* flex gap-2 */}
+                        //       {/* <button className="text-[#3A5B76]" onClick={(e)=>handlePreview(e,row.quotationNumber,row)}><Preview/></button>
+                        //       <button className="text-[#3A5B76]" onClick={(e)=>handleEdit(e,row.quotationNumber)}><ModeEdit/></button> */}
+                        //       <button className="text-red-500" onClick={(e) =>handledelete(e,row.quotationNumber)}><DeleteForever/></button>
+                        //     </div>
+                        //   )}
                         />
                         
                     </div>

@@ -11,16 +11,21 @@ import { TableComponent } from "../../components/Table";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
 import { useNavigate } from "react-router-dom";
+import { Category } from "@mui/icons-material";
+import { data } from "jquery";
 export function ExpenseManager() {
   const items = Array.from({ length: 5 }, (v, i) => i);
-  const column = ["Date", "Name", "Category", "Amount", "Mode"];
+  const column = ["S.no","Date", "Name", "Category", "Amount", "Mode"];
   const [serarchRow, setSearchRow] = useState(""); // serarchRow state
   const [expenseData,setExpenseData]=useState([]);
   const [total,setTotal]=useState([]);
   const [visible, setVisible] = useState(false);
+  const [visibleCategory, setVisibleCategory] = useState(false);
   const [load,setLoad]=useState(false);
   const [loader,setLoader]=useState(true);
   const navigate=useNavigate();
+    const [addCategory,setAddCategory] = useState("");
+      const [expenseCategory, setExepenseCategory] = useState("");
    useEffect(() => {
      const fetchBussiness = async () => {
               try {
@@ -58,6 +63,7 @@ export function ExpenseManager() {
       .includes(serarchRow.toLowerCase())
   );
   const dataTable = filteredExpenses.map((value) => ({
+    sno:value.expense_number,
     date: value.expense_date,
     name: value.expense_employee_name,
     categoryName: value.expense_category_name,
@@ -75,6 +81,7 @@ export function ExpenseManager() {
     },
     onSubmit:(values)=>{
       console.log(values);
+      values.expenseCategory=expenseCategory
       const addExpenseData=async ()=>{
           try{
             const res=apiPost("/expenses",values);
@@ -88,14 +95,72 @@ export function ExpenseManager() {
       }
     
     }
+     const fetchExpense = async () => {
+      // setLoader(false); // Start loading
+      try {
+        setLoader(false);
+        const res = await apiGet("/expenses");
+        console.log(res.data);
+        setExpenseData(res.data);
+        setTotal(res.data.length);
+        console.log("Expense_Response", res);
+      } catch (error) {
+        console.error("Error fetching expenseData data:", error);
+      } finally {
+        setLoader(true); // Stop loading
+      }
+    };
     addExpenseData();
+    fetchExpense();
     }
   })
+  function handleCategoryChange(e){
+    setAddCategory("");
+    if(e.target.value=="otherCategory")
+    {
+      setVisibleCategory(true);
+      return
+    }
+    console.log(e.target.value);
+    setExepenseCategory(e.target.value);
+  }
+  function handleExpenseCategoryAdd(e){
+    const newCategory=document.getElementById("newCategory").value;
+    // formik.values.product_category=newCategory;
+    setAddCategory(newCategory);
+    setExepenseCategory(newCategory);
+    // console.log(formik.values.product_category);
+    setVisibleCategory(false);
+  }
+  function handleClick(e,row){
+    console.log(row);
+    for(var i of expenseData)
+    {
+      if(i.expense_number==row.sno)
+      {
+        console.log(i);
+        navigate("/expenseManagerView",{state:{data:i}});
+      }
+    }
+  }
   return (
     <>
       {
         loader?(
            <div className="bg-white mt-3 p-10">
+             <Dialog header="Add Category" visible={visibleCategory} onHide={() => {if (!visibleCategory) return; setVisibleCategory(false); }}
+                style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
+                <dl>
+                  <dt className="mb-2 mt-2">Category Name</dt>
+                  <dd><input id="newCategory" type="text" className="p-[0.76rem] w-full border-1 border-[#d1d5db] rounded-[6px]" placeholder="Enter expense category" /></dd>
+                </dl>
+                 <ButtonComponent
+                      onClick={(e)=>handleExpenseCategoryAdd(e)}
+                      label="Add"
+                      type="submit"
+                      className="bg-[#3A5B76] text-white px-8 py-2 rounded hover:bg-[#2E4A63]"
+                    ></ButtonComponent>
+            </Dialog>
       <div className="gop">
                 <div className="max-w-7xl mx-auto bg-white p-2 shadow-lg responsive-head rounded-lg">
                   <div className="flex justify-between items-center responsive-header mb-4">
@@ -138,10 +203,11 @@ export function ExpenseManager() {
           </div>
           <div className="flex flex-column gap-2">
           <label htmlFor="expenseCategory">Select Category</label>
-          <select onChange={formik.handleChange} name="expenseCategory" className="p-[0.76rem] border-1 border-[#d1d5db] rounded-[6px]" id="">
+          <select onChange={handleCategoryChange} name="expenseCategory" className="p-[0.76rem] border-1 border-[#d1d5db] rounded-[6px]" id="">
             <option value="notDescribed">Select</option>
             <option value="travel">Travel</option>
             <option value="officeSupplies">Office Supplies</option>
+            <option value="otherCategory" className="bg-[#3A5B76] text-white">{addCategory==""?"add category":addCategory}</option>
           </select>
           </div>
           <div className="flex flex-column gap-2">
@@ -179,6 +245,7 @@ export function ExpenseManager() {
                   {/* <TableComponent column={column} data={dataTable}></TableComponent> */}
       
                   <TableComponent
+                    onClickRow={handleClick}
                     name="expense's"
                     column={column}
                     data={dataTable}
@@ -259,12 +326,12 @@ export function ExpenseManager() {
                             style={{ width: "25%" }}
                             body={<Skeleton />}
                           ></Column>
-                          <Column
+                          {/* <Column
                             field="quantity"
                             header="Status"
                             style={{ width: "25%" }}
                             body={<Skeleton />}
-                          ></Column>
+                          ></Column> */}
                         </DataTable>
                       </div>
           

@@ -1,3 +1,7 @@
+// salesPersonSidebar.jsx
+// This component is designed to be used in a sales person dashboard layout.
+// It provides a sidebar navigation menu with options for navigating to different sections of the application.
+// It includes options for Sales, Purchase, Reports and Expense, Settings, and Logout.
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -18,23 +22,26 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useState } from 'react';
 export function SalesPersonSidebar({ data }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [purchaseShow, setPurchaseShow] = useState(null);
-  const [settingShow, setSettingShow] = useState(null);
-  const [reportsAndExpense, setReportsAndExpense] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [salesOpen, setSalesOpen] = useState(false);
-  const [purchaseOpen, setPurchaseOpen] = useState(false);
-  const [reportsAndExpenseOpen, setReportsAndExpenseOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const navigate = useNavigate(); // Use the useNavigate hook to programmatically navigate
+  const location = useLocation(); // Get the current location to determine active links
+  const [anchorEl, setAnchorEl] = useState(null); // State for the sales menu anchor element
+  const [purchaseShow, setPurchaseShow] = useState(null); // State for the purchase menu anchor element
+  const [settingShow, setSettingShow] = useState(null); // State for the settings menu anchor element
+  const [reportsAndExpense, setReportsAndExpense] = useState(null); // State for the reports and expense menu anchor element
+  const [drawerOpen, setDrawerOpen] = useState(false); // State to control the drawer open/close state
+  const [salesOpen, setSalesOpen] = useState(false); // State to control the sales menu open/close state
+  const [purchaseOpen, setPurchaseOpen] = useState(false); // State to control the purchase menu open/close state
+  const [reportsAndExpenseOpen, setReportsAndExpenseOpen] = useState(false); // State to control the reports and expense menu open/close state
+  const [settingsOpen, setSettingsOpen] = useState(false); // State to control the settings menu open/close state
 
+  // Function to handle navigation when a menu item is clicked
+  // This function closes the drawer and navigates to the specified path
   const handleNavigate = path => {
     setDrawerOpen(false); // Close the drawer when navigating
     navigate(path);
   };
 
+  // Functions to handle clicks on different menu items
   const handleSalesClick = event => {
     setAnchorEl(event.currentTarget);
   };
@@ -73,6 +80,9 @@ export function SalesPersonSidebar({ data }) {
     setPurchaseShow(event.currentTarget);
   };
 
+  // Function to check if a given path is active
+  // This function checks if the current location's pathname matches the given path
+
   const isActive = path => location.pathname === path;
   const handleListShow = data => {
     if (data == 'sales') {
@@ -100,6 +110,9 @@ export function SalesPersonSidebar({ data }) {
       setSettingsOpen(!settingsOpen);
     }
   };
+
+  // Function to handle logout
+  // This function removes the authentication token and navigates to the login page
   function handleLogout(e) {
     {
       localStorage.removeItem('token');
@@ -122,9 +135,10 @@ export function SalesPersonSidebar({ data }) {
       >
         <Button
           sx={{
-            color: 'black',
+            color: '#3A5B7A',
             borderBottom: isActive('/dashboard') ? '3px solid #3a5b76' : 'none',
             borderRadius: 0,
+            fontWeight: 'bold',
             px: 2,
           }}
           onClick={() => handleNavigate('/dashboard')}
@@ -133,10 +147,11 @@ export function SalesPersonSidebar({ data }) {
         </Button>
         <Button
           sx={{
-            color: 'black',
+            color: '#3A5B7A',
             borderBottom: isActive('/display') ? '3px solid #3a5b76' : 'none',
             borderRadius: 0,
             px: 2,
+            fontWeight: 'bold',
           }}
           onClick={() => handleNavigate('/display')}
         >
@@ -144,18 +159,8 @@ export function SalesPersonSidebar({ data }) {
         </Button>
         <Button
           sx={{
-            color: 'black',
-            borderBottom: isActive('/products') ? '3px solid #3a5b76' : 'none',
-            borderRadius: 0,
-            px: 2,
-          }}
-          onClick={() => handleNavigate('/products')}
-        >
-          Products
-        </Button>
-        <Button
-          sx={{
-            color: 'black',
+            color: '#3A5B7A',
+            fontWeight: 'bold',
             borderBottom:
               isActive(`/invoices`) ||
               isActive(`/quotation`) ||
@@ -178,20 +183,29 @@ export function SalesPersonSidebar({ data }) {
           open={Boolean(anchorEl)}
           onClose={() => handleSalesClose()}
         >
-          <MenuItem onClick={() => handleSalesClose('/invoices')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSalesClose('/invoices')}
+          >
             Invoices
           </MenuItem>
-          <MenuItem onClick={() => handleSalesClose('/deliverychallan-table')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSalesClose('/deliverychallan-table')}
+          >
             Delivery Challan
           </MenuItem>
-          <MenuItem onClick={() => handleSalesClose('/quotation')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSalesClose('/quotation')}
+          >
             Quotation
           </MenuItem>
-          <MenuItem onClick={() => handleSalesClose('/inventory')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSalesClose('/inventory')}
+          >
             Inventory
-          </MenuItem>
-          <MenuItem disabled onClick={() => handleSalesClose('/paymentIn')}>
-            Payment In
           </MenuItem>
         </Menu>
       </Box>
@@ -205,7 +219,7 @@ export function SalesPersonSidebar({ data }) {
       <Drawer
         sx={{
           '& .MuiDrawer-paper': {
-            width: { xs: '40%', sm: '30%', md: '30%' }, // Width adjustment for different screen sizes
+            width: { xs: '50%', sm: '30%', md: '30%' }, // Width adjustment for different screen sizes
           },
         }}
         anchor="left"
@@ -250,24 +264,37 @@ export function SalesPersonSidebar({ data }) {
             onClick={() => handleNavigate('/dashboard')}
             selected={isActive('/dashboard')}
           >
-            <ListItemText primary="Dashboard" />
-          </ListItem>
-          <ListItem
-            button
-            onClick={() => handleNavigate('/products')}
-            selected={isActive('/products')}
-          >
-            <ListItemText primary="Products" />
+            <ListItemText
+              className="!text-[#3A5B76]"
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Dashboard
+                </Typography>
+              }
+            />
           </ListItem>
           <ListItem
             button
             onClick={() => handleNavigate('/display')}
             selected={isActive('/display')}
           >
-            <ListItemText primary="Customer" />
+            <ListItemText
+              p
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Customer
+                </Typography>
+              }
+            />
           </ListItem>
           <ListItem button onClick={() => handleListShow('sales')}>
-            <ListItemText primary="Sales" />
+            <ListItemText
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Sales
+                </Typography>
+              }
+            />
             {salesOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </ListItem>
           <Collapse in={salesOpen} timeout="auto" unmountOnExit>
@@ -278,7 +305,13 @@ export function SalesPersonSidebar({ data }) {
                 onClick={() => handleNavigate('/invoices')}
                 selected={isActive('/invoices')}
               >
-                <ListItemText primary="Invoices" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Invoices
+                    </Typography>
+                  }
+                />
               </ListItem>
               <ListItem
                 button
@@ -286,7 +319,13 @@ export function SalesPersonSidebar({ data }) {
                 onClick={() => handleNavigate('/deliveryChallan-table')}
                 selected={isActive('/deliveryChallan-table')}
               >
-                <ListItemText primary="Delivery Challan" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Delivery Challan
+                    </Typography>
+                  }
+                />
               </ListItem>
               <ListItem
                 button
@@ -294,7 +333,13 @@ export function SalesPersonSidebar({ data }) {
                 onClick={() => handleNavigate('/quotation')}
                 selected={isActive('/quotation')}
               >
-                <ListItemText primary="Quotation" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Quotation
+                    </Typography>
+                  }
+                />
               </ListItem>
               <ListItem
                 button
@@ -302,21 +347,21 @@ export function SalesPersonSidebar({ data }) {
                 onClick={() => handleNavigate('/inventory')}
                 selected={isActive('/inventory')}
               >
-                <ListItemText primary="Inventory" />
-              </ListItem>
-              <ListItem
-                button
-                sx={{ pl: 4 }}
-                onClick={() => handleNavigate('/paymentIn')}
-                selected={isActive('/paymentIn')}
-              >
-                <ListItemText primary="Payment In" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Inventory
+                    </Typography>
+                  }
+                />
               </ListItem>
             </List>
           </Collapse>
         </List>
         <Box
           sx={{
+            display: 'absolute',
+            marginTop: '3vh',
             p: 2,
             borderTop: '1px solid #ddd',
           }}

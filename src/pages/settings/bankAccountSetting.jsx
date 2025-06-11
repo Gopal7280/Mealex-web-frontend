@@ -1,3 +1,4 @@
+// Description: Bank Account Setting Page
 import { useEffect, useRef, useState } from "react";
 import { apiGet, apiPost } from "../../services/api";
 import { useFormik } from "formik";
@@ -9,12 +10,12 @@ import { TableComponent } from "../../components/Table";
 import { InputSwitch } from 'primereact/inputswitch';
 import { useNavigate } from "react-router-dom";
 export function BankAccountSetting() {
-  const toast = useRef(null);
-  const [visible, setVisible] = useState(false);
-  const [checked1, setChecked1] = useState(false);
-  const [checked2, setChecked2] = useState(false);
-  const [bankData, setBankData] = useState([]);
-  const [run, setRun] = useState(false);
+  const toast = useRef(null); // Toast reference for displaying messages
+  const [visible, setVisible] = useState(false); // State to control the visibility of the dialog
+  const [checked1, setChecked1] = useState(false); // State to track the active bank account
+  const [checked2, setChecked2] = useState(false); // State to track the second active bank account (if needed)
+  const [bankData, setBankData] = useState([]); // State to hold bank account data
+  const [run, setRun] = useState(false); // State to trigger re-fetching of data
   const column = [
     'S.No',
     'Account Holder Name',
@@ -22,9 +23,11 @@ export function BankAccountSetting() {
     'Account Type',
     'IFSC Code',
     'Bank Name',
-  ];
-  const navigate=useNavigate();
+  ]; // Column headers for the table
+  const navigate=useNavigate(); // Navigation hook to redirect users
   useEffect(() => {
+    // Fetch business profile to ensure user has a business profile
+        // If no business profile exists, redirect to profile form
     const fetchBussiness = async () => {
           try {
             const res = await apiGet('/businessprofile');
@@ -39,6 +42,8 @@ export function BankAccountSetting() {
     const fetchAccount = async () => {
       // setLoader(false); // Start loading
       try {
+        // Fetch bank account data from the API
+        // If the API call fails, it will throw an error that can be caught in the catch block
         const res = await apiGet('/bankaccount');
         console.log(res.data);
         setBankData(res.data);
@@ -74,11 +79,15 @@ export function BankAccountSetting() {
     fetchAccount();
   }, [run]);
   const [search, setSearch] = useState(''); // Search state
+  // Filter bank data based on search input
+  // The filter checks if the search term is included in any of the bank account details
   const filteredUsers = bankData.filter(data =>
     `${data.bank_account_name} ${data.bank_account_number} ${data.bank_account_type} ${data.bank_name}`
       .toLowerCase()
       .includes(search.toLowerCase())
   );
+  // Prepare data for the table by mapping over the filtered bank accounts
+  // Each object in the array contains the necessary fields for display in the table
   const dataTable = filteredUsers.map(value => ({
     sNo: value.bank_serial_number,
     name: value.bank_account_name,
@@ -87,6 +96,7 @@ export function BankAccountSetting() {
     ifscCode: value.bank_ifsc_code,
     bankName: value.bank_name,
   }));
+  // Formik setup for handling form submission
   const formik = useFormik({
     initialValues: {
       accountHolderName: '',
@@ -109,6 +119,8 @@ export function BankAccountSetting() {
       addBankAccount();
     },
   });
+  // Function to handle the active status of a bank account
+  // It updates the active status of the bank account based on the serial number
   function handleAccountAtiveStatus(e, aNo, sno) {
     for (var i of bankData) {
       if (sno == i.bank_serial_number) {

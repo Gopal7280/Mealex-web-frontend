@@ -23,6 +23,8 @@ const ProductModalView = ({setModalShow1}) => {
   const [unitSelected, setUnitSelected] = useState([]);
   const [locations, setLocationS] = useState("");
   const location = useLocation();
+  const [visible, setVisible] = useState(false);
+  const [addCategory,setAddCategory] = useState("");
   const toast = useRef(null);
   const [gstSet, setGstSet] = useState({
     sellingPrice: "withGstSelling",
@@ -52,6 +54,12 @@ const ProductModalView = ({setModalShow1}) => {
   }
   function handleCategoryChange(e) {
     console.log(e.target.value);
+    setAddCategory("");
+    if(e.target.value=="otherCategory")
+    {
+      setVisible(true);
+      return
+    }
     setProduct_category(e.target.value);
   }
   function handleCustomField() {
@@ -183,7 +191,14 @@ const ProductModalView = ({setModalShow1}) => {
     console.log(e.target.value);
     setProductUnuit(e.target.value);
   }
-
+  function handleProductCategoryAdd(e){
+    const newCategory=document.getElementById("newCategory").value;
+    // formik.values.product_category=newCategory;
+    setAddCategory(newCategory);
+    setProduct_category(newCategory);
+    // console.log(formik.values.product_category);
+    setVisible(false);
+  }
   return (
     <>
       {loader ? (
@@ -193,6 +208,19 @@ const ProductModalView = ({setModalShow1}) => {
       ) : (
         <Dialog header="Add Product" visible={true} className="sm:w-10/12" onHide={() => {if (!setModalShow1) return; setModalShow1(false); }}>
         <div>
+          <Dialog header="Add Category" visible={visible} onHide={() => {if (!visible) return; setVisible(false); }}
+                          style={{ width: '50vw' }} breakpoints={{ '960px': '75vw', '641px': '100vw' }}>
+                          <dl>
+                            <dt className="mb-2 mt-2">Category Name</dt>
+                            <dd><input id="newCategory" type="text" className="p-[0.76rem] w-full border-1 border-[#d1d5db] rounded-[6px]" placeholder="Enter Product category" /></dd>
+                          </dl>
+                           <ButtonComponent
+                                onClick={(e)=>handleProductCategoryAdd(e)}
+                                label="Add"
+                                type="submit"
+                                className="bg-[#3A5B76] text-white px-8 py-2 rounded hover:bg-[#2E4A63]"
+                              ></ButtonComponent>
+                      </Dialog>
           <div className="max-w-5xl mx-auto bg-white p-2 rounded-lg shadow-md">
             <div className="">
               <div className="">
@@ -273,6 +301,7 @@ const ProductModalView = ({setModalShow1}) => {
                         <option value="Electronics">Electronics</option>
                         <option value="clothing">Clothing</option>
                         <option value="food">Food</option>
+                        <option value="otherCategory" className="bg-[#3A5B76] text-white">{addCategory==""?"add category":addCategory}</option>
                       </select>
                     </div>
                     <div className="lg:grid grid-cols-2 gap-3 sm:grid mt-2 block">

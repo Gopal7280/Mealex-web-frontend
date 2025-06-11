@@ -1462,7 +1462,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                             ) : (
                               <>
                               {
-                                  userRole=="owner"?(
+                                  (userRole == 'owner' || userRole=="salesPerson" || userRole=="partner")?(
                                     <button
                                   type="button"
                                   className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
@@ -1510,7 +1510,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                                   </li>
                                 ))}
                                 {
-                                  userRole=="owner"?(
+                                  (userRole == 'owner' || userRole=="salesPerson" || userRole=="partner")?(
                                     <button
                                   type="button"
                                   className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
@@ -1867,13 +1867,24 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                     +ADD ITEM
                   </button>
                   <div>
-                    <button
-                    onClick={handleOpenModalProduct}
+                     {
+                      (userRole == 'owner' || userRole=="partner") ? (
+                        <button
+                      onClick={handleOpenModalProduct}
                       type="button"
                       className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
                     >
-                     + Add Product
+                      + Add Product
                     </button>
+                      ):(<><button
+                      disabled
+                      onClick={handleOpenModalProduct}
+                      type="button"
+                      className="disabled:bg-gray-200 px-20 py-3 w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white disabled:hover:text-[#3A5B76]"
+                    >
+                      + Add Product
+                    </button></>)
+                    }
                   </div>
                   {/* <div>
                     <button

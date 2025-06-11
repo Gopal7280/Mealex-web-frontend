@@ -1,3 +1,8 @@
+// OwnerSideBar.jsx
+// This component is designed to be used in a React application with React Router for navigation.
+// It provides a sidebar navigation menu for an owner or admin user, allowing them to navigate through different sections of the application such as Dashboard, Products, Sales, Purchase, Reports, and Settings.
+// It also includes a responsive design that adapts to both desktop and mobile views, using Material-UI components for styling and layout.
+// Import necessary libraries and components
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   Box,
@@ -19,23 +24,38 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import { useState } from 'react';
 import { apiGet } from '../../services/api';
 export function OwnerSideBar({ data }) {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [purchaseShow, setPurchaseShow] = useState(null);
-  const [settingShow, setSettingShow] = useState(null);
-  const [reportsAndExpense, setReportsAndExpense] = useState(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-  const [salesOpen, setSalesOpen] = useState(false);
-  const [purchaseOpen, setPurchaseOpen] = useState(false);
-  const [reportsAndExpenseOpen, setReportsAndExpenseOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
+  const navigate = useNavigate(); // This is used to programmatically navigate to different routes in the application.
+  const location = useLocation(); // This hook gives access to the current location object, which contains information about the current URL
+  const [anchorEl, setAnchorEl] = useState(null); // This state is used to manage the anchor element for the sales dropdown menu
+  const [purchaseShow, setPurchaseShow] = useState(null); // This state is used to manage the anchor element for the purchase dropdown men
+  const [settingShow, setSettingShow] = useState(null); // This state is used to manage the anchor element for the settings dropdown men
+  const [reportsAndExpense, setReportsAndExpense] = useState(null); // This state is used to manage the anchor element for the reports and expense dropdown menu
+  const [drawerOpen, setDrawerOpen] = useState(false); // This state is used to manage the open/close state of the sidebar drawer
+  const [salesOpen, setSalesOpen] = useState(false); // This state is used to manage the open/close state of the sales dropdown menu
+  const [purchaseOpen, setPurchaseOpen] = useState(false); // This state is used to manage the open/close state of the purchase dropdown menu
+  const [reportsAndExpenseOpen, setReportsAndExpenseOpen] = useState(false); // This state is used to manage the open/close state of the reports and expense dropdown menu
+  const [settingsOpen, setSettingsOpen] = useState(false);  // This state is used to manage the open/close state of the settings dropdown menu
 
+  // Function to handle navigation when a menu item is clicked
   const handleNavigate = path => {
     setDrawerOpen(false); // Close the drawer when navigating
-    navigate(path);
+    if (path == 'profileCheck') {
+      const fetchBussiness = async () => {
+        const res = await apiGet('/businessprofile');
+        console.log(res.length);
+        if (res.length != 0) {
+          navigate('/bussiness-profile');
+        } else {
+          navigate('/profile_form');
+        }
+      };
+      fetchBussiness();
+    }
+    if (path != 'profileCheck') {
+      navigate(path);
+    }
   };
-
+  // Functions to handle clicks on different menu items
   const handleSalesClick = event => {
     setAnchorEl(event.currentTarget);
   };
@@ -54,20 +74,19 @@ export function OwnerSideBar({ data }) {
   };
   const handleSettingClose = path => {
     setSettingShow(null);
-    if(path=="profileCheck")
-    {
-    const fetchBussiness = async () => {
-      const res = await apiGet('/businessprofile');
-      console.log(res.length);
-      if (res.length != 0) {
-         navigate('/bussiness-profile');
-      } else {
-        navigate('/profile_form');
-    };
-  }
-  fetchBussiness();
+    if (path == 'profileCheck') {
+      const fetchBussiness = async () => {
+        const res = await apiGet('/businessprofile');
+        console.log(res.length);
+        if (res.length != 0) {
+          navigate('/bussiness-profile');
+        } else {
+          navigate('/profile_form');
+        }
+      };
+      fetchBussiness();
     }
-    if (path!="profileCheck") {
+    if (path != 'profileCheck') {
       handleNavigate(path);
     }
   };
@@ -114,6 +133,7 @@ export function OwnerSideBar({ data }) {
       setSettingsOpen(!settingsOpen);
     }
   };
+  // Function to handle logout
   function handleLogout(e) {
     {
       localStorage.removeItem('token');
@@ -136,9 +156,10 @@ export function OwnerSideBar({ data }) {
       >
         <Button
           sx={{
-            color: 'black',
+            color: '#3A5B7A',
             borderBottom: isActive('/dashboard') ? '3px solid #3a5b76' : 'none',
             borderRadius: 0,
+            fontWeight: 'bold',
             px: 2,
           }}
           onClick={() => handleNavigate('/dashboard')}
@@ -147,10 +168,11 @@ export function OwnerSideBar({ data }) {
         </Button>
         <Button
           sx={{
-            color: 'black',
+            color: '#3A5B7A',
             borderBottom: isActive('/products') ? '3px solid #3a5b76' : 'none',
             borderRadius: 0,
             px: 2,
+            fontWeight: 'bold',
           }}
           onClick={() => handleNavigate('/products')}
         >
@@ -158,10 +180,11 @@ export function OwnerSideBar({ data }) {
         </Button>
         <Button
           sx={{
-            color: 'black',
+            color: '#3A5B7A',
             borderBottom: isActive('/display') ? '3px solid #3a5b76' : 'none',
             borderRadius: 0,
             px: 2,
+            fontWeight: 'bold',
           }}
           onClick={() => handleNavigate('/display')}
         >
@@ -169,7 +192,8 @@ export function OwnerSideBar({ data }) {
         </Button>
         <Button
           sx={{
-            color: 'black',
+            color: '#3A5B7A',
+            fontWeight: 'bold',
             borderBottom:
               isActive(`/invoices`) ||
               isActive(`/quotation`) ||
@@ -192,19 +216,34 @@ export function OwnerSideBar({ data }) {
           open={Boolean(anchorEl)}
           onClose={() => handleSalesClose()}
         >
-          <MenuItem onClick={() => handleSalesClose('/invoices')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSalesClose('/invoices')}
+          >
             Invoices
           </MenuItem>
-          <MenuItem onClick={() => handleSalesClose('/deliverychallan-table')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSalesClose('/deliverychallan-table')}
+          >
             Delivery Challan
           </MenuItem>
-          <MenuItem onClick={() => handleSalesClose('/quotation')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSalesClose('/quotation')}
+          >
             Quotation
           </MenuItem>
-          <MenuItem onClick={() => handleSalesClose('/inventory')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSalesClose('/inventory')}
+          >
             Inventory
           </MenuItem>
-          <MenuItem onClick={() => handleSalesClose('/paymentIn')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSalesClose('/paymentIn')}
+          >
             Payment In
           </MenuItem>
         </Menu>
@@ -212,7 +251,8 @@ export function OwnerSideBar({ data }) {
         {/* purchase Form */}
         <Button
           sx={{
-            color: 'black',
+            color: '#3A5B76',
+            fontWeight: 'bold',
             borderBottom:
               isActive(`/purchase-table`) ||
               isActive(`/purchaseForm`) ||
@@ -233,13 +273,22 @@ export function OwnerSideBar({ data }) {
           open={Boolean(purchaseShow)}
           onClose={() => handlePurchaseClose()}
         >
-          <MenuItem onClick={() => handlePurchaseClose('/purchase-table')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handlePurchaseClose('/purchase-table')}
+          >
             Purchase List
           </MenuItem>
-          <MenuItem onClick={() => handlePurchaseClose('/purchaseForm')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handlePurchaseClose('/purchaseForm')}
+          >
             Purchase Form
           </MenuItem>
-          <MenuItem onClick={() => handlePurchaseClose('/paymentOut')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handlePurchaseClose('/paymentOut')}
+          >
             Payment Out
           </MenuItem>
         </Menu>
@@ -248,7 +297,8 @@ export function OwnerSideBar({ data }) {
 
         <Button
           sx={{
-            color: 'black',
+            color: '#3A5B76',
+            fontWeight: 'bold',
             borderBottom:
               isActive(`/reports`) ||
               isActive(`/expenseManager`) ||
@@ -268,10 +318,14 @@ export function OwnerSideBar({ data }) {
           open={Boolean(reportsAndExpense)}
           onClose={() => handleReportsAndExpenseClose()}
         >
-          <MenuItem onClick={() => handleReportsAndExpenseClose('/reports')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleReportsAndExpenseClose('/reports')}
+          >
             Reports
           </MenuItem>
           <MenuItem
+            className="!text-[#3A5B76] !font-bold"
             onClick={() => handleReportsAndExpenseClose('/expenseManager')}
           >
             Expense Manager
@@ -283,9 +337,14 @@ export function OwnerSideBar({ data }) {
                 */}
         <Button
           sx={{
-            color: 'black',
+            color: '#3A5B76',
+            fontWeight: 'bold',
             borderBottom:
-              (isActive(`/settings/invoice`) || isActive(`/settings/challan`) || isActive(`/users`) || isActive(`/settings/bankAccountSetting`)) || settingShow
+              isActive(`/settings/invoice`) ||
+              isActive(`/settings/challan`) ||
+              isActive(`/users`) ||
+              isActive(`/settings/bankAccountSetting`) ||
+              settingShow
                 ? '3px solid #3a5b76'
                 : 'none',
             borderRadius: 0,
@@ -301,21 +360,34 @@ export function OwnerSideBar({ data }) {
           open={Boolean(settingShow)}
           onClose={() => handleSettingClose()}
         >
-          <MenuItem onClick={() => handleSettingClose('/settings/invoice')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSettingClose('/settings/invoice')}
+          >
             Invoice Setting
           </MenuItem>
-          <MenuItem onClick={() => handleSettingClose('/settings/challan')}>
-            Challan Setting 
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSettingClose('/settings/challan')}
+          >
+            Challan Setting
           </MenuItem>
           <MenuItem
+            className="!text-[#3A5B76] !font-bold"
             onClick={() => handleSettingClose('/settings/bankAccountSetting')}
           >
             Bank Account Setting
           </MenuItem>
-          <MenuItem onClick={() => handleSettingClose('/users')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSettingClose('/users')}
+          >
             Users Acess
           </MenuItem>
-          <MenuItem onClick={() => handleSettingClose('profileCheck')}>
+          <MenuItem
+            className="!text-[#3A5B76] !font-bold"
+            onClick={() => handleSettingClose('profileCheck')}
+          >
             Update Business Profile
           </MenuItem>
         </Menu>
@@ -375,24 +447,50 @@ export function OwnerSideBar({ data }) {
             onClick={() => handleNavigate('/dashboard')}
             selected={isActive('/dashboard')}
           >
-            <ListItemText primary="Dashboard" />
+            <ListItemText
+              className="!text-[#3A5B76]"
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Dashboard
+                </Typography>
+              }
+            />
           </ListItem>
           <ListItem
             button
             onClick={() => handleNavigate('/products')}
             selected={isActive('/products')}
           >
-            <ListItemText primary="Products" />
+            <ListItemText
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Products
+                </Typography>
+              }
+            />
           </ListItem>
           <ListItem
             button
             onClick={() => handleNavigate('/display')}
             selected={isActive('/display')}
           >
-            <ListItemText primary="Customer" />
+            <ListItemText
+              p
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Customer
+                </Typography>
+              }
+            />
           </ListItem>
           <ListItem button onClick={() => handleListShow('sales')}>
-            <ListItemText primary="Sales" />
+            <ListItemText
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Sales
+                </Typography>
+              }
+            />
             {salesOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </ListItem>
           <Collapse in={salesOpen} timeout="auto" unmountOnExit>
@@ -403,7 +501,13 @@ export function OwnerSideBar({ data }) {
                 onClick={() => handleNavigate('/invoices')}
                 selected={isActive('/invoices')}
               >
-                <ListItemText primary="Invoices" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Invoices
+                    </Typography>
+                  }
+                />
               </ListItem>
               <ListItem
                 button
@@ -411,7 +515,13 @@ export function OwnerSideBar({ data }) {
                 onClick={() => handleNavigate('/deliveryChallan-table')}
                 selected={isActive('/deliveryChallan-table')}
               >
-                <ListItemText primary="Delivery Challan" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Delivery Challan
+                    </Typography>
+                  }
+                />
               </ListItem>
               <ListItem
                 button
@@ -419,7 +529,13 @@ export function OwnerSideBar({ data }) {
                 onClick={() => handleNavigate('/quotation')}
                 selected={isActive('/quotation')}
               >
-                <ListItemText primary="Quotation" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Quotation
+                    </Typography>
+                  }
+                />
               </ListItem>
               <ListItem
                 button
@@ -427,7 +543,13 @@ export function OwnerSideBar({ data }) {
                 onClick={() => handleNavigate('/inventory')}
                 selected={isActive('/inventory')}
               >
-                <ListItemText primary="Inventory" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Inventory
+                    </Typography>
+                  }
+                />
               </ListItem>
               <ListItem
                 button
@@ -435,12 +557,24 @@ export function OwnerSideBar({ data }) {
                 onClick={() => handleNavigate('/paymentIn')}
                 selected={isActive('/paymentIn')}
               >
-                <ListItemText primary="Payment In" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Payment In
+                    </Typography>
+                  }
+                />
               </ListItem>
             </List>
           </Collapse>
           <ListItem button onClick={() => handleListShow('purchase')}>
-            <ListItemText primary="Purchase" />
+            <ListItemText
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Purchase
+                </Typography>
+              }
+            />
             {purchaseOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </ListItem>
           <Collapse in={purchaseOpen} timeout="auto" unmountOnExit>
@@ -451,7 +585,13 @@ export function OwnerSideBar({ data }) {
                 onClick={() => handleNavigate('/purchase-table')}
                 selected={isActive('/purchase-table')}
               >
-                <ListItemText primary="Purchase List" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Purchase List
+                    </Typography>
+                  }
+                />
               </ListItem>
               <ListItem
                 button
@@ -459,7 +599,13 @@ export function OwnerSideBar({ data }) {
                 onClick={() => handleNavigate('/purchaseForm')}
                 selected={isActive('/purchaseForm')}
               >
-                <ListItemText primary="Purchase Form" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Purchase Form
+                    </Typography>
+                  }
+                />
               </ListItem>
               <ListItem
                 button
@@ -467,12 +613,24 @@ export function OwnerSideBar({ data }) {
                 onClick={() => handleNavigate('/paymentOut')}
                 selected={isActive('/paymentOut')}
               >
-                <ListItemText primary="Payment Out" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Payment Out
+                    </Typography>
+                  }
+                />
               </ListItem>
             </List>
           </Collapse>
           <ListItem button onClick={() => handleListShow('reportsAndExpense')}>
-            <ListItemText primary="Insights" />
+            <ListItemText
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Insights
+                </Typography>
+              }
+            />
             {reportsAndExpenseOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </ListItem>
           <Collapse in={reportsAndExpenseOpen} timeout="auto" unmountOnExit>
@@ -483,7 +641,13 @@ export function OwnerSideBar({ data }) {
                 onClick={() => handleNavigate('/reports')}
                 selected={isActive('/reports')}
               >
-                <ListItemText primary="Reports" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Reports
+                    </Typography>
+                  }
+                />
               </ListItem>
               <ListItem
                 button
@@ -491,12 +655,24 @@ export function OwnerSideBar({ data }) {
                 onClick={() => handleNavigate('/expenseManager')}
                 selected={isActive('/expenseManager')}
               >
-                <ListItemText primary="Expense Manager" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Expense Manager
+                    </Typography>
+                  }
+                />
               </ListItem>
             </List>
           </Collapse>
           <ListItem button onClick={() => handleListShow('settings')}>
-            <ListItemText primary="Settings" />
+            <ListItemText
+              primary={
+                <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                  Settings
+                </Typography>
+              }
+            />
             {settingsOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </ListItem>
           <Collapse in={settingsOpen} timeout="auto" unmountOnExit>
@@ -504,10 +680,72 @@ export function OwnerSideBar({ data }) {
               <ListItem
                 button
                 sx={{ pl: 4 }}
-                onClick={() => handleNavigate('/settings')}
-                selected={isActive('/settings')}
+                onClick={() => handleNavigate('/settings/invoice')}
+                selected={isActive('/settings/invoice')}
               >
-                <ListItemText primary="Prefix" />
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Invoice settings
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem
+                button
+                sx={{ pl: 4 }}
+                onClick={() => handleNavigate('/settings/challan')}
+                selected={isActive('/settings/challan')}
+              >
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Challan settings
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem
+                button
+                sx={{ pl: 4 }}
+                onClick={() => handleNavigate('/settings/bankAccountSetting')}
+                selected={isActive('/settings/bankAccountSetting')}
+              >
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Bank Account settings
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem
+                button
+                sx={{ pl: 4 }}
+                onClick={() => handleNavigate('/users')}
+                selected={isActive('/users')}
+              >
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Users Acess
+                    </Typography>
+                  }
+                />
+              </ListItem>
+              <ListItem
+                button
+                sx={{ pl: 4 }}
+                onClick={() => handleNavigate('profileCheck')}
+                selected={isActive('/profile_form')}
+              >
+                <ListItemText
+                  primary={
+                    <Typography sx={{ fontWeight: 'bold', color: '#3A5B76' }}>
+                      Update Business Profile
+                    </Typography>
+                  }
+                />
               </ListItem>
             </List>
           </Collapse>
