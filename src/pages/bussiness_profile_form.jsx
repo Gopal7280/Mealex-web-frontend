@@ -35,7 +35,7 @@ export function Bussiness_profile_from({ setRefresh }) {
   const [iso2State, setIso2State] = useState(''); // State to hold ISO2 code for billing state
   const [iso2State1, setIso2State1] = useState(''); // State to hold ISO2 code for shipping state
   const [style1, setStyle1] = useState({ display: 'none' }); // State to control visibility of billing address fields
-  const [style2, setStyle2] = useState({ display: 'inline-block' });  // State to control visibility of billing address fields when zip code is entered
+  const [style2, setStyle2] = useState({ display: 'inline-block' }); // State to control visibility of billing address fields when zip code is entered
   const [style3, setStyle3] = useState({ display: 'none' }); // State to control visibility of shipping address fields
   const [style4, setStyle4] = useState({ display: 'inline-block' }); // State to control visibility of shipping address fields when zip code is entered
   useEffect(() => {
@@ -51,14 +51,28 @@ export function Bussiness_profile_from({ setRefresh }) {
           },
         };
         const response = await axios(config); // Fetching states for India
-        setCountry('India'); // Setting country name  
+        const sortedStates = response.data.sort((a, b) => {
+          const nameA = a.name.toUpperCase();
+          const nameB = b.name.toUpperCase();
+
+          if (nameA < nameB) {
+            // e.g., 'ASSAM' vs 'BIHAR'
+            return -1; // 'ASSAM' should come before 'BIHAR'
+          }
+          if (nameA > nameB) {
+            // e.g., 'BIHAR' vs 'ASSAM'
+            return 1; // 'BIHAR' should come after 'ASSAM'
+          }
+          return 0; // e.g., 'GUJARAT' vs 'GUJARAT'
+        });
+        setCountry('India'); // Setting country name
         setCountry1('India'); // Setting country name for shipping
-        setState(response.data); // Setting state data for billing  
-        setState1(response.data); // Setting state data for shipping
+        setState(sortedStates); // Setting state data for billing
+        setState1(sortedStates); // Setting state data for shipping
         setIso2Country('In'); // Setting ISO2 code for billing country
         setIso2Country1('In'); // Setting ISO2 code for shipping country
         setNames({ ...names, countryName: 'India' }); // Setting initial country name for billing
-        setNames1({ ...names, countryName: 'India' }); // Setting initial country name for shipping 
+        setNames1({ ...names, countryName: 'India' }); // Setting initial country name for shipping
       } catch (err) {
         console.log(err);
       }
@@ -135,7 +149,7 @@ export function Bussiness_profile_from({ setRefresh }) {
   }
   const [city, setCity] = useState([{}]); // State to hold city data for billing
   const [city1, setCity1] = useState([{}]); // State to hold city data for shipping
-  
+
   // Function to handle state change based on selected country
   function handleStateChange(e, name) {
     if (name == 'billing') {
@@ -210,7 +224,7 @@ export function Bussiness_profile_from({ setRefresh }) {
       city: '',
     },
   ]); // State to hold zip code data for shipping
-  const [zip, setZip] = useState('');   // State to hold zip code for billing
+  const [zip, setZip] = useState(''); // State to hold zip code for billing
   const [zip1, setZip1] = useState(''); // State to hold zip code for shipping
 
   // Function to handle debounce for fetching zip code data
@@ -461,7 +475,7 @@ export function Bussiness_profile_from({ setRefresh }) {
     }
   };
   const [shipping, setShipping] = useState(''); // State to hold shipping address if it is same as billing
-  function handleCheck(e) { 
+  function handleCheck(e) {
     if (e.target.checked) {
       var bill = document.getElementById('bill');
       console.log(bill.value);
@@ -471,7 +485,7 @@ export function Bussiness_profile_from({ setRefresh }) {
     }
   }
   const [error, setError] = useState({
-    name:'',
+    name: '',
     panNo: '',
     gstinNo: '',
     phone_Number: '',
@@ -479,34 +493,32 @@ export function Bussiness_profile_from({ setRefresh }) {
 
   // Function to handle validation for PAN, GSTIN, and phone number
   function handleCheckCred(e, name) {
-    if(name=="name")
-    {
+    if (name == 'name') {
       if (!NAME_REGEX.test(e.target.value)) {
         if (e.target.value == '') {
           setError({
-            name:'',
+            name: '',
             panNo: error.panNo,
             gstinNo: error.gstinNo,
             phone_Number: error.phone_Number,
           });
-          formik.values.name='';
+          formik.values.name = '';
           setStatus(true);
         } else {
           setError({
-            name:
-              'Invalid name. Only letters and spaces are allowed, and it must be 2-50 characters long.',
-              panNo:error.panNo,
+            name: 'Invalid name. Only letters and spaces are allowed, and it must be 2-50 characters long.',
+            panNo: error.panNo,
             gstinNo: error.gstinNo,
             phone_Number: error.phone_Number,
           });
-          formik.values.name=e.target.value;
+          formik.values.name = e.target.value;
           setStatus(false);
         }
       } else {
-        formik.values.name=e.target.value;
+        formik.values.name = e.target.value;
         console.log('2');
         setError({
-          name:'',
+          name: '',
           panNo: error.panNo,
           gstinNo: error.gstinNo,
           phone_Number: error.phone_Number,
@@ -656,7 +668,7 @@ export function Bussiness_profile_from({ setRefresh }) {
                     name="name"
                     placeholder="Name"
                     classNameInput="w-full p-2 border rounded mt-1"
-                    onChange={(e)=>handleCheckCred(e,"name")}
+                    onChange={e => handleCheckCred(e, 'name')}
                     value={formik.values.name}
                   />
                   <span className="text-red-500">
@@ -1175,7 +1187,7 @@ export function Bussiness_profile_from({ setRefresh }) {
                   + Add Field
                 </button>
               </div>
-                  {/* // This section is for additional notes and personal information */}
+              {/* // This section is for additional notes and personal information */}
               <div className="mt-6">
                 <label className="block text-gray-600">Notes</label>
                 <textarea

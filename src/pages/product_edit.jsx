@@ -2,6 +2,7 @@
 //This is a product edit page where user can edit the product details
 
 import { useEffect, useState } from 'react';
+import { Dialog } from 'primereact/dialog';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { InputComponent } from '../components/Input';
 import { ButtonComponent } from '../components/Button';
@@ -140,6 +141,23 @@ export function Product_edit() {
     console.log(e.target.value);
     setProductUnuit(e.target.value);
   }
+  function handleCategoryChange(e) {
+    setAddCategory('');
+    if (e.target.value == 'otherCategory') {
+      setVisible(true);
+      return;
+    }
+    console.log(e.target.value);
+    formik.values.product_category=e.target.value;
+  }
+  function handleProductCategoryAdd(e) {
+    const newCategory = document.getElementById('newCategory').value;
+    // formik.values.product_category=newCategory;
+    setAddCategory(newCategory);
+    formik.values.product_category=newCategory;
+    // console.log(formik.values.product_category);
+    setVisible(false);
+  }
   return (
     <>
       {loader ? (
@@ -229,19 +247,51 @@ export function Product_edit() {
                     Product Category
                   </label>
                   <select
-                    onChange={formik.handleChange}
-                    {...(isEdit ? {} : { value: data.category })}
+                    onChange={handleCategoryChange}
                     name="product_category"
                     className="w-full p-2 border rounded mt-1"
-                    value={formik.values.product_category}
                   >
-                    <option disabled value="">
+                    <option value={data.category}>
                       {data.category != '' ? data.category : 'select'}
                     </option>
                     <option value="Electronics">Electronics</option>
                     <option value="clothing">Clothing</option>
                     <option value="food">Food</option>
+                    <option
+                          value="otherCategory"
+                          className="bg-[#3A5B76] text-white"
+                        >
+                          {addCategory == '' ? 'add category' : addCategory}
+                        </option>
                   </select>
+                   <Dialog
+                              header="Add Category"
+                              visible={visible}
+                              onHide={() => {
+                                if (!visible) return;
+                                setVisible(false);
+                              }}
+                              style={{ width: '50vw' }}
+                              breakpoints={{ '960px': '75vw', '641px': '100vw' }}
+                            >
+                              <dl>
+                                <dt className="mb-2 mt-2">Category Name</dt>
+                                <dd>
+                                  <input
+                                    id="newCategory"
+                                    type="text"
+                                    className="p-[0.76rem] w-full border-1 border-[#d1d5db] rounded-[6px]"
+                                    placeholder="Enter Product category"
+                                  />
+                                </dd>
+                              </dl>
+                              <ButtonComponent
+                                onClick={e => handleProductCategoryAdd(e)}
+                                label="Add"
+                                type="submit"
+                                className="bg-[#3A5B76] text-white px-8 py-2 rounded hover:bg-[#2E4A63]"
+                              ></ButtonComponent>
+                            </Dialog>
                 </div>
                 <div>
                   <InputComponent

@@ -1,23 +1,29 @@
-import React, { useState, useEffect, useRef } from "react";
-import axios from "axios";
-import "../../node_modules/bootstrap/dist/css/bootstrap.min.css";
-import { toWords } from "number-to-words";
-import "../styles/layoutFix.css";
-import Sidebar from "../layouts/Sidebar";
-import { Preview, ModeEdit, DeleteForever, Close } from "@mui/icons-material";
-import "../../node_modules/bootstrap-icons/font/bootstrap-icons.css";
-import { useFormik } from "formik";
-import { NavLink, useNavigate } from "react-router-dom";
-import { debounce, delay, update } from "lodash";
-import { data } from "jquery";
-import { InputComponent } from "../components/Input";
-import { ButtonComponent } from "../components/Button";
-import { apiGet, apiPost } from "../services/api";
-import { Loader } from "../layouts/Loader";
-import { CustomerModalView } from "./modalViews/customerModalView";
-import ProductModalView from "./modalViews/productModalView";
+import React, { useState, useEffect, useRef } from 'react';
+
+import { Dialog } from 'primereact/dialog';
+import { InputNumber } from 'primereact/inputnumber';
+import { InputText } from 'primereact/inputtext';
+import { Button } from 'primereact/button';
+import axios from 'axios';
+import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+import { toWords } from 'number-to-words';
+import '../styles/layoutFix.css';
+import Sidebar from '../layouts/Sidebar';
+import { Preview, ModeEdit, DeleteForever, Close } from '@mui/icons-material';
+import '../../node_modules/bootstrap-icons/font/bootstrap-icons.css';
+import { useFormik } from 'formik';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { debounce, delay, update } from 'lodash';
+import { data } from 'jquery';
+import { InputComponent } from '../components/Input';
+import { ButtonComponent } from '../components/Button';
+import { apiGet, apiPost } from '../services/api';
+import { Loader } from '../layouts/Loader';
+import { CustomerModalView } from './modalViews/customerModalView';
+import ProductModalView from './modalViews/productModalView';
 // import { useDebounce } from "../hooks/useDebounce";
 export default function InvoiceForm({ onInvoiceAdded }) {
+  const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
   const [disp1, setdisp1] = useState(true);
   const [disp2, setdisp2] = useState(false);
@@ -29,63 +35,60 @@ export default function InvoiceForm({ onInvoiceAdded }) {
   const dropdownRef = useRef(null);
   const [total, setTotal] = useState(0);
   const [amountReceipt, setAmountReceipt] = useState(0);
-  const [paymentTerms, setPaymentTerms] = useState("");
+  const [paymentTerms, setPaymentTerms] = useState('');
   const [dueDate, setDueDate] = useState();
-  const [invoicePrefix, setInvoicePrefix] = useState("");
-  const [invoiceNumber, setInvoiceNumber] = useState("");
+  const [invoicePrefix, setInvoicePrefix] = useState('');
+  const [invoiceNumber, setInvoiceNumber] = useState('');
   const [TaxAmount, setTaxAmount] = useState([]);
-  const [productDescription, setProductDescription] = useState(["null"]);
+  const [productDescription, setProductDescription] = useState(['null']);
   const [disabl, setdisabl] = useState([]);
   const [loader, setLoader] = useState(true);
-    const [userRole,setUserRole]=useState("owner");
-  const [nameLetter, setNameLetter] = useState("");
-  const [modalShow,setModalShow]=useState(false);
-  const [modalShow1,setModalShow1]=useState(false);
+  const [userRole, setUserRole] = useState('owner');
+  const [nameLetter, setNameLetter] = useState('');
+  const [modalShow, setModalShow] = useState(false);
+  const [modalShow1, setModalShow1] = useState(false);
   const [productAmount, setProductAmount] = useState([
     {
-      amount: "0",
-      per: "0",
+      amount: '0',
+      per: '0',
     },
   ]);
   useEffect(() => {
     setLoader(true); // Show loader when effect starts
     const dt = new Date();
     setDate(dt.toLocaleDateString());
-    const fetchUserRole=async ()=>{
-        try{
-              const res=await apiGet("/user");
-              console.log(res.data);
-              console.log(res.data[0].employee_role);
-              setUserRole(res.data[0].employee_role);
-        }
-        catch(err)
-        {
-          console.log(err);
-        }
-    }
+    const fetchUserRole = async () => {
+      try {
+        const res = await apiGet('/user');
+        console.log(res.data);
+        console.log(res.data[0].employee_role);
+        setUserRole(res.data[0].employee_role);
+      } catch (err) {
+        console.log(err);
+      }
+    };
     fetchUserRole();
     const getBussinessProfile = async () => {
       try {
-        const responseb = await apiGet("/businessprofile");
+        const responseb = await apiGet('/businessprofile');
         console.log(responseb);
         if (responseb.length === 0) {
           navigate('/profile_form');
-        }
-        else{
+        } else {
           setBusinessProfile(responseb);
           if (responseb[0].logo == null) {
-          var name = responseb[0].business_name;
-          console.log(name.substring(0, 1));
-        }
+            var name = responseb[0].business_name;
+            console.log(name.substring(0, 1));
+          }
         }
       } catch (error) {
-        console.error("Error fetching business profile:", error);
+        console.error('Error fetching business profile:', error);
       }
     };
 
     const invoicePrefixSet = async () => {
       try {
-        var res = await apiGet("/invoices/invoicenumber/prefix");
+        var res = await apiGet('/invoices/invoicenumber/prefix');
         console.log(res);
         setBankAccountDeatil(res.data[0]);
         setInvoicePrefix(res.invoice_prefix);
@@ -93,24 +96,22 @@ export default function InvoiceForm({ onInvoiceAdded }) {
         setDueDate(res.due_date);
         setPaymentTerms(res.paymentTerms);
       } catch (error) {
-        console.error("Error fetching invoice prefix:", error);
-        if(error.response.data.message=="bank account not found")
-        {
+        console.error('Error fetching invoice prefix:', error);
+        if (error.response.data.message == 'bank account not found') {
           setInvoicePrefix(error.response.data.invoice_prefix);
-        setInvoiceNumber(error.response.data.invoice_number);
-        setDueDate(error.response.data.due_date);
-        setPaymentTerms(error.response.data.paymentTerms);
+          setInvoiceNumber(error.response.data.invoice_number);
+          setDueDate(error.response.data.due_date);
+          setPaymentTerms(error.response.data.paymentTerms);
         }
-        
       }
     };
     const fetchCustomers = async () => {
       try {
-        const res1 = await apiGet("/customers");
+        const res1 = await apiGet('/customers');
         setCustomer(res1);
         console.log(res1);
       } catch (error) {
-        console.error("Error fetching customers:", error);
+        console.error('Error fetching customers:', error);
       }
     };
 
@@ -123,197 +124,430 @@ export default function InvoiceForm({ onInvoiceAdded }) {
     setLoader(false);
   }, [modalShow]); // Empty dependency array, ensures this effect runs only once after component mount
 
-  useEffect(()=>{
+  useEffect(() => {
     setLoader(true); // Show loader when effect starts
     const fetchProduct = async () => {
       try {
-        const res = await apiGet("/products/productName");
-        setProducts(res);
+        const res = await apiGet('/products/productName');
+        const sortedData = res.sort((a, b) => {
+          const nameA = a.product_name.toUpperCase();
+          const nameB = b.product_name.toUpperCase();
+
+          if (nameA < nameB) {
+            // e.g., 'ASSAM' vs 'BIHAR'
+            return -1; // 'ASSAM' should come before 'BIHAR'
+          }
+          if (nameA > nameB) {
+            // e.g., 'BIHAR' vs 'ASSAM'
+            return 1; // 'BIHAR' should come after 'ASSAM'
+          }
+          return 0; // e.g., 'GUJARAT' vs 'GUJARAT'
+        });
+        setProducts(sortedData);
         console.log(res);
-        console.log("Product data fetched");
+        console.log('Product data fetched');
       } catch (error) {
-        console.error("Error fetching products:", error);
+        console.error('Error fetching products:', error);
       }
     };
     fetchProduct();
     setLoader(false);
-  },[modalShow1])
+  }, [modalShow1]);
 
   function handleDueDate(e) {
     setDueDate(e.target.value);
-    if (e.target.value == "") {
+    if (e.target.value == '') {
       setdisp1(false);
       setdisp2(true);
     }
   }
+  const [visible, setVisible] = useState(false);
   const handleAddProductRow = () => {
-    setProductRows([
-      ...productRows,
-      {
-        id: "",
-        productName: "",
-        hsnCode: "",
-        gstRate: "",
-        unitPrice: "",
-        quantity: "",
-        total: "",
-        discount_amount: 0,
-        taxable_amount: 0,
-      },
-    ]);
-    const updateMe = [...disabl];
-    setdisabl([...disabl, 1]);
-    setTaxAmount([...TaxAmount, 0]);
-    setProductDescription([...productDescription, "null"]);
-    setProductAmount([
-      ...productAmount,
-      {
-        amount: "",
-        per: "",
-      },
-    ]);
+    setVisible(true);
+    // setProductRows([
+    //   ...productRows,
+    //   {
+    //     id: "",
+    //     productName: "",
+    //     hsnCode: "",
+    //     gstRate: "",
+    //     unitPrice: "",
+    //     quantity: "",
+    //     total: "",
+    //     discount_amount: 0,
+    //     taxable_amount: 0,
+    //   },
+    // ]);
+    // const updateMe = [...disabl];
+    // setdisabl([...disabl, 1]);
+    // setTaxAmount([...TaxAmount, 0]);
+    // setProductDescription([...productDescription, "null"]);
+    // setProductAmount([
+    //   ...productAmount,
+    //   {
+    //     amount: "",
+    //     per: "",
+    //   },
+    // ]);
   };
   const [productRows, setProductRows] = useState([
-    {
-      id: "",
-      productName: "",
-      hsnCode: "",
-      gstRate: "",
-      gstCalculate: "",
-      unitPrice: "",
-      quantity: "",
-      total: "",
-      discount_amount: 0,
-      discount_amountPer: "0_%",
-      productDescription: "",
-      taxable_amount: 0,
-    },
+    // {
+    //   id: "",
+    //   productName: "",
+    //   hsnCode: "",
+    //   gstRate: "",
+    //   gstCalculate: "",
+    //   unitPrice: "",
+    //   quantity: "",
+    //   total: "",
+    //   discount_amount: 0,
+    //   discount_amountPer: "0_%",
+    //   productDescription: "",
+    //   taxable_amount: 0,
+    // },
   ]);
-  const handleProductChange = async (index, productId) => {
-    console.log(productId);
-    setCount(0);
-    const updateMe = [...disabl];
-    updateMe[index] = 0;
-    setdisabl(updateMe);
+  //   const handleProductChange = async () => {
+
+  //     const itemsToAdd = btnToQty.filter((entry) => entry?.flag);
+  //     console.log(itemsToAdd);
+  //     // console.log(productId);
+  //     setCount(0);
+  //     if (!itemsToAdd.length) {
+  //     console.log("No items to add.");
+  //     return;
+  //   }
+  // for (const index in itemsToAdd) {
+  //   try {
+  //     const productId = itemsToAdd[index].item.product_id; // Assuming `product_id` exists in item details
+  //     const res = await apiGet(`products/detail/${productId}`);
+  //     const productDetail = res[0];
+  //     console.log("res",productDetail);
+  //       const updatedRows = [...productRows];
+  //       if (!updatedRows[index]) {
+  //   updatedRows[index] = {
+  //     id: "",
+  //     productName: "",
+  //     hsnCode: "",
+  //     gstRate: "",
+  //     gstCalculate: "",
+  //     unitPrice: "",
+  //     quantity: "",
+  //     total: "",
+  //     discount_amount: 0,
+  //     discount_amountPer: "0_%",
+  //     productDescription: "",
+  //     taxable_amount: 0,
+  //   };
+  // }
+  //       var rate = 100;
+  //       rate = parseInt(res[0].gst_rate) * parseFloat(res[0].selling_price);
+  //       console.log(res);
+  //       rate = rate / 100;
+  //       console.log('gstRate' + rate);
+  //       var calculateTax = 0;
+  //       var calculateGst = 0;
+  //       if (res[0].selling_status == 'withGstSelling') {
+  //         console.log('yes');
+  //         console.log(res);
+  //         calculateGst = 1 + parseFloat(res[0].gst_rate / 100);
+  //         calculateTax = parseFloat(res[0].selling_price) / calculateGst;
+  //         calculateTax = parseFloat(calculateTax).toFixed(2);
+  //         calculateGst = 0;
+  //         res[0].gst_rate = 0;
+  //       }
+  //       if (res[0].selling_status == 'withoutGstSelling') {
+  //         console.log('no');
+  //         console.log(res);
+  //         calculateGst = (res[0].selling_price * res[0].gst_rate) / 100;
+  //         calculateTax = res[0].selling_price;
+  //         calculateTax = parseFloat(calculateTax).toFixed(2);
+  //         console.log(calculateGst);
+  //       }
+  //       updatedRows[index].quantity = '1';
+  //       const updateTax = [...TaxAmount];
+  //       const updateGst = [...gstRateS];
+  //       updateGst[index] = parseFloat(res[0].gst_rate);
+  //       updateTax[index] = calculateGst;
+  //       updatedRows[index] = {
+  //         ...updatedRows[index],
+  //         id: productDetail.product_id,
+  //         productName: productDetail.product_name,
+  //         hsnCode: productDetail.product_hsn_code,
+  //         gstRate: productDetail.gst_rate,
+  //         gstCalculate: rate + parseFloat(res[0].selling_price),
+  //         unitPrice: calculateTax,
+  //         quantity: updatedRows[index].quantity,
+  //         total:
+  //           calculateGst + calculateTax * parseFloat(updatedRows[index].quantity), // Update total based on quantity
+  //         discount_amount: '0',
+  //         discount_amountPer: '0%',
+  //         taxable_amount: calculateTax * parseFloat(updatedRows[index].quantity),
+  //         productDescription: '',
+  //       };
+  //       console.log(res[0].gst_rate);
+  //       // ////////////////////////////////////////////////
+  //       const update = [...productAmount];
+  //       update[index].amount = 0;
+  //       update[index].per = 0;
+  //       var taxableamount = 0;
+  //       var totalAmount = 0;
+  //       for (let row of updatedRows) {
+  //         totalAmount += parseFloat(row.total);
+  //         taxableamount += parseFloat(row.taxable_amount);
+  //       }
+  //       var gstSumAmount = 0;
+  //       for (var i = 0; i < updateTax.length; i++) {
+  //         gstSumAmount += parseFloat(updateTax[i]);
+  //       }
+  //       setGstAmount(parseFloat(gstSumAmount).toFixed(2));
+  //       const gstSum = parseFloat(
+  //         updateTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
+  //       );
+  //       setGstSu(parseFloat(gstSum));
+  //       setAddTotal(totalAmount.toFixed(2));
+  //       setTaxableAmount(parseFloat(taxableamount).toFixed(2));
+  //       setProductAmount(update);
+  //       setGstRateS(updateGst);
+  //       setProductRows(updatedRows);
+  //       setTaxAmount(updateTax);
+  //       console.log(updateTax);
+  //   } catch (error) {
+  //     console.error("Error fetching product details:", error);
+  //   }
+  //   finally{
+  //     // setVisible(false);
+  //   }
+  // }
+
+  //     // const updateMe = [...disabl];
+  //     // updateMe[index] = 0;
+  //     // setdisabl(updateMe);
+  //     // try {
+  //     //   const token = localStorage.getItem('token');
+  //     //   // if (productId == "addProduct") {
+  //     //   //   setModalShow1(true);
+  //     //   //   return
+  //     //   // }
+  //     //   const res = await apiGet(`products/detail/${productId}`);
+  //     //   const productDetail = res[0];
+  //       // const updatedRows = [...productRows];
+  //       // var rate = 100;
+  //       // rate = parseInt(res[0].gst_rate) * parseFloat(res[0].selling_price);
+  //       // console.log(res);
+  //       // rate = rate / 100;
+  //       // console.log('gstRate' + rate);
+  //       // var calculateTax = 0;
+  //       // var calculateGst = 0;
+  //       // if (res[0].selling_status == 'withGstSelling') {
+  //       //   console.log('yes');
+  //       //   console.log(res);
+  //       //   calculateGst = 1 + parseFloat(res[0].gst_rate / 100);
+  //       //   calculateTax = parseFloat(res[0].selling_price) / calculateGst;
+  //       //   calculateTax = parseFloat(calculateTax).toFixed(2);
+  //       //   calculateGst = 0;
+  //       //   res[0].gst_rate = 0;
+  //       // }
+  //       // if (res[0].selling_status == 'withoutGstSelling') {
+  //       //   console.log('no');
+  //       //   console.log(res);
+  //       //   calculateGst = (res[0].selling_price * res[0].gst_rate) / 100;
+  //       //   calculateTax = res[0].selling_price;
+  //       //   calculateTax = parseFloat(calculateTax).toFixed(2);
+  //       //   console.log(calculateGst);
+  //       // }
+  //       // updatedRows[index].quantity = '1';
+  //       // const updateTax = [...TaxAmount];
+  //       // const updateGst = [...gstRateS];
+  //       // updateGst[index] = parseFloat(res[0].gst_rate);
+  //       // updateTax[index] = calculateGst;
+  //       // updatedRows[index] = {
+  //       //   ...updatedRows[index],
+  //       //   id: productDetail.product_id,
+  //       //   productName: productDetail.product_name,
+  //       //   hsnCode: productDetail.product_hsn_code,
+  //       //   gstRate: productDetail.gst_rate,
+  //       //   gstCalculate: rate + parseFloat(res[0].selling_price),
+  //       //   unitPrice: calculateTax,
+  //       //   quantity: updatedRows[index].quantity,
+  //       //   total:
+  //       //     calculateGst + calculateTax * parseFloat(updatedRows[index].quantity), // Update total based on quantity
+  //       //   discount_amount: '0',
+  //       //   discount_amountPer: '0%',
+  //       //   taxable_amount: calculateTax * parseFloat(updatedRows[index].quantity),
+  //       //   productDescription: '',
+  //       // };
+  //       // console.log(res[0].gst_rate);
+  //       // // ////////////////////////////////////////////////
+  //       // const update = [...productAmount];
+  //       // update[index].amount = 0;
+  //       // update[index].per = 0;
+  //       // var taxableamount = 0;
+  //       // var totalAmount = 0;
+  //       // for (let row of updatedRows) {
+  //       //   totalAmount += parseFloat(row.total);
+  //       //   taxableamount += parseFloat(row.taxable_amount);
+  //       // }
+  //       // var gstSumAmount = 0;
+  //       // for (var i = 0; i < updateTax.length; i++) {
+  //       //   gstSumAmount += parseFloat(updateTax[i]);
+  //       // }
+  //       // setGstAmount(parseFloat(gstSumAmount).toFixed(2));
+  //       // const gstSum = parseFloat(
+  //       //   updateTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
+  //       // );
+  //       // setGstSu(parseFloat(gstSum));
+  //       // setAddTotal(totalAmount.toFixed(2));
+  //       // setTaxableAmount(parseFloat(taxableamount).toFixed(2));
+  //       // setProductAmount(update);
+  //       // setGstRateS(updateGst);
+  //       // setProductRows(updatedRows);
+  //       // setTaxAmount(updateTax);
+  //       // console.log(updateTax);
+  //     // } catch (error) {
+  //     //   console.error('Error fetching product details:', error);
+  //     // }
+  //   };
+  const handleProductChange = async () => {
+    const itemsToAdd = btnToQty.filter(entry => entry?.flag);
+    console.log('Items to Add:', itemsToAdd);
+
+    // Return early if there are no items to add
+    if (!itemsToAdd.length) {
+      console.log('No items to add.');
+      setProductRows([]); // Clear rows if no items to add
+      setTaxAmount([]);
+      setGstRateS([]);
+      setProductAmount([]);
+      setAddTotal('0.00');
+      setTaxableAmount('0.00');
+      setGstAmount('0.00');
+      setGstSu(0);
+      return;
+    }
+
+    const updatedRows = [];
+    const updateTax = [];
+    const updateGst = [];
+    const updateAmounts = [];
+
     try {
-      const token = localStorage.getItem("token");
-      // if (productId == "addProduct") {
-      //   setModalShow1(true);
-      //   return
-      // }
-      const res = await apiGet(`products/detail/${productId}`);
-      const productDetail = res[0];
-      const updatedRows = [...productRows];
-      var rate = 100;
-      rate = parseInt(res[0].gst_rate) * parseFloat(res[0].selling_price);
-      console.log(res);
-      rate = rate / 100;
-      console.log("gstRate" + rate);
-      var calculateTax = 0;
-      var calculateGst = 0;
-      if (res[0].selling_status == "withGstSelling") {
-        console.log("yes");
-        console.log(res);
-        calculateGst = 1 + parseFloat(res[0].gst_rate / 100);
-        calculateTax = parseFloat(res[0].selling_price) / calculateGst;
-        calculateTax = parseFloat(calculateTax).toFixed(2);
-        calculateGst = 0;
-        res[0].gst_rate = 0;
+      setLoading(true);
+      for (const item of itemsToAdd) {
+        const productId = item.item.product_id;
+        const quantity = item.quantity || 1; // Use quantity from itemsToAdd
+
+        // Fetch product details
+        const res = await apiGet(`products/detail/${productId}`);
+        const productDetail = res[0];
+        console.log('Product details fetched:', productDetail);
+
+        // GST and price calculations
+        const gstRate = parseFloat(productDetail.gst_rate || 0);
+        const unitPrice = parseFloat(productDetail.selling_price || 0);
+        let calculateTax = unitPrice;
+        let calculateGst = 0;
+
+        if (productDetail.selling_status === 'withGstSelling') {
+          const gstDivider = 1 + gstRate / 100;
+          calculateTax = (unitPrice / gstDivider).toFixed(2);
+        } else if (productDetail.selling_status === 'withoutGstSelling') {
+          calculateGst = (unitPrice * gstRate) / 100;
+        }
+
+        const total = (calculateTax * quantity + calculateGst).toFixed(2);
+
+        // Update the row
+        const updatedRow = {
+          originalIndex: item.originalIndex,
+          id: productDetail.product_id,
+          productName: productDetail.product_name,
+          hsnCode: productDetail.product_hsn_code,
+          gstRate,
+          gstCalculate: (gstRate * unitPrice) / 100,
+          unitPrice: calculateTax,
+          quantity,
+          total,
+          discount_amount: '0',
+          discount_amountPer: '0%',
+          taxable_amount: (calculateTax * quantity).toFixed(2),
+          productDescription: productDetail.description || '',
+        };
+
+        updatedRows.push(updatedRow);
+        updateTax.push(calculateGst.toFixed(2));
+        updateGst.push(gstRate);
+        updateAmounts.push({ amount: 0, per: 0 });
       }
-      if (res[0].selling_status == "withoutGstSelling") {
-        console.log("no");
-        console.log(res);
-        calculateGst = (res[0].selling_price * res[0].gst_rate) / 100;
-        calculateTax = res[0].selling_price;
-        calculateTax = parseFloat(calculateTax).toFixed(2);
-        console.log(calculateGst);
-      }
-      updatedRows[index].quantity = "1";
-      const updateTax = [...TaxAmount];
-      const updateGst = [...gstRateS];
-      updateGst[index] = parseFloat(res[0].gst_rate);
-      updateTax[index] = calculateGst;
-      updatedRows[index] = {
-        ...updatedRows[index],
-        id: productDetail.product_id,
-        productName: productDetail.product_name,
-        hsnCode: productDetail.product_hsn_code,
-        gstRate: productDetail.gst_rate,
-        gstCalculate: rate + parseFloat(res[0].selling_price),
-        unitPrice: calculateTax,
-        quantity: updatedRows[index].quantity,
-        total:
-        calculateGst + calculateTax * parseFloat(updatedRows[index].quantity), // Update total based on quantity
-        discount_amount: "0",
-        discount_amountPer: "0%",
-        taxable_amount: calculateTax * parseFloat(updatedRows[index].quantity),
-        productDescription: "",
-      };
-      console.log(res[0].gst_rate);
-      // ////////////////////////////////////////////////
-      const update = [...productAmount];
-      update[index].amount = 0;
-      update[index].per = 0;
-      var taxableamount = 0;
-      var totalAmount = 0;
-      for (let row of updatedRows) {
-        totalAmount += parseFloat(row.total);
-        taxableamount += parseFloat(row.taxable_amount);
-      }
-      var gstSumAmount = 0;
-      for (var i = 0; i < updateTax.length; i++) {
-        gstSumAmount += parseFloat(updateTax[i]);
-      }
-      setGstAmount(parseFloat(gstSumAmount).toFixed(2));
-      const gstSum = parseFloat(
-        updateTax.reduce((acc, val) => acc + parseFloat(val || 0), 0).toFixed(2)
+
+      // Summing up totals and updating state
+      const totalAmount = updatedRows.reduce(
+        (sum, row) => sum + parseFloat(row.total || 0),
+        0
       );
-      setGstSu(parseFloat(gstSum));
-      setAddTotal(totalAmount.toFixed(2));
-      setTaxableAmount(parseFloat(taxableamount).toFixed(2));
-      setProductAmount(update);
-      setGstRateS(updateGst);
+      const taxableAmount = updatedRows.reduce(
+        (sum, row) => sum + parseFloat(row.taxable_amount || 0),
+        0
+      );
+      const gstSum = updateTax.reduce(
+        (sum, val) => sum + parseFloat(val || 0),
+        0
+      );
+
       setProductRows(updatedRows);
       setTaxAmount(updateTax);
-      console.log(updateTax);
+      setGstRateS(updateGst);
+      setProductAmount(updateAmounts);
+      setAddTotal(totalAmount.toFixed(2));
+      setTaxableAmount(taxableAmount.toFixed(2));
+      setGstAmount(gstSum.toFixed(2));
+      setGstSu(parseFloat(gstSum));
+
+      console.log('Updated rows:', updatedRows);
     } catch (error) {
-      console.error("Error fetching product details:", error);
+      console.error('Error fetching product details:', error);
+    } finally {
+      setLoading(false);
+      setVisible(false);
     }
   };
+
   const [addTotal, setAddTotal] = useState(0);
   const [subTotal, setSubTotal] = useState(0);
   const [qty, setQty] = useState(0);
   var qtyy = 0;
-  const [AmountWords, setAmountWords] = useState("");
+  const [AmountWords, setAmountWords] = useState('');
   const navigate = useNavigate();
   const formik = useFormik({
     initialValues: {
-      tax_amount: "",
+      tax_amount: '',
       vendorId: [{}],
-      bankAccountId:"",
+      bankAccountId: '',
       partyDetail: [{}],
-      invoice_prefix: "",
-      invoice_number: "",
-      sales_invoice_date: "",
-      payment_terms: "",
-      due_date: "",
-      total_amount: "",
-      add_notes: "",
-      taxable_amount: "",
-      sgstAmount: "",
-      cgstAmount: "",
+      invoice_prefix: '',
+      invoice_number: '',
+      sales_invoice_date: '',
+      payment_terms: '',
+      due_date: '',
+      total_amount: '',
+      add_notes: '',
+      taxable_amount: '',
+      sgstAmount: '',
+      cgstAmount: '',
       perTaxAmount: [],
       // //////////////////////////////////////
       productdetail: [{}],
       product_Description: [],
     },
-    onSubmit: (values) => {
+    onSubmit: values => {
       values.vendorId = businessprofile[0].vendor_id;
       values.sgstAmount = gstAmount / 2;
       values.cgstAmount = gstAmount / 2;
       values.perTaxAmount = TaxAmount;
       values.taxable_amount = taxableAmount;
-      values.bankAccountId = bankAccountDeatil.length==0?"00a00a0a-0aaa-0aa0-a00a-00aa0a0a000a":bankAccountDeatil.bank_account_id;
+      values.bankAccountId =
+        bankAccountDeatil.length == 0
+          ? '00a00a0a-0aaa-0aa0-a00a-00aa0a0a000a'
+          : bankAccountDeatil.bank_account_id;
       values.payment_terms = paymentTerms;
       values.sales_invoice_date = date;
       values.add_notes = notes;
@@ -330,10 +564,10 @@ export default function InvoiceForm({ onInvoiceAdded }) {
       const postInvoice = async () => {
         setLoader(true);
         try {
-          const res = await apiPost("/invoices", values);
-          navigate("/invoices"); // On success
+          const res = await apiPost('/invoices', values);
+          navigate('/invoices'); // On success
         } catch (error) {
-          console.error("Failed to post invoice:", error);
+          console.error('Failed to post invoice:', error);
         } finally {
           setLoader(false);
         }
@@ -343,19 +577,19 @@ export default function InvoiceForm({ onInvoiceAdded }) {
       console.log(values);
     },
   });
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [display, setDisplay] = useState({ display: "block" });
+  const [display, setDisplay] = useState({ display: 'block' });
   const [display1, setDisplay1] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
-  const filteredCustomers = customer.filter((customer) =>
+  const filteredCustomers = customer.filter(customer =>
     customer.customer_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleSelect = (customer) => {
+  const handleSelect = customer => {
     setSelectedCustomer(customer);
     setIsDropdownOpen(false);
-    setSearchTerm(""); // Clear search term
+    setSearchTerm(''); // Clear search term
   };
 
   const handleShow = () => {
@@ -369,18 +603,18 @@ export default function InvoiceForm({ onInvoiceAdded }) {
     setDisplay1(false);
   };
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = event => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
       }
     };
 
     // Bind the event listener
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
 
     // Clean up the event listener on component unmount
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [dropdownRef]);
   var gstSum = 0;
@@ -392,7 +626,6 @@ export default function InvoiceForm({ onInvoiceAdded }) {
   const [gstAmount, setGstAmount] = useState(0);
   const [count, setCount] = useState(0);
   const [gstAmountPer, setGstAmountPer] = useState(0);
-  
 
   function handleChange(e, item, index, quantity, getNotify) {
     // Create copies of the current state
@@ -402,21 +635,21 @@ export default function InvoiceForm({ onInvoiceAdded }) {
     let taxableamount = 0;
     let gstSumAmount = 0;
     // Handle GST change
-    if (getNotify === "gstChange") {
+    if (getNotify === 'gstChange') {
       setCount(1);
       let gstSumPer = 0;
       // Ensure discount_amountPer is defined and is a string
       const discountAmountPer = updatedRows[index].discount_amountPer;
       updatedRows[index].discount_amountPer =
-        updatedRows[index].discount_amountPer + "_%";
+        updatedRows[index].discount_amountPer + '_%';
       console.log(updatedRows[index].discount_amountPer);
-      if (discountAmountPer !== "0_%" && discountAmountPer !== "0") {
-        console.log("working");
-        const spl = updatedRows[index].discount_amountPer.split("_");
+      if (discountAmountPer !== '0_%' && discountAmountPer !== '0') {
+        console.log('working');
+        const spl = updatedRows[index].discount_amountPer.split('_');
         const spl1 = spl[0];
         updatedRows[index].discount_amountPer = spl1;
         // console.log(spl1);
-        const term = e.target.value.split("_");
+        const term = e.target.value.split('_');
         const gstRate = parseFloat(term[1]);
 
         // console.log(gstRate);
@@ -451,7 +684,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
           }
         }
         console.log(gstSumPer);
-        console.log("sum");
+        console.log('sum');
         for (var i = 0; i < updatedTax.length; i++) {
           gstSumAmount += parseFloat(updatedTax[i]);
         }
@@ -478,7 +711,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
         setGstSu(parseFloat(gstSum));
         // const discount_amount=((updatedRows[index].quantity * updatedRows[index].unitPrice)-updatedRows[index].discount_amount);
       } else {
-        const term = e.target.value.split("_");
+        const term = e.target.value.split('_');
         const gstRate = parseFloat(term[1]);
         console.log(updatedRows[index].discount_amount);
 
@@ -512,7 +745,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
           }
         }
         console.log(gstSumPer);
-        console.log("sum");
+        console.log('sum');
         for (var i = 0; i < updatedTax.length; i++) {
           gstSumAmount += parseFloat(updatedTax[i]);
         }
@@ -525,7 +758,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
         );
         const gstR = [...gstRateS];
         gstR[index] = term[1];
-        
+
         setGstAmount(parseFloat(gstSumAmount).toFixed(2));
         setGstAmountPer(parseFloat(gstSumPer).toFixed(2));
         setTaxableAmount(parseFloat(taxableamount).toFixed(2));
@@ -538,29 +771,32 @@ export default function InvoiceForm({ onInvoiceAdded }) {
     }
 
     // Handle quantity change
-    if (getNotify === "qtyChange") {
+    if (getNotify === 'qtyChange') {
+      const productOriginalIndex = updatedRows[index].originalIndex;
+      const updatedBtnToQty = [...btnToQty];
+      updatedBtnToQty[productOriginalIndex].quantity = parseInt(quantity);
       // Update the quantity for the current row
-      if (updatedRows[index].discount_amountPer != "0_%") {
-        if (updatedRows[index].discount_amountPer != "0") {
+      if (updatedRows[index].discount_amountPer != '0_%') {
+        if (updatedRows[index].discount_amountPer != '0') {
           const updateDiscountAmount = [...productAmount];
-          console.log("working discount per");
+          console.log('working discount per');
           const currentGstRate = gstRateS[index]
             ? parseFloat(updatedRows[index].gstRate)
             : 0;
           updatedRows[index].discount_amountPer =
-            updatedRows[index].discount_amountPer + "_%";
+            updatedRows[index].discount_amountPer + '_%';
           console.log(quantity);
-          quantity = quantity == "" ? 0 : quantity;
+          quantity = quantity == '' ? 0 : quantity;
           updateDiscountAmount[index].amount =
             (parseFloat(updateDiscountAmount[index].per) *
               quantity *
               updatedRows[index].unitPrice) /
             100;
           console.log(updateDiscountAmount);
-          const spl = updatedRows[index].discount_amountPer.split("_");
+          const spl = updatedRows[index].discount_amountPer.split('_');
           const spl1 = spl[0];
           console.log(spl1);
-          console.log("spl");
+          console.log('spl');
           updatedRows[index].discount_amountPer = spl1;
           updatedRows[index].quantity = quantity;
           console.log(updatedRows[index].quantity);
@@ -606,7 +842,6 @@ export default function InvoiceForm({ onInvoiceAdded }) {
               .toFixed(2)
           );
 
-         
           setGstAmount(parseFloat(gstSumAmount).toFixed(2));
           setTaxableAmount(parseFloat(taxableamount).toFixed(2));
           setProductRows(updatedRows);
@@ -614,17 +849,17 @@ export default function InvoiceForm({ onInvoiceAdded }) {
           setAddTotal(totalAmount.toFixed(2));
           setGstSu(parseFloat(gstSum));
         } else {
-          console.log("else block executingg");
+          console.log('else block executingg');
           updatedRows[index].quantity = quantity;
           const updateDiscountAmount = [...productAmount];
           console.log(updatedRows[index].quantity);
-          if (updatedRows[index].discount_amountPer == "0") {
+          if (updatedRows[index].discount_amountPer == '0') {
             updatedRows[index].discount_amountPer =
-              updatedRows[index].discount_amountPer + "_%";
-            const spl = updatedRows[index].discount_amountPer.split("_");
+              updatedRows[index].discount_amountPer + '_%';
+            const spl = updatedRows[index].discount_amountPer.split('_');
             const spl1 = spl[0];
             console.log(spl1);
-            console.log("spl");
+            console.log('spl');
             updatedRows[index].discount_amountPer = spl1;
           }
           // Get the current GST rate for the row
@@ -677,7 +912,6 @@ export default function InvoiceForm({ onInvoiceAdded }) {
               .toFixed(2)
           );
 
-        
           setGstAmount(parseFloat(gstSumAmount).toFixed(2));
           setTaxableAmount(parseFloat(taxableamount).toFixed(2));
           setProductAmount(updateDiscountAmount);
@@ -687,22 +921,22 @@ export default function InvoiceForm({ onInvoiceAdded }) {
           setGstSu(parseFloat(gstSum));
         }
       } else {
-        console.log("else block executing");
+        console.log('else block executing');
         const updateDiscountAmount = [...productAmount];
         updatedRows[index].quantity = quantity;
         console.log(updatedRows[index].quantity);
-        if (updatedRows[index].discount_amountPer == "0_%") {
+        if (updatedRows[index].discount_amountPer == '0_%') {
           updatedRows[index].discount_amountPer =
-            updatedRows[index].discount_amountPer + "_%";
-          const spl = updatedRows[index].discount_amountPer.split("_");
+            updatedRows[index].discount_amountPer + '_%';
+          const spl = updatedRows[index].discount_amountPer.split('_');
           const spl1 = spl[0];
           console.log(spl1);
-          console.log("spl");
+          console.log('spl');
           updatedRows[index].discount_amountPer = spl1;
         }
-        if (updatedRows[index].discount_amount == "") {
-          updatedRows[index].discount_amount = "0";
-          updateDiscountAmount[index].amount = "0";
+        if (updatedRows[index].discount_amount == '') {
+          updatedRows[index].discount_amount = '0';
+          updateDiscountAmount[index].amount = '0';
         }
         // Get the current GST rate for the row
         const currentGstRate = gstRateS[index]
@@ -753,7 +987,6 @@ export default function InvoiceForm({ onInvoiceAdded }) {
             .toFixed(2)
         );
 
-       
         setGstAmount(parseFloat(gstSumAmount).toFixed(2));
         setTaxableAmount(parseFloat(taxableamount).toFixed(2));
         setProductRows(updatedRows);
@@ -764,18 +997,18 @@ export default function InvoiceForm({ onInvoiceAdded }) {
     }
 
     // Handle row removal
-    if (getNotify === "remove") {
+    if (getNotify === 'remove') {
       const updatedRows = [...productRows];
       const updatedTax = [...TaxAmount];
 
       // Log the index and the row being removed for debugging
-      console.log("Deleting row at index:", index);
-      console.log("Row details before deletion:", updatedRows[index]);
+      console.log('Deleting row at index:', index);
+      console.log('Row details before deletion:', updatedRows[index]);
 
       // Remove the row and corresponding tax amount
       updatedRows.splice(index, 1);
       updatedTax.splice(index, 1);
-      console.log("Updated rows after deletion:", updatedRows);
+      console.log('Updated rows after deletion:', updatedRows);
 
       // Calculate the total amount for all remaining rows
       let totalAmount = 0; // Reset totalAmount before recalculating
@@ -802,24 +1035,24 @@ export default function InvoiceForm({ onInvoiceAdded }) {
 
       // Log the updated state (this will not show the updated state immediately)
       console.log(
-        "Product rows after update (may not reflect immediately):",
+        'Product rows after update (may not reflect immediately):',
         productRows
       );
     }
 
     // To see the updated productRows, you can use a useEffect hook
-    if (getNotify == "discount") {
-      if (e.target.name == "rupe") {
+    if (getNotify == 'discount') {
+      if (e.target.name == 'rupe') {
         const updateDiscountAmount = [...productAmount];
         setShowRupee(true);
         setPer(false);
         // const term = e.target.value.split("_");
         // const gstRate = parseFloat(term[1]);
-        updatedRows[index].discount_amountPer = "0";
+        updatedRows[index].discount_amountPer = '0';
         console.log(e.target.value);
-        console.log("i am rupe");
+        console.log('i am rupe');
         const discount_amoun = e.target.value != isNaN ? e.target.value : 0;
-        const discount_amount = discount_amoun == "" ? 0 : discount_amoun;
+        const discount_amount = discount_amoun == '' ? 0 : discount_amoun;
         console.log(discount_amount);
         updatedRows[index].discount_amount =
           parseFloat(discount_amount).toFixed(2);
@@ -829,7 +1062,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
         updateDiscountAmount[index].amount =
           parseFloat(discount_amount).toFixed(2);
         console.log(updateDiscountAmount);
-        console.log("calculating");
+        console.log('calculating');
         const disamount = item.quantity * item.unitPrice - discount_amount;
         // setTaxableAmount(disamount);
         updatedRows[index].taxable_amount = parseFloat(disamount).toFixed(2);
@@ -865,7 +1098,6 @@ export default function InvoiceForm({ onInvoiceAdded }) {
             .toFixed(2)
         );
 
-       
         setGstAmount(parseFloat(gstSumAmount).toFixed(2));
         setProductAmount(updateDiscountAmount);
         setTaxableAmount(parseFloat(taxableamount).toFixed(2));
@@ -874,18 +1106,18 @@ export default function InvoiceForm({ onInvoiceAdded }) {
         setAddTotal(totalAmount.toFixed(2));
         setGstSu(parseFloat(gstSum));
       }
-      if (e.target.name == "per") {
+      if (e.target.name == 'per') {
         setPer(true);
         setShowRupee(false);
-        const add = e.target.value + "_%";
+        const add = e.target.value + '_%';
         console.log(add);
-        const spli = add.split("_");
+        const spli = add.split('_');
         const spl1 = spli[0];
         const updateDiscountAmount = [...productAmount];
         const discount_amount = spl1;
-        if (e.target.value == "") {
-          updatedRows[index].discount_amountPer = "0_%";
-          updateDiscountAmount[index].amount = "0";
+        if (e.target.value == '') {
+          updatedRows[index].discount_amountPer = '0_%';
+          updateDiscountAmount[index].amount = '0';
         } else {
           updatedRows[index].discount_amountPer = parseFloat(spl1).toFixed(2);
           updateDiscountAmount[index].amount = parseFloat(
@@ -893,7 +1125,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
           ).toFixed(2);
           updateDiscountAmount[index].per = parseFloat(spl1).toFixed(2);
           console.log(updateDiscountAmount);
-          updatedRows[index].discount_amount = "0";
+          updatedRows[index].discount_amount = '0';
         }
         console.log(updatedRows[index].discount_amountPer);
         const disamount =
@@ -933,7 +1165,6 @@ export default function InvoiceForm({ onInvoiceAdded }) {
             .toFixed(2)
         );
 
-        
         setGstAmount(parseFloat(gstSumAmount).toFixed(2));
         setProductAmount(updateDiscountAmount);
         setTaxableAmount(parseFloat(taxableamount).toFixed(2));
@@ -943,19 +1174,19 @@ export default function InvoiceForm({ onInvoiceAdded }) {
         setGstSu(parseFloat(gstSum));
       }
     }
-    if (getNotify == "unitchange") {
+    if (getNotify == 'unitchange') {
       console.log(e.target.value);
-      console.log("unit Price working");
-      if (updatedRows[index].discount_amountPer != "0_%") {
-        if (updatedRows[index].discount_amountPer != "0") {
+      console.log('unit Price working');
+      if (updatedRows[index].discount_amountPer != '0_%') {
+        if (updatedRows[index].discount_amountPer != '0') {
           const updateDiscountAmount = [...productAmount];
-          console.log("working discount per");
+          console.log('working discount per');
           updatedRows[index].unitPrice = e.target.value;
           const currentGstRate = gstRateS[index]
             ? parseFloat(updatedRows[index].gstRate)
             : 0;
           updatedRows[index].discount_amountPer =
-            updatedRows[index].discount_amountPer + "_%";
+            updatedRows[index].discount_amountPer + '_%';
           console.log(quantity);
           updateDiscountAmount[index].amount = parseFloat(
             (parseFloat(updateDiscountAmount[index].per) *
@@ -964,10 +1195,10 @@ export default function InvoiceForm({ onInvoiceAdded }) {
               100
           ).toFixed(2);
           console.log(updateDiscountAmount);
-          const spl = updatedRows[index].discount_amountPer.split("_");
+          const spl = updatedRows[index].discount_amountPer.split('_');
           const spl1 = spl[0];
           console.log(spl1);
-          console.log("spl");
+          console.log('spl');
           updatedRows[index].discount_amountPer = parseFloat(spl1).toFixed(2);
           console.log(updatedRows[index].unitPrice);
           const a1 =
@@ -1011,7 +1242,6 @@ export default function InvoiceForm({ onInvoiceAdded }) {
               .toFixed(2)
           );
 
-          
           setGstAmount(parseFloat(gstSumAmount).toFixed(2));
           setTaxableAmount(parseFloat(taxableamount).toFixed(2));
           setProductRows(updatedRows);
@@ -1019,18 +1249,18 @@ export default function InvoiceForm({ onInvoiceAdded }) {
           setAddTotal(totalAmount.toFixed(2));
           setGstSu(parseFloat(gstSum));
         } else {
-          console.log("else block executingg");
+          console.log('else block executingg');
           const quantity = parseFloat(updatedRows[index].quantity);
           updatedRows[index].unitPrice = e.target.value;
           const updateDiscountAmount = [...productAmount];
           console.log(updatedRows[index].unitPrice);
-          if (updatedRows[index].discount_amountPer == "0") {
+          if (updatedRows[index].discount_amountPer == '0') {
             updatedRows[index].discount_amountPer =
-              updatedRows[index].discount_amountPer + "_%";
-            const spl = updatedRows[index].discount_amountPer.split("_");
+              updatedRows[index].discount_amountPer + '_%';
+            const spl = updatedRows[index].discount_amountPer.split('_');
             const spl1 = spl[0];
             console.log(spl1);
-            console.log("spl");
+            console.log('spl');
             updatedRows[index].discount_amountPer = spl1;
           }
           // Get the current GST rate for the row
@@ -1083,7 +1313,6 @@ export default function InvoiceForm({ onInvoiceAdded }) {
               .toFixed(2)
           );
 
-          
           setGstAmount(parseFloat(gstSumAmount).toFixed(2));
           setProductAmount(updateDiscountAmount);
           setTaxableAmount(parseFloat(taxableamount).toFixed(2));
@@ -1093,23 +1322,23 @@ export default function InvoiceForm({ onInvoiceAdded }) {
           setGstSu(parseFloat(gstSum));
         }
       } else {
-        console.log("else block executing");
+        console.log('else block executing');
         const updateDiscountAmount = [...productAmount];
         const quantity = parseFloat(updatedRows[index].quantity);
         updatedRows[index].unitPrice = e.target.value;
         console.log(updatedRows[index].unitPrice);
-        if (updatedRows[index].discount_amountPer == "0_%") {
+        if (updatedRows[index].discount_amountPer == '0_%') {
           updatedRows[index].discount_amountPer =
-            updatedRows[index].discount_amountPer + "_%";
-          const spl = updatedRows[index].discount_amountPer.split("_");
+            updatedRows[index].discount_amountPer + '_%';
+          const spl = updatedRows[index].discount_amountPer.split('_');
           const spl1 = spl[0];
           console.log(spl1);
-          console.log("spl");
+          console.log('spl');
           updatedRows[index].discount_amountPer = spl1;
         }
-        if (updatedRows[index].discount_amount == "") {
-          updatedRows[index].discount_amount = "0";
-          updateDiscountAmount[index].amount = "0";
+        if (updatedRows[index].discount_amount == '') {
+          updatedRows[index].discount_amount = '0';
+          updateDiscountAmount[index].amount = '0';
         }
         // Get the current GST rate for the row
         const currentGstRate = gstRateS[index]
@@ -1158,7 +1387,6 @@ export default function InvoiceForm({ onInvoiceAdded }) {
             .toFixed(2)
         );
 
-        
         setGstAmount(parseFloat(gstSumAmount).toFixed(2));
         setTaxableAmount(parseFloat(taxableamount).toFixed(2));
         setProductRows(updatedRows);
@@ -1169,24 +1397,24 @@ export default function InvoiceForm({ onInvoiceAdded }) {
     }
   }
   useEffect(() => {
-    console.log("Updated productRows:", productRows);
+    console.log('Updated productRows:', productRows);
   }, [productRows]);
   const [showNotes, setShowNotes] = useState(false);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState('');
 
   const toggleNotes = () => {
-    setShowNotes((prevShowNotes) => !prevShowNotes);
+    setShowNotes(prevShowNotes => !prevShowNotes);
   };
 
-  const handleNotesChange = (event) => {
+  const handleNotesChange = event => {
     setNotes(event.target.value);
   };
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bankDetails, setBankDetails] = useState({
-    accountNumber: "427557535633",
-    ifscCode: "BARB0MGRIND",
-    bankBranch: "Bank of Baroda, MG ROAD, INDORE, MP",
-    accountHolder: "Computer Mechanic",
+    accountNumber: '427557535633',
+    ifscCode: 'BARB0MGRIND',
+    bankBranch: 'Bank of Baroda, MG ROAD, INDORE, MP',
+    accountHolder: 'Computer Mechanic',
   });
 
   const [accountNumber, setAccountNumber] = useState(bankDetails.accountNumber);
@@ -1206,7 +1434,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
   const [round, setRound] = useState(false);
   function handleRoundChange(e) {
     if (e.target.checked) {
-      console.log("round");
+      console.log('round');
       var originalValue = addTotal;
       var roundValue = Math.round(addTotal);
       console.log(originalValue);
@@ -1215,29 +1443,44 @@ export default function InvoiceForm({ onInvoiceAdded }) {
       setAddTotal(roundValue);
       setRound(roundedofValue.toFixed(2));
     } else {
-      console.log("not");
+      console.log('not');
     }
   }
-  const handleDeleteRow = (index) => {
+  const handleDeleteRow = index => {
+    const updatedBtnToQty = [...btnToQty];
     // Create copies of the current state to avoid direct mutation
     const updatedRows = [...productRows];
     const updateddisp = [...disabl];
     const updatedTax = [...TaxAmount];
     const updatedProductAmount = [...productAmount];
-
+    const productOriginalIndex = updatedRows[index].originalIndex;
     // Log the index and the row being removed for debugging
-    console.log("Deleting row at index:", index);
+    console.log('Deleting row at index:', index);
     if (updatedRows.length == 1) {
-      console.log("worked");
+      console.log('worked');
       setdisabl([1]);
     }
-    console.log("Row details before deletion:", updatedRows[index]);
+    console.log('Row details before deletion:', updatedRows[index]);
     for (var k = 0; k < updatedRows.length; k++) {
-      if (updatedRows[k].quantity == "") {
-        updatedRows[k].quantity = "0";
+      if (updatedRows[k].quantity == '') {
+        updatedRows[k].quantity = '0';
       }
     }
-
+    // { console.log(updatedBtnToQty[i].originalIndex);
+    // if(updatedBtnToQty[i].originalIndex==productOriginalIndex)
+    // {
+    //   updatedBtnToQty.splice(productOriginalIndex,1);
+    // }
+    for (var i in updatedBtnToQty)
+      if (updatedBtnToQty[i] != undefined) {
+        if (updatedBtnToQty[i].item != null) {
+          if (
+            updatedBtnToQty[i].originalIndex == updatedRows[index].originalIndex
+          ) {
+            updatedBtnToQty[i] = { flag: false, item: null, quantity: 0 }; // Reset to show "Add" button
+          }
+        }
+      }
     // Remove the row and corresponding tax amount
     if (index >= 0 && index < updatedRows.length) {
       updatedRows.splice(index, 1);
@@ -1245,7 +1488,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
       updatedTax.splice(index, 1);
       updatedProductAmount.splice(index, 1);
     } else {
-      console.error("Index out of bounds:", index);
+      console.error('Index out of bounds:', index);
     }
 
     // Calculate the total amount for all remaining rows
@@ -1272,6 +1515,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
     );
 
     // Update state with the new values
+    setBtnToQty(updatedBtnToQty);
     setdisabl(updateddisp);
     setProductAmount(updatedProductAmount);
     setGstAmount(gstSumAmount);
@@ -1282,34 +1526,34 @@ export default function InvoiceForm({ onInvoiceAdded }) {
     setAddTotal(totalAmount.toFixed(2)); // Format totalAmount to two decimal places
   };
   function handleFocus(e, index, name) {
-    if (name == "qty") {
-      console.log("working");
+    if (name == 'qty') {
+      console.log('working');
       const updatedRows = [...productRows];
-      updatedRows[index].quantity = "";
+      updatedRows[index].quantity = '';
       setProductRows(updatedRows);
     }
-    if (name == "rupe") {
-      console.log("working");
+    if (name == 'rupe') {
+      console.log('working');
       const updatedRows = [...productRows];
-      updatedRows[index].discount_amount = "";
+      updatedRows[index].discount_amount = '';
       setProductRows(updatedRows);
     }
-    if (name == "proD") {
-      console.log("working");
+    if (name == 'proD') {
+      console.log('working');
       const updatedRows = [...productRows];
-      updatedRows[index].productDescription = "";
+      updatedRows[index].productDescription = '';
       setProductRows(updatedRows);
     }
-    if (name == "dis") {
-      console.log("working");
+    if (name == 'dis') {
+      console.log('working');
       const updatedRows = [...productRows];
-      updatedRows[index].discount_amountPer = "0_%";
+      updatedRows[index].discount_amountPer = '0_%';
       setProductRows(updatedRows);
     }
-    if (name == "unitChange") {
-      console.log("working");
+    if (name == 'unitChange') {
+      console.log('working');
       const updatedRows = [...productRows];
-      updatedRows[index].unitPrice = "";
+      updatedRows[index].unitPrice = '';
       console.log(e.target.value);
       setProductRows(updatedRows);
     }
@@ -1320,10 +1564,58 @@ export default function InvoiceForm({ onInvoiceAdded }) {
     setProductRows(updateDescription);
     console.log(updateDescription);
   }
-  function handleOpenModalProduct()
-  {
+  function handleOpenModalProduct() {
     setModalShow1(true);
   }
+  /////////////////////////////////////////////
+  const [modalItemsData, setModalItemsData] = useState({});
+  const [btnToQty, setBtnToQty] = useState([]);
+  function convertAddButtonToQuantity(e, index, item) {
+    const updatedBtnToQty = [...btnToQty];
+    updatedBtnToQty[index] = {
+      flag: true, // Toggle to show quantity controls
+      item, // Store item details
+      quantity: 1, // Default quantity
+      originalIndex: index,
+    };
+    console.log(updatedBtnToQty);
+    setBtnToQty(updatedBtnToQty);
+  }
+
+  function handleQuantityChange(index, change) {
+    const updatedBtnToQty = [...btnToQty];
+    if (!updatedBtnToQty[index]) return;
+
+    updatedBtnToQty[index].quantity += change;
+    updatedBtnToQty[index].originalIndex = index;
+
+    // If quantity becomes zero, reset the entry instead of removing it
+    if (updatedBtnToQty[index].quantity <= 0) {
+      updatedBtnToQty[index] = { flag: false, item: null, quantity: 0 }; // Reset to show "Add" button
+    }
+
+    setBtnToQty(updatedBtnToQty);
+  }
+  function handleInputQuantityChange(index, newQuantity) {
+    if (isNaN(newQuantity) || newQuantity < 0) return; // Prevent invalid input
+
+    const updatedBtnToQty = [...btnToQty];
+    if (updatedBtnToQty[index]) {
+      updatedBtnToQty[index].quantity = newQuantity; // Update the quantity
+      updatedBtnToQty[index].originalIndex = index;
+    }
+    if (updatedBtnToQty[index].quantity == "") {
+      updatedBtnToQty[index] = { flag: false, item: null, quantity: 0 }; // Reset to show "Add" button
+    }
+    console.log(updatedBtnToQty);
+    setBtnToQty(updatedBtnToQty);
+  }
+  const [searchTermProducts, setSearchTermProducts] = useState('');
+
+  const filteredProducts = products.filter(item =>
+    item.product_name.toLowerCase().includes(searchTermProducts.toLowerCase())
+  );
+
   return (
     <>
       {loader ? (
@@ -1332,12 +1624,130 @@ export default function InvoiceForm({ onInvoiceAdded }) {
         </>
       ) : (
         <div>
-          {
-            modalShow && (<CustomerModalView setModalShow={setModalShow}/>)
-          }
-          {
-            modalShow1 && (<ProductModalView setModalShow1={setModalShow1}/>)
-          }
+          {modalShow && <CustomerModalView setModalShow={setModalShow} />}
+          {modalShow1 && <ProductModalView setModalShow1={setModalShow1} />}
+          <Dialog
+            header="Add Items"
+            visible={visible}
+            className="sm:w-[70vw] w-[90vw]"
+            // style={{ width: '70vw' }}
+            onHide={() => {
+              if (!visible) return;
+              setVisible(false);
+            }}
+          >
+            <div className="">
+              <div>
+                {/* Search Input */}
+                <div className="p-inputgroup w-full mt-3 mb-3 sticky top-0 z-100">
+                  <InputText
+                    placeholder="Search for products.."
+                    value={searchTermProducts}
+                    onChange={e => setSearchTermProducts(e.target.value)}
+                  />
+                  <Button icon="pi pi-search" className="p-button-warning" />
+                </div>
+
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th>S.no</th>
+                      <th>Product Name</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredProducts.length > 0 ? (
+                      filteredProducts.map((items, index) => {
+                        const originalIndex = products.findIndex(
+                          product => product === items
+                        );
+                        return (
+                          <tr key={originalIndex} className="border mb-10">
+                            <td className="pl-2 p-3">{originalIndex + 1}</td>
+                            <td className="pl-2">
+                              {items.product_name.toUpperCase()}
+                            </td>
+                            <td className="pr-1">
+                              {btnToQty?.[originalIndex]?.flag ? (
+                                <div className="p-inputgroup flex-1">
+                                  <button
+                                    className="p-button-danger px-2"
+                                    onClick={() =>
+                                      handleQuantityChange(originalIndex, -1)
+                                    }
+                                  >
+                                    -
+                                  </button>
+                                  <input
+                                    type="number"
+                                    className="!w-8 text-center border mx-2"
+                                    value={
+                                      btnToQty[originalIndex]?.quantity || ''
+                                    }
+                                    onChange={e => {
+                                      const value = e.target.value;
+                                      handleInputQuantityChange(
+                                        originalIndex,
+                                        value === '' ? '' : parseInt(value)
+                                      );
+                                    }}
+                                    min="0"
+                                  />
+
+                                  <button
+                                    className="p-button-success px-2"
+                                    onClick={() =>
+                                      handleQuantityChange(originalIndex, 1)
+                                    }
+                                  >
+                                    +
+                                  </button>
+                                </div>
+                              ) : (
+                                <button
+                                  className="p-button !bg-[#3A5B76]"
+                                  onClick={e =>
+                                    convertAddButtonToQuantity(
+                                      e,
+                                      originalIndex,
+                                      items
+                                    )
+                                  }
+                                >
+                                  Add
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })
+                    ) : (
+                      <tr>
+                        <td colSpan="3" className="text-center">
+                          No products available.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              <div
+                className="bg-white border-t-1 bg-blue-500 sticky-bottom p-3"
+                style={{ bottom: '-33px' }}
+              >
+                <Button
+                  className="p-2 !rounded-lg text-white w-full !bg-[#3A5B76]"
+                  label="Add Items"
+                  icon="pi pi-check"
+                  iconPos="right"
+                  loading={loading}
+                  onClick={handleProductChange}
+                />
+              </div>
+            </div>
+          </Dialog>
           <div className="over bg-gray-100 p-4 max-w-7xl mx-auto bg-white">
             <h2 className="text-center">Invoice</h2>
             <form onSubmit={formik.handleSubmit}>
@@ -1364,36 +1774,36 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                             )}
                           </>
                         ) : (
-                          ""
+                          ''
                         )}
                         <h6>
                           {businessprofile.length > 0
                             ? businessprofile[0].vendor_business_legal_name
-                            : ""}
+                            : ''}
                         </h6>
                       </div>
                       <div>
                         <h6>
                           {businessprofile.length > 0
                             ? businessprofile[0].vendor_phone
-                            : ""}
+                            : ''}
                         </h6>
                         <h6>
                           {businessprofile.length > 0
                             ? businessprofile[0].vendor_pan
-                            : ""}
+                            : ''}
                         </h6>
                         <h6>
                           {businessprofile.length > 0
                             ? businessprofile[0].vendor_gstin
-                            : ""}
+                            : ''}
                         </h6>
                       </div>
                     </div>
                     <h6>
                       {businessprofile.length > 0
                         ? businessprofile[0].address
-                        : ""}
+                        : ''}
                     </h6>
                     <h2 className="fs-5 font-semibold mb-1 p-1">Bill To:</h2>
                     <div className="relative">
@@ -1419,13 +1829,13 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                                 </div>
                                 <div>
                                   {selectedCustomer.billing_street_address +
-                                    " " +
+                                    ' ' +
                                     selectedCustomer.billing_city +
-                                    " " +
+                                    ' ' +
                                     selectedCustomer.billing_state +
-                                    " " +
+                                    ' ' +
                                     selectedCustomer.billing_city +
-                                    " " +
+                                    ' ' +
                                     selectedCustomer.billing_pincode}
                                 </div>
                               </div>
@@ -1435,13 +1845,13 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                                 </div>
                                 <div>
                                   {selectedCustomer.shipping_street_address +
-                                    " " +
+                                    ' ' +
                                     selectedCustomer.shipping_city +
-                                    " " +
+                                    ' ' +
                                     selectedCustomer.shipping_state +
-                                    " " +
+                                    ' ' +
                                     selectedCustomer.billing_city +
-                                    " " +
+                                    ' ' +
                                     selectedCustomer.shipping_pincode}
                                 </div>
                               </div>
@@ -1461,21 +1871,19 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                               </div>
                             ) : (
                               <>
-                              {
-                                  (userRole == 'owner' || userRole=="salesPerson" || userRole=="partner")?(
-                                    <button
-                                  type="button"
-                                  className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                                  onClick={() =>
-                                    setModalShow(true)
-                                  }
-                                >
-                                  Create Party
-                                </button>
-                                  ):(
-                                    <></>
-                                  )
-                                }
+                                {userRole == 'owner' ||
+                                userRole == 'salesPerson' ||
+                                userRole == 'partner' ? (
+                                  <button
+                                    type="button"
+                                    className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                    onClick={() => setModalShow(true)}
+                                  >
+                                    Create Party
+                                  </button>
+                                ) : (
+                                  <></>
+                                )}
                               </>
                             )}
                           </div>
@@ -1493,12 +1901,12 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                               placeholder="Search Customers"
                               classNameInput="p-2 border border-gray-300 rounded-md w-full"
                               value={searchTerm}
-                              onChange={(e) => setSearchTerm(e.target.value)}
+                              onChange={e => setSearchTerm(e.target.value)}
                               autoFocus
                             />
                             {filteredCustomers.length > 0 ? (
                               <ul className="max-h-60 overflow-y-auto">
-                                {filteredCustomers.map((customer) => (
+                                {filteredCustomers.map(customer => (
                                   <li
                                     key={customer.id}
                                     onClick={() => handleSelect(customer)}
@@ -1509,21 +1917,19 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                                     <br />
                                   </li>
                                 ))}
-                                {
-                                  (userRole == 'owner' || userRole=="salesPerson" || userRole=="partner")?(
-                                    <button
-                                  type="button"
-                                  className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                                  onClick={() =>
-                                    setModalShow(true)
-                                  }
-                                >
-                                  Create Party
-                                </button>
-                                  ):(
-                                    <></>
-                                  )
-                                }
+                                {userRole == 'owner' ||
+                                userRole == 'salesPerson' ||
+                                userRole == 'partner' ? (
+                                  <button
+                                    type="button"
+                                    className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                                    onClick={() => setModalShow(true)}
+                                  >
+                                    Create Party
+                                  </button>
+                                ) : (
+                                  <></>
+                                )}
                               </ul>
                             ) : (
                               <div className="p-2 text-gray-500">
@@ -1591,7 +1997,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                             value="7"
                             readOnly
                             classNameInput="w-full p-2 border rounded-md focus:ring-2 focus:ring-[#3A5B76] hover:bg-gray-100"
-                            onChange={(e) => setPaymentTerms(e.target.value)} // This will not trigger since readOnly
+                            onChange={e => setPaymentTerms(e.target.value)} // This will not trigger since readOnly
                             placeholder="In Days"
                           />
                         </div>
@@ -1634,229 +2040,215 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                       <th className="p-2 border">Action</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {productRows.map((product, index) => (
-                      <React.Fragment key={index}>
-                        <tr>
-                          <td className="w-10">
-                            <InputComponent
-                              onChange={formik.handleChange}
-                              type="number"
-                              name="sNo"
-                              value={index + 1}
-                              readOnly
-                              classNameInput="w-10 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                            />
-                          </td>
-                          <td className="w-80">
-                            <select
-                              disabled={disabl != null && disabl[index] == 0}
-                              className="w-80 p-2 border border-gray-300 hover:bg-gray-200"
-                              name="productdetail"
-                              onChange={(e) =>
-                                handleProductChange(index, e.target.value)
-                              }
-                              value={product.productName}
-                            >
-                              <option value="">
-                                {disabl != null && disabl[index] == 0
-                                  ? product.productName
-                                  : "Select"}
-                              </option>
-                              {products.map((product) => (
-                                <option
-                                  key={product.product_id}
-                                  value={product.product_id}
-                                >
-                                  {product.product_name}
-                                </option>
-                              ))}
-                            </select>
-                          </td>
-                          <td className="w-30">
-                            <InputComponent
-                              onChange={formik.handleChange}
-                              type="text"
-                              name="HSNCode"
-                              value={product.hsnCode}
-                              min="0"
-                              classNameInput="w-full p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                            />
-                          </td>
-                          <td className="w-20">
-                            <InputComponent
-                              onChange={formik.handleChange}
-                              type="number"
-                              min="0"
-                              name="quantity"
-                              onFocus={(e) => handleFocus(e, index, "qty")}
-                              {...(product.quantity != ""
-                                ? { value: product.quantity }
-                                : {})}
-                              onBlur={(e) =>
-                                handleChange(
-                                  e,
-                                  product,
-                                  index,
-                                  e.target.value,
-                                  "qtyChange"
-                                )
-                              }
-                              classNameInput="w-20 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                              placeholder="Quantity"
-                            />
-                          </td>
-                          <td className="w-40">
-                            <InputComponent
-                              type="number"
-                              step="any"
-                              name="unitPrice"
-                              onFocus={(e) =>
-                                handleFocus(e, index, "unitChange")
-                              }
-                              {...(product.unitPrice != ""
-                                ? { value: product.unitPrice }
-                                : {})}
-                              onBlur={(e) =>
-                                handleChange(
-                                  e,
-                                  product,
-                                  index,
-                                  e.target.value,
-                                  "unitchange"
-                                )
-                              }
-                              min="0"
-                              classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                            />
-                          </td>
-                          <td className="w-30">
-                            <InputComponent
-                              type="number"
-                              name="rupe"
-                              step="any"
-                              min="0"
-                              onFocus={(e) => handleFocus(e, index, "rupe")}
-                              {...(product.discount_amount != ""
-                                ? { value: productAmount[index].amount }
-                                : {})}
-                              onBlur={(e) =>
-                                handleChange(e, product, index, 0, "discount")
-                              }
-                              placeholder="₹"
-                              classNameInput="w-30 p-2 border border-gray-300  hover:bg-gray-200"
-                            />
-                          </td>
-                          <td className="w-40">
-                            <select
-                              onChange={(e) =>
-                                handleChange(e, product, index, 0, "gstChange")
-                              }
-                              // value={product.gstRate}
-                              className="w-40 border d-inline-block border-gray-300 rounded-md p-2"
-                            >
-                              <option
-                                className="bg-gray"
+                  {productRows.length ? (
+                    <tbody>
+                      {productRows.map((product, index) => (
+                        <React.Fragment key={index}>
+                          <tr>
+                            <td className="w-13">
+                              <InputComponent
+                                onChange={formik.handleChange}
+                                type="number"
+                                name="sNo"
+                                value={index + 1}
                                 readOnly
-                                value={"gst_"}
+                                classNameInput="w-13 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                              />
+                            </td>
+                            <td className="w-80">{product.productName}</td>
+                            <td className="w-30">
+                              <InputComponent
+                                onChange={formik.handleChange}
+                                type="text"
+                                name="HSNCode"
+                                value={product.hsnCode}
+                                min="0"
+                                classNameInput="w-full p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                              />
+                            </td>
+                            <td className="w-20">
+                              <InputComponent
+                                onChange={formik.handleChange}
+                                type="number"
+                                min="0"
+                                name="quantity"
+                                onFocus={e => handleFocus(e, index, 'qty')}
+                                {...(product.quantity != ''
+                                  ? { value: product.quantity }
+                                  : {})}
+                                onBlur={e =>
+                                  handleChange(
+                                    e,
+                                    product,
+                                    index,
+                                    e.target.value,
+                                    'qtyChange'
+                                  )
+                                }
+                                classNameInput="w-20 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                                placeholder="Quantity"
+                              />
+                            </td>
+                            <td className="w-40">
+                              <InputComponent
+                                type="number"
+                                step="any"
+                                name="unitPrice"
+                                onFocus={e =>
+                                  handleFocus(e, index, 'unitChange')
+                                }
+                                {...(product.unitPrice != ''
+                                  ? { value: product.unitPrice }
+                                  : {})}
+                                onBlur={e =>
+                                  handleChange(
+                                    e,
+                                    product,
+                                    index,
+                                    e.target.value,
+                                    'unitchange'
+                                  )
+                                }
+                                min="0"
+                                classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                              />
+                            </td>
+                            <td className="w-30">
+                              <InputComponent
+                                type="number"
+                                name="rupe"
+                                step="any"
+                                min="0"
+                                onFocus={e => handleFocus(e, index, 'rupe')}
+                                {...(product.discount_amount != ''
+                                  ? { value: productAmount[index].amount }
+                                  : {})}
+                                onBlur={e =>
+                                  handleChange(e, product, index, 0, 'discount')
+                                }
+                                placeholder="₹"
+                                classNameInput="w-30 p-2 border border-gray-300  hover:bg-gray-200"
+                              />
+                            </td>
+                            <td className="w-40">
+                              <select
+                                onChange={e =>
+                                  handleChange(
+                                    e,
+                                    product,
+                                    index,
+                                    0,
+                                    'gstChange'
+                                  )
+                                }
+                                // value={product.gstRate}
+                                className="w-40 border d-inline-block border-gray-300 rounded-md p-2"
                               >
-                                {count == 0
-                                  ? product.gstRate
-                                  : productRows.length
-                                  ? product.gstRate
-                                  : ""}
-                              </option>
-                              <option value="gst_0">0%</option>
-                              <option value="gst_0.1">0.1%</option>
-                              <option value="gst_0.25">0.25%</option>
-                              <option value="gst_1.5">1.5%</option>
-                              <option value="gst_3">3%</option>
-                              <option value="gst_5">5%</option>
-                              <option value="gst_6">6%</option>
-                              <option value="gst_12">12%</option>
-                              <option value="gst_13.8">13.8%</option>
-                              <option value="gst_18">18%</option>
-                              <option value="gst_28">GST @ 28%</option>
-                            </select>
-                          </td>
-                          <td className="w-40">
-                            <InputComponent
-                              onChange={formik.handleChange}
-                              type="number"
-                              step="any"
-                              name="taxableAmount"
-                              value={product.taxable_amount}
-                              min="0"
-                              readOnly
-                              classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                            />
-                          </td>
-                          <td>
-                            <ButtonComponent
-                              type="button"
-                              className="p-1 m-auto w-100 text-white bg-red-500 rounded hover:bg-red-600"
-                              value="remove"
-                              onClick={() => handleDeleteRow(index)}
-                            >
-                              <DeleteForever />
-                            </ButtonComponent>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td></td>
-                          <td colSpan={4}>
-                            <textarea
-                              onFocus={(e) => handleFocus(e, index, "proD")}
-                              {...(product.productDescription != ""
-                                ? { value: product.productDescription }
-                                : {})}
-                              onBlur={(e) => handleDescriptionAdd(e, index)}
-                              name="productDescription"
-                              placeholder="Enter product description"
-                              className="bg-white w-full border border-gray-300 hover:bg-gray-200"
-                              id=""
-                            ></textarea>
-                          </td>
-                          <td className="w-30">
-                            <InputComponent
-                              onBlur={(e) =>
-                                handleChange(e, product, index, 0, "discount")
-                              }
-                              type="number"
-                              step="any"
-                              min="0"
-                              max="100"
-                              name="per"
-                              placeholder="%"
-                              onFocus={(e) => handleFocus(e, index, "dis")}
-                              {...(product.discount_amountPer != "0_%"
-                                ? { value: productAmount[index].per }
-                                : {})}
-                              classNameInput="w-30 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                            />
-                          </td>
-                          <td className="w-40">
-                            {TaxAmount[index] !== "NaN" ? (
-                              <div>
-                                <input
-                                  className="w-40 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
-                                  // value={"Rs." + TaxAmount[index]}
-                                  value={
-                                    TaxAmount[index] != undefined
-                                      ? "₹" + TaxAmount[index]
-                                      : "₹ 0.00"
-                                  }
-                                ></input>
-                              </div>
-                            ) : (
-                              <span className="w-40">0.00</span>
-                            )}
-                          </td>
-                          <td></td>
-                        </tr>
-                      </React.Fragment>
-                    ))}
-                  </tbody>
+                                <option
+                                  className="bg-gray"
+                                  readOnly
+                                  value={'gst_'}
+                                >
+                                  {count == 0
+                                    ? product.gstRate
+                                    : productRows.length
+                                      ? product.gstRate
+                                      : ''}
+                                </option>
+                                <option value="gst_0">0%</option>
+                                <option value="gst_0.1">0.1%</option>
+                                <option value="gst_0.25">0.25%</option>
+                                <option value="gst_1.5">1.5%</option>
+                                <option value="gst_3">3%</option>
+                                <option value="gst_5">5%</option>
+                                <option value="gst_6">6%</option>
+                                <option value="gst_12">12%</option>
+                                <option value="gst_13.8">13.8%</option>
+                                <option value="gst_18">18%</option>
+                                <option value="gst_28">GST @ 28%</option>
+                              </select>
+                            </td>
+                            <td className="w-40">
+                              <InputComponent
+                                onChange={formik.handleChange}
+                                type="number"
+                                step="any"
+                                name="taxableAmount"
+                                value={product.taxable_amount}
+                                min="0"
+                                readOnly
+                                classNameInput="w-40 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                              />
+                            </td>
+                            <td>
+                              <ButtonComponent
+                                type="button"
+                                className="p-1 m-auto w-100 text-white bg-red-500 rounded hover:bg-red-600"
+                                value="remove"
+                                onClick={() => handleDeleteRow(index)}
+                              >
+                                <DeleteForever />
+                              </ButtonComponent>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td></td>
+                            <td colSpan={4}>
+                              <textarea
+                                onFocus={e => handleFocus(e, index, 'proD')}
+                                {...(product.productDescription != ''
+                                  ? { value: product.productDescription }
+                                  : {})}
+                                onBlur={e => handleDescriptionAdd(e, index)}
+                                name="productDescription"
+                                placeholder="Enter product description"
+                                className="bg-white w-full border border-gray-300 hover:bg-gray-200"
+                                id=""
+                              ></textarea>
+                            </td>
+                            <td className="w-30">
+                              <InputComponent
+                                onBlur={e =>
+                                  handleChange(e, product, index, 0, 'discount')
+                                }
+                                type="number"
+                                step="any"
+                                min="0"
+                                max="100"
+                                name="per"
+                                placeholder="%"
+                                onFocus={e => handleFocus(e, index, 'dis')}
+                                {...(product.discount_amountPer != '0_%'
+                                  ? { value: productAmount[index].per }
+                                  : {})}
+                                classNameInput="w-30 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                              />
+                            </td>
+                            <td className="w-40">
+                              {TaxAmount[index] !== 'NaN' ? (
+                                <div>
+                                  <input
+                                    className="w-40 mb-2 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                                    // value={"Rs." + TaxAmount[index]}
+                                    value={
+                                      TaxAmount[index] != undefined
+                                        ? '₹' + TaxAmount[index]
+                                        : '₹ 0.00'
+                                    }
+                                  ></input>
+                                </div>
+                              ) : (
+                                <span className="w-40">0.00</span>
+                              )}
+                            </td>
+                            <td></td>
+                          </tr>
+                        </React.Fragment>
+                      ))}
+                    </tbody>
+                  ) : (
+                    <></>
+                  )}
                 </table>
                 <div className="relative w-full p-1 grid grid-cols-1 md:grid-cols-2 gap-1">
                   <button
@@ -1867,24 +2259,26 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                     +ADD ITEM
                   </button>
                   <div>
-                     {
-                      (userRole == 'owner' || userRole=="partner") ? (
+                    {userRole == 'owner' || userRole == 'partner' ? (
+                      <button
+                        onClick={handleOpenModalProduct}
+                        type="button"
+                        className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
+                      >
+                        + Add Product
+                      </button>
+                    ) : (
+                      <>
                         <button
-                      onClick={handleOpenModalProduct}
-                      type="button"
-                      className="w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white"
-                    >
-                      + Add Product
-                    </button>
-                      ):(<><button
-                      disabled
-                      onClick={handleOpenModalProduct}
-                      type="button"
-                      className="disabled:bg-gray-200 px-20 py-3 w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white disabled:hover:text-[#3A5B76]"
-                    >
-                      + Add Product
-                    </button></>)
-                    }
+                          disabled
+                          onClick={handleOpenModalProduct}
+                          type="button"
+                          className="disabled:bg-gray-200 px-20 py-3 w-full p-3 mt-3 border rounded border-[#3A5B76] text-[#3A5B76] font-semibold rounded hover:bg-[#2E4A62] hover:text-white disabled:hover:text-[#3A5B76]"
+                        >
+                          + Add Product
+                        </button>
+                      </>
+                    )}
                   </div>
                   {/* <div>
                     <button
@@ -1908,7 +2302,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
           >
             QTY: {qty}
           </div> */}
-                  {gstSu != "NaN" ? (
+                  {gstSu != 'NaN' ? (
                     <div
                       className="text-center font-semibold"
                       name="subTotal"
@@ -1978,25 +2372,26 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                   </div>
                 </div>
 
-                <div className="m-4">
-                  <div>
-                    <ButtonComponent
-                      type="button"
-                      className="mt-3 text-[#3A5B76] font-semibold rounded hover:text-[#2E4A62]"
-                    >
-                      + Add Additional Charges
-                    </ButtonComponent>
-                    <div className="flex justify-between mt-3">
-                      <button
+                {productRows.length ? (
+                  <div className="m-4">
+                    <div>
+                      <ButtonComponent
                         type="button"
-                        className=" text-[#3A5B76] font-semibold rounded hover:text-[#2E4A62]"
+                        className="mt-3 text-[#3A5B76] font-semibold rounded hover:text-[#2E4A62]"
                       >
-                        + Taxable Amount
-                      </button>
-                      <div>₹{taxableAmount}</div>
-                    </div>
-                    <div className="mt-1.5">
-                      {/* {productRows.map((item, index) => (
+                        + Add Additional Charges
+                      </ButtonComponent>
+                      <div className="flex justify-between mt-3">
+                        <button
+                          type="button"
+                          className=" text-[#3A5B76] font-semibold rounded hover:text-[#2E4A62]"
+                        >
+                          + Taxable Amount
+                        </button>
+                        <div>₹{taxableAmount}</div>
+                      </div>
+                      <div className="mt-1.5">
+                        {/* {productRows.map((item, index) => (
                 <div key={index} className="">
                     <div className="flex justify-between">
                         <div className="font-medium">SGST@{item.gstRate / 2}</div>
@@ -2008,34 +2403,88 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                     </div>
                 </div>
             ))} */}
-                      <div className="">
-                        <div className="flex justify-between">
-                          <div className="font-medium">
-                            SGST@
-                            {gstAmountPer == productRows.length
-                              ? productRows[0].gstRate + "%"
-                              : ""}
+                        <div className="">
+                          <div className="flex justify-between">
+                            <div className="font-medium">
+                              SGST@
+                              {gstAmountPer == productRows.length
+                                ? productRows[0].gstRate + '%'
+                                : ''}
+                            </div>
+                            <div className="">
+                              ₹{(gstAmount / 2).toFixed(2)}
+                            </div>
                           </div>
-                          <div className="">₹{(gstAmount / 2).toFixed(2)}</div>
-                        </div>
-                        <div className="flex justify-between">
-                          <div className="font-medium">
-                            CGST@
-                            {gstAmountPer == productRows.length
-                              ? productRows[0].gstRate + "%"
-                              : ""}
+                          <div className="flex justify-between">
+                            <div className="font-medium">
+                              CGST@
+                              {gstAmountPer == productRows.length
+                                ? productRows[0].gstRate + '%'
+                                : ''}
+                            </div>
+                            <div>₹{(gstAmount / 2).toFixed(2)}</div>
                           </div>
-                          <div>₹{(gstAmount / 2).toFixed(2)}</div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                  {/* tcs */}
-                  {/* <div className="flex items-center space-x-2 mt-4 col-span-2">
+                    {/* tcs */}
+                    {/* <div className="flex items-center space-x-2 mt-4 col-span-2">
                 <input type="checkbox" className="h-4 w-4 cursor-pointer" />
                 <label className="text-sm text-gray-700">Apply TCS</label>
               </div> */}
+                  </div>
+                ) : (
+                  <div className="m-4">
+                    <div>
+                      <ButtonComponent
+                        type="button"
+                        className="mt-3 text-[#3A5B76] font-semibold rounded hover:text-[#2E4A62]"
+                      >
+                        + Add Additional Charges
+                      </ButtonComponent>
+                      <div className="flex justify-between mt-3">
+                        <button
+                          type="button"
+                          className=" text-[#3A5B76] font-semibold rounded hover:text-[#2E4A62]"
+                        >
+                          + Taxable Amount
+                        </button>
+                        <div>₹{taxableAmount}</div>
+                      </div>
+                      <div className="mt-1.5">
+                        {/* {productRows.map((item, index) => (
+                <div key={index} className="">
+                    <div className="flex justify-between">
+                        <div className="font-medium">SGST@{item.gstRate / 2}</div>
+                        <div className="" >₹{TaxAmount.length>0?TaxAmount[index]/2:0}</div>
+                    </div>
+                    <div className="flex justify-between">
+                        <div className="font-medium">CGST@{item.gstRate / 2}</div>
+                        <div>₹{TaxAmount.length>0?TaxAmount[index]/2:0}</div>
+                    </div>
                 </div>
+            ))} */}
+                        <div className="">
+                          <div className="flex justify-between">
+                            <div className="font-medium">SGST@ 0.00</div>
+                            <div className="">
+                              ₹{(gstAmount / 2).toFixed(2)}
+                            </div>
+                          </div>
+                          <div className="flex justify-between">
+                            <div className="font-medium">CGST@ 0.00</div>
+                            <div>₹0.0</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    {/* tcs */}
+                    {/* <div className="flex items-center space-x-2 mt-4 col-span-2">
+                <input type="checkbox" className="h-4 w-4 cursor-pointer" />
+                <label className="text-sm text-gray-700">Apply TCS</label>
+              </div> */}
+                  </div>
+                )}
               </div>
 
               {/* Bank Details */}
@@ -2044,10 +2493,19 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                   <div className="border p-6 h-60 bg-gray-50 text-gray-500 text-lg font-medium cursor-pointer">
                     <h2 className="text-xl font-semibold mb-2">Bank Details</h2>
                     <div className="mt-1 p-2">
-                      <p className="text-sm">Account Number: {bankAccountDeatil.bank_account_number}</p>
-                      <p className="text-sm">Account Holder's Name: {bankAccountDeatil.bank_account_name}</p>
-                      <p className="text-sm">IFSC CODE: {bankAccountDeatil.bank_ifsc_code}</p>
-                      <p className="text-sm">Branch Name: {bankAccountDeatil.bank_name}</p>
+                      <p className="text-sm">
+                        Account Number: {bankAccountDeatil.bank_account_number}
+                      </p>
+                      <p className="text-sm">
+                        Account Holder's Name:{' '}
+                        {bankAccountDeatil.bank_account_name}
+                      </p>
+                      <p className="text-sm">
+                        IFSC CODE: {bankAccountDeatil.bank_ifsc_code}
+                      </p>
+                      <p className="text-sm">
+                        Branch Name: {bankAccountDeatil.bank_name}
+                      </p>
                     </div>
                     {/* <ButtonComponent
                   type="button"
@@ -2073,28 +2531,28 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                         <InputComponent
                           type="text"
                           value={accountNumber}
-                          onChange={(e) => setAccountNumber(e.target.value)}
+                          onChange={e => setAccountNumber(e.target.value)}
                           placeholder="Account Number"
                           className="border p-2 mb-2 w-full"
                         />
                         <InputComponent
                           type="text"
                           value={ifscCode}
-                          onChange={(e) => setIfscCode(e.target.value)}
+                          onChange={e => setIfscCode(e.target.value)}
                           placeholder="IFSC CODE"
                           className="border p-2 mb-2 w-full"
                         />
                         <InputComponent
                           type="text"
                           value={bankBranch}
-                          onChange={(e) => setBankBranch(e.target.value)}
+                          onChange={e => setBankBranch(e.target.value)}
                           placeholder="Bank and Branch Name"
                           className="border p-2 mb-2 w-full"
                         />
                         <InputComponent
                           type="text"
                           value={accountHolder}
-                          onChange={(e) => setAccountHolder(e.target.value)}
+                          onChange={e => setAccountHolder(e.target.value)}
                           placeholder="Account Holder's Name"
                           className="border p-2 mb-4 w-full"
                         />
@@ -2157,7 +2615,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                       type="number"
                       className="w-full p-2 bg-white border rounded-lg border-gray-300"
                       value={amountReceipt}
-                      onChange={(e) =>
+                      onChange={e =>
                         setAmountReceipt(parseFloat(e.target.value) || 0)
                       }
                     />
@@ -2196,7 +2654,7 @@ export default function InvoiceForm({ onInvoiceAdded }) {
                       src={
                         businessprofile.length > 0
                           ? businessprofile[0].vendor_signature_box
-                          : ""
+                          : ''
                       }
                       alt="Logo Preview"
                       className="w-full h-40 object-cover border rounded"

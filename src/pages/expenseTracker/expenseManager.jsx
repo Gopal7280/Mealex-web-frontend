@@ -15,7 +15,7 @@ import { Category } from "@mui/icons-material";
 import { data } from "jquery";
 export function ExpenseManager() {
   const items = Array.from({ length: 5 }, (v, i) => i);
-  const column = ["S.no","Date", "Name", "Category", "Amount", "Mode"];
+  const column = ["UID","Date", "Name", "Category", "Amount", "Mode"];
   const [serarchRow, setSearchRow] = useState(""); // serarchRow state
   const [expenseData,setExpenseData]=useState([]);
   const [total,setTotal]=useState([]);
@@ -298,7 +298,7 @@ export function ExpenseManager() {
                         <DataTable value={items} className="p-datatable-striped">
                           <Column
                             field="code"
-                            header="Date"
+                            header="UID"
                             style={{ width: "25%" }}
                             body={<Skeleton />}
                           ></Column>

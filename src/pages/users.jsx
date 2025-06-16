@@ -32,6 +32,7 @@ import { InputText } from 'primereact/inputtext';
 import { Checkbox } from 'primereact/checkbox';
 import { initial } from 'lodash';
 import { useFormik } from 'formik';
+import { NAME_REGEX, PHONE_REGIX } from '../utils/regularExpression.jsx';
 function Users() {
   const [visible, setVisible] = useState(false); // State to control the visibility of the dialog
   const items = Array.from({ length: 5 }, (v, i) => i); // Create an array of 5 items for the skeleton loader
@@ -45,6 +46,14 @@ function Users() {
   const toast = useRef(null); // Reference for the toast notifications
   const [total, setTotal] = useState(0); // State to hold the total number of users
   const [categoryType, setCategoryType] = useState(''); // State to hold the selected user category
+   const [error, setError] = useState({
+    contactPerson: '',
+    name: '',
+    panNo: '',
+    gstinNo: '',
+    phone_Number: '',
+  }); // State to hold error messages for PAN, GSTIN, and phone number validation
+  const [status,setStatus]=useState(true);
   useEffect(() => {
     // Check if the business profile exists, if not redirect to profile form
     const fetchBussiness = async () => {
@@ -243,6 +252,187 @@ function Users() {
       addUser();
     },
   });
+  function handleCheck(e, name) {
+    if (name == 'name') {
+      if (!NAME_REGEX.test(e.target.value)) {
+        if (e.target.value == '') {
+          setError({
+            ...error,
+            name: '',
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          formik.values.customer_name = '';
+          setStatus(true);
+        } else {
+          setError({
+            ...error,
+            name: 'Invalid name. Only letters and spaces are allowed, and it must be 2-50 characters long.',
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          formik.values.customer_name = e.target.value;
+          setStatus(false);
+        }
+      } else {
+        formik.values.customer_name = e.target.value;
+        console.log('2');
+        setError({
+          ...error,
+          name: '',
+          panNo: error.panNo,
+          gstinNo: error.gstinNo,
+          phone_Number: error.phone_Number,
+        });
+        setStatus(true);
+      }
+    }
+    if (name == 'contactPerson') {
+      if (!NAME_REGEX.test(e.target.value)) {
+        if (e.target.value == '') {
+          setError({
+            ...error,
+            contactPerson: '',
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          formik.values.customerContactPerson = '';
+          setStatus(true);
+        } else {
+          setError({
+            ...error,
+            contactPerson:
+              'Invalid contact person. Only letters and spaces are allowed, and it must be 2-50 characters long.',
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          formik.values.customerContactPerson = e.target.value;
+          setStatus(false);
+        }
+      } else {
+        formik.values.customerContactPerson = e.target.value;
+        console.log('2');
+        setError({
+          ...error,
+          contactPerson: '',
+          panNo: error.panNo,
+          gstinNo: error.gstinNo,
+          phone_Number: error.phone_Number,
+        });
+        setStatus(true);
+      }
+    }
+    if (name == 'pan') {
+      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+      if (!panRegex.test(e.target.value.toUpperCase())) {
+        if (e.target.value == '') {
+          setError({
+            ...error,
+            panNo: '',
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          // setPan_no('');
+          setStatus(true);
+        } else {
+          setError({
+            ...error,
+            panNo:
+              'Invalid PAN format. Expected: 5 letters, 4 numbers, 1 letter',
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          // setPan_no('false');
+          setStatus(false);
+        }
+      } else {
+        // setPan_no(e.target.value.toUpperCase());
+        console.log('2');
+        setError({
+          ...error,
+          panNo: '',
+          gstinNo: error.gstinNo,
+          phone_Number: error.phone_Number,
+        });
+        setStatus(true);
+      }
+    }
+    if (name == 'number') {
+      if (!PHONE_REGIX.test(e.target.value)) {
+        if (e.target.value == '') {
+          setError({
+            ...error,
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: '',
+          });
+          formik.values.mobileNo='';
+          // setPhoneNumber('');
+          setStatus(true);
+        } else {
+          setError({
+            ...error,
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: 'Invalid Mobile no format. Expected: 10 numbers',
+          });
+          formik.values.mobileNo=e.target.value;
+          // setPhoneNumber('false');
+          setStatus(false);
+        }
+      } else {
+        formik.values.mobileNo=e.target.value;
+        // setPhoneNumber(e.target.value);
+        console.log('2');
+        setError({
+          ...error,
+          panNo: error.panNo,
+          gstinNo: error.gstinNo,
+          phone_Number: '',
+        });
+        setStatus(true);
+      }
+    }
+    if (name == 'gstin') {
+      const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9]{1}[A-Z]{2}$/;
+      if (!gstRegex.test(e.target.value.toUpperCase())) {
+        if (e.target.value == '') {
+          setError({
+            panNo: error.panNo,
+            gstinNo: '',
+            phone_Number: error.phone_Number,
+          });
+          // setGstIn('');
+          setStatus(true);
+        } else {
+          setError({
+            ...error,
+            panNo: error.panNo,
+            gstinNo:
+              'Invalid GSTIN format. Expected: 2 numbers, 5 letters, 4 numbers, 1 letter , 1 number , 2 letters',
+            phone_Number: error.phone_Number,
+          });
+          // setGstIn('false');
+          setStatus(false);
+        }
+      } else {
+        // setGstIn(e.target.value.toUpperCase());
+        console.log('2');
+        setError({
+          ...error,
+          panNo: error.panNo,
+          gstinNo: '',
+          phone_Number: error.phone_Number,
+        });
+        setStatus(true);
+      }
+    }
+    console.log(e.target.value);
+  }
   return (
     <div>
       {loader ? (
@@ -318,12 +508,16 @@ function Users() {
                         <div className="flex flex-column gap-2">
                           <label htmlFor="username">Mobile no</label>
                           <InputText
-                            id="username"
+                            id="mobileNo"
+                            maxLength={10}
                             name="mobileNo"
-                            onChange={formik.handleChange}
+                            onChange={(e)=>handleCheck(e,"number")}
                             placeholder="enter mobile no"
                             aria-describedby="username-help"
                           />
+                          <span className="text-red-500">
+                      {error.phone_Number != '' ? error.phone_Number : ''}
+                    </span>
                         </div>
                         <div className="flex flex-column gap-2">
                           <label htmlFor="username">Email</label>
@@ -379,10 +573,11 @@ function Users() {
                       </div>
                       <div className="mt-10 float-end p-2">
                         <ButtonComponent
+                          disabled={!status}
                           value="Submit"
                           type="submit"
                           label="Save"
-                          className="px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                          className="disabled:opacity-80 disabled:bg-gray-400 px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
                         ></ButtonComponent>
                       </div>
                     </form>

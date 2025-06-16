@@ -30,7 +30,7 @@ import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 function CustomerDisplay({ customerListUpdated }) {
   const items = Array.from({ length: 5 }, (v, i) => i); // Create an array of 5 items for the skeleton loader
-  const column = ['S.No', 'Name', 'Address', 'Email', 'Contact']; // Define the columns for the table
+  const column = ['UID', 'Name', 'Address', 'Email', 'Contact']; // Define the columns for the table
   const [customers, setCustomers] = useState([]); // State to hold customer data
   const [search, setSearch] = useState(''); // Search state
   const navigate = useNavigate(); // Navigate to another page
@@ -46,7 +46,8 @@ function CustomerDisplay({ customerListUpdated }) {
       customer_type: '',
       customer_party_type: '',
       customer_category: '',
-      customer_contact_persone: '',
+      // customer_contact_persone: '',
+      customer_contact_person: '',
       customer_pan: '',
       customer_gstin: '',
       customer_notes: '',
@@ -127,14 +128,14 @@ function CustomerDisplay({ customerListUpdated }) {
     sNo: value.customer_number,
     name: value.customer_name,
     Address:
-      value.billing_street_address +
+      value.billing_city==null?"- - - -":(value.billing_street_address +
       ' ' +
       value.billing_city +
       ' ' +
       value.billing_state +
       ' ' +
       ' ' +
-      value.billing_country,
+      value.billing_country),
     Email: value.customer_email,
     Contact: value.customer_phone,
   }));
@@ -287,7 +288,7 @@ function CustomerDisplay({ customerListUpdated }) {
               <DataTable value={items} className="p-datatable-striped">
                 <Column
                   field="code"
-                  header="S.No"
+                  header="UID"
                   style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>

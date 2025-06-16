@@ -2911,14 +2911,14 @@ export function QuotationFrom() {
                 {productRows.map((product, index) => (
                    <React.Fragment key={index}>
                                           <tr>
-                                            <td className="w-10">
+                                            <td className="w-13">
                                               <InputComponent
                                                 onChange={formik.handleChange}
                                                 type="number"
                                                 name="sNo"
                                                 value={index + 1}
                                                 readOnly
-                                                classNameInput="w-10 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
+                                                classNameInput="w-13 p-2 border border-gray-300 rounded-md hover:bg-gray-200"
                                               />
                                             </td>
                                             <td className="w-80">

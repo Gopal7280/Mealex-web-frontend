@@ -11,6 +11,7 @@ import { Loader } from '../layouts/Loader';
 import { Skeleton } from 'primereact/skeleton';
 import { Dialog } from 'primereact/dialog';
 import { Toast } from 'primereact/toast';
+import { EMAIL_CHECK } from '../utils/regularExpression';
 const PrivacyPolicy = ({ visiblePrivacy, setVisiblePrivacy }) => {
   return (
     <Dialog
@@ -601,62 +602,83 @@ const LoginRegister = ({ setAuth, setUserRoleRoutes }) => {
   };
 
   // Handles the registration functionality
-  const handleRegister = async e => {
-    e.preventDefault();
-    setError('');
-    if (password !== confirmPassword) {
-      setError('Passwords do not match!');
-      return;
-    }
-    console.log(email);
-    // [Warning]: the sendEmail function is used for sending a welcome email after registration, consider to extract this function as a utility function because it's used in multiple places
-    const sendEmail = async () => {
-      const templateParams = {
-        to_name: 'Bill365', // Must match variable in your template
-        email: email, // Optional, if used in your template
-        message: 'Welcome to our app! Let us know if you have any questions.', // Match variable name in template
-      };
-      emailjs
-        .send(
-          'service_s4es4n8', // Replace with your actual Service ID
-          'template_31jd2hh', // Replace with your actual Template ID
-          templateParams,
-          '-1wolPEfuWi750zxX' // Replace with your actual Public Key
-        )
-        .then(response => {
-          console.log('SUCCESS!', response.status, response.text);
-          console.log('Welcome email sent successfully!');
-        })
-        .catch(error => {
-          console.error('FAILED...', error);
-          console.log('Failed to send welcome email.');
-        });
+ const handleRegister = async e => {
+  e.preventDefault();
+  setError('');
+
+  if (password !== confirmPassword) {
+    setError('Passwords do not match!');
+    return;
+  }
+
+  const check=EMAIL_CHECK(email);
+  if(!check){
+    console.log("check");
+    setError("Please enter a valid email address format");
+    return;
+  }
+
+
+  console.log(email);
+
+// the sendEmail function is used for sending a welcome email after registration, consider to extract this function as a utility function because it's used in multiple places
+  const sendEmail = async () => {
+    const templateParams = {
+      to_name: 'Bill365', // Must match variable in your template
+      email: email, // Optional, if used in your template
+      message: 'Welcome to our app! Let us know if you have any questions.', // Match variable name in template
     };
-    sendEmail();
-    try {
-      setLoader(true);
-      const response = await apiPost('/auth/signUp', {
-        username,
-        email,
-        password,
+    emailjs
+      .send(
+        'service_s4es4n8', // Replace with your actual Service ID
+        'template_31jd2hh', // Replace with your actual Template ID
+        templateParams,
+        '-1wolPEfuWi750zxX' // Replace with your actual Public Key
+      )
+      .then(response => {
+        console.log('SUCCESS!', response.status, response.text);
+        console.log('Welcome email sent successfully!');
+      })
+      .catch(error => {
+        console.error('FAILED...', error);
+        console.log('Failed to send welcome email.');
       });
-      console.log(response);
-      const response1 = await apiPost('/auth/login', { email, password });
-      if (response1.data.token != undefined && response) {
-        setToken(response1.data.token);
-        axios.defaults.headers.common['Authorization'] =
-          'Bearer ' + response1.data.token;
-        setAuth(true);
-        navigate('/dashboard');
-      } else {
-        console.log('no token found');
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed!');
-    } finally {
-      setLoader(false);
-    }
   };
+
+  try {
+    setLoader(true);
+
+    // Call sendEmail after successful registration if you want to ensure the user is registered first
+    // Or keep it here if you want to send it concurrently or before the API call.
+    // For a welcome email, sending it after successful registration is usually preferred.
+    // For now, I'll leave it in its original position as per your code.
+    sendEmail();
+
+    const response = await apiPost('/auth/signUp', {
+      username,
+      email,
+      password,
+    });
+    console.log(response);
+
+    const response1 = await apiPost('/auth/login', { email, password });
+    if (response1.data.token !== undefined && response) { // Use !== for explicit check
+      setToken(response1.data.token);
+      axios.defaults.headers.common['Authorization'] =
+        'Bearer ' + response1.data.token;
+      setAuth(true);
+      navigate('/dashboard');
+    } else {
+      console.log('no token found');
+      // Potentially set an error here if login fails or no token
+      setError('Registration successful, but login failed. Please try logging in manually.');
+    }
+  } catch (err) {
+    setError(err.response?.data?.message || 'Registration failed! Please try again.');
+  } finally {
+    setLoader(false);
+  }
+};
 
   // Handles the forgot password functionality
   function forgotPassword(e) {

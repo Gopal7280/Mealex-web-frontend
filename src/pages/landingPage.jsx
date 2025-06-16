@@ -493,7 +493,7 @@ const AboutUs= ()=>{
   return(
     <div className='w-10/12 m-auto' id="about">
     <div className='flex justify-center'>
-    <section class="bg-white text-gray-400 p-8 rounded-lg mb-12 transform hover:scale-102 transition-transform duration-300">
+    <section class="bg-white text-gray-400 p-8 rounded-lg mb-12">
             <h2 class="text-3xl md:text-4xl font-bold !text-blue-900 mb-6 text-center ">About Us</h2>
             <p class="text-lg leading-relaxed mb-4 text-justify">
                 Compunic Private Limited embarked on its journey in June 2022, initially focusing on providing robust hardware and network solutions. With a strong foundation in IT infrastructure and a team of seasoned professionals, we quickly identified a significant need in the market for high-quality, cost-effective software development services, particularly in areas that streamline business operations.
@@ -618,7 +618,7 @@ const ContactUs=()=>{
     <div id="contactUS" className='py-16 bg-white flex justify-center'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
       <h2 className='sm:text-center'>Contact Us</h2>
-      <h6 className='sm:text-center  !text-gray-400'>If you have any questions about this Refund and Cancellation Policy, <br></br> or if you wish to submit a refund request, please contact our Grievance Officer:</h6>
+      <h6 className='sm:ml-14  !text-gray-400'>If you have any questions about this Refund and Cancellation Policy, <br></br> or if you wish to submit a refund request, please contact our Grievance Officer:</h6>
       {/* If you have any questions about this Refund and Cancellation Policy, or if you wish to submit a refund request, please contact our Grievance Officer: */}
       <p className='sm:ml-14'>Grievance Officer: <br></br>
 Data Privacy Team

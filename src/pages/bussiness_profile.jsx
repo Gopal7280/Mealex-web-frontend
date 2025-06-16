@@ -28,9 +28,9 @@ export function Bussiness_profile({ setRefresh }) {
   const [edit, setEdit] = useState(false);
   const navigate = useNavigate();
   const [pan_no, setPan_no] = useState('');
-    const [phoneNumber, setPhoneNumber] = useState('');
-    const [gstIn, setGstIn] = useState('');
-    const [status, setStatus] = useState(true);
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [gstIn, setGstIn] = useState('');
+  const [status, setStatus] = useState(true);
   const [error, setError] = useState('');
   const maxSizeInMB = 2; // Limit size to 2MB
   const [country, setCountry] = useState([{}]);
@@ -58,10 +58,24 @@ export function Bussiness_profile({ setRefresh }) {
           },
         };
         const response = await axios(config);
+        const sortedStates = response.data.sort((a, b) => {
+          const nameA = a.name.toUpperCase();
+          const nameB = b.name.toUpperCase();
+
+          if (nameA < nameB) {
+            // e.g., 'ASSAM' vs 'BIHAR'
+            return -1; // 'ASSAM' should come before 'BIHAR'
+          }
+          if (nameA > nameB) {
+            // e.g., 'BIHAR' vs 'ASSAM'
+            return 1; // 'BIHAR' should come after 'ASSAM'
+          }
+          return 0; // e.g., 'GUJARAT' vs 'GUJARAT'
+        });
         setCountry('India');
         setCountry1('India');
-        setState(response.data);
-        setState1(response.data);
+        setState(sortedStates);
+        setState1(sortedStates);
         setIso2Country('In');
         setIso2Country1('In');
         setNames({ ...names, countryName: 'India' });
@@ -466,9 +480,8 @@ export function Bussiness_profile({ setRefresh }) {
       if (phoneNumber == '') {
         values.phone = data[0].vendor_phone;
       }
-      if(phoneNumber!='')
-      {
-        values.phone=phoneNumber;
+      if (phoneNumber != '') {
+        values.phone = phoneNumber;
       }
       if (values.email == '') {
         values.email = data[0].vendor_email;
@@ -476,16 +489,14 @@ export function Bussiness_profile({ setRefresh }) {
       if (pan_no == '') {
         values.pan = data[0].vendor_pan;
       }
-      if(pan_no!="")
-      {
-        values.pan=pan_no;
+      if (pan_no != '') {
+        values.pan = pan_no;
       }
       if (gstIn == '') {
         values.gst = data[0].vendor_gstin;
       }
-      if(gstIn !='')
-      {
-        values.gst=gstIn;
+      if (gstIn != '') {
+        values.gst = gstIn;
       }
       if (values.businessType == '') {
         values.businessType = data[0].vendor_industry_type;
@@ -508,12 +519,11 @@ export function Bussiness_profile({ setRefresh }) {
       if (values.anniversary == '') {
         values.anniversary = data[0].vendor_anniversary;
       }
-      if(values.streetBillingAddress=="")
-      {
-        values.streetBillingAddress=data[0].billing_street_address;
-      }if(values.streetShippingAddress=="")
-      {
-          values.streetShippingAddress=data[0].shipping_street_address
+      if (values.streetBillingAddress == '') {
+        values.streetBillingAddress = data[0].billing_street_address;
+      }
+      if (values.streetShippingAddress == '') {
+        values.streetShippingAddress = data[0].shipping_street_address;
       }
       values.signatureBox = signature;
       values.logo = logoPreview;
@@ -581,34 +591,32 @@ export function Bussiness_profile({ setRefresh }) {
     }
   };
   function handleCheckCred(e, name) {
-    if(name=="name")
-    {
+    if (name == 'name') {
       if (!NAME_REGEX.test(e.target.value)) {
         if (e.target.value == '') {
           setError({
-            name:'',
+            name: '',
             panNo: error.panNo,
             gstinNo: error.gstinNo,
             phone_Number: error.phone_Number,
           });
-          formik.values.name='';
+          formik.values.name = '';
           setStatus(true);
         } else {
           setError({
-            name:
-              'Invalid name. Only letters and spaces are allowed, and it must be 2-50 characters long.',
-              panNo:error.panNo,
+            name: 'Invalid name. Only letters and spaces are allowed, and it must be 2-50 characters long.',
+            panNo: error.panNo,
             gstinNo: error.gstinNo,
             phone_Number: error.phone_Number,
           });
-          formik.values.name=e.target.value;
+          formik.values.name = e.target.value;
           setStatus(false);
         }
       } else {
-        formik.values.name=e.target.value;
+        formik.values.name = e.target.value;
         console.log('2');
         setError({
-          name:'',
+          name: '',
           panNo: error.panNo,
           gstinNo: error.gstinNo,
           phone_Number: error.phone_Number,
@@ -757,11 +765,11 @@ export function Bussiness_profile({ setRefresh }) {
                       placeholder="Name"
                       {...(edit ? {} : { value: data[0].vendor_name })}
                       classNameInput="w-full p-2 border rounded mt-1"
-                      onChange={(e)=>handleCheckCred(e,"name")}
+                      onChange={e => handleCheckCred(e, 'name')}
                     />
                     <span className="text-red-500">
-                    {error.name != '' ? error.name : ''}
-                  </span>
+                      {error.name != '' ? error.name : ''}
+                    </span>
                   </div>
                   <div>
                     <InputComponent
@@ -793,8 +801,8 @@ export function Bussiness_profile({ setRefresh }) {
                       {...(edit ? {} : { value: data[0].vendor_phone })}
                     />
                     <span className="text-red-500">
-                    {error.phone_Number != '' ? error.phone_Number : ''}
-                  </span>
+                      {error.phone_Number != '' ? error.phone_Number : ''}
+                    </span>
                   </div>
                   <div>
                     <InputComponent
@@ -824,8 +832,8 @@ export function Bussiness_profile({ setRefresh }) {
                       {...(edit ? {} : { value: data[0].vendor_pan })}
                     />
                     <span className="text-red-500">
-                    {error.panNo != '' ? error.panNo : ''}
-                  </span>
+                      {error.panNo != '' ? error.panNo : ''}
+                    </span>
                   </div>
                   <div>
                     <InputComponent
@@ -839,9 +847,9 @@ export function Bussiness_profile({ setRefresh }) {
                       onChange={e => handleCheckCred(e, 'gstin')}
                       {...(edit ? {} : { value: data[0].vendor_gstin })}
                     />
-                                      <span className="text-red-500">
-                    {error.gstinNo != '' ? error.gstinNo : ''}
-                  </span>
+                    <span className="text-red-500">
+                      {error.gstinNo != '' ? error.gstinNo : ''}
+                    </span>
                   </div>
                   <div>
                     <label className="block text-gray-600">Business Type</label>
@@ -870,7 +878,9 @@ export function Bussiness_profile({ setRefresh }) {
                     <select
                       name="businessCategory"
                       onChange={formik.handleChange}
-                      {...(edit ? {} : { value: data[0].vendor_business_category })}
+                      {...(edit
+                        ? {}
+                        : { value: data[0].vendor_business_category })}
                       className="w-full p-2 border rounded mt-1"
                     >
                       <option disabled value="">
@@ -1369,7 +1379,6 @@ export function Bussiness_profile({ setRefresh }) {
                     ) : (
                       <div>
                         <InputComponent
-                          
                           onFocus={handleEdit}
                           labelName="birthdate"
                           labelInput="Birthdate"
@@ -1377,7 +1386,9 @@ export function Bussiness_profile({ setRefresh }) {
                           name="birthdate"
                           classNameInput="w-full p-2 border rounded mt-1"
                           onChange={formik.handleChange}
-                          {...(edit ? {type:'date'} : { value: data[0].vendor_birthdate })}
+                          {...(edit
+                            ? { type: 'date' }
+                            : { value: data[0].vendor_birthdate })}
                         />
                       </div>
                     )}
@@ -1396,7 +1407,6 @@ export function Bussiness_profile({ setRefresh }) {
                     ) : (
                       <div>
                         <InputComponent
-                          
                           onFocus={handleEdit}
                           labelName="anniversary"
                           labelInput="Anniversary"
@@ -1404,7 +1414,9 @@ export function Bussiness_profile({ setRefresh }) {
                           name="anniversary"
                           classNameInput="w-full p-2 border rounded mt-1"
                           onChange={formik.handleChange}
-                          {...(edit ? {type:'date'} : { value: data[0].vendor_anniversary })}
+                          {...(edit
+                            ? { type: 'date' }
+                            : { value: data[0].vendor_anniversary })}
                         />
                       </div>
                     )}
@@ -1424,14 +1436,14 @@ export function Bussiness_profile({ setRefresh }) {
                 </div>
 
                 <div className="mt-10 text-end">
-                                <ButtonComponent
-                                  {...(status ? {} : { disabled: true })}
-                                  value="Submit"
-                                  type="submit"
-                                  label="Save"
-                                  className="disabled:opacity-80 disabled:bg-gray-400 px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
-                                ></ButtonComponent>
-                              </div>
+                  <ButtonComponent
+                    {...(status ? {} : { disabled: true })}
+                    value="Submit"
+                    type="submit"
+                    label="Save"
+                    className="disabled:opacity-80 disabled:bg-gray-400 px-20 py-3 bg-[#3A5B76] text-white font-bold rounded hover:bg-[#2E4A62]"
+                  ></ButtonComponent>
+                </div>
               </form>
             </div>
           ) : (

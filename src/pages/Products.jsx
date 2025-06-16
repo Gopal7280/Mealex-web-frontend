@@ -48,11 +48,11 @@ const Products = () => {
   const column = [
     'UID',
     'Product Name',
-    'HSNCode',
-    'ProductUnit',
-    'ProductRate',
-    'GSTRate',
-    'QRCode',
+    'HSN Code',
+    'Product Unit',
+    'Product Rate',
+    'GST Rate',
+    'QR Code',
   ];
   const [selectedAction, setSelectedAction] = useState(null); // State to hold selected action
   const [loader, setLoader] = useState(true); // State to control loading state
@@ -179,31 +179,31 @@ const Products = () => {
                 ></Column>
                 <Column
                   field="category"
-                  header="HSNCode"
+                  header="HSN Code"
                   style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>
                 <Column
                   field="quantity"
-                  header="ProductUnit"
+                  header="Product Unit"
                   style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>
                 <Column
                   field="quantity"
-                  header="ProductRate"
+                  header="Product Rate"
                   style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>
                 <Column
                   field="quantity"
-                  header="GSTRate"
+                  header="GST Rate"
                   style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>
                 <Column
                   field="quantity"
-                  header="QRCode"
+                  header="QR Code"
                   style={{ width: '25%' }}
                   body={<Skeleton />}
                 ></Column>

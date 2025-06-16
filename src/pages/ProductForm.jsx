@@ -33,6 +33,7 @@ const ProductForm = () => {
   const [visible, setVisible] = useState(false); // State to manage visibility of the dialog for adding a new category
   const toast = useRef(null); // Reference for the Toast component
   const [addCategory, setAddCategory] = useState(''); // State to manage the new category name
+  const [purchasePriceInputVisible, setPurchasePriceInputVisible] = useState(true);
   // Default values for selling and purchase prices
   const [gstSet, setGstSet] = useState({
     sellingPrice: 'withGstSelling',
@@ -76,6 +77,13 @@ const ProductForm = () => {
   function handleProductChange(e) {
     console.log(e.target.value);
     setProducttype(e.target.value);
+    if(e.target.value=="service")
+    {
+      setPurchasePriceInputVisible(false);
+    }
+    else{
+      setPurchasePriceInputVisible(true);
+    }
   }
 
   // Function to handle category change
@@ -103,7 +111,7 @@ const ProductForm = () => {
     setCustomField(updatedFields);
   }
   const [product_category, setProduct_category] = useState(''); // State to manage product category
- 
+
   // Formik setup for handling form submission and validation
   // It initializes the form values and handles the submission logic
   const formik = useFormik({
@@ -439,7 +447,9 @@ const ProductForm = () => {
                         </select>
                       </div>
                     </div>
-                    <div className="lg:grid grid-cols-2 gap-3 sm:grid mt-2 block">
+                    {
+                      purchasePriceInputVisible && (
+                        <div className="lg:grid grid-cols-2 gap-3 sm:grid mt-2 block">
                       <div>
                         <InputComponent
                           labelInput="Purchase Price"
@@ -464,6 +474,8 @@ const ProductForm = () => {
                         </select>
                       </div>
                     </div>
+                      )
+                    }
                     <div className="mt-2">
                       <InputComponent
                         labelInput="Product HSN / SAC Code"
@@ -499,7 +511,7 @@ const ProductForm = () => {
                         <option value="28">28%</option>
                       </select>
                     </div>
-                    <div>
+                    <div className={`${!purchasePriceInputVisible?'mt-4':'mt-2'}`}>
                       <button
                         disabled
                         className="mt-2 px-4 py-2 bg-blue-500 disabled:opacity-80 disabled:bg-gray-400 text-white rounded"

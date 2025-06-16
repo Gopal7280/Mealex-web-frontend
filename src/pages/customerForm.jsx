@@ -22,6 +22,7 @@ import { ButtonComponent } from '../components/Button';
 import { apiGet, apiPost } from '../services/api';
 import * as yup from 'yup';
 import { config } from '../config/app.js';
+import { NAME_REGEX } from '../utils/regularExpression.jsx';
 
 export default function CustomerForm({
   onCustomerAdded,
@@ -29,7 +30,7 @@ export default function CustomerForm({
   onCancelEdit,
 }) {
   const [loader, setLoader] = useState(false); // State to manage loading state
-  const [country, setCountry] = useState([{}]); // State to hold country data 
+  const [country, setCountry] = useState([{}]); // State to hold country data
   const [country1, setCountry1] = useState([{}]); // State to hold country data for shipping address
   const [iso2Country, setIso2Country] = useState(''); // State to hold ISO2 code of the country for billing address
   const [iso2Country1, setIso2Country1] = useState(''); // State to hold ISO2 code of the country for shipping address
@@ -42,14 +43,13 @@ export default function CustomerForm({
   const [party, setParty] = useState(''); // State to hold the type of party (vendor/customer)
   const toast = useRef(null); // Toast reference for displaying messages
   const [locations, setLocationS] = useState(''); // State to hold the location data passed from the previous page
-  const location = useLocation(); // Get the current location object  
+  const location = useLocation(); // Get the current location object
   const [pan_no, setPan_no] = useState(''); // State to hold PAN number
   const [phoneNumber, setPhoneNumber] = useState(''); // State to hold phone number
-  const [gstIn, setGstIn] = useState(''); // State to hold GST number 
+  const [gstIn, setGstIn] = useState(''); // State to hold GST number
   const [status, setStatus] = useState(true); // State to manage the status of form validation
 
   useEffect(() => {
-
     // Function to fetch business profile data
     // If no business profile exists, redirect to profile form
     const fetchBussiness = async () => {
@@ -77,10 +77,24 @@ export default function CustomerForm({
           },
         };
         const response = await axios(config); // Fetching states for India
+        const sortedStates = response.data.sort((a, b) => {
+          const nameA = a.name.toUpperCase();
+          const nameB = b.name.toUpperCase();
+
+          if (nameA < nameB) {
+            // e.g., 'ASSAM' vs 'BIHAR'
+            return -1; // 'ASSAM' should come before 'BIHAR'
+          }
+          if (nameA > nameB) {
+            // e.g., 'BIHAR' vs 'ASSAM'
+            return 1; // 'BIHAR' should come after 'ASSAM'
+          }
+          return 0; // e.g., 'GUJARAT' vs 'GUJARAT'
+        });
         setCountry('India'); // Set the country name for billing address
         setCountry1('India'); // Set the country name for shipping address
-        setState(response.data); // Set the state data for billing address
-        setState1(response.data); /// Set the state data for shipping address
+        setState(sortedStates); // Set the state data for billing address
+        setState1(sortedStates); /// Set the state data for shipping address
         setIso2Country('In'); // Set the ISO2 code for billing address
         setIso2Country1('In'); // Set the ISO2 code for shipping address
         setNames({ ...names, countryName: 'India' }); // Set the country name in names state for billing address
@@ -113,7 +127,7 @@ export default function CustomerForm({
   const [state, setState] = useState([{}]);
   // State to hold the state data for shipping address
   const [state1, setState1] = useState([{}]);
-  // Function to handle country change for billing and shipping addresses 
+  // Function to handle country change for billing and shipping addresses
   function handleCountryChange(e, name) {
     if (name == 'billing') {
       if (e.target.value === 'select') {
@@ -250,7 +264,7 @@ export default function CustomerForm({
       city: '',
     },
   ]);
-  const [zip, setZip] = useState(''); // State to hold the zip code for billing address 
+  const [zip, setZip] = useState(''); // State to hold the zip code for billing address
   const [zip1, setZip1] = useState(''); // State to hold the zip code for shipping address
 
   // Function to handle debounce for fetching zip code data
@@ -272,7 +286,7 @@ export default function CustomerForm({
     fetchUsingZipCode();
   }, 700);
 
-  // Function to handle debounce for fetching zip code data for shipping address  
+  // Function to handle debounce for fetching zip code data for shipping address
   // This function is called when the user types in the shipping zip code input field
   const handleDebounce1 = debounce(value => {
     const fetchUsingZipCode = async () => {
@@ -353,8 +367,8 @@ export default function CustomerForm({
       }
     }
   }
-  const navigate = useNavigate(); // Navigation hook to navigate between pages  
-  const [customer_type, setCustomer_type] = useState(''); // State to hold the customer type (retail/wholesale) 
+  const navigate = useNavigate(); // Navigation hook to navigate between pages
+  const [customer_type, setCustomer_type] = useState(''); // State to hold the customer type (retail/wholesale)
   const [customField, setCustomField] = useState(['']); // State to hold custom fields entered by the user
 
   // Formik setup for managing form state
@@ -446,6 +460,20 @@ export default function CustomerForm({
         const [key, value] = field.split('/').map(item => item.trim());
         return { key, value };
       });
+      if([values.streetBilling_address,values.billingCity,values.billingCountry,values.billingState,values.billingZip_code].some(value=>value.trim()=="")){
+        values.billingCity="-";
+        values.billingCountry="-";
+        values.billingState="-";
+        values.billingZip_code="-";
+        values.streetBilling_address="-";
+      }
+      if([values.streetShipping_address,values.shippingCity,values.shippingCountry,values.shippingState,values.shippingZip_code].some(value=>value.trim()=="")){
+        values.shippingCity="-";
+        values.shippingCountry="-";
+        values.shippingState="-";
+        values.shippingZip_code="-";
+        values.streetShipping_address="-";
+      }
       values.customField = keyValuePairs;
       values.party = party;
       values.customer_type = customer_type;
@@ -456,7 +484,7 @@ export default function CustomerForm({
       console.log(values);
 
       // Function to add customer data
-      // This function is called when the form is submitted 
+      // This function is called when the form is submitted
       const addCustomersData = async () => {
         setLoader(true);
         try {
@@ -521,6 +549,8 @@ export default function CustomerForm({
     setCustomField(updatedFields);
   }
   const [error, setError] = useState({
+    contactPerson: '',
+    name: '',
     panNo: '',
     gstinNo: '',
     phone_Number: '',
@@ -530,11 +560,85 @@ export default function CustomerForm({
   // This function is called when the user types in the input fields for PAN, GSTIN, and phone number
   // It checks the format of the input and sets the error messages accordingly
   function handleCheck(e, name) {
+    if (name == 'name') {
+      if (!NAME_REGEX.test(e.target.value)) {
+        if (e.target.value == '') {
+          setError({
+            ...error,
+            name: '',
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          formik.values.customer_name = '';
+          setStatus(true);
+        } else {
+          setError({
+            ...error,
+            name: 'Invalid name. Only letters and spaces are allowed, and it must be 2-50 characters long.',
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          formik.values.customer_name = e.target.value;
+          setStatus(false);
+        }
+      } else {
+        formik.values.customer_name = e.target.value;
+        console.log('2');
+        setError({
+          ...error,
+          name: '',
+          panNo: error.panNo,
+          gstinNo: error.gstinNo,
+          phone_Number: error.phone_Number,
+        });
+        setStatus(true);
+      }
+    }
+    if (name == 'contactPerson') {
+      if (!NAME_REGEX.test(e.target.value)) {
+        if (e.target.value == '') {
+          setError({
+            ...error,
+            contactPerson: '',
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          formik.values.customerContactPerson = '';
+          setStatus(true);
+        } else {
+          setError({
+            ...error,
+            contactPerson:
+              'Invalid contact person. Only letters and spaces are allowed, and it must be 2-50 characters long.',
+            panNo: error.panNo,
+            gstinNo: error.gstinNo,
+            phone_Number: error.phone_Number,
+          });
+          formik.values.customerContactPerson = e.target.value;
+          setStatus(false);
+        }
+      } else {
+        formik.values.customerContactPerson = e.target.value;
+        console.log('2');
+        setError({
+          ...error,
+          contactPerson: '',
+          panNo: error.panNo,
+          gstinNo: error.gstinNo,
+          phone_Number: error.phone_Number,
+        });
+        setStatus(true);
+      }
+    }
     if (name == 'pan') {
       const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
       if (!panRegex.test(e.target.value.toUpperCase())) {
         if (e.target.value == '') {
           setError({
+            ...error,
             panNo: '',
             gstinNo: error.gstinNo,
             phone_Number: error.phone_Number,
@@ -543,6 +647,7 @@ export default function CustomerForm({
           setStatus(true);
         } else {
           setError({
+            ...error,
             panNo:
               'Invalid PAN format. Expected: 5 letters, 4 numbers, 1 letter',
             gstinNo: error.gstinNo,
@@ -555,6 +660,7 @@ export default function CustomerForm({
         setPan_no(e.target.value.toUpperCase());
         console.log('2');
         setError({
+          ...error,
           panNo: '',
           gstinNo: error.gstinNo,
           phone_Number: error.phone_Number,
@@ -567,6 +673,7 @@ export default function CustomerForm({
       if (!panRegex.test(e.target.value)) {
         if (e.target.value == '') {
           setError({
+            ...error,
             panNo: error.panNo,
             gstinNo: error.gstinNo,
             phone_Number: '',
@@ -575,6 +682,7 @@ export default function CustomerForm({
           setStatus(true);
         } else {
           setError({
+            ...error,
             panNo: error.panNo,
             gstinNo: error.gstinNo,
             phone_Number: 'Invalid Mobile no format. Expected: 10 numbers',
@@ -586,6 +694,7 @@ export default function CustomerForm({
         setPhoneNumber(e.target.value);
         console.log('2');
         setError({
+          ...error,
           panNo: error.panNo,
           gstinNo: error.gstinNo,
           phone_Number: '',
@@ -606,6 +715,7 @@ export default function CustomerForm({
           setStatus(true);
         } else {
           setError({
+            ...error,
             panNo: error.panNo,
             gstinNo:
               'Invalid GSTIN format. Expected: 2 numbers, 5 letters, 4 numbers, 1 letter , 1 number , 2 letters',
@@ -618,6 +728,7 @@ export default function CustomerForm({
         setGstIn(e.target.value.toUpperCase());
         console.log('2');
         setError({
+          ...error,
           panNo: error.panNo,
           gstinNo: '',
           phone_Number: error.phone_Number,
@@ -657,10 +768,14 @@ export default function CustomerForm({
                       labelInput="Customer-Name:"
                       type="text"
                       name="customer_name"
-                      onChange={formik.handleChange}
+                      value={formik.values.customer_name}
+                      onChange={e => handleCheck(e, 'name')}
                       classNameInput="w-full p-2 border rounded mt-1"
                       placeholder="Customer Name"
                     />
+                    <span className="text-red-500">
+                      {error.name != '' ? error.name : ''}
+                    </span>
                     {/* <span>{formik.errors.customer_name}</span> */}
                   </div>
                   <div>
@@ -807,12 +922,15 @@ export default function CustomerForm({
                       labelInput="Contact Person"
                       type="text"
                       id="customerContactPerson"
-                      onChange={formik.handleChange}
+                      value={formik.customerContactPerson}
+                      onChange={e => handleCheck(e, 'contactPerson')}
                       name="customerContactPerson"
                       classNameInput="w-full p-2 border rounded mt-1"
                       placeholder="Enter contact person name"
                     />
-                    {/* <span>{formik.errors.opening_value}</span> */}
+                    <span className="text-red-500">
+                      {error.contactPerson != '' ? error.contactPerson : ''}
+                    </span>
                   </div>
                 </div>
               </div>
