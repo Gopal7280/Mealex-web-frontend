@@ -1,200 +1,165 @@
-// App.js
 import {
-  BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
 } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import LoginRegister from '../pages/loginRegister';
-import CustomerForm from '../pages/customerForm';
-import CustomerProfile from '../pages/customerProfile';
-import CustomerDisplay from '../pages/customerDisplay';
-import EditCustomer from '../pages/editCustomer';
-import Dashboard from '../pages/Dashboard';
-import Invoices from '../pages/Invoices';
-import Payments from '../pages/Payments';
-import Products from '../pages/Products';
-import Reports from '../pages/Reports';
-import Settings, {
-  AuthorizedSignatureChallan,
-  AuthorizedSignatureInvoice,
-  BankAccountSettingChallan,
-  BankAccountSettingInvoicentact,
-  PrefixSettingChallan,
-  PrefixSettingInvoice,
-  ThemeSettingChallan,
-  ThemeSettingInvoice,
-} from '../pages/Settings';
-import ProductForm from '../pages/ProductForm';
-import Sidebar from '../layouts/Sidebar';
-import InvoiceForm from '../pages/InvoiceForm'; // InvoiceForm import karo
+import Customers from '../pages/Customers';
+
+
 import '../styles/index.css';
-import { Challan } from '../pages/challan';
-import { ChallanForm } from '../pages/challan_form';
-import PublicRoutes from './publicRoute';
-import ProtectedRoute from './protectedRoute';
-import '../styles/index.css';
-import { GenerateInvoice } from '../pages/generateInvoice';
-import { GenerateBillComponent } from '../pages/generateBill';
-import CustomerFormDetailDisplay from '../pages/cutsomer_form_detail';
-import Customer_detail_edit from '../pages/Customer_edit';
-import { Product_detail } from '../pages/product_detail';
-import { Product_edit } from '../pages/product_edit';
-import { QuotationFrom } from '../pages/QuotationForm';
-import { ChallanPreview } from '../pages/challan_preview';
-import { ChallanEdit } from '../pages/challan_edit';
-import { Bussiness_profile } from '../pages/bussiness_profile';
-import { Bussiness_profile_from } from '../pages/bussiness_profile_form';
-import { Quotation_edit } from '../pages/quotation_edit';
-import PurchaseTable from '../pages/purchaseTable';
-import DeliveryChallanTable from '../pages/deliveryChallan_table';
-import QuotationTable from '../pages/quotation';
-import { QuotationPreview } from '../pages/quotation_preview';
-import { InvoicePreview } from '../pages/invoice_preview';
-import { InvoiceEdit } from '../pages/invoice_edit';
-import { GenerateChallan } from '../pages/generate_challan';
-import { InvoiceSampleA4 } from '../layouts/a4SizeInvoiceLayout';
-import { PurchaseForm } from '../pages/purchaseForm';
-import { GenerateQuotationn } from '../pages/generateQuotation';
-import { PurchasePreview } from '../pages/purchasePreview';
-import { PurchaseEdit } from '../pages/purchaseEdit';
-import { PaymentIn } from '../pages/paymentIn';
-import { PaymentInForm } from '../pages/paymentInForm';
-import { PaymentOutForm } from '../pages/paymentOutForm';
-import { PaymentOut } from '../pages/paymentOut';
-import HotkeyManager from '../components/hotKeyManager';
 import LandingPage from '../pages/landingPage';
-import Users from '../pages/users';
-import { UserForm } from '../pages/userForm';
-import { GeneratePurchase } from '../pages/generatePurchase';
-import SalesReportGSTIN from '../pages/reports/salesReport';
-import GstPurchaseReport from '../pages/reports/purchaseReport';
-import { ExpenseManager } from '../pages/expenseTracker/expenseManager';
-import SalesReport1 from '../pages/reports/salesReport1';
-import { Inventory } from '../pages/inventory/inventory';
-import NoRouteMatch from '../layouts/noRouteFound';
-import { apiGet } from '../services/api';
-import { OwnerRoutes } from './ownerRoutes';
-import { DeliveryBoyRoutes } from './deliveryBoyRoutes';
-import { StockManagerRoutes } from './stockManagerRoutes';
-import { SalesPersonRoutes } from './salesPersonRoutes';
+import OtpVerification from '../pages/OtpVerification';
+import UserAccess from '../pages/UserAccess';
+import ResetOtp from '../pages/resetOtp';
+import MinimalDashboard from '../pages/MinimalDashboard';
+import MessDetailsForm from '../pages/MessDetailsForm';
+import VerifyMessOtp from '../pages/VerifyMessOtp';
+import LoginRegister from '../pages/loginRegister';
+import { useState } from 'react';
+import MessVerificationStatus from '../pages/MessVerificationStatus';
+import OwnerDashboard from '../pages/ownerDashboard';
+import OwnerPlans from '../pages/OwnerPlans';
+import CreatePlan from '../pages/CreatePlan';
+import EditPlan from '../pages/EditPlan';
+import '../styles/index.css';
+import CustomerProfileOwner from '../pages/CustomerProfileforOwner';
+import CustomerProfile from '../pages/CustomerProfile';
+import CustomersPlan from '../pages/CustomerPlan';
+import MessProfile from '../pages/MessProfile';
+import Notifications from '../pages/Notifications';
+import CustomerHistory from '../pages/CustomerHistory';
+import PlanVerification from '../pages/PlanVerification';
+import PlanHistory from '../pages/PlanHistory';
+import SwitchRole from '../pages/SwitchRole';
+// import AccountHistory from '../pages/AccountHistory.jsx';
+
+// import '../../node_modules/bootstrap/dist/css/bootstrap.min.css';
+
+import '../styles/index.css';
+import Orders from '../pages/Orders';
+import UseTokens from '../pages/UseTokens';
+import AddCustomers from '../pages/AddCustomers';
+import History from '../pages/History';
+import CustomerMinimalDashboard from '../pages/CustomerMinimalDashboard ';
+import CustomerMessDetails from '../pages/CustomerMessDetails';
+import PlansOfCustomers from '../pages/PlansOfCustomers';
+import CustomerTransactionHistory from '../pages/CustomerTransactionHistory';
+import YourMess from '../pages/YourMess';
+import CustomersTokens from '../pages/CustomersTokens';
+import CustomerOrders from '../pages/CustomerOrders';
+import CustomerDashboard from '../pages/CustomerDashboard';
+import CustomerNotifications from '../pages/CustomerNotifications';
+import SwitchMess from '../pages/SwitchMess';
+import SwitchRoleCustomer from '../pages/SwitchRoleCustomer';
+import CustomerActivePLans from '../pages/CustomerActivePlans';
+
 
 function RouteComponent() {
-  const [isAuthenticated, setIsAuthenticated] = useState(
-    localStorage.getItem('isAuthenticated') === 'true'
-  );
-  const [isRefresh, setIsRefresh] = useState(false);
-  const [userRoleRoutes, setUserRoleRoutes] = useState(localStorage.getItem("mkddr"));  //mkddr named for user Roles
-  const newRole={
-    owner:"Zp4N8x3Lk7Tv",
-    salesPerson:"B9Qr6MtP2XaF",
-    stockManager:"J3xWp4Yn7XqZ",
-    deliveryBoy:"L8Tx2VaF6Qr9M",
-    partner:"P7Xk9Mz2Fa4JQ",
-  }
-  // const [userRoleRoutes, setUserRoleRoutes] = useState("owner");  //mkddr named for user Roles
-  useEffect(() => {
-    console.log(userRoleRoutes);
-    console.log("executing");
-    if(userRoleRoutes=="owner" || userRoleRoutes==null || userRoleRoutes==newRole.owner)
-    {
-      localStorage.setItem('mkddr',newRole.owner);
-    }
-    if(userRoleRoutes=="salesPerson" || userRoleRoutes==newRole.salesPerson)
-    {
-      localStorage.setItem('mkddr',newRole.salesPerson);
-    }
-    if(userRoleRoutes=="stockManager" || userRoleRoutes==newRole.stockManager)
-    {
-      localStorage.setItem('mkddr',newRole.stockManager);
-    }
-    if(userRoleRoutes=="deliveryBoy" || userRoleRoutes==newRole.deliveryBoy)
-    {
-      localStorage.setItem('mkddr',newRole.deliveryBoy);
-    }
-    if(userRoleRoutes=="partner" || userRoleRoutes==newRole.partner)
-    {
-      localStorage.setItem('mkddr',newRole.partner);
-    }
-    // localStorage.setItem('mkddr',userRoleRoutes==null?"owner":userRoleRoutes);
-    localStorage.setItem('isAuthenticated', isAuthenticated);
-  }, [isAuthenticated,userRoleRoutes]);
 
-  return (
-    <>
-      {
-        // setIsAuthenticated,isAuthenticated,isRefresh,setIsRefresh
-        (userRoleRoutes == 'owner' || userRoleRoutes=="Zp4N8x3Lk7Tv") && (
-          <OwnerRoutes
-          setUserRoleRoutes={setUserRoleRoutes}
-            setIsAuthenticated={setIsAuthenticated}
-            isAuthenticated={isAuthenticated}
-            isRefresh={isRefresh}
-            setIsRefresh={setIsRefresh}
-          />
-        )
-      }
-      {
-        // setIsAuthenticated,isAuthenticated,isRefresh,setIsRefresh
-        (userRoleRoutes == null) && (
-          <OwnerRoutes
-          setUserRoleRoutes={setUserRoleRoutes}
-            setIsAuthenticated={setIsAuthenticated}
-            isAuthenticated={isAuthenticated}
-            isRefresh={isRefresh}
-            setIsRefresh={setIsRefresh}
-          />
-        )
-      }
-      {
-        // setIsAuthenticated,isAuthenticated,isRefresh,setIsRefresh
-        (userRoleRoutes == 'partner' || userRoleRoutes=="P7Xk9Mz2Fa4JQ") && (
-          <OwnerRoutes
-            setIsAuthenticated={setIsAuthenticated}
-            isAuthenticated={isAuthenticated}
-            isRefresh={isRefresh}
-            setIsRefresh={setIsRefresh}
-          />
-        )
-      }
-      {
-        // setIsAuthenticated,isAuthenticated,isRefresh,setIsRefresh
-        (userRoleRoutes == 'deliveryBoy' || userRoleRoutes== "L8Tx2VaF6Qr9M") && (
-          <DeliveryBoyRoutes
-            setIsAuthenticated={setIsAuthenticated}
-            isAuthenticated={isAuthenticated}
-            isRefresh={isRefresh}
-            setIsRefresh={setIsRefresh}
-          />
-        )
-      }
-      {
-        // setIsAuthenticated,isAuthenticated,isRefresh,setIsRefresh
-        (userRoleRoutes == 'stockManager' || userRoleRoutes=="J3xWp4Yn7XqZ") && (
-          <StockManagerRoutes
-            setIsAuthenticated={setIsAuthenticated}
-            isAuthenticated={isAuthenticated}
-            isRefresh={isRefresh}
-            setIsRefresh={setIsRefresh}
-          />
-        )
-      }
-      {
-        // setIsAuthenticated,isAuthenticated,isRefresh,setIsRefresh
-        (userRoleRoutes == 'salesPerson' || userRoleRoutes == "B9Qr6MtP2XaF") && (
-          <SalesPersonRoutes
-          setUserRoleRoutes={setUserRoleRoutes}
-            setIsAuthenticated={setIsAuthenticated}
-            isAuthenticated={isAuthenticated}
-            isRefresh={isRefresh}
-            setIsRefresh={setIsRefresh}
-          />
-        )
-      }
-      
-    </>
-  );
+   const [auth, setAuth] = useState(false);
+
+    return(
+      <Routes>
+
+         <Route path="/login" element={<LoginRegister setAuth={setAuth} />} />
+
+                 <Route path="/otp-verification" element={<OtpVerification />} />
+                 <Route path="/user-access" element={<UserAccess />} />
+                  <Route path="/reset-otp" element={<ResetOtp />} />
+        <Route path="/" element={<LandingPage />} />
+
+        {/* Protected Routes */}
+
+        <Route path="/minimal-dashboard"  element={<MinimalDashboard />} />
+                <Route path="/customer-minimal-dashboard"  element={<CustomerMinimalDashboard />} />
+
+        <Route path="/mess-details"  element={<MessDetailsForm />} />
+        <Route path="/verify-mess-otp" element={<VerifyMessOtp />} />
+        {/* <Route path='/verification-status' element={<MessVerificationStatus/>}/> */}
+        <Route path='/owner-dashboard' element={<OwnerDashboard />} />
+       <Route path='/plans' element={<OwnerPlans />} />
+        <Route path='/add-plan' element={<CreatePlan />} />
+        <Route path="/edit-plan" element={<EditPlan />} />
+<Route path="/owner/mess/id/:messId" element={<MessVerificationStatus setAuth={setAuth} />} />
+<Route path="/orders" element={<Orders />} />
+<Route path="/customers" element={<Customers />} />
+<Route path="/owner-customer-profile" element={<CustomerProfileOwner />} />
+<Route path="/customer-profile" element={<CustomerProfile />} />
+
+<Route path="/customer-profile/plans" element={<CustomersPlan />} />
+<Route path="/plan-verification" element={<PlanVerification />} />
+
+<Route path="/customer-profile/history" element={<CustomerHistory />} />
+<Route path="/customer/use-tokens" element={<UseTokens />} />
+<Route path="/mess-profile" element={<MessProfile />} />
+<Route path="/notifications" element={<Notifications />} />
+<Route path="/add-customer" element={<AddCustomers />} />
+<Route path="/history" element={<History />} />
+ <Route path="/owner/history/plans" element={<PlanHistory />} />
+  {/* <Route path="/owner/history/account" element={<AccountHistory />} /> */}
+  <Route path="/customer/your-mess" element={<YourMess />} />
+  <Route path="/customer/mess-details" element={<CustomerMessDetails />} />
+    <Route path="/customer-plans" element={<PlansOfCustomers />} />
+    <Route path="/customer-history" element={<CustomerTransactionHistory />} />
+    <Route path="/using-plans" element={<CustomersTokens />} />
+    <Route path="/login/customers-dashboard" element={<CustomerDashboard />} />
+        <Route path="/customers-orders" element={<CustomerOrders />} />
+        <Route path="/customer-notifications" element={<CustomerNotifications />} />
+        <Route path="/switch-mess" element={<SwitchMess />} />
+        <Route path="/switch-role" element={<SwitchRole />} />
+        <Route path="/switch-role-customer" element={<SwitchRoleCustomer />} />
+        <Route path="/customer-activeplans" element={<CustomerActivePLans />} />
+      </Routes>
+    )
 }
 
 export default RouteComponent;
+
+
+
+
+
+// // src/routes/routes.jsx
+// import { Routes, Route, Navigate } from 'react-router-dom'
+// import { publicRoutes } from './publicRoutes'
+// import { ownerRoutes } from './ownerRoutes'
+// import { customerRoutes } from './customerRoutes'
+// import ProtectedRoute from './ProtectedRoute'
+
+// function RouteComponent() {
+//   return (
+//     <Routes>
+//       {publicRoutes.map((r, i) => (
+//         <Route key={`pub-${i}`} path={r.path} element={r.element} />
+//       ))}
+
+//       {ownerRoutes.map((r, i) => (
+//         <Route
+//           key={`own-${i}`}
+//           path={r.path}
+//           element={
+//             <ProtectedRoute allowedRoles={['owner']}>
+//               {r.element}
+//             </ProtectedRoute>
+//           }
+//         />
+//       ))}
+
+//       {customerRoutes.map((r, i) => (
+//         <Route
+//           key={`cus-${i}`}
+//           path={r.path}
+//           element={
+//             <ProtectedRoute allowedRoles={['customer']}>
+//               {r.element}
+//             </ProtectedRoute>
+//           }
+//         />
+//       ))}
+
+//       <Route path="*" element={<Navigate to="/" replace />} />
+//     </Routes>
+//   )
+// }
+
+// export default RouteComponent

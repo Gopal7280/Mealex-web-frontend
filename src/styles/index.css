@@ -1,20 +1,80 @@
+
+
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Base Reset and Typography */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  /* background-color: #242424; */
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
-body{
-  background-color: #e5e7eb !important;
+
+/* Base body styles using Tailwind classes */
+body {
+  @apply bg-gray-100 text-gray-800;
 }
-@layer base {img{display: initial;}}
+
+/* Ensure base <img> tags are not blocked */
+@layer base {
+  img {
+    display: initial;
+  }
+}
+
+/* Input utility */
+.input {
+  @apply w-full px-4 py-2 border border-gray-300 rounded text-gray-700 placeholder-gray-400 focus:ring-2 focus:ring-orange-400 focus:outline-none;
+}
+
+/* Button utility */
+.btn {
+  @apply px-4 py-2 rounded text-white bg-orange-500 hover:bg-orange-600 transition disabled:opacity-50;
+}
+
+/* Chrome/Safari ke default time icon ko dark ya hide karne ke liye */
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1); /* dark karne ke liye */
+  cursor: pointer;
+}
+
+/* Agar completely gayab karna ho to */
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+/* React Time Picker cleanup */
+.react-time-picker {
+  width: 100% !important;
+}
+
+.react-time-picker__wrapper {
+  border: none !important; /* extra border remove */
+  display: flex;
+  align-items: center;
+  background: transparent;
+}
+
+.react-time-picker__inputGroup {
+  padding: 0.75rem 1rem; /* Tailwind = px-4 py-3 */
+  background: #f3f4f6;   /* Tailwind = bg-gray-100 */
+  border: 1px solid #000;
+  border-radius: 0.75rem; /* Tailwind = rounded-xl */
+  flex: 1;
+  font-size: 1rem;
+}
+
+.react-time-picker__clock-button,
+.react-time-picker__clear-button {
+  background: none;
+  border: none;
+  margin-left: 0.5rem;
+  cursor: pointer;
+}
