@@ -159,11 +159,160 @@
 
 
 
-import React, { useState, useEffect } from 'react';
+// import React, { useState, useEffect } from 'react';
+// import { useNavigate, useLocation } from 'react-router-dom';
+// import { apiPost } from '../services/api';
+// import axios from 'axios';
+// import storage from '../utils/storage';
+
+
+// const OtpVerification = () => {
+//   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+//   const [timer, setTimer] = useState(30);
+//   const [resendEnabled, setResendEnabled] = useState(false);
+//   const [error, setError] = useState('');
+//   const navigate = useNavigate();
+//   const location = useLocation();
+
+//   const identifier = location.state?.identifier;
+//   const identifierType = location.state?.identifierType;
+//   const requestId = location.state?.requestId;
+//   const context = location.state?.context || 'registration';
+
+//   useEffect(() => {
+//     const interval = setInterval(() => {
+//       setTimer(prev => {
+//         if (prev <= 1) {
+//           clearInterval(interval);
+//           setResendEnabled(true);
+//           return 0;
+//         }
+//         return prev - 1;
+//       });
+//     }, 1000);
+//     return () => clearInterval(interval);
+//   }, []);
+
+//   const handleChange = (index, value) => {
+//     if (!/^\d?$/.test(value)) return;
+//     const newOtp = [...otp];
+//     newOtp[index] = value;
+//     setOtp(newOtp);
+//     if (value && index < 5) {
+//       document.getElementById(`otp-${index + 1}`).focus();
+//     }
+//   };
+
+//   const handleSubmit = async () => {
+//     const finalOtp = otp.join('');
+//     if (finalOtp.length !== 6) {
+//       setError('Please enter a valid 6-digit OTP');
+//       return;
+//     }
+
+//     try {
+//       const response = await apiPost('/register/otp', {
+//         identifier,
+//         identifierType,
+//         otp: finalOtp,
+//         requestId,
+//         context,
+//       });
+
+//       if (response.data.success) {
+//         const token = response.data.token;
+//         const identifier = response.data.identifier;
+
+//         storage.removeItem('token');
+//         storage.removeItem('identifier');
+//         storage.setItem('identifier', identifier);
+//         storage.setItem('token', token);
+//         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+//         navigate('/user-access');
+//       } else {
+//         setError(response.data.message || 'OTP verification failed');
+//       }
+//     } catch (err) {
+//       console.error('❌ OTP verification failed:', err);
+//       setError(err.response?.data?.message || 'OTP verification failed');
+//     }
+//   };
+
+//   const handleResend = async () => {
+//     try {
+//       await apiPost('/resend-otp', {
+//         identifier,
+//         context,
+//         requestId,
+//       });
+//       setOtp(['', '', '', '', '', '']);
+//       setResendEnabled(false);
+//       setTimer(30);
+//     } catch (err) {
+//       setError(err.response?.data?.message || 'Failed to resend OTP');
+//     }
+//   };
+
+//   return (
+//     <div className="min-h-screen flex items-center justify-center bg-white px-4">
+//       <div className="bg-white p-8 rounded-lg w-full max-w-md text-center">
+//         <h2 className="md:text-4xl text-2xl font-semibold text-orange-500 mb-2 md:mb-4">
+//           Verify Your Account
+//         </h2>
+//         <p className="text-gray-400 mb-2 md:mb-6 text-sm md:text-base">
+//           Enter the 6-digit code sent to <span className="font-medium">{identifier}</span>
+//         </p>
+
+//         <div className="flex justify-between gap-2 mb-4">
+//           {otp.map((digit, index) => (
+//             <input
+//               key={index}
+//               id={`otp-${index}`}
+//               type="text"
+//               inputMode="numeric"
+//               maxLength={1}
+//               value={digit}
+//               onChange={e => handleChange(index, e.target.value)}
+//               className="w-10 h-12 border-2 border-orange-500 text-center rounded-lg text-lg focus:outline-none"
+//             />
+//           ))}
+//         </div>
+
+//         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+
+//         <button
+//           onClick={handleSubmit}
+//           className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition"
+//         >
+//           Verify
+//         </button>
+
+//         <div className="mt-4 text-sm text-gray-600">
+//           {resendEnabled ? (
+//             <button
+//               onClick={handleResend}
+//               className="text-orange-500 font-bold hover:underline"
+//             >
+//               Resend OTP
+//             </button>
+//           ) : (
+//             `Resend OTP in ${timer}s`
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default OtpVerification;
+
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { apiPost } from '../services/api';
 import axios from 'axios';
 import storage from '../utils/storage';
+import { setupNotifications } from '../App'; // ✅ import kiya
+import { toast } from 'react-hot-toast';
 
 const OtpVerification = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
@@ -172,6 +321,7 @@ const OtpVerification = () => {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
+  const foregroundListenerBound = useRef(false); // ✅ yaha bhi chahiye
 
   const identifier = location.state?.identifier;
   const identifierType = location.state?.identifierType;
@@ -227,6 +377,11 @@ const OtpVerification = () => {
         storage.setItem('identifier', identifier);
         storage.setItem('token', token);
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+        // ✅ setupNotifications call
+        await setupNotifications(token, foregroundListenerBound);
+        toast.success('🎉 Account verified & logged in!');
+
         navigate('/user-access');
       } else {
         setError(response.data.message || 'OTP verification failed');
@@ -304,6 +459,7 @@ const OtpVerification = () => {
 };
 
 export default OtpVerification;
+
 
 
 // import React, { useState, useEffect } from 'react';

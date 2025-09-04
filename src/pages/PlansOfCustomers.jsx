@@ -1218,7 +1218,7 @@ const CustomerPlansView = () => {
     <div className="flex h-screen">
       <Navbar2 />
       {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-green-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <OwnerHeader />
         <div className="space-y-6 bg-[#FAF9F5] px-4 py-4">
           {messes.map((mess) => {

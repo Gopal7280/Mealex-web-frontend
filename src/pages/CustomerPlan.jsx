@@ -152,32 +152,69 @@ setShowAvailablePlans(false); // hide available plans section
 };
 
 
-  const handlePlanPurchase = async () => {
-    setShowPaymentModal(false);
-    if (selectedPlan?.paymentMode === 'cash') {
-      try {
-        await apiPost('/owner/mess/payment-verify', {
-          planId: selectedPlan._id || selectedPlan.planId,
-          customerId,
-          customerPaymentType: 'cash',
-        });
-        alert('Plan purchased via Cash');
-        setShowAvailablePlans(false);
-        // fetchActivePlans();
-      } catch (err) {
-        console.error('Cash payment failed:', err);
-        alert('Failed to record cash payment.');
+  // const handlePlanPurchase = async () => {
+  //   setShowPaymentModal(false);
+  //   if (selectedPlan?.paymentMode === 'cash') {
+  //     try {
+  //       await apiPost('/owner/mess/payment-verify', {
+  //         planId: selectedPlan._id || selectedPlan.planId,
+  //         customerId,
+  //         customerPaymentType: 'cash',
+  //       });
+  //       alert('Plan purchased via Cash');
+  //       setShowAvailablePlans(false);
+  //       // fetchActivePlans();
+  //     } catch (err) {
+  //       console.error('Cash payment failed:', err);
+  //       alert('Failed to record cash payment.');
+  //     }
+  //   } else {
+  //     initiatePayment();
+  //   }
+  // };
+
+const handlePlanPurchase = async () => {
+  setShowPaymentModal(false);
+
+  if (selectedPlan?.paymentMode === "cash") {
+    try {
+      const payload = {
+        customerId,
+        planId: selectedPlan._id || selectedPlan.planId,
+        messId,
+      };
+
+      // 🔥 New API for cash (OTP initiation)
+      const res = await apiPost("/owner/mess/plan/issue/initiate", payload);
+      const responseData = res.data; // ✅ axios ka response unwrap karo
+
+
+      if (responseData.success) {
+        toast.success("✅ OTP sent successfully. Please verify.");
+        
+        // ⚡ Store response for next page
+        storage.setItem("planIssueResponse", JSON.stringify(responseData));
+
+        // 👉 Navigate to OTP verification page
+        navigate("/plan-otp-verification");
+      } else {
+        toast.error("❌ Failed to initiate cash plan issue.");
       }
-    } else {
-      initiatePayment();
+    } catch (err) {
+      console.error("Cash initiation failed:", err);
+      toast.error("❌ Something went wrong.");
     }
-  };
+  } else {
+    initiatePayment();
+  }
+};
+
 
   return (
     <div className="flex h-screen">
       <Navbar />
       {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-green-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
 
           <OwnerHeader />
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">
@@ -315,75 +352,7 @@ setShowAvailablePlans(false); // hide available plans section
         </div>
         </div>
 
-         {/* {showPaymentModal && selectedPlan && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center  bg-opacity-50 backdrop-brightness-50">
-    <div className="bg-white rounded-2xl p-6 shadow-lg w-[90%] max-w-md relative">
-      
-      <button
-        onClick={() => setShowPaymentModal(false)}
-        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
-      >
-        ✕
-      </button>
 
-      <h3 className="text-lg font-semibold text-center text-black mb-6">
-        Choose Customer’s Payment Method
-      </h3>
-
-      
-      <div className="flex flex-col gap-4 mb-6">
-        <label
-          onClick={() => setSelectedPlan({ ...selectedPlan, paymentMode: 'cash' })}
-          className={`flex items-center justify-between px-4 py-3 rounded-lg border cursor-pointer ${
-            selectedPlan?.paymentMode === 'cash'
-              ? 'border-green-500 bg-green-50'
-              : 'border-gray-300'
-          }`}
-        >
-          <div className="flex items-center gap-2 text-green-600 font-medium">
-            <span className="text-xl">🪙</span> Cash
-          </div>
-          {selectedPlan?.paymentMode === 'cash' && (
-            <span className="text-green-500 text-lg">✔</span>
-          )}
-        </label>
-
-        <label
-          onClick={() => setSelectedPlan({ ...selectedPlan, paymentMode: 'online' })}
-          className={`flex items-center justify-between px-4 py-3 rounded-lg border cursor-pointer ${
-            selectedPlan?.paymentMode === 'online'
-              ? 'border-blue-500 bg-blue-50'
-              : 'border-gray-300'
-          }`}
-        >
-          <div className="flex items-center gap-2 text-blue-600 font-medium">
-            <span className="text-xl">💳</span> UPI/Online
-          </div>
-          {selectedPlan?.paymentMode === 'online' && (
-            <span className="text-blue-500 text-lg">✔</span>
-          )}
-        </label>
-      </div>
-
-      <button
-        onClick={() => {
-          setShowPaymentModal(false);
-          
-        }}
-        className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-lg font-semibold"
-      >
-        Purchase Plan
-      </button>
-    </div>
-  </div>
-)}
-
-      </div>
-    </div>
-  );
-};
-
-export default CustomerPlans; */}
 
  {showPaymentModal && selectedPlan && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 backdrop-brightness-50">

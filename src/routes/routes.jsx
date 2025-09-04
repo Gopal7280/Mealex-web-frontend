@@ -42,7 +42,6 @@ import AddCustomers from '../pages/AddCustomers';
 import History from '../pages/History';
 import CustomerMinimalDashboard from '../pages/CustomerMinimalDashboard ';
 import CustomerMessDetails from '../pages/CustomerMessDetails';
-import PlansOfCustomers from '../pages/PlansOfCustomers';
 import CustomerTransactionHistory from '../pages/CustomerTransactionHistory';
 import YourMess from '../pages/YourMess';
 import CustomersTokens from '../pages/CustomersTokens';
@@ -52,6 +51,10 @@ import CustomerNotifications from '../pages/CustomerNotifications';
 import SwitchMess from '../pages/SwitchMess';
 import SwitchRoleCustomer from '../pages/SwitchRoleCustomer';
 import CustomerActivePLans from '../pages/CustomerActivePlans';
+import CreateLinkedAccount from '../pages/CreateLinkedAccount';
+import KYC from '../pages/KYC';
+import Stakeholder from '../pages/stakeholder';
+import PlanotpVerification from '../pages/planotpverification';
 
 
 function RouteComponent() {
@@ -99,7 +102,6 @@ function RouteComponent() {
   {/* <Route path="/owner/history/account" element={<AccountHistory />} /> */}
   <Route path="/customer/your-mess" element={<YourMess />} />
   <Route path="/customer/mess-details" element={<CustomerMessDetails />} />
-    <Route path="/customer-plans" element={<PlansOfCustomers />} />
     <Route path="/customer-history" element={<CustomerTransactionHistory />} />
     <Route path="/using-plans" element={<CustomersTokens />} />
     <Route path="/login/customers-dashboard" element={<CustomerDashboard />} />
@@ -109,6 +111,10 @@ function RouteComponent() {
         <Route path="/switch-role" element={<SwitchRole />} />
         <Route path="/switch-role-customer" element={<SwitchRoleCustomer />} />
         <Route path="/customer-activeplans" element={<CustomerActivePLans />} />
+        <Route path="/linking-account" element={<CreateLinkedAccount />} />
+        <Route path="/Mess-KYC" element={<KYC />} />
+        <Route path="/create-stakeholder" element={<Stakeholder />} />
+        <Route path="/plan-otp-verification" element={<PlanotpVerification />} />
       </Routes>
     )
 }

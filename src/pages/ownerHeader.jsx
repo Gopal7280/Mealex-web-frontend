@@ -386,10 +386,11 @@ const OwnerHeader = () => {
   const handleAvatarClick = () => navigate('/mess-profile');
 
   return (
-    <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-6 gap-4 sm:gap-0">
+    // <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start mb-6 gap-4 sm:gap-0">
+<div className="flex justify-between items-center mb-6">
       
       {/* Left: Owner Info */}
-      <div className="text-center sm:text-left">
+      <div className="">
         <p className="text-xs sm:text-sm text-gray-700 font-semibold">Welcome,</p>
         <h2 className="text-xl sm:text-3xl font-bold text-orange-600">{ownerName}</h2>
         <p className="text-xs sm:text-sm text-green-600">(Owner)</p>
@@ -402,7 +403,7 @@ const OwnerHeader = () => {
           <p className="text-xs sm:text-lg text-gray-500">{messAddress}</p>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        {/* <div className="flex items-center gap-2 sm:gap-3">
           <img
             src={bell}
             alt="Notifications"
@@ -415,7 +416,22 @@ const OwnerHeader = () => {
             alt="Owner Avatar"
             className="w-9 h-9 sm:w-12 sm:h-12 rounded-full border border-orange-400 object-cover cursor-pointer"
           />
-        </div>
+        </div> */}
+        <div className="flex items-center gap-4">
+  <img
+    src={bell}
+    alt="Notifications"
+    className="w-10 h-10 cursor-pointer"
+    onClick={handleNotifications}
+  />
+  <img
+    src={profileImage || defaultAvatar}
+    alt="Owner Avatar"
+    className="w-12 h-12 object-cover border border-orange-400 cursor-pointer rounded-full"
+    onClick={handleAvatarClick}
+  />
+</div>
+
       </div>
     </div>
   );

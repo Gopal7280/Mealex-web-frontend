@@ -239,7 +239,7 @@ const SwitchRoleCustomer = () => {
   return (
     <div className="flex h-screen">
       <Navbar2 />
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-green-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <CustomerHeader title="Switch Role" />
 
         {/* Description Section */}

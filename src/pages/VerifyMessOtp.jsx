@@ -175,12 +175,6 @@ const VerifyMessOtp = () => {
     }
   };
 
-  // const handleResend = () => {
-  //   setTimer(60);
-  //   setResendEnabled(false);
-  //   // Optionally hit resend endpoint here
-  //   alert('OTP resent (mocked).');
-  // };
 
 const handleResend = async () => {
   setTimer(60);

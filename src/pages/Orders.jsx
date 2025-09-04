@@ -20,21 +20,7 @@ const Orders = () => {
 
   const isSelected = (id) => selectedOrders.includes(id);
 
-  // const toggleOrderSelection = (id) => {
-  //   if (isSelected(id)) {
-  //     setSelectedOrders(selectedOrders.filter((orderId) => orderId !== id));
-  //   } else {
-  //     setSelectedOrders([...selectedOrders, id]);
-  //   }
-  // };
 
-  // const selectAll = () => {
-  //   if (selectedOrders.length === orders.length) {
-  //     setSelectedOrders([]);
-  //   } else {
-  //     setSelectedOrders(orders.map((o) => o.orderId));
-  //   }
-  // };
   const toggleOrderSelection = (id) => {
   setSelectedOrders(prev =>
     prev.includes(id) ? prev.filter(orderId => orderId !== id) : [...prev, id]
@@ -49,16 +35,6 @@ const selectAll = () => {
   }
 };
 
-
-  // const handleAcceptAll = () => {
-  //   selectedOrders.forEach(id => handleDecision(id, 'accepted'));
-  //   setSelectedOrders([]);
-  // };
-
-  // const handleRejectAll = () => {
-  //   selectedOrders.forEach(id => handleDecision(id, 'rejected'));
-  //   setSelectedOrders([]);
-  // };
 
 const handleAcceptAll = () => {
   const socket = getSocket();
@@ -127,7 +103,8 @@ const handleRejectAll = () => {
           const res = await apiGet(`/owner/mess/${messId}/orders`);
           if (res.success) {
             const data = res.data || [];
-              setTotalOrders(res.total || 0);   // ✅ backend se total count lo
+            console.log(res);
+  setTotalOrders(data.length); // ✅ fix here
 
             const mergedOrders = data.map(o => {
               const rawPayload = storage.getItem(`orderPayload_${o.orderId}`);
@@ -174,9 +151,11 @@ const handleRejectAll = () => {
     const res = await apiGet(`/owner/mess/${messId}/orders/past?days=7&page=${pageNumber}&limit=10`);
     if (res.success) {
       const data = res.data || [];
-      console.log("Past orders fetched:", data);
+      console.log("Past orders fetched:", res);
       setOrders(data);
       setPage(pageNumber);
+        setTotalOrders(res.pagination?.total || data.length); // ✅ fix here
+
 
       // Enable next if 10 items came, else last page
       if (data.length === 10) {
@@ -226,17 +205,7 @@ const handleRejectAll = () => {
       }
     });
 
-    // onOrderResponse(res => {
-    //   console.log("Order response received:", res);
-    //   if (res?.success && res.data?.orderId && res.data?.orderStatus) {
-    //     console.log("Order response received:", res.data);
-    //     const rawPayload = storage.getItem(`orderPayload_${res.data.orderId}`);
-    //     const existingPayload = rawPayload ? JSON.parse(rawPayload) : {};
-    //     const updatedPayload = { ...existingPayload, orderStatus: res.data.orderStatus };
-    //     storage.setItem(`orderPayload_${res.data.orderId}`, JSON.stringify(updatedPayload));
-    //     setOrders(prev => prev.map(o => o.orderId === res.data.orderId ? updatedPayload : o));
-    //   }
-    // });
+ 
     onOrderResponse(res => {
   console.log("Order response received:", res);
 
@@ -302,7 +271,7 @@ const handleRejectAll = () => {
     <div className="flex h-screen ">
       <Navbar2 />
       {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-green-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <CustomerHeader/>
 
      
@@ -396,7 +365,7 @@ const handleRejectAll = () => {
 
                 )}
 
-                <div className="grid grid-cols-7 text-center font-poppins font-medium text-gray-700 py-4 border-t border-t-[#DEDEDE] border-b border-b-[#DEDEDE]">
+                {/* <div className="grid grid-cols-7 text-center font-poppins font-medium text-gray-700 py-4 border-t border-t-[#DEDEDE] border-b border-b-[#DEDEDE]">
                   <span className='border-r border-[#DEDEDE] text-[#3C3C4399] p-1'>{order.customerName}</span>
                   <span className='border-r border-[#DEDEDE] text-[#3C3C4399] p-1'>{order.customerPlanName || order.planName}</span>
                   <span className='border-r border-[#DEDEDE] text-[#3C3C4399] p-1'>{order.tokenCount} Token(s)</span>
@@ -415,7 +384,54 @@ const handleRejectAll = () => {
                   ) : (
                     <span className="col-span-2 text-gray-400 italic text-center">Past Order</span>
                   )}
-                </div>
+                </div> */}
+                <div className="overflow-x-auto">
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 text-center font-poppins font-medium text-gray-700 py-4 border-t border-t-[#DEDEDE] border-b border-b-[#DEDEDE] text-xs sm:text-sm md:text-base">
+    <span className="md:border-r border-b md:border-b-0 border-[#DEDEDE] text-[#3C3C4399] p-2 break-words">
+      {order.customerName}
+    </span>
+    <span className="md:border-r border-b md:border-b-0 border-[#DEDEDE] text-[#3C3C4399] p-2 break-words">
+      {order.customerPlanName || order.planName}
+    </span>
+    <span className="md:border-r border-b md:border-b-0 border-[#DEDEDE] text-[#3C3C4399] p-2 break-words">
+      {order.tokenCount} Token(s)
+    </span>
+    <span className="md:border-r border-b md:border-b-0 border-[#DEDEDE] text-[#3C3C4399] p-2 break-words">
+      {new Date(order.createdAt).toLocaleTimeString()}
+    </span>
+    <span className="md:border-r border-b md:border-b-0 border-[#DEDEDE] text-[#3C3C4399] p-2 break-words">
+      {new Date(order.createdAt).toLocaleDateString()}
+    </span>
+
+    {!showPastOrders ? (
+      order.orderStatus === "pending" || !order.orderStatus ? (
+        <>
+          <button
+            onClick={() => handleDecision(order.orderId, "accepted")}
+            className="md:border-r border-b md:border-b-0 border-gray-300 text-green-600 font-bold w-full py-2"
+          >
+            ACCEPT
+          </button>
+          <button
+            onClick={() => handleDecision(order.orderId, "rejected")}
+            className="text-red-600 font-bold w-full py-2"
+          >
+            REJECT
+          </button>
+        </>
+      ) : (
+        <span className="col-span-2 text-gray-400 italic text-center py-2">
+          Action taken
+        </span>
+      )
+    ) : (
+      <span className="col-span-2 text-gray-400 italic text-center py-2">
+        Past Order
+      </span>
+    )}
+  </div>
+</div>
+
 
                 <div className="mt-2 text-sm text-gray-700 p-1">
                   <span className="inline-block border font-poppins border-green-500 text-green-600 font-bold md:ml-3 px-2 py-0.5 rounded mr-2 text-sm">

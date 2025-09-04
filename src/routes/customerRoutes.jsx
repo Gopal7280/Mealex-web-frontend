@@ -6,7 +6,6 @@ import CustomerHistory from '../pages/CustomerHistory'
 import UseTokens from '../pages/UseTokens'
 import YourMess from '../pages/YourMess'
 import CustomerMessDetails from '../pages/CustomerMessDetails'
-import PlansOfCustomers from '../pages/PlansOfCustomers'
 import CustomerTransactionHistory from '../pages/CustomerTransactionHistory'
 import CustomersTokens from '../pages/CustomersTokens'
 import CustomerDashboard from '../pages/CustomerDashboard'
@@ -21,7 +20,6 @@ export const customerRoutes = [
   { path: '/customer/use-tokens', element: <UseTokens /> },
   { path: '/customer/your-mess', element: <YourMess /> },
   { path: '/customer/mess-details', element: <CustomerMessDetails /> },
-  { path: '/customer-plans', element: <PlansOfCustomers /> },
   { path: '/customer-history', element: <CustomerTransactionHistory /> },
   { path: '/customer/tokens', element: <CustomersTokens /> },
   { path: '/login/customers-dashboard', element: <CustomerDashboard /> },

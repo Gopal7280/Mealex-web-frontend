@@ -902,17 +902,33 @@ const handleSubmit = async (e) => {
 
   
   return (
-    <form onSubmit={handleSubmit} className="w-full mx-auto p-10 bg-white rounded-2xl shadow space-y-8">
+    // <form onSubmit={handleSubmit} className="w-full mx-auto p-10 bg-white rounded-2xl shadow space-y-8">
      
-             <div className="flex items-center gap-2 mb-4">
-                    <ArrowLeft 
-                      className="w-8 h-8 cursor-pointer text-orange-500 hover:text-red-500"
-                      onClick={() => navigate(-1)}
-                    />
-                    <h2 className="text-3xl font-bold text-orange-500"> Create Mess Profile</h2>
-                  </div>
+    //          <div className="flex items-center gap-2 mb-4">
+    //                 <ArrowLeft 
+    //                   className="w-8 h-8 cursor-pointer text-orange-500 hover:text-red-500"
+    //                   onClick={() => navigate(-1)}
+    //                 />
+    //                 <h2 className="text-3xl font-bold text-orange-500"> Create Mess Profile</h2>
+    //               </div>
+    <form
+  onSubmit={handleSubmit}
+  className="w-full mx-auto p-6 sm:p-8 md:p-10 bg-white rounded-2xl shadow space-y-8"
+>
+  <div className="flex items-center gap-2 mb-4">
+    <ArrowLeft
+      className="w-8 h-8 cursor-pointer text-orange-500 hover:text-red-500"
+      onClick={() => navigate(-1)}
+    />
+    <h2 className="text-2xl sm:text-3xl font-bold text-orange-500">
+      Create Mess Profile
+    </h2>
+  </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6"> */}
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+
         <InputGroup label="Mess Name*">
           <input
             type="text"
@@ -1113,8 +1129,6 @@ const handleSubmit = async (e) => {
           />
        
         </InputGroup>
-
-        
     
 <InputGroup label="Upload Mess Logo*">
   <input
@@ -1204,7 +1218,7 @@ const handleSubmit = async (e) => {
 </div>
 
       </div>
-      {isDaysModalOpen && (
+      {/* {isDaysModalOpen && (
   <div className="fixed inset-0 bg-opacity-40  backdrop-blur-sm z-50 flex justify-center items-center">
     <div className="bg-white shadow p-6 rounded-lg w-[300px]">
       <h2 className="text-lg font-semibold mb-4">Select Days Open</h2>
@@ -1285,7 +1299,84 @@ setForm((prev) => ({
         <p className="mt-2 text-sm text-orange-600">Fields marked with * are mandatory</p>
       </div>
 
-    </form>
+    </form> */}
+     {isDaysModalOpen && (
+    <div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+      <div className="bg-white shadow p-6 rounded-lg w-full max-w-sm">
+        <h2 className="text-lg font-semibold mb-4">Select Days Open</h2>
+        <div className="grid grid-cols-3 gap-2">
+          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+            <button
+              key={day}
+              type="button"
+              onClick={() => handleToggleDay(day)}
+              className={`border px-3 py-1 rounded ${
+                selectedDays.includes(day)
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-gray-100'
+              }`}
+            >
+              {day}
+            </button>
+          ))}
+        </div>
+        <div className="mt-4 flex justify-end gap-2">
+          <button
+            className="text-gray-500"
+            onClick={() => setIsDaysModalOpen(false)}
+          >
+            Cancel
+          </button>
+          <button
+            className="bg-orange-500 text-white px-4 py-1 rounded"
+            onClick={() => {
+              const fullDayMap = {
+                Mon: 'Monday',
+                Tue: 'Tuesday',
+                Wed: 'Wednesday',
+                Thu: 'Thursday',
+                Fri: 'Friday',
+                Sat: 'Saturday',
+                Sun: 'Sunday',
+              };
+              const mappedDays = selectedDays.map((day) => fullDayMap[day]);
+              setForm((prev) => ({ ...prev, daysOpen: mappedDays }));
+              setIsDaysModalOpen(false);
+            }}
+          >
+            Save
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+
+  {/* Submit Button */}
+  <div className="flex flex-col items-center">
+    <button
+      type="submit"
+      disabled={loading}
+      className={`w-full sm:w-1/2 md:w-1/3 font-semibold py-3 rounded-xl transition 
+        ${
+          loading
+            ? 'bg-gray-400 text-white cursor-not-allowed'
+            : 'bg-orange-500 text-white hover:bg-orange-600'
+        }`}
+    >
+      {loading ? (
+        <div className="flex items-center justify-center gap-2">
+          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+          <span>Submitting...</span>
+        </div>
+      ) : (
+        'Submit Details'
+      )}
+    </button>
+    <p className="mt-2 text-sm text-orange-600">
+      Fields marked with * are mandatory
+    </p>
+  </div>
+</form>
 
     
   );

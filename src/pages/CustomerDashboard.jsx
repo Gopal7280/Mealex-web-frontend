@@ -394,7 +394,7 @@ const CustomerDashboard = () => {
   return (
     <div className="flex h-screen">
       <Navbar2 />
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-green-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <CustomerHeader />
 
         {/* stats */}
@@ -431,7 +431,7 @@ const CustomerDashboard = () => {
         </div>
 
         {/* recent orders */}
-        <div className="bg-white border rounded-xl overflow-hidden mb-8">
+        {/* <div className="bg-white border rounded-xl overflow-hidden mb-8">
           <div className="flex justify-between items-center px-12 py-4">
             <h3 className="text-base font-semibold text-[#33363F]">Recent Orders</h3>
           </div>
@@ -452,7 +452,7 @@ const CustomerDashboard = () => {
                 <div className="text-center">Status</div>
               </div>
 
-              <div className="max-h-[340px] overflow-y-auto">
+              <div className="max-h-[320px] overflow-y-auto">
                 {orders.map((order, idx) => (
                   <div
                     key={order.orderId || idx}
@@ -490,7 +490,109 @@ const CustomerDashboard = () => {
               </div>
             </>
           )}
-        </div>
+        </div> */}
+        {/* recent orders */}
+<div className="bg-white border rounded-xl overflow-hidden mb-8">
+  <div className="flex justify-between items-center px-4 sm:px-6 md:px-12 py-4">
+    <h3 className="text-base font-semibold text-[#33363F]">Recent Orders</h3>
+  </div>
+
+  {orders.length === 0 ? (
+    <div className="text-center text-[#0000008C] py-6">
+      No orders placed today.
+    </div>
+  ) : (
+    <div className="overflow-x-auto">
+      <div className="hidden md:grid grid-cols-7 text-sm font-medium text-gray-600 border-b pb-2 px-4 min-w-[900px]">
+        <div>Customer Name</div>
+        <div>Plan Name</div>
+        <div>Tokens</div>
+        <div>Type</div>
+        <div>Time</div>
+        <div>Date</div>
+        <div className="text-center">Status</div>
+      </div>
+
+      <div className="max-h-[320px] overflow-y-auto">
+        {orders.map((order, idx) => (
+          <div
+            key={order.orderId || idx}
+            className="border-t px-4 py-3 text-sm md:grid md:grid-cols-7 items-center min-w-[900px]"
+          >
+            {/* Mobile stacked view */}
+            <div className="md:hidden space-y-2">
+              <p><span className="font-medium">Customer:</span> {order.customerName}</p>
+              <p><span className="font-medium">Plan:</span> {order.customerPlanName}</p>
+              <p><span className="font-medium">Tokens:</span> {order.tokenCount}</p>
+              <p><span className="font-medium">Type:</span> {order.orderType}</p>
+              <p>
+                <span className="font-medium">Time:</span>{" "}
+                {new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+              </p>
+              <p>
+                <span className="font-medium">Date:</span>{" "}
+                {new Date(order.createdAt).toLocaleDateString()}
+              </p>
+              <p>
+                <span className="font-medium">Status:</span>{" "}
+                {order.orderStatus === "pending" ? (
+                  <button
+                    onClick={() => handleCancelOrder(order)}
+                    className="ml-2 px-3 py-1 text-xs font-semibold rounded bg-red-100 text-red-600 hover:bg-red-200"
+                  >
+                    CANCEL ORDER
+                  </button>
+                ) : (
+                  <span
+                    className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full ${
+                      statusColors[order.orderStatus?.toLowerCase()]
+                    }`}
+                  >
+                    {order.orderStatus?.toUpperCase()}
+                  </span>
+                )}
+              </p>
+            </div>
+
+            {/* Desktop 7-column view */}
+            <div className="hidden md:contents">
+              <div>{order.customerName}</div>
+              <div>{order.customerPlanName}</div>
+              <div>{order.tokenCount}</div>
+              <div className="capitalize">{order.orderType}</div>
+              <div>
+                {new Date(order.createdAt).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </div>
+              <div>{new Date(order.createdAt).toLocaleDateString()}</div>
+              <div className="text-center">
+                {order.orderStatus === "pending" ? (
+                  <button
+                    onClick={() => handleCancelOrder(order)}
+                    className="px-3 py-1 text-xs font-semibold rounded bg-red-100 text-red-600 hover:bg-red-200"
+                  >
+                    CANCEL ORDER
+                  </button>
+                ) : (
+                  <span
+                    className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                      statusColors[order.orderStatus?.toLowerCase()]
+                    }`}
+                  >
+                    {order.orderStatus?.toUpperCase()}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )}
+</div>
+
       </div>
     </div>
   );

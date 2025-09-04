@@ -33,7 +33,7 @@ const CustomerActivePlans = () => {
   return (
     <div className="flex h-screen">
       <Navbar2 />
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-green-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <CustomerHeader  />
 
         {/* Tabs */}
@@ -104,16 +104,23 @@ const CustomerActivePlans = () => {
                 <p className="font-semibold text-lg">{plan.name}</p>
                 <p className="text-sm text-gray-600">{plan.description}</p>
                 <p className="text-sm text-gray-500">
-                  {plan.totalTokens} Tokens / {plan.durationDays} Days
+                  {plan.issuedTokenCount} Tokens / {plan.durationDays} Days
                 </p>
                 <p className="text-sm text-gray-700 font-semibold">₹{plan.price}</p>
-                <p className="text-xs text-gray-500 mt-1">
-                  Purchased: {new Date(plan.purchaseDate).toLocaleDateString()} | 
-                  Expiry: {new Date(plan.expiryDate).toLocaleDateString()}
-                </p>
-                <p className="text-xs text-gray-500">
-                  Tokens Used: {plan.usedTokenCount} / {plan.issuedTokenCount}
-                </p>
+              
+                <p className="text-xs mt-1">
+  <span className="text-green-600 font-medium">
+    Purchased: {new Date(plan.purchaseDate).toLocaleDateString()}
+  </span>{" "}
+  |{" "}
+  <span className="text-red-600 font-medium">
+    Expiry: {new Date(plan.expiryDate).toLocaleDateString()}
+  </span>
+</p>
+<p className="text-xs text-gray-500">
+  Tokens Used: {plan.usedTokenCount} / {plan.issuedTokenCount}
+</p>
+
               </div>
             ))}
           </div>

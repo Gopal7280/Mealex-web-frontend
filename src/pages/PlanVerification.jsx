@@ -163,7 +163,7 @@ const handleResend = async () => {
 
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="bg-white p-8 rounded-lg w-full max-w-md text-center shadow-lg">
         <h2 className="text-2xl font-semibold text-orange-500 mb-2">Verify Token Use</h2>
         <p className="text-gray-500 mb-4 text-sm">

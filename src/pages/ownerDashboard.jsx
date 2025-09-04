@@ -120,7 +120,7 @@ const OwnerDashboard = () => {
   return (
     <div className="flex h-screen ">
       <Navbar />
-      <main className="flex-1 md:p-4 pt-16 py-4 px-4 bg-green-50 overflow-y-auto">
+      <main className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <OwnerHeader ownerName={ownerName} messName={messName} logoUrl={logoUrl} />
 
         <h2 className="text-2xl font-bold text-[#14224A] mb-4 ">
@@ -145,58 +145,12 @@ const OwnerDashboard = () => {
             </button>
           ))}
         </div>
-
-        {/* <div className="bg-white border border-gray-300 rounded-xl overflow-hidden mb-10">
-          <div className="flex justify-between items-center px-12 py-4">
-            <h3 className="text-base font-semibold text-[#33363F]">Recent Orders</h3>
-          </div>
-          <table className="w-full text-sm rounded-lg text-center">
-            <tbody>
-              {filteredOrders.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="text-center text-[#0000008C] py-6">No Orders Found</td>
-                </tr>
-              ) : (
-                filteredOrders.map((order, idx) => (
-                  <tr key={order.orderId || idx} className="border-t">
-                    <td colSpan="5" className="px-6 py-3">
-                      <div className="grid grid-cols-5 gap-2 items-center">
-                        <div className="text-center">{order.customerName}</div>
-                        <div className="text-center">{order.customerPlanName}</div>
-                        <div className="text-center">{order.tokenCount}</div>
-                        <div className="text-center">{order.orderType}</div>
-                        <div className="flex justify-center gap-2">
-                          {order.orderStatus === 'pending' ? (
-                            <>
-                              <button onClick={() => handleDecision(order.orderId, 'accepted')} className="text-green-600 font-semibold hover:underline">Accept</button>
-                              <button onClick={() => handleDecision(order.orderId, 'rejected')} className="text-red-600 font-semibold hover:underline">Reject</button>
-                            </>
-                          ) : (
-                            <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                              order.orderStatus === 'accepted' ? 'bg-green-100 text-green-700' :
-                              order.orderStatus === 'rejected' ? 'bg-red-100 text-red-700' :
-                              order.orderStatus === 'cancelled' ? 'bg-purple-100 text-purple-700' :
-                              'bg-yellow-100 text-yellow-700'
-                            }`}>
-                              {order.orderStatus.toUpperCase()}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div> */}
-        <div  className="bg-white border  rounded-xl overflow-hidden mb-8">
+        {/* <div  className="bg-white border  rounded-xl overflow-hidden mb-8">
   <div className="flex justify-between items-center px-12 py-4">
     <h3 className="text-base font-semibold text-[#33363F]">Recent Orders</h3>
   </div>
 
-  {/* 🔹 Scrollable container with max height */}
-  <div className="max-h-[340px] overflow-y-auto"> 
+  <div className="max-h-[320px] overflow-y-auto"> 
     <table className="w-full text-sm rounded-lg text-center">
       <tbody>
         {filteredOrders.length === 0 ? (
@@ -254,7 +208,152 @@ const OwnerDashboard = () => {
       </tbody>
     </table>
   </div>
+</div> */}
+{/* <div className="bg-white border rounded-xl overflow-hidden mb-8">
+  <div className="flex justify-between items-center px-4 sm:px-6 md:px-12 py-4">
+    <h3 className="text-base font-semibold text-[#33363F]">Recent Orders</h3>
+  </div>
+
+  <div className="max-h-[320px] overflow-y-auto">
+    <table className="w-full text-xs sm:text-sm md:text-base rounded-lg text-center">
+      <tbody>
+        {filteredOrders.length === 0 ? (
+          <tr>
+            <td colSpan="5" className="text-center text-[#0000008C] py-6">
+              No Orders Found
+            </td>
+          </tr>
+        ) : (
+          filteredOrders.map((order, idx) => (
+            <tr key={order.orderId || idx} className="border-t">
+              <td className="px-1 py-2 sm:px-4 sm:py-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 items-center">
+                  <div className="text-center truncate">{order.customerName}</div>
+                  <div className="text-center truncate">{order.customerPlanName}</div>
+                  <div className="text-center">{order.tokenCount}</div>
+                  <div className="text-center">{order.orderType}</div>
+                  <div className="flex justify-center gap-2 flex-wrap">
+                    {order.orderStatus === "pending" ? (
+                      <>
+                        <button
+                          onClick={() =>
+                            handleDecision(order.orderId, "accepted")
+                          }
+                          className="text-green-600 font-semibold hover:underline"
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() =>
+                            handleDecision(order.orderId, "rejected")
+                          }
+                          className="text-red-600 font-semibold hover:underline"
+                        >
+                          Reject
+                        </button>
+                      </>
+                    ) : (
+                      <span
+                        className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full ${
+                          order.orderStatus === "accepted"
+                            ? "bg-green-100 text-green-700"
+                            : order.orderStatus === "rejected"
+                            ? "bg-red-100 text-red-700"
+                            : order.orderStatus === "cancelled"
+                            ? "bg-purple-100 text-purple-700"
+                            : "bg-yellow-100 text-yellow-700"
+                        }`}
+                      >
+                        {order.orderStatus.toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </td>
+            </tr>
+          ))
+        )}
+      </tbody>
+    </table>
+  </div>
+</div> */}
+<div className="bg-white border rounded-xl overflow-hidden mb-8">
+  <div className="flex justify-between items-center px-4 sm:px-6 md:px-12 py-4">
+    <h3 className="text-base font-semibold text-[#33363F]">Recent Orders</h3>
+  </div>
+
+  <div className="max-h-[320px] overflow-y-auto">
+    {filteredOrders.length === 0 ? (
+      <div className="text-center text-[#0000008C] py-6">No Orders Found</div>
+    ) : (
+      <div className="divide-y">
+        {filteredOrders.map((order, idx) => (
+          <div
+            key={order.orderId || idx}
+            className="p-4 grid grid-cols-1 md:grid-cols-5 gap-4 text-sm md:text-base items-center"
+          >
+            {/* 🔹 Mobile: label + value vertically */}
+            <div className="flex md:block justify-between">
+              <span className="md:hidden font-medium text-gray-700">Customer</span>
+              <span className="truncate">{order.customerName}</span>
+            </div>
+
+            <div className="flex md:block justify-between">
+              <span className="md:hidden font-medium text-gray-700">Plan</span>
+              <span className="truncate">{order.customerPlanName}</span>
+            </div>
+
+            <div className="flex md:block justify-between">
+              <span className="md:hidden font-medium text-gray-700">Tokens</span>
+              <span>{order.tokenCount}</span>
+            </div>
+
+            <div className="flex md:block justify-between">
+              <span className="md:hidden font-medium text-gray-700">Type</span>
+              <span>{order.orderType}</span>
+            </div>
+
+            <div className="flex md:block justify-between">
+              <span className="md:hidden font-medium text-gray-700">Status</span>
+              {order.orderStatus === "pending" ? (
+                <div className="flex gap-2 flex-wrap">
+                  <button
+                    onClick={() => handleDecision(order.orderId, "accepted")}
+                    className="text-green-600 font-semibold hover:underline"
+                  >
+                    Accept
+                  </button>
+                  <button
+                    onClick={() => handleDecision(order.orderId, "rejected")}
+                    className="text-red-600 font-semibold hover:underline"
+                  >
+                    Reject
+                  </button>
+                </div>
+              ) : (
+                <span
+                  className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full ${
+                    order.orderStatus === "accepted"
+                      ? "bg-green-100 text-green-700"
+                      : order.orderStatus === "rejected"
+                      ? "bg-red-100 text-red-700"
+                      : order.orderStatus === "cancelled"
+                      ? "bg-purple-100 text-purple-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {order.orderStatus.toUpperCase()}
+                </span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </div>
 </div>
+
+
 
       </main>
     </div>

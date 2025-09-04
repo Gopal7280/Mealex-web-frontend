@@ -82,7 +82,7 @@ const handleUsePlan = async () => {
     <div className="flex h-screen">
       <Navbar />
       {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-green-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <OwnerHeader />
         <h2 className="text-2xl font-semibold mb-4">Use Plan Tokens</h2>
 

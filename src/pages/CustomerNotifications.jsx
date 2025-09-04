@@ -133,7 +133,7 @@ const CustomerNotifications = () => {
     <div className="flex h-screen">
       <Navbar2 />
       {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-green-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
             <CustomerHeader />
    
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Notifications</h2>

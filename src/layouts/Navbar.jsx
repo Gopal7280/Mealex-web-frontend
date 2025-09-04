@@ -380,6 +380,8 @@ import {
   Settings,
   Menu,
   X,
+ FileCheck   // ✅ KYC style icon
+
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -484,7 +486,7 @@ const Sidebar = () => {
 
           <Link
             to="/history"
-            className={getLinkClasses("/history")}
+            className={getLinkClasses("/history", "/owner/history/plans")}
             onClick={() => setIsOpen(false)}
           >
             <Clock size={20} />
@@ -508,15 +510,24 @@ const Sidebar = () => {
             <UserCog size={20} />
             Switch Role
           </Link>
-
+           
           <Link
+          to="/Mess-KYC"
+          className={getLinkClasses("/Mess-KYC")}
+          onClick={() => setIsOpen(false)}
+           >
+          <FileCheck size={20} />   {/* ✅ KYC icon */}
+          Add Account
+          </Link>
+
+          {/* <Link
             to="/settings"
             className={getLinkClasses("/settings")}
             onClick={() => setIsOpen(false)}
           >
             <Settings size={20} />
             Settings
-          </Link>
+          </Link> */}
         </div>
 
         {/* Footer (Fixed at Bottom) */}

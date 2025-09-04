@@ -35,34 +35,85 @@ const UserAccess = () => {
   const previousIdentifier = location.state?.identifier || storage.getItem('identifier')?.replace(/"/g, '') || '';
   const identifierType = previousIdentifier.includes('@') ? 'email' : 'phone';
 
+  // const sendOtp = async (type) => {
+  //   const identifier = type === 'email' ? email : phone;
+
+  //   if (type === 'phone' && (!/^\d{10}$/.test(phone))) {
+  //     alert('Please enter a valid 10-digit phone number.');
+  //     return;
+  //   }
+  //   if (type === 'email' && !/^[\w.-]+@[\w.-]+\.\w{2,}$/.test(email)) {
+  //     alert('Please enter a valid email address.');
+  //     return;
+  //   }
+
+  //   const token = storage.getItem('token');
+  //   try {
+  //     const res = await apiPost('/user/communication', { identifier }, {
+  //       headers: { Authorization: `Bearer ${token}` }
+  //     });
+  //     setVerificationRequestId(res.data.requestId);
+  //     setOtpContext(res.data.context);
+  //     setActiveOtpType(type);
+  //     if (type === 'email') setShowEmailOtpBox(true);
+  //     else setShowPhoneOtpBox(true);
+  //     alert(`OTP sent to ${type}`);
+  //   } catch (err) {
+  //     const errorMsg = err?.response?.data?.message || `Failed to send ${type} OTP`;
+  //     alert(errorMsg);
+  //   }
+  // };
+
   const sendOtp = async (type) => {
-    const identifier = type === 'email' ? email : phone;
+  const identifier = type === 'email' ? email : phone;
 
-    if (type === 'phone' && (!/^\d{10}$/.test(phone))) {
-      alert('Please enter a valid 10-digit phone number.');
+  if (type === 'phone' && (!/^\d{10}$/.test(phone))) {
+    alert('Please enter a valid 10-digit phone number.');
+    return;
+  }
+  if (type === 'email' && !/^[\w.-]+@[\w.-]+\.\w{2,}$/.test(email)) {
+    alert('Please enter a valid email address.');
+    return;
+  }
+
+  const token = storage.getItem('token');
+  try {
+    const res = await apiPost('/user/communication', { identifier }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    // ✅ agar direct token mila to OTP ki zaroorat nahi
+    if (res.data.identifierToken) {
+      if (type === 'email') {
+        setIsEmailVerified(true);
+        setEmailToken(res.data.identifierToken);
+        setShowEmailOtpBox(false); 
+        storage.setItem('emailToken', res.data.identifierToken);
+        alert('Email already verified ✅');
+      } else {
+        setIsPhoneVerified(true);
+        setPhoneToken(res.data.identifierToken);
+        setShowPhoneOtpBox(false); 
+        storage.setItem('phoneToken', res.data.identifierToken);
+        alert('Phone already verified ✅');
+      }
       return;
     }
-    if (type === 'email' && !/^[\w.-]+@[\w.-]+\.\w{2,}$/.test(email)) {
-      alert('Please enter a valid email address.');
-      return;
-    }
 
-    const token = storage.getItem('token');
-    try {
-      const res = await apiPost('/user/communication', { identifier }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setVerificationRequestId(res.data.requestId);
-      setOtpContext(res.data.context);
-      setActiveOtpType(type);
-      if (type === 'email') setShowEmailOtpBox(true);
-      else setShowPhoneOtpBox(true);
-      alert(`OTP sent to ${type}`);
-    } catch (err) {
-      const errorMsg = err?.response?.data?.message || `Failed to send ${type} OTP`;
-      alert(errorMsg);
-    }
-  };
+    // ⚡ agar token nahi mila → OTP flow
+    setVerificationRequestId(res.data.requestId);
+    setOtpContext(res.data.context);
+    setActiveOtpType(type);
+
+    if (type === 'email') setShowEmailOtpBox(true);
+    else setShowPhoneOtpBox(true);
+
+    alert(`OTP sent to ${type}`);
+  } catch (err) {
+    const errorMsg = err?.response?.data?.message || `Failed to send ${type} OTP`;
+    alert(errorMsg);
+  }
+};
 
   const verifyOtp = async () => {
     const identifier = activeOtpType === 'email' ? email : phone;

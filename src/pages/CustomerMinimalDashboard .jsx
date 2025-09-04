@@ -83,7 +83,7 @@ const CustomerMinimalDashboard = () => {
     <div className="flex h-screen ">
         <Navbar2 />
       {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-green-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
 
           <CustomerHeader />
 
@@ -166,7 +166,7 @@ const CustomerMinimalDashboard = () => {
               />
               <div className="flex-1">
                 <p className="font-semibold">{mess.messName}</p>
-                <p className="text-sm text-gray-500">{mess.city} • {mess.pincode}</p>
+                <p className="text-l text-gray-500">{mess.city} • {mess.pincode}</p>
                 <p className="text-sm text-gray-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
               </div>
               <div

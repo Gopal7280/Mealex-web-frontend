@@ -33,6 +33,7 @@ const CustomerPlansView = () => {
       apiGet(`/customer/mess/${messId}/plan/issued`),
       apiGet(`/customer/mess/plans/${messId}`),
     ]);
+    console.log('Issued Plans:', issuedRes);
     setPlansByMess((prev) => ({
       ...prev,
       [messId]: {
@@ -68,7 +69,7 @@ const CustomerPlansView = () => {
   return (
     <div className="flex h-screen">
       <Navbar2 />
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-green-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <OwnerHeader />
 
         {/* Tabs */}
@@ -123,10 +124,11 @@ const CustomerPlansView = () => {
                       alt="logo"
                       className="w-14 h-14 rounded-md object-cover"
                     />
-                    <div className="flex-1">
-                      <p className="font-semibold">{mess.messName}</p>
-                      <p className="text-sm text-gray-500">{mess.address}</p>
-                    </div>
+                      <div className="flex-1">
+                <p className="font-semibold">{mess.messName}</p>
+                <p className="text-l text-gray-500">{mess.city} • {mess.pincode}</p>
+                <p className="text-sm text-gray-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
+              </div>
                     <div
                       onClick={(e) => {
                         e.stopPropagation();
@@ -166,8 +168,11 @@ const CustomerPlansView = () => {
                                     <p className="font-medium">{plan.name}</p>
                                     <p className="text-sm text-gray-600">{plan.description}</p>
                                     <p className="text-sm text-gray-500">
-                                      {plan.totalTokens} Tokens / {plan.durationDays} Days
+                                      {plan.issuedTokenCount} Tokens / {plan.durationDays} Days
                                     </p>
+                                    <p className="text-sm text-gray-700 font-semibold">
+  {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
+</p>
                                   </div>
                                 </div>
                                 <button
@@ -222,6 +227,9 @@ const CustomerPlansView = () => {
                                       <p className="text-sm text-gray-500">
                                         {plan.totalTokens} Tokens / {plan.durationDays} Days
                                       </p>
+                                      <p className="text-sm text-gray-700 font-semibold">
+  {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
+</p>
                                       <p className="text-sm text-gray-700 font-semibold">₹{plan.price}</p>
                                     </div>
                                   </div>

@@ -8,7 +8,7 @@ import { setToken } from '../services/authService';
 import mealx from '../assets/mealx.png';
 import handdrawn from '../assets/handdrawnu.png';
 import handdrawnn from '../assets/handdrawnn.png';
-
+import { setupNotifications } from '../App';
 import { GoogleLogin } from '@react-oauth/google';
 import { Dialog } from 'primereact/dialog';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -82,43 +82,84 @@ const LoginRegister = ({ setAuth }) => {
     });
   };
 
-  const handleLogin = async e => {
-    e.preventDefault();
-    setError('');
+  // const handleLogin = async e => {
+  //   e.preventDefault();
+  //   setError('');
 
-    const normalizedIdentifier = identifier.includes('@') ? identifier.toLowerCase() : identifier;
+  //   const normalizedIdentifier = identifier.includes('@') ? identifier.toLowerCase() : identifier;
 
-    try {
-      setLoader(true);
-      const response = await apiPost('/login', { identifier: normalizedIdentifier, password });
-  console.log(response)
-      const JWT = response.data.token;
-      storage.setItem('identifier', response.data.identifier);
-      storage.setItem('token', JWT);
-      setToken(JWT);
-      setAuth(true);
-            await initFCM(); // <-- yaha call karna hai
+  //   try {
+  //     setLoader(true);
+  //     const response = await apiPost('/login', { identifier: normalizedIdentifier, password });
+  // console.log(response)
+  //     const JWT = response.data.token;
+  //     storage.setItem('identifier', response.data.identifier);
+  //     storage.setItem('token', JWT);
+  //     setToken(JWT);
+  //     setAuth(true);
+  //           await initFCM(); // <-- yaha call karna hai
 
 
-      if (response.data.isOwner && response.data.isCustomer) {
-        navigate('/minimal-dashboard');
-        storage.setItem('roles', 'both');
-      } else if (response.data.isCustomer) {
-        storage.setItem('role', 'customer');
-        navigate('customers-dashboard');
-        toast.success('🎉 Logged In As Customer!');
-      } else if (response.data.isOwner ) {
-        navigate('/minimal-dashboard');
-        toast.success('🎉 Logged In As Owner!');
-      } else {
-        navigate('/user-access');
-      }
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Try again!');
-    } finally {
-      setLoader(false);
+  //     if (response.data.isOwner && response.data.isCustomer) {
+  //       navigate('/minimal-dashboard');
+  //       storage.setItem('roles', 'both');
+  //     } else if (response.data.isCustomer) {
+  //       storage.setItem('role', 'customer');
+  //       navigate('customers-dashboard');
+  //       toast.success('🎉 Logged In As Customer!');
+  //     } else if (response.data.isOwner ) {
+  //       navigate('/minimal-dashboard');
+  //       toast.success('🎉 Logged In As Owner!');
+  //     } else {
+  //       navigate('/user-access');
+  //     }
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || 'Login failed. Try again!');
+  //   } finally {
+  //     setLoader(false);
+  //   }
+  // };
+
+const handleLogin = async e => {
+  e.preventDefault();
+  setError('');
+
+  const normalizedIdentifier = identifier.includes('@') ? identifier.toLowerCase() : identifier;
+
+  try {
+    setLoader(true);
+    const response = await apiPost('/login', { identifier: normalizedIdentifier, password });
+    console.log(response);
+
+    const JWT = response.data.token;
+    storage.setItem('identifier', response.data.identifier);
+    storage.setItem('token', JWT);
+    setToken(JWT);
+    setAuth(true);
+
+    // ✅ FCM setup turant login ke baad
+    await setupNotifications(JWT);
+
+    if (response.data.isOwner && response.data.isCustomer) {
+      navigate('/minimal-dashboard');
+      storage.setItem('roles', 'both');
+    } else if (response.data.isCustomer) {
+      storage.setItem('role', 'customer');
+      navigate('customers-dashboard');
+      toast.success('🎉 Logged In As Customer!');
+    } else if (response.data.isOwner) {
+      navigate('/minimal-dashboard');
+      toast.success('🎉 Logged In As Owner!');
+    } else {
+      navigate('/user-access');
     }
-  };
+  } catch (err) {
+    setError(err.response?.data?.message || 'Login failed. Try again!');
+  } finally {
+    setLoader(false);
+  }
+};
+
 
   const handleRegister = async e => {
     e.preventDefault();
@@ -140,6 +181,7 @@ const LoginRegister = ({ setAuth }) => {
         password,
         confirmPassword
       });
+      console.log(res)
 
       const data = res.data;
       if (data.success && data.requestId) {
