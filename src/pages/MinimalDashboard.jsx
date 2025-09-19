@@ -166,21 +166,27 @@ const MinimalDashboard = () => {
                     <div className="text-right ml-2 sm:ml-4">
                       <p className={`font-medium text-xs sm:text-sm ${textColor}`}>{badgeText}</p>
                       <button
-                        onClick={() => {
-                          if (isVerified) {
-                            storage.setItem("messId", mess._id || mess.messId);
-                            storage.setItem("selectedMess", JSON.stringify(mess));
-                            toast.success(`Logged in with ${mess.messName} successfully`);
-                            navigate("/owner-dashboard");
-                          } else {
-                            storage.setItem("selectedMess", JSON.stringify(mess));
-                            navigate(`/owner/mess/id/${mess.messId}`);
-                          }
-                        }}
-                        className="text-xl sm:text-2xl cursor-pointer text-green-600 hover:text-green-800"
-                      >
-                        →
-                      </button>
+  onClick={() => {
+    if (isVerified) {
+      storage.setItem("messId", mess._id || mess.messId);
+      storage.setItem("selectedMess", JSON.stringify(mess));
+
+      // ✅ Store available services for this mess
+      storage.setItem("messServices", JSON.stringify(mess.services || []));
+
+      toast.success(`Logged in with ${mess.messName} successfully`);
+      navigate("/owner-dashboard");
+    } else {
+      storage.setItem("selectedMess", JSON.stringify(mess));
+      storage.setItem("messServices", JSON.stringify(mess.services || [])); // pending mess bhi store kar lo
+      navigate(`/owner/mess/id/${mess.messId}`);
+    }
+  }}
+  className="text-xl sm:text-2xl cursor-pointer text-green-600 hover:text-green-800"
+>
+  →
+</button>
+
                     </div>
                   </div>
                 );

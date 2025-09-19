@@ -179,7 +179,7 @@ onClick={() => setShowModal(true)}
       <h3 className="text-lg font-semibold mb-4 text-center">Select Order Type</h3>
       
       <div className="flex gap-3 justify-center mb-4">
-        {['dine', 'take-away', 'delivery'].map(type => (
+        {/* {['dine', 'take-away', 'delivery'].map(type => (
           <button
             key={type}
             onClick={() => setOrderType(type)}
@@ -189,7 +189,19 @@ onClick={() => setShowModal(true)}
           >
             {type.charAt(0).toUpperCase() + type.slice(1)}
           </button>
-        ))}
+        ))} */}
+        {(JSON.parse(storage.getItem('messServices') || '[]')).map(type => (
+  <button
+    key={type}
+    onClick={() => setOrderType(type)}
+    className={`px-4 py-2 rounded-full cursor-pointer border ${
+      orderType === type ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700'
+    }`}
+  >
+    {type.charAt(0).toUpperCase() + type.slice(1)}
+  </button>
+))}
+
       </div>
 
       {orderType === 'delivery' && (
@@ -209,18 +221,7 @@ onClick={() => setShowModal(true)}
         >
           Cancel
         </button>
-        {/* <button
-          onClick={async () => {
-            if (!orderType) return alert('Please select an order type');
-            if (orderType === 'delivery' && !address.trim()) return alert('Please enter address');
-
-            setShowModal(false);
-            await handleUsePlan(); // call with selected values
-          }}
-          className="px-4 py-2 bg-orange-500 cursor-pointer text-white rounded hover:bg-orange-600"
-        >
-          Confirm
-        </button> */}
+       
         <button
   onClick={async () => {
     if (!orderType) return alert('Please select an order type');

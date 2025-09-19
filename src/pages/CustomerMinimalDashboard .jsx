@@ -26,6 +26,8 @@ const CustomerMinimalDashboard = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [gotoPage, setGotoPage] = useState("");
+  const [selectedMessKyc, setSelectedMessKyc] = useState(0);
+
 
 
   useEffect(() => {
@@ -73,14 +75,24 @@ const CustomerMinimalDashboard = () => {
     }
   };
 
+  // const handleMessClick = (mess) => {
+  //   mess.services=mess.services || (Array.isArray(mess.services) ? mess.services : mess.services ? [mess.services] : []);
+  //   const alreadyExpanded = expandedMessId === mess.messId;
+  //   setExpandedMessId(alreadyExpanded ? null : mess.messId);
+  //   storage.setItem('messId', mess.messId);
+  //   if (!plansByMess[mess.messId]) fetchPlans(mess.messId);
+  //   setSelectedPlan(null);
+  // };
   const handleMessClick = (mess) => {
-    mess.services=mess.services || (Array.isArray(mess.services) ? mess.services : mess.services ? [mess.services] : []);
-    const alreadyExpanded = expandedMessId === mess.messId;
-    setExpandedMessId(alreadyExpanded ? null : mess.messId);
-    storage.setItem('messId', mess.messId);
-    if (!plansByMess[mess.messId]) fetchPlans(mess.messId);
-    setSelectedPlan(null);
-  };
+  mess.services = mess.services || (Array.isArray(mess.services) ? mess.services : mess.services ? [mess.services] : []);
+  const alreadyExpanded = expandedMessId === mess.messId;
+  setExpandedMessId(alreadyExpanded ? null : mess.messId);
+  storage.setItem('messId', mess.messId);
+  setSelectedMessKyc(Number(mess.kyc_stage)); // ✅ Selected mess KYC stage store
+  if (!plansByMess[mess.messId]) fetchPlans(mess.messId);
+  setSelectedPlan(null);
+};
+
 
   return (
     <div className="flex h-screen ">
@@ -171,9 +183,7 @@ const CustomerMinimalDashboard = () => {
                 <p className="font-semibold">{mess.messName}</p>
                 <p className="text-l text-gray-500">{mess.city} • {mess.pincode}</p>
                 <p className="text-sm text-green-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
-                  {/* <p className="text-sm text-gray-600 font-semibold">
-      Days Open: {Array.isArray(mess.daysOpen) ? mess.daysOpen.join(", ") : mess.daysOpen}
-    </p> */}
+       
               </div>
               <div
                 onClick={(e) => {
@@ -321,7 +331,7 @@ const CustomerMinimalDashboard = () => {
         </div>
 
       {/* Payment Modal */}
-      {showPaymentModal && selectedPlan && (
+      {/* {showPaymentModal && selectedPlan && (
         <div className="fixed inset-0 bg-opacity-50 backdrop-brightness-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">
             <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
@@ -356,7 +366,53 @@ const CustomerMinimalDashboard = () => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
+      {showPaymentModal && selectedPlan && (
+  <div className="fixed inset-0 bg-opacity-50 backdrop-brightness-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">
+      <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
+      <div className="flex flex-col gap-3">
+
+        {/* Cash always available */}
+        <button
+          className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
+          onClick={() => {
+            setShowPaymentModal(false);
+            toast.success('💵 Cash payment selected. Please pay at mess counter.');
+          }}
+        >
+          Pay with Cash
+        </button>
+
+        {/* UPI / Online only if KYC complete */}
+        {selectedMessKyc >= 3 ? (
+          <PaymentGateway
+            messId={expandedMessId}
+            plan={selectedPlan}
+            onSuccess={() => {
+              setShowPaymentModal(false);
+              fetchPlans(expandedMessId);
+              toast.success(`${selectedPlan?.name} has been added successfully!`);
+              navigate('/cust/my-mess');
+            }}
+          />
+        ) : (
+          <p className="text-red-500 text-sm mt-1">
+            Online payment is not available for this mess as KYC is incomplete.
+          </p>
+        )}
+
+        <button
+          className="text-sm text-gray-500 cursor-pointer mt-2 hover:text-red-500"
+          onClick={() => setShowPaymentModal(false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 };

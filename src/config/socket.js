@@ -61,43 +61,86 @@ export const connectSocket = (token) => {
     for (const h of orderUpdateHandlers) h(data);
   });
 
+  // socket.off('incoming_order');
+  // socket.on('incoming_order', (res) => {
+  //   if (res?.success && res.data?.orderId) {
+  //     const cleanPayload = {
+  //       orderId: res.data.orderId,
+  //       messId: res.data.messId,
+  //       messName: res.data.messName,
+  //       customerId: res.data.customerId,
+  //       customerName: res.data.customerName,
+  //       customerPlanId: res.data.customerPlanId,
+  //       customerPlanName: res.data.customerPlanName,
+  //       submittedTokenIds: res.data.submittedTokenIds || [],
+  //       tokenCount: res.data.tokenCount,
+  //       tokenStatus: res.data.tokenStatus,
+  //       totalPrice: res.data.totalPrice,
+  //       orderType: res.data.orderType,
+  //       deliveryAddress: res.data.deliveryAddress,
+  //       status: res.data.status,
+  //       orderStatus: res.data.orderStatus,
+  //       orderExpiresAt: res.data.orderExpiresAt,
+  //       scheduledFor: res.data.scheduledFor,
+  //       createdAt: res.data.createdAt,
+  //       updatedAt: res.data.updatedAt,
+  //       count: res.data.count || { pending: 0, accepted: 0, rejected: 0, completed: 0 }
+  //     };
+
+  //     storage.setItem(`orderPayload_${res.data.orderId}`, JSON.stringify(cleanPayload));
+
+  //     const existing = JSON.parse(storage.getItem("liveOrders") || "[]");
+  //     if (!existing.find(o => o.orderId === res.data.orderId)) {
+  //       existing.push(cleanPayload);
+  //       storage.setItem("liveOrders", JSON.stringify(existing));
+  //     }
+
+  //     for (const h of incomingOrderHandlers) h(res);
+  //   }
+  // });
+
   socket.off('incoming_order');
-  socket.on('incoming_order', (res) => {
-    if (res?.success && res.data?.orderId) {
-      const cleanPayload = {
-        orderId: res.data.orderId,
-        messId: res.data.messId,
-        messName: res.data.messName,
-        customerId: res.data.customerId,
-        customerName: res.data.customerName,
-        customerPlanId: res.data.customerPlanId,
-        customerPlanName: res.data.customerPlanName,
-        submittedTokenIds: res.data.submittedTokenIds || [],
-        tokenCount: res.data.tokenCount,
-        tokenStatus: res.data.tokenStatus,
-        totalPrice: res.data.totalPrice,
-        orderType: res.data.orderType,
-        deliveryAddress: res.data.deliveryAddress,
-        status: res.data.status,
-        orderStatus: res.data.orderStatus,
-        orderExpiresAt: res.data.orderExpiresAt,
-        scheduledFor: res.data.scheduledFor,
-        createdAt: res.data.createdAt,
-        updatedAt: res.data.updatedAt,
-        count: res.data.count || { pending: 0, accepted: 0, rejected: 0, completed: 0 }
-      };
+socket.on('incoming_order', (res) => {
+  const currentMessId = storage.getItem("messId");
 
-      storage.setItem(`orderPayload_${res.data.orderId}`, JSON.stringify(cleanPayload));
+  if (res?.success && res.data?.orderId && res.data?.messId === currentMessId) {
+    const cleanPayload = {
+      orderId: res.data.orderId,
+      messId: res.data.messId,
+      messName: res.data.messName,
+      customerId: res.data.customerId,
+      customerName: res.data.customerName,
+      customerPlanId: res.data.customerPlanId,
+      customerPlanName: res.data.customerPlanName,
+      submittedTokenIds: res.data.submittedTokenIds || [],
+      tokenCount: res.data.tokenCount,
+      tokenStatus: res.data.tokenStatus,
+      totalPrice: res.data.totalPrice,
+      orderType: res.data.orderType,
+      deliveryAddress: res.data.deliveryAddress,
+      status: res.data.status,
+      orderStatus: res.data.orderStatus,
+      orderExpiresAt: res.data.orderExpiresAt,
+      scheduledFor: res.data.scheduledFor,
+      createdAt: res.data.createdAt,
+      updatedAt: res.data.updatedAt,
+      count: res.data.count || { pending: 0, accepted: 0, rejected: 0, completed: 0 }
+    };
 
-      const existing = JSON.parse(storage.getItem("liveOrders") || "[]");
-      if (!existing.find(o => o.orderId === res.data.orderId)) {
-        existing.push(cleanPayload);
-        storage.setItem("liveOrders", JSON.stringify(existing));
-      }
+    storage.setItem(`orderPayload_${res.data.orderId}`, JSON.stringify(cleanPayload));
 
-      for (const h of incomingOrderHandlers) h(res);
+    const existing = JSON.parse(storage.getItem("liveOrders") || "[]");
+    if (!existing.find(o => o.orderId === res.data.orderId)) {
+      existing.push(cleanPayload);
+      storage.setItem("liveOrders", JSON.stringify(existing));
     }
-  });
+
+    for (const h of incomingOrderHandlers) h(res);
+  } else {
+    console.log("⏭️ Ignored order for different messId:", res?.data?.messId);
+  }
+});
+
 
   socket.off('order_cancel_by_customer');
   socket.on('order_cancel_by_customer', (data) => {

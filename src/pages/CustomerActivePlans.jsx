@@ -27,12 +27,23 @@ const CustomerActivePlans = () => {
     }
   };
 
-  const handleUseTokens = (customerPlanId,messId) => {
-    storage.setItem("customerPlanId", customerPlanId);
-    storage.setItem("messId", messId); // ✅ messId bhi save karo
+  // const handleUseTokens = (customerPlanId,messId) => {
+  //   storage.setItem("customerPlanId", customerPlanId);
+  //   storage.setItem("messId", messId); // ✅ messId bhi save karo
 
-    navigate("/using-plans");
-  };
+  //   navigate("/using-plans");
+  // };
+
+const handleUseTokens = (customerPlanId, messId, services) => {
+  storage.setItem("customerPlanId", customerPlanId);
+  storage.setItem("messId", messId);
+
+  // ✅ services ko bhi localStorage me store kare
+  storage.setItem("messServices", JSON.stringify(services));
+
+  navigate("/using-plans");
+};
+
 
   return (
     <div className="flex h-screen">
@@ -86,12 +97,23 @@ const CustomerActivePlans = () => {
     </button>
     {menuOpenId === plan.customerPlanId && (
       <div className="absolute right-0 mt-2 w-36 bg-white border rounded-lg shadow-md z-20">
-        <button
+        {/* <button
           onClick={() => handleUseTokens(plan.customerPlanId, plan.messId)}
           className="w-full px-4 cursor-pointer py-2 text-sm text-left text-orange-600 hover:bg-orange-50"
         >
           Use Tokens
-        </button>
+        </button> */}
+        <button
+  onClick={() => handleUseTokens(
+    plan.customerPlanId,
+    plan.messId,
+    plan.MessProfile?.services || []
+  )}
+  className="w-full px-4 cursor-pointer py-2 text-sm text-left text-orange-600 hover:bg-orange-50"
+>
+  Use Tokens
+</button>
+
       </div>
     )}
   </div>

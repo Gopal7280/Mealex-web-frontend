@@ -17,6 +17,8 @@ const ExploreMessDetails = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const kycStage = mess?.kyc_stage || "0";
+
 
 
 
@@ -25,7 +27,6 @@ const ExploreMessDetails = () => {
     const res = await apiGet('/customer/mess/subscribed');
     console.log(res);
     if (res.success && Array.isArray(res.data)) {
-      // extract only messIds
       const messIds = res.data.map(m => m.messId);
       storage.setItem('subscribedMessIds', JSON.stringify(messIds));
       return messIds;
@@ -139,32 +140,7 @@ const ExploreMessDetails = () => {
               </h4>
 
               <div className="flex gap-4 flex-wrap">
-                {/* {plans.map((plan, idx) => (
-                  <div
-                    key={idx}
-                    onClick={() => setSelectedPlan(plan)}
-                    className={`w-64 border rounded-xl p-4 cursor-pointer  ${
-                      selectedPlan?.planId === plan.planId
-                        ? 'border-4 border-orange-500 shadow-md'
-                        : 'hover:shadow-md'
-                    }`}
-                  >
-                    <img
-                      src={plan.imageUrl || 'https://via.placeholder.com/150'}
-                      alt="Plan"
-                      className="h-28 w-full object-cover rounded mb-3"
-                    />
-                    <h5 className="font-bold text-gray-800 text-base">{plan.name}</h5>
-                    <p className="text-sm text-gray-500">{plan.description}</p>
-                    <p className="text-sm font-semibold text-green-600">Menu:{plan.menu}</p>
-
-                    <ul className="text-sm text-gray-700 mt-2 space-y-1">
-                      <li>💰 {plan.price} INR</li>
-                      <li>🎫 {plan.totalTokens} Tokens</li>
-                      <li>📅 {plan.durationDays} Days</li>
-                    </ul>
-                  </div>
-                ))} */}
+             
                 {plans.map((plan, idx) => (
   <div
     key={idx}
@@ -243,7 +219,7 @@ const ExploreMessDetails = () => {
                   Pay with Cash
                 </button>
        
-                {selectedPlan && (
+                {/* {selectedPlan && (
                   <PaymentGateway
                     plan={selectedPlan}
                     messId={mess.messId}
@@ -255,7 +231,26 @@ const ExploreMessDetails = () => {
                       }, 4000); 
                     }}
                   />
-                )}
+                )} */}
+{selectedPlan && kycStage === "3" && (
+  <PaymentGateway
+    plan={selectedPlan}
+    messId={mess.messId}
+    onSuccess={() => {
+      setShowPaymentModal(false);    
+      fetchPlans(mess.messId);        
+      setTimeout(() => {
+        navigate('/cust/my-mess');
+      }, 4000); 
+    }}
+  />
+)}
+
+{selectedPlan && kycStage !== "3" && (
+  <div className="text-sm text-gray-500 mt-2">
+    Online payment is not available for this mess as KYC is incomplete.
+  </div>
+)}
 
                 <button
                   className="text-sm text-gray-500 mt-2 cursor-pointer hover:text-red-500"

@@ -15,6 +15,8 @@ const CustomerPlansView = () => {
   const [plansByMess, setPlansByMess] = useState({});
   const [selectedAvailablePlan, setSelectedAvailablePlan] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [selectedMessKyc, setSelectedMessKyc] = useState(0);
+
 
   const navigate = useNavigate();
 
@@ -24,6 +26,7 @@ const CustomerPlansView = () => {
 
   const fetchMesses = async () => {
     const res = await apiGet('/customer/mess/subscribed');
+    console.log('Fetched messes:', res); // <-- ✅ Add this
     console.log(res);
     if (res.success && Array.isArray(res.data)) {
       setMesses(res.data);
@@ -36,6 +39,7 @@ const CustomerPlansView = () => {
       apiGet(`/customer/mess/plans/${messId}`),
     ]);
     console.log('Issued Plans:', issuedRes);
+    console.log('All Plans:', allPlansRes);
     setPlansByMess((prev) => ({
       ...prev,
       [messId]: {
@@ -45,20 +49,39 @@ const CustomerPlansView = () => {
     }));
   };
 
-  const handleMessClick = (mess) => {
-    const alreadyExpanded = expandedMessId === mess.messId;
-    setExpandedMessId(alreadyExpanded ? null : mess.messId);
-    storage.setItem('messId', mess.messId);
-    if (!plansByMess[mess.messId]) {
-      fetchPlans(mess.messId);
-    }
-    setSelectedAvailablePlan(null);
-  };
+  // const handleMessClick = (mess) => {
+  //   const alreadyExpanded = expandedMessId === mess.messId;
+  //   setExpandedMessId(alreadyExpanded ? null : mess.messId);
+  //   storage.setItem('messId', mess.messId);
+  //   if (!plansByMess[mess.messId]) {
+  //     fetchPlans(mess.messId);
+  //   }
+  //   setSelectedAvailablePlan(null);
+  // };
 
-  const handleUseTokens = (customerPlanId) => {
-    storage.setItem('customerPlanId', customerPlanId);
-    navigate(`/using-plans`);
-  };
+
+const handleMessClick = (mess) => {
+  const alreadyExpanded = expandedMessId === mess.messId;
+  setExpandedMessId(alreadyExpanded ? null : mess.messId);
+  storage.setItem('messId', mess.messId);
+  setSelectedMessKyc(mess.kyc_stage); // ✅ store selected mess KYC
+  
+  if (!plansByMess[mess.messId]) {
+    fetchPlans(mess.messId);
+  }
+  setSelectedAvailablePlan(null);
+};
+
+
+  const handleUseTokens = (customerPlanId, messId, services) => {
+  storage.setItem('customerPlanId', customerPlanId);
+  storage.setItem('messId', messId);
+
+  // ✅ services bhi store karein
+  storage.setItem('messServices', JSON.stringify(services || []));
+
+  navigate(`/using-plans`);
+};
 
   const handlePaymentSuccess = () => {
     if (selectedAvailablePlan?.messId) {
@@ -130,9 +153,7 @@ const CustomerPlansView = () => {
                 <p className="font-semibold">{mess.messName}</p>
                 <p className="text-l text-gray-500">{mess.city} • {mess.pincode}</p>
                 <p className="text-sm text-green-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
-                  {/* <p className="text-sm text-gray-600 font-semibold">
-      Days Open: {Array.isArray(mess.daysOpen) ? mess.daysOpen.join(", ") : mess.daysOpen}
-    </p> */}
+           
               </div>
                     <div
                       onClick={(e) => {
@@ -180,12 +201,18 @@ const CustomerPlansView = () => {
 </p>
                                   </div>
                                 </div>
+                              
                                 <button
-                                  onClick={() => handleUseTokens(plan.customerPlanId)}
-                                  className="text-sm cursor-pointer text-orange-600 hover:underline"
-                                >
-                                  Use Tokens
-                                </button>
+  onClick={() => handleUseTokens(
+    plan.customerPlanId,
+    plan.messId,
+    plan.MessProfile?.services || []
+  )}
+  className="text-sm cursor-pointer text-orange-600 hover:underline"
+>
+  Use Tokens
+</button>
+
                               </div>
                             ))}
                           </div>
@@ -264,7 +291,7 @@ const CustomerPlansView = () => {
         )}
 
         {/* Payment Modal */}
-        {showPaymentModal && selectedAvailablePlan && (
+        {/* {showPaymentModal && selectedAvailablePlan && (
           <div className="fixed inset-0 bg-opacity-50 backdrop-brightness-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">
               <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
@@ -294,7 +321,45 @@ const CustomerPlansView = () => {
               </div>
             </div>
           </div>
+        )} */}
+        {showPaymentModal && selectedAvailablePlan && (
+  <div className="fixed inset-0 bg-opacity-50 backdrop-brightness-50 flex items-center justify-center z-50">
+    <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">
+      <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
+      <div className="flex flex-col gap-3">
+        <button
+          className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
+          onClick={() => {
+            setShowPaymentModal(false);
+            toast.success('💵 Cash payment selected. Please pay at mess counter.');
+          }}
+        >
+          Pay with Cash
+        </button>
+
+        {selectedMessKyc >= 3 ? (
+          <PaymentGateway
+            messId={selectedAvailablePlan.messId}
+            plan={{ ...selectedAvailablePlan.plan, planId: selectedAvailablePlan.planId }}
+            onSuccess={handlePaymentSuccess}
+          />
+        ) : (
+          <p className="text-red-500 text-sm mt-1">
+            Online payment is not available for this mess as KYC is incomplete.
+          </p>
         )}
+
+        <button
+          className="text-sm text-gray-500 mt-2 cursor-pointer hover:text-red-500"
+          onClick={() => setShowPaymentModal(false)}
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
+
       </div>
     </div>
   );

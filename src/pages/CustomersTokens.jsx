@@ -53,6 +53,21 @@ const CustomerUseTokens = () => {
       .finally(() => setLoading(false));
   };
 
+
+  const [services, setServices] = useState([]);
+
+useEffect(() => {
+  const savedServices = storage.getItem("messServices");
+  if (savedServices) {
+    try {
+      setServices(JSON.parse(savedServices));
+    } catch (e) {
+      console.error("Invalid services data", e);
+    }
+  }
+}, []);
+
+
   useEffect(() => {
     const token = storage.getItem('token');
     if (token) {
@@ -72,6 +87,7 @@ const CustomerUseTokens = () => {
         }, 800);
       } else {
         toast.error(`❌ Failed: ${response?.message}`);
+        setIsSubmitting(false); // ✅ reset submitting state on failure
       }
     };
 
@@ -83,22 +99,24 @@ const CustomerUseTokens = () => {
   }, [messId, customerPlanId, navigate]);
 
   useEffect(() => {
-    const token = storage.getItem('token');
-    if (token) connectSocket(token);
+    
 
     const handleUpdate = (res) => {
       console.log('📢 order_update:', res);
       if (res?.success && res.data?.orderStatus) {
         if (res.data.orderStatus === 'accepted') {
           toast.success('🎉 Order accepted');
+          setIsSubmitting(false); // ✅ reset submitting state on acceptance
         } else if (res.data.orderStatus === 'rejected') {
           toast.error('❌ Order rejected');
+          setIsSubmitting(false); // ✅ reset submitting state on rejection
         } else {
           toast('ℹ️ Order updated');
         }
         navigate('/customers-orders');
       } else {
         toast.error(`⚠️ Update failed: ${res?.message}`);
+        setIsSubmitting(false); // ✅ reset submitting state on failure
       }
     };
 
@@ -118,13 +136,75 @@ const CustomerUseTokens = () => {
     setIsModalOpen(true);
   };
 
-  const handleSubmitOrder = async () => {
-    const socket = getSocket();
-    if (!socket) return toast.error('WebSocket not connected');
+  // const handleSubmitOrder = async () => {
+  //   const socket = getSocket();
+  //   // if (!socket)
+  //   //  return toast.error('WebSocket not connected');
+  // if (!socket) {
+  //   toast.error('WebSocket not connected');
+  //   setIsSubmitting(false); // ✅ reset immediately if no socket
+  //   return;
+  // }
 
-    setLoading(true);
-      setIsSubmitting(true);   // ⬅️ Start submitting state
 
+  //   // setLoading(true);
+  //     setIsSubmitting(true);   // ⬅️ Start submitting state
+
+  //   await refetchPlan();
+
+  //   const latestUnusedTokens = planData.issuedTokens
+  //     .filter(issuedToken => {
+  //       return !planData.usedTokens.some(used => {
+  //         return typeof used === 'string'
+  //           ? used === issuedToken._id
+  //           : used._id === issuedToken._id;
+  //       });
+  //     })
+  //     .slice(0, selectedCount);
+
+  //   if (latestUnusedTokens.length < selectedCount) {
+  //     toast.error("❌ Not enough valid unused tokens available. Please try again.");
+  //     setLoading(false);
+  //     setIsSubmitting(false);   // ⬅️ reset on failure
+
+  //     return;
+  //   }
+
+  //   storage.setItem('tokens', latestUnusedTokens);
+
+  //   const payload = {
+  //     customerPlanId,
+  //     tokens: latestUnusedTokens,
+  //     customerId,
+  //     orderType: selectedService,
+  //     token: JWT,
+  //     ...(selectedService === 'delivery' && { deliveryAddress }),
+  //   };
+
+  //   socket.emit('new_order', payload, (response) => {
+  //     if (response?.success) {
+  //       toast.success('Order placed successfully!');
+  //       setIsModalOpen(false);
+  //       setTimeout(refetchPlan, 1000);
+  //     } else {
+  //       toast.error(`❌ Failed: ${response?.message}`);
+  //     }
+  //         setIsSubmitting(false);   // ⬅️ always reset after response
+
+  //   });
+  // };
+
+const handleSubmitOrder = async () => {
+  const socket = getSocket();
+  if (!socket) {
+    toast.error('WebSocket not connected');
+    setIsSubmitting(false); // ✅ reset immediately if no socket
+    return;
+  }
+
+  setIsSubmitting(true); // ⬅️ Start submitting state
+
+  try {
     await refetchPlan();
 
     const latestUnusedTokens = planData.issuedTokens
@@ -139,9 +219,7 @@ const CustomerUseTokens = () => {
 
     if (latestUnusedTokens.length < selectedCount) {
       toast.error("❌ Not enough valid unused tokens available. Please try again.");
-      setLoading(false);
-          setIsSubmitting(false);   // ⬅️ reset on failure
-
+      setIsSubmitting(false); // ✅ reset on failure
       return;
     }
 
@@ -164,13 +242,17 @@ const CustomerUseTokens = () => {
       } else {
         toast.error(`❌ Failed: ${response?.message}`);
       }
-          setIsSubmitting(false);   // ⬅️ always reset after response
-
+      setIsSubmitting(false); // ✅ always reset after socket response
     });
-  };
+  } catch (err) {
+    console.error("❌ Submit error:", err);
+    toast.error("Unexpected error. Please try again.");
+    setIsSubmitting(false); // ✅ reset on unexpected error
+  }
+};
 
 
-  const total = usedTokens.length + issuedTokens.length;
+
 
   return (
     <div className="flex h-screen">
@@ -216,52 +298,6 @@ const CustomerUseTokens = () => {
           Use {selectedCount} Token{selectedCount > 1 ? 's' : ''}
         </button>
       </div>
-
-      {/* Modal */}
-      {/* <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} className="relative z-50">
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white rounded-lg max-w-md w-full p-6 shadow-xl space-y-4">
-            <Dialog.Title className="text-lg font-bold">Select Order Type</Dialog.Title>
-          
-            <div className="flex gap-3 justify-center mb-4">
-  {['dine', 'take-away', 'delivery'].map(service => (
-    <button
-      key={service}
-      onClick={() => setSelectedService(service)}
-      className={`px-4 py-2 rounded-full cursor-pointer border ${
-        selectedService === service ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700'
-      }`}
-    >
-      {service.charAt(0).toUpperCase() + service.slice(1)}
-    </button>
-  ))}
-</div>
-
-            {selectedService === 'delivery' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mt-4">Delivery Address</label>
-                <textarea
-                  value={deliveryAddress}
-                  onChange={(e) => setDeliveryAddress(e.target.value)}
-                  className="w-full mt-1 p-2 border rounded"
-                  placeholder="Enter your full address"
-                />
-              </div>
-            )}
-            <div className="flex justify-end gap-3 mt-6">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-              <button
-                onClick={handleSubmitOrder}
-                disabled={!selectedService || (selectedService === 'delivery' && !deliveryAddress)}
-                className="px-4 py-2 bg-orange-500 text-white rounded disabled:opacity-50"
-              >
-                Submit Order
-              </button>
-            </div>
-          </Dialog.Panel>
-        </div>
-      </Dialog> */}
       <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} className="relative z-50">
   <div className="fixed inset-0 backdrop-brightness-50 bg-opacity-50" aria-hidden="true" />
   <div className="fixed inset-0 flex items-center justify-center">
@@ -271,7 +307,7 @@ const CustomerUseTokens = () => {
       </Dialog.Title>
 
       {/* Order Type Buttons - Same row like Owner modal */}
-      <div className="flex gap-3 justify-center mb-4">
+      {/* <div className="flex gap-3 justify-center mb-4">
         {['dine', 'take-away', 'delivery'].map((service) => (
           <button
             key={service}
@@ -285,7 +321,27 @@ const CustomerUseTokens = () => {
             {service.charAt(0).toUpperCase() + service.slice(1)}
           </button>
         ))}
-      </div>
+      </div> */}
+      {services.length === 0 ? (
+  <p className="text-center text-gray-500">No services available for this mess.</p>
+) : (
+  <div className="flex gap-3 justify-center mb-4">
+    {services.map((service) => (
+      <button
+        key={service}
+        onClick={() => setSelectedService(service)}
+        className={`px-4 py-2 rounded-full cursor-pointer border ${
+          selectedService === service
+            ? 'bg-orange-500 text-white'
+            : 'bg-gray-100 text-gray-700'
+        }`}
+      >
+        {service.charAt(0).toUpperCase() + service.slice(1)}
+      </button>
+    ))}
+  </div>
+)}
+
 
       {/* Delivery Address Field */}
       {selectedService === 'delivery' && (
@@ -306,13 +362,6 @@ const CustomerUseTokens = () => {
         >
           Cancel
         </button>
-        {/* <button
-          onClick={handleSubmitOrder}
-          disabled={!selectedService || (selectedService === 'delivery' && !deliveryAddress)}
-          className="px-4 py-2 bg-orange-500 cursor-pointer text-white rounded hover:bg-orange-600 disabled:opacity-50"
-        >
-          Submit Order
-        </button> */}
         <button
   onClick={handleSubmitOrder}
   disabled={isSubmitting || !selectedService || (selectedService === 'delivery' && !deliveryAddress)}

@@ -256,6 +256,7 @@ const SwitchMess = () => {
     setLoading(true);
     try {
       const res = await apiGet("/owner/mess/all");
+      console.log("✅ Fetched messes:", res); // <-- ✅ Add this
       if (res?.success && Array.isArray(res.data)) {
         setMesses(res.data);
       } else {
@@ -269,19 +270,59 @@ const SwitchMess = () => {
     }
   };
 
-  const handleMessClick = (mess) => {
-    const isVerified = mess.status === "active" || mess.status === "activated";
+  // const handleMessClick = (mess) => {
+  //   const isVerified = mess.status === "active" || mess.status === "activated";
 
-    if (isVerified) {
-      storage.setItem("messId", mess._id || mess.messId);
-      storage.setItem("selectedMess", JSON.stringify(mess));
-      toast.success(`Logged in with ${mess.messName} successfully`);
-      navigate("/owner-dashboard");
-    } else {
-      storage.setItem("selectedMess", JSON.stringify(mess));
-      navigate(`/owner/mess/id/${mess.messId}`);
-    }
-  };
+  //   if (isVerified) {
+  //     storage.setItem("messId", mess._id || mess.messId);
+  //     storage.setItem("selectedMess", JSON.stringify(mess));
+  //     toast.success(`Logged in with ${mess.messName} successfully`);
+  //     navigate("/owner-dashboard");
+  //   } else {
+  //     storage.setItem("selectedMess", JSON.stringify(mess));
+  //     navigate(`/owner/mess/id/${mess.messId}`);
+  //   }
+  // };
+
+// const handleMessClick = (mess) => {
+//   const isVerified = mess.status === "active" || mess.status === "activated";
+
+//   // Store messId and whole mess object
+//   storage.setItem("messId", mess._id || mess.messId);
+//   storage.setItem("selectedMess", JSON.stringify(mess));
+
+//   // ✅ Store only this mess ke available services
+//   storage.setItem("messServices", JSON.stringify(mess.services || []));
+
+//   if (isVerified) {
+//     toast.success(`Logged in with ${mess.messName} successfully`);
+//     navigate("/owner-dashboard");
+//   } else {
+//     navigate(`/owner/mess/id/${mess.messId}`);
+//   }
+// };
+const handleMessClick = (mess) => {
+  const isVerified = mess.status === "active" || mess.status === "activated";
+
+  // Store messId and complete mess object
+  storage.setItem("messId", mess._id || mess.messId);
+  storage.setItem("selectedMess", JSON.stringify(mess));
+
+  // Store mess KYC stage separately for easy access
+  storage.setItem("messKycStage", mess.kyc_stage || "0");
+
+  // Optionally, store available services of this mess
+  storage.setItem("messServices", JSON.stringify(mess.services || []));
+
+  if (isVerified) {
+    toast.success(`Logged in with ${mess.messName} successfully`);
+    navigate("/owner-dashboard");
+  } else {
+    navigate(`/owner/mess/id/${mess.messId}`);
+  }
+};
+
+
 
   return (
     <>

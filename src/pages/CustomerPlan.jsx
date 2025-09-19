@@ -10,6 +10,9 @@ import toast from 'react-hot-toast';
 
 
 const CustomerPlans = () => {
+  const selectedMess = JSON.parse(storage.getItem("selectedMess"));
+const kycStage = selectedMess?.kyc_stage || "0";
+
   const [activePlans, setActivePlans] = useState([]);
   const [showAvailablePlans, setShowAvailablePlans] = useState(false);
   const [availablePlans, setAvailablePlans] = useState([]);
@@ -432,7 +435,7 @@ console.log("🔍 Cash Plan Issue Initiation Response:", responseData);
         </div>
 
 
-
+{/* 
  {showPaymentModal && selectedPlan && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 backdrop-brightness-50">
             <div className="bg-white rounded-2xl p-6 shadow-lg w-[90%] max-w-md relative">
@@ -458,7 +461,73 @@ console.log("🔍 Cash Plan Issue Initiation Response:", responseData);
             </div>
             
           </div>
-        )}
+        )} */}
+        {showPaymentModal && selectedPlan && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 backdrop-brightness-50">
+    <div className="bg-white rounded-2xl p-6 shadow-lg w-[90%] max-w-md relative">
+      <button
+        onClick={() => setShowPaymentModal(false)}
+        className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+      >
+        ✕
+      </button>
+      <h3 className="text-lg font-semibold text-center text-black mb-6">
+        Choose Customer’s Payment Method
+      </h3>
+
+      <div className="flex flex-col gap-4 mb-6">
+        {/* Cash option always available */}
+        <label
+          onClick={() => setSelectedPlan({ ...selectedPlan, paymentMode: 'cash' })}
+          className={`flex items-center justify-between px-4 py-3 rounded-lg border cursor-pointer ${
+            selectedPlan?.paymentMode === 'cash' ? 'border-green-500 bg-green-50' : 'border-gray-300'
+          }`}
+        >
+          <div className="flex items-center gap-2 text-green-600 font-medium">
+            <span className="text-xl">🪙</span> Cash
+          </div>
+          {selectedPlan?.paymentMode === 'cash' && <span className="text-green-500 text-lg">✔</span>}
+        </label>
+
+        {/* Online/UPI option shown only if KYC Stage 3 */}
+        {(() => {
+          const selectedMess = JSON.parse(storage.getItem("selectedMess"));
+          const kycStage = selectedMess?.kyc_stage || "0";
+
+          if (kycStage === "3") {
+            return (
+              <label
+                onClick={() => setSelectedPlan({ ...selectedPlan, paymentMode: 'online' })}
+                className={`flex items-center cursor-pointer justify-between px-4 py-3 rounded-lg border ${
+                  selectedPlan?.paymentMode === 'online' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+                }`}
+              >
+                <div className="flex items-center gap-2 text-blue-600 font-medium">
+                  <span className="text-xl cursor-pointer">💳</span> UPI/Online
+                </div>
+                {selectedPlan?.paymentMode === 'online' && <span className="text-blue-500 text-lg">✔</span>}
+              </label>
+            );
+          } else {
+            return (
+              <p className="text-red-500 text-sm font-medium mt-2">
+                ⚠️ Online payment is not available for this mess as KYC is incomplete.
+              </p>
+            );
+          }
+        })()}
+      </div>
+
+      <button
+        onClick={handlePlanPurchase}
+        className="w-full bg-orange-500 cursor-pointer hover:bg-orange-600 text-white py-2 rounded-lg font-semibold"
+      >
+        Purchase Plan
+      </button>
+    </div>
+  </div>
+)}
+
       </div>
       
     
