@@ -311,7 +311,7 @@ const SwitchMess = () => {
                   key={mess.messId}
                   className="border rounded-xl bg-white p-4 shadow-sm flex flex-col"
                 >
-                  <div className="flex items-center gap-4 p-2 rounded-lg border border-gray-300 cursor-pointer hover:border-orange-500">
+                  <div className="flex items-center gap-4 p-2 rounded-lg border border-gray-300 hover:border-orange-500">
                     <img
                       src={mess.logoUrl || defaultIcon}
                       alt="logo"
@@ -331,7 +331,7 @@ const SwitchMess = () => {
                       onClick={() => handleMessClick(mess)}
                       className="text-orange-500 text-xl"
                     >
-                      <FiArrowRight />
+                      <FiArrowRight className="cursor-pointer" />
                     </div>
                   </div>
                 </div>
@@ -343,7 +343,7 @@ const SwitchMess = () => {
           <div className="flex justify-center mt-10 sm:mt-16 md:mt-24">
             <button
               onClick={handleAddMess}
-              className="bg-orange-500 text-white px-10 sm:px-20 md:px-40 py-3 rounded-lg font-semibold shadow-lg hover:bg-orange-600 transition text-sm sm:text-base"
+              className="bg-orange-500 cursor-pointer text-white px-10 sm:px-20 md:px-40 py-3 rounded-lg font-semibold shadow-lg hover:bg-orange-600 transition text-sm sm:text-base"
             >
               {hasNoMesses ? "Add Your Mess" : "Add New Mess"}
             </button>

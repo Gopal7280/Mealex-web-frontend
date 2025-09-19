@@ -1,16 +1,21 @@
-export const getToken=()=>{
-    return localStorage.getItem("token");
-};
-export const setToken=(token)=>{
-    console.log("tokenset"+token);
-    return localStorage.setItem("token",token)
-}
-export const removeToken = () => {
-    localStorage.removeItem('token');
-  };
-  
-export const logoutUser=()=>{
-    removeToken();
-    window.location.href="/login";
+export const getToken = () => localStorage.getItem("token");
 
-}
+export const setToken = (token) => {
+  if (token) {
+    localStorage.setItem("token", token);
+    console.log("[AuthService] Token set:", token);
+  } else {
+    console.warn("[AuthService] No token provided to setToken");
+  }
+};
+
+export const removeToken = () => {
+  localStorage.removeItem("token");
+  console.log("[AuthService] Token removed");
+};
+
+export const logoutUser = () => {
+  removeToken();
+  console.log("[AuthService] Logging out user...");
+  window.location.href = "/login";
+};

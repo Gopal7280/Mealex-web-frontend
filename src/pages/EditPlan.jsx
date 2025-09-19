@@ -287,6 +287,8 @@ import Navbar from '../layouts/Navbar';
 import OwnerHeader from './ownerHeader';
 import { apiPost } from '../services/api';
 import toast from 'react-hot-toast';
+import { ArrowLeft } from 'lucide-react';
+
 
 
 const EditPlan = () => {
@@ -335,11 +337,19 @@ const EditPlan = () => {
     <div className="flex h-screen">
       <Navbar />
       {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
+    <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
+        <OwnerHeader />
 
-        <OwnerHeader ownerName="Owner Name" messName="Test Mess 1" />
+        <div className="flex items-center gap-2 mb-6">
+          <ArrowLeft
+            className="w-8 h-8 cursor-pointer text-[#232325] hover:text-red-500"
+            onClick={() => navigate(-1)}
+          />
+          <h2 className="text-xl sm:text-2xl font-semibold  text-[#232325]">
+            Plan Details
+          </h2>
+        </div>
 
-        <h2 className="text-xl font-semibold text-gray-700 mb-6">Plan Details,</h2>
 
         {/* Plan Card Preview */}
         <div className="bg-white border rounded-xl p-4 shadow mb-8 w-full max-w-md">
@@ -460,7 +470,7 @@ const EditPlan = () => {
   className={`w-full font-semibold py-3 rounded-xl transition 
     ${loading 
       ? 'bg-gray-400 text-white cursor-not-allowed' 
-      : 'bg-orange-500 text-white hover:bg-green-900'
+      : 'bg-orange-500 text-white cursor-pointer hover:bg-green-900'
     }`}
 >
   {loading ? (

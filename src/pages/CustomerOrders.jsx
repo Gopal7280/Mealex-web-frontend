@@ -515,18 +515,18 @@ const CustomerOrders = () => {
           <select
             value={selectedMess}
             onChange={(e) => setSelectedMess(e.target.value)}
-            className="border px-3 py-1 rounded text-sm"
+            className="border px-3 py-1 cursor-pointer rounded text-sm"
           >
             <option value="all">All Messes</option>
             {messes.map(m => (
-              <option key={m.messId} value={m.messId}>{m.messName}</option>
+              <option className='cursor-pointer' key={m.messId} value={m.messId}>{m.messName}</option>
             ))}
           </select>
 
           {['all','pending','accepted','rejected','cancelled'].map(status => (
             <button
               key={status}
-              className={`px-4 py-1 rounded border ${statusFilter === status ? 'bg-orange-500 text-white' : ''}`}
+              className={`px-4 py-1 rounded cursor-pointer border ${statusFilter === status ? 'bg-orange-500 text-white' : ''}`}
               onClick={() => setStatusFilter(status)}
             >
               {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -535,7 +535,7 @@ const CustomerOrders = () => {
 
           <div ref={dropdownRef} className="relative inline-block">
             <button
-              className="border px-4 py-1 rounded flex items-center"
+              className="border px-4 py-1 cursor-pointer rounded flex items-center"
               onClick={(e) => {
                 e.stopPropagation();
                 setShowDropdown((prev) => !prev);
@@ -550,11 +550,11 @@ const CustomerOrders = () => {
 
             {showDropdown && (
               <div className="absolute mt-1 bg-white border rounded shadow">
-                <button className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                <button className="block w-full text-left cursor-pointer px-4 py-2 hover:bg-gray-100"
                   onClick={() => { setTimeRange('today'); setShowDropdown(false); }}>Today</button>
-                <button className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                <button className="block w-full text-left cursor-pointer px-4 py-2 hover:bg-gray-100"
                   onClick={() => { setTimeRange('7'); setShowDropdown(false); }}>Last 7 Days</button>
-                <button className="block w-full text-left px-4 py-2 hover:bg-gray-100"
+                <button className="block w-full text-left cursor-pointer px-4 py-2 hover:bg-gray-100"
                   onClick={() => { setTimeRange('30'); setShowDropdown(false); }}>Last 30 Days</button>
               </div>
             )}
@@ -582,7 +582,7 @@ const CustomerOrders = () => {
                     {order.orderStatus?.toLowerCase() === 'pending' && (
                       <button
                         onClick={() => handleCancelOrder(order)}
-                        className="text-orange-500 font-semibold"
+                        className="text-orange-500 cursor-pointer font-semibold"
                       >
                         CANCEL ORDER
                       </button>

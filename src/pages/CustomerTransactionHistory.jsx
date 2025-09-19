@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useEffect, useState } from 'react';
 import Navbar2 from '../layouts/Navbar2';
 import OwnerHeader from '../layouts/CustomerHeader';
@@ -23,8 +19,9 @@ const TransactionHistory = () => {
   const fetchTransactions = async () => {
   try {
     const res = await apiPost('/customer/mess/transaction', { messId });
-    if (res?.data?.success) {
-      const mappedData = (res.data.data || []).map((t) => ({
+    console.log(res);
+    if (res?.success) {
+      const mappedData = (res.data || []).map((t) => ({
         ...t,
         type:
           t.type === 'transaction'
@@ -76,7 +73,7 @@ const TransactionHistory = () => {
             <button
               className={`text-sm font-semibold ${
                 activeTab === 'transaction'
-                  ? 'border-b-2 border-orange-500 text-black'
+                  ? 'border-b-2 border-orange-500 cursor-pointer text-black'
                   : 'text-gray-500'
               }`}
               onClick={() => setActiveTab('transaction')}
@@ -86,7 +83,7 @@ const TransactionHistory = () => {
             <button
               className={`text-sm font-semibold ${
                 activeTab === 'account'
-                  ? 'border-b-2 border-orange-500 text-black'
+                  ? 'border-b-2 border-orange-500 cursor-pointer text-black'
                   : 'text-gray-500'
               }`}
               onClick={() => setActiveTab('account')}
@@ -103,7 +100,7 @@ const TransactionHistory = () => {
                   {['All', 'Purchased', 'Used'].map((type) => (
   <button
     key={type}
-    className={`px-3 py-1 text-sm border rounded-full mr-2 ${
+    className={`px-3 py-1 text-sm border cursor-pointer rounded-full mr-2 ${
       filterType === type
         ? 'bg-orange-500 text-white'
         : 'bg-gray-100'
@@ -189,7 +186,7 @@ const TransactionHistory = () => {
                   <button
                     onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
-                    className="px-3 py-1 border rounded disabled:opacity-50"
+                    className="px-3 py-1 border cursor-pointer rounded disabled:opacity-50"
                   >
                     Prev
                   </button>
@@ -198,7 +195,7 @@ const TransactionHistory = () => {
                     <button
                       key={i + 1}
                       onClick={() => handlePageChange(i + 1)}
-                      className={`px-3 py-1 border rounded ${
+                      className={`px-3 py-1 border cursor-pointer rounded ${
                         currentPage === i + 1
                           ? 'bg-orange-500 text-white'
                           : 'bg-white'
@@ -211,7 +208,7 @@ const TransactionHistory = () => {
                   <button
                     onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
-                    className="px-3 py-1 border rounded disabled:opacity-50"
+                    className="px-3 py-1 border rounded cursor-pointer disabled:opacity-50"
                   >
                     Next
                   </button>

@@ -18,7 +18,7 @@ export const customerRoutes = [
   { path: '/customer-profile/plans', element: <CustomersPlan /> },
   { path: '/customer-profile/history', element: <CustomerHistory /> },
   { path: '/customer/use-tokens', element: <UseTokens /> },
-  { path: '/customer/your-mess', element: <YourMess /> },
+  { path: '//cust/my-mess', element: <YourMess /> },
   { path: '/customer/mess-details', element: <CustomerMessDetails /> },
   { path: '/customer-history', element: <CustomerTransactionHistory /> },
   { path: '/customer/tokens', element: <CustomersTokens /> },

@@ -22,35 +22,91 @@ const History = () => {
   const token = localStorage.getItem('token');
   const messId = localStorage.getItem('messId');
 
-  const fetchTransactions = async () => {
-    if (!token || !messId) {
-      console.error('❌ Token or Mess ID missing');
-      return;
-    }
+//   const fetchTransactions = async () => {
+    // if (!token || !messId) {
+    //   console.error('❌ Token or Mess ID missing');
+    //   return;
+    // }
 
-    setLoading(true);
-    try {
+//     setLoading(true);
+//     try {
    
-       const res = await apiPost(
-        `/owner/mess/stats/transactions?limit=${pagination.limit}&offset=${pagination.offset}`,
-        { messId },
-      );
+//        const res = await apiPost(
+//         `/owner/mess/stats/transactions?limit=${pagination.limit}&offset=${pagination.offset}`,
+//         { messId },
+//       );
 
-      console.log('✅ API Success Response:', res?.data);
+//       console.log('✅ API Success Response:', res?.data);
 
-      if (res.data.success) {
-        setTransactions(res.data.data);
-        setPagination(prev => ({
-          ...prev,
-          hasMore: res.data.pagination.hasMore,
-        }));
-      }
-    } catch (error) {
-      console.error('❌ Error fetching transactions:', error?.response?.data || error.message);
-    } finally {
-      setLoading(false);
+//       // if (res.data.success) {
+//       //   setTransactions(res.data.data);
+//       // ✅ Abhi
+// if (Array.isArray(res.data)) {
+//   setTransactions(res.data);
+// } else if (res.data?.data) {
+//   setTransactions(res.data.data);
+// }
+//         setPagination(prev => ({
+//           ...prev,
+//           hasMore: res.data.pagination.hasMore,
+//         }));
+//       }
+//     } catch (error) {
+//       console.error('❌ Error fetching transactions:', error?.response?.data || error.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+// const fetchTransactions = async () => {
+//   try {
+//     const res = await apiPost(
+//       `/owner/mess/stats/transactions?limit=${pagination.limit}&offset=${pagination.offset}`,
+//       { messId },
+//     );
+
+//     console.log('✅ API Success Response:', res?.data);
+
+//     if (Array.isArray(res.data)) {
+//       setTransactions(res.data);
+//     } else if (res.data?.data) {
+//       setTransactions(res.data.data);
+//     }
+//   } catch (err) {
+//     console.error('❌ API Error:', err);
+//   }
+// };
+
+const fetchTransactions = async () => {
+  if (!token || !messId) {
+    console.error('❌ Token or Mess ID missing');
+    return;
+  }
+
+  setLoading(true);
+  try {
+    const res = await apiPost(
+      `/owner/mess/stats/transactions?limit=${pagination.limit}&offset=${pagination.offset}`,
+      { messId },
+    );
+
+    console.log('✅ API Success Response:', res);
+
+    if (res?.success) {
+      setTransactions(res.data || []);
+
+      setPagination(prev => ({
+        ...prev,
+        hasMore: res.pagination?.hasMore || false,
+      }));
     }
-  };
+  } catch (err) {
+    console.error('❌ API Error:', err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchTransactions();
@@ -86,31 +142,47 @@ const History = () => {
         <OwnerHeader />
   <div className="justify-between mb-4 bg-white p-4 rounded-2xl shadow">
            <div className="flex gap-6 bg-white mb-6 border-b pb-2">
-              <button onClick={() => navigate('/history')} className={`capitalize text-md font-medium transition-opacity ${currentPath === '/history' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
+              <button onClick={() => navigate('/history')} className={`cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/history' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
                 Transactions History 
               </button>
-              <button onClick={() => navigate('/owner/history/plans')} className={`capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/plans' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
+              <button onClick={() => navigate('/owner/history/plans')} className={` cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/plans' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
                 Plan History
               </button>
-              <button onClick={() => navigate('/owner/history/account')} className={`capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/account' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
+              <button onClick={() => navigate('/owner/history/account')} className={`cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/account' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
                 Account History
               </button>
             </div>
 
         {/* Filters */}
-        <div className="flex space-x-4 my-4">
+        {/* <div className="flex space-x-4 my-4">
           {['All', 'Purchased', 'Used'].map(f => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-1 rounded border ${
+              className={`px-4 py-1 rounded cursor-pointer border ${
                 filter === f ? 'bg-orange-500 text-white' : 'text-gray-700 border-gray-300'
               }`}
             >
               {f}
             </button>
           ))}
-        </div>
+        </div> */}
+        <div className="flex flex-wrap gap-2 my-4">
+  {['All', 'Purchased', 'Used'].map(f => (
+    <button
+      key={f}
+      onClick={() => setFilter(f)}
+      className={`px-4 py-1 rounded cursor-pointer border text-sm sm:text-base ${
+        filter === f
+          ? 'bg-orange-500 text-white'
+          : 'text-gray-700 border-gray-300'
+      }`}
+    >
+      {f}
+    </button>
+  ))}
+</div>
+
 
         {/* Table */}
         <div className="overflow-x-auto bg-white rounded shadow">
@@ -139,9 +211,13 @@ const History = () => {
                   <tr key={index} className="border-b">
                     <td className="px-6 py-4">{item.planName || item.planId || '—'}</td>
                     <td className="px-6 py-4">
-                      {item.type === 'submission'
+                      {/* {item.type === 'submission'
                         ? item.submittedTokens?.length || 0
-                        : item.tokensPurchased || 0}
+                        : item.tokensPurchased || 0} */}
+                        {item.type === 'submission'
+  ? item.submittedTokenCount || 0
+  : item.tokensPurchased || 0}
+
                     </td>
                     <td className="px-6 py-4">
                       {item.time ? new Date(item.time).toLocaleDateString() : 'N/A'}
@@ -170,7 +246,11 @@ const History = () => {
 </td>
 
                     <td className="px-6 py-4">
-                      {item.type === 'submission' ? item.submittedByName : item.transactionByName || '—'}
+                      {/* {item.type === 'submission' ? item.submittedByName : item.transactionByName || '—'} */}
+
+{item.type === 'submission'
+  ? item.submittedByName
+  : item.transactionByName || '—'}
                     </td>
                   </tr>
                 ))
@@ -182,14 +262,14 @@ const History = () => {
         {/* Pagination */}
         <div className="flex justify-between mt-4">
           <button
-            className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+            className="px-4 py-2 cursor-pointer bg-gray-200 text-gray-700 rounded disabled:opacity-50"
             disabled={pagination.offset === 0}
             onClick={handlePrevious}
           >
             Previous
           </button>
           <button
-            className="px-4 py-2 bg-orange-500 text-white rounded disabled:opacity-50"
+            className="px-4 py-2 cursor-pointer bg-orange-500 text-white rounded disabled:opacity-50"
             disabled={!pagination.hasMore}
             onClick={handleNext}
           >

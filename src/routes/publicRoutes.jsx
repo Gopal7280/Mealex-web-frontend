@@ -4,7 +4,6 @@ import LoginRegister from '../pages/loginRegister'
 import OtpVerification from '../pages/OtpVerification'
 import UserAccess from '../pages/UserAccess'
 import ResetOtp from '../pages/resetOtp'
-
 export const publicRoutes = [
 
     //    const [auth, setAuth] = useState(false);

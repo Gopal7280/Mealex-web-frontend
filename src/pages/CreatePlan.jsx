@@ -428,7 +428,7 @@ const CreatePlan = () => {
             className="w-8 h-8 cursor-pointer text-[#232325] hover:text-red-500"
             onClick={() => navigate(-1)}
           />
-          <h2 className="text-xl sm:text-2xl font-semibold text-[#232325]">
+          <h2 className="text-xl sm:text-2xl font-semibold  text-[#232325]">
             Create New Plan
           </h2>
         </div>
@@ -548,12 +548,12 @@ const CreatePlan = () => {
                   ${
                     loading
                       ? 'bg-gray-400 text-white cursor-not-allowed'
-                      : 'bg-orange-500 text-white hover:bg-green-900'
+                      : 'bg-orange-500 text-white cursor-pointer hover:bg-green-900'
                   }`}
               >
                 {loading ? (
                   <div className="flex items-center justify-center gap-2">
-                    <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    <span className="w-4 h-4 border-2 border-white border-t-transparent  rounded-full animate-spin"></span>
                     <span>Creating New Plan...</span>
                   </div>
                 ) : (
@@ -564,7 +564,7 @@ const CreatePlan = () => {
               <button
                 type="button"
                 onClick={() => navigate('/plans')}
-                className="flex-1 bg-white hover:bg-red-500 hover:text-white hover:border-red-500 text-orange-500 border-2 border-orange-500 py-3 rounded-2xl font-semibold"
+                className="flex-1 bg-white hover:bg-red-500 hover:text-white cursor-pointer hover:border-red-500 text-orange-500 border-2 border-orange-500 py-3 rounded-2xl font-semibold"
               >
                 Cancel
               </button>

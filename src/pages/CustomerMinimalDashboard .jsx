@@ -25,6 +25,8 @@ const CustomerMinimalDashboard = () => {
   const [plansByMess, setPlansByMess] = useState({});
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [gotoPage, setGotoPage] = useState("");
+
 
   useEffect(() => {
     fetchMesses(page);
@@ -72,6 +74,7 @@ const CustomerMinimalDashboard = () => {
   };
 
   const handleMessClick = (mess) => {
+    mess.services=mess.services || (Array.isArray(mess.services) ? mess.services : mess.services ? [mess.services] : []);
     const alreadyExpanded = expandedMessId === mess.messId;
     setExpandedMessId(alreadyExpanded ? null : mess.messId);
     storage.setItem('messId', mess.messId);
@@ -83,26 +86,26 @@ const CustomerMinimalDashboard = () => {
     <div className="flex h-screen ">
         <Navbar2 />
       {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto ">
 
           <CustomerHeader />
 
           {/* Tabs */}
           <div className="flex space-x-6 border-b mb-6">
               <button
-              className={`pb-2 ${tab === 'plans' ? 'border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'}`}
+              className={`pb-2 ${tab === 'plans' ? 'border-b-2 border-orange-500  text-orange-600' : 'cursor-pointer text-gray-500'}`}
               onClick={() => navigate('/customer-activeplans')}
             >
               My Plans
             </button>
              <button
-              className={`pb-2 ${tab === 'your' ? 'border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'}`}
-              onClick={() => navigate('/customer/your-mess')}
+              className={`pb-2 ${tab === 'your' ? 'border-b-2 border-orange-500  text-orange-600' : 'cursor-pointer text-gray-500'}`}
+              onClick={() => navigate('/cust/my-mess')}
             >
               My Mess
             </button>
             <button
-              className={`pb-2 ${tab === 'available' ? 'border-b-2 border-orange-500 text-orange-600' : 'text-gray-500'}`}
+              className={`pb-2 ${tab === 'available' ? 'border-b-2 border-orange-500  text-orange-600' : 'cursor-pointer text-gray-500'}`}
               onClick={() => setTab('available')}
             >
               Available Mess
@@ -115,7 +118,7 @@ const CustomerMinimalDashboard = () => {
             <select
               value={searchMode}
               onChange={(e) => setSearchMode(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg"
+              className="px-4 py-2 border cursor-pointer border-gray-300 rounded-lg"
             >
               <option value="city">City</option>
               <option value="pincode">Pincode</option>
@@ -128,7 +131,7 @@ const CustomerMinimalDashboard = () => {
               onChange={(e) => setSearchInput(e.target.value)}
             />
             <button
-              className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg"
+              className="flex items-center gap-2 px-4 cursor-pointer py-2 bg-orange-500 text-white rounded-lg"
               onClick={() => fetchMesses(1)}
             >
               <MdLocationOn className="text-xl" />
@@ -167,7 +170,10 @@ const CustomerMinimalDashboard = () => {
               <div className="flex-1">
                 <p className="font-semibold">{mess.messName}</p>
                 <p className="text-l text-gray-500">{mess.city} • {mess.pincode}</p>
-                <p className="text-sm text-gray-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
+                <p className="text-sm text-green-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
+                  {/* <p className="text-sm text-gray-600 font-semibold">
+      Days Open: {Array.isArray(mess.daysOpen) ? mess.daysOpen.join(", ") : mess.daysOpen}
+    </p> */}
               </div>
               <div
                 onClick={(e) => {
@@ -223,7 +229,7 @@ const CustomerMinimalDashboard = () => {
                           </div>
                           {isSelected && (
                             <button
-                              className="mt-2 bg-orange-500 hover:bg-orange-600 text-white py-1 px-3 rounded"
+                              className="mt-2 bg-orange-500 cursor-pointer hover:bg-orange-600 text-white py-1 px-3 rounded"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 setShowPaymentModal(true);
@@ -250,36 +256,68 @@ const CustomerMinimalDashboard = () => {
 </div>
 
 
-          {/* Pagination */}
-          {pagination?.totalPages > 1 && (
-            <div className="flex justify-center mt-4 gap-2">
-              <button
-                disabled={page === 1}
-                className="px-3 py-1 rounded bg-gray-200 text-gray-600 disabled:opacity-50"
-                onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
-              >
-                Prev
-              </button>
-              {Array.from({ length: pagination.totalPages }).map((_, idx) => (
-                <button
-                  key={idx + 1}
-                  className={`px-3 py-1 rounded ${
-                    page === idx + 1 ? 'bg-orange-500 text-white' : 'bg-gray-100'
-                  }`}
-                  onClick={() => setPage(idx + 1)}
-                >
-                  {idx + 1}
-                </button>
-              ))}
-              <button
-                disabled={page === pagination.totalPages}
-                className="px-3 py-1 rounded bg-gray-200 text-g ray-600 disabled:opacity-50"
-                onClick={() => setPage((prev) => Math.min(prev + 1, pagination.totalPages))}
-              >
-                Next
-              </button>
-            </div>
-          )}
+     
+{pagination?.totalPages > 1 && (
+  <div className="flex flex-col items-center mt-6 gap-3">
+    {/* Prev / Next */}
+    <div className="flex gap-2">
+      <button
+        disabled={page === 1}
+        className="px-3 py-1 rounded cursor-pointer bg-gray-200 text-gray-600 disabled:opacity-50"
+        onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+      >
+        Prev
+      </button>
+
+      <span className="px-3 py-1 text-gray-700">
+        Page {page} of {pagination.totalPages}
+      </span>
+
+      <button
+        disabled={page === pagination.totalPages}
+        className="px-3 py-1 rounded cursor-pointer bg-gray-200 text-gray-600 disabled:opacity-50"
+        onClick={() => setPage((prev) => Math.min(prev + 1, pagination.totalPages))}
+      >
+        Next
+      </button>
+    </div>
+
+    {/* Go To Page */}
+    <div className="flex gap-2 items-center">
+      <input
+        type="number"
+        min="1"
+        max={pagination.totalPages}
+        placeholder="Page no."
+        className="border px-3 py-1 rounded w-24 text-sm"
+        value={gotoPage}
+        onChange={(e) => setGotoPage(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            const pageNum = Number(gotoPage);
+            if (pageNum >= 1 && pageNum <= pagination.totalPages) {
+              setPage(pageNum);
+            }
+            setGotoPage("");
+          }
+        }}
+      />
+      <button
+        className="px-3 py-1 bg-orange-500 cursor-pointer text-white rounded text-sm"
+        onClick={() => {
+          const pageNum = Number(gotoPage);
+          if (pageNum >= 1 && pageNum <= pagination.totalPages) {
+            setPage(pageNum);
+          }
+          setGotoPage("");
+        }}
+      >
+        Go
+      </button>
+    </div>
+  </div>
+)}
+
         </div>
 
       {/* Payment Modal */}
@@ -289,10 +327,10 @@ const CustomerMinimalDashboard = () => {
             <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
             <div className="flex flex-col gap-3">
               <button
-                className="bg-green-500 hover:bg-green-600 text-white py-2 rounded"
+                className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
                 onClick={() => {
                   setShowPaymentModal(false);
-                  alert('💵 Cash payment selected. Please pay at mess counter.');
+                  toast.success('💵 Cash payment selected. Please pay at mess counter.');
                 }}
               >
                 Pay with Cash
@@ -305,12 +343,12 @@ const CustomerMinimalDashboard = () => {
                   setShowPaymentModal(false);
                   fetchPlans(expandedMessId);
                   toast.success(`${selectedPlan?.name} has been added successfully!`);
-                 navigate('/customer/your-mess');
+                 navigate('/cust/my-mess');
                 }}
               />
 
               <button
-                className="text-sm text-gray-500 mt-2 hover:text-red-500"
+                className="text-sm text-gray-500 cursor-pointer mt-2 hover:text-red-500"
                 onClick={() => setShowPaymentModal(false)}
               >
                 Cancel

@@ -230,7 +230,7 @@ const PlanOptions = ({ planId, isActive, onAction }) => {
         {/* ✅ Activate Plan */}
         <button
           onClick={() => handleAction('activate')}
-          className="flex justify-between items-center w-full text-green-600 text-sm hover:underline"
+          className="flex justify-between cursor-pointer items-center w-full text-green-600 text-sm hover:underline"
         >
           <span className="flex items-center gap-2">
             <PlayCircle size={16} /> Activate Plan
@@ -241,7 +241,7 @@ const PlanOptions = ({ planId, isActive, onAction }) => {
         {/* ⛔ Deactivate Plan */}
         <button
           onClick={() => handleAction('deactivate')}
-          className="flex justify-between items-center w-full text-yellow-600 text-sm hover:underline"
+          className="flex cursor-pointer justify-between items-center w-full text-yellow-600 text-sm hover:underline"
         >
           <span className="flex items-center gap-2">
             <PauseCircle size={16} /> Deactivate Plan
@@ -252,7 +252,7 @@ const PlanOptions = ({ planId, isActive, onAction }) => {
         {/* 🗑 Delete Plan */}
         <button
           onClick={() => onAction('delete', planId)}
-          className="flex items-center gap-2 text-red-600 text-sm hover:underline"
+          className="flex items-center cursor-pointer gap-2 text-red-600 text-sm hover:underline"
         >
           <Trash2 size={16} /> Delete Plan
         </button>

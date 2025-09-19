@@ -118,7 +118,7 @@ const VerifyMessOtp = () => {
       setRequestId(savedRequestId);
       setMessId(savedMessId);
     } else {
-      alert('Missing verification data. Redirecting to form...');
+      toast.error('Missing verification data. Redirecting to form...');
       navigate('/mess-details');
     }
   }, [navigate]);
@@ -160,7 +160,7 @@ const VerifyMessOtp = () => {
         messId
       });
 
-      if (res.data.success) {
+      if (res.success) {
         toast.success(`${messEmail} verified successfully and ${messName} Created Successfully`);
         storage.removeItem('messEmail');
         storage.removeItem('messRequestId');
@@ -184,16 +184,16 @@ const handleResend = async () => {
   try {
     const res = await apiPost('/resend-otp', {
       identifier: email,
-      identifierType: 'email',
+    
       context: 'mess-registration',
       requestId
     });
-
-    if (res.data.success && res.data.requestId) {
-      setRequestId(res.data.requestId);
-      storage.setItem('messRequestId', res.data.requestId);
+   console.log(res);
+    if (res.success && res.requestId) {
+      setRequestId(res.requestId);
+      storage.setItem('messRequestId', res.requestId);
     } else {
-      setError(res.data.message || 'Failed to resend OTP');
+      setError(res.message || 'Failed to resend OTP');
     }
   } catch (err) {
     console.error('Resend OTP failed:', err);

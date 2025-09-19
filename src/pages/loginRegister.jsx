@@ -120,6 +120,48 @@ const LoginRegister = ({ setAuth }) => {
   //   }
   // };
 
+// const handleLogin = async e => {
+//   e.preventDefault();
+//   setError('');
+
+//   const normalizedIdentifier = identifier.includes('@') ? identifier.toLowerCase() : identifier;
+
+//   try {
+//     setLoader(true);
+//     const response = await apiPost('/login', { identifier: normalizedIdentifier, password });
+//     console.log(response);
+
+//     // const JWT = response.data.token;
+//     const JWT = data.token;
+
+//     storage.setItem('identifier', response.data.identifier);
+//     storage.setItem('token', JWT);
+//     setToken(JWT);
+//     setAuth(true);
+
+//     // ✅ FCM setup turant login ke baad
+//     await setupNotifications(JWT);
+
+//     if (response.data.isOwner && response.data.isCustomer) {
+//       navigate('/minimal-dashboard');
+//       storage.setItem('roles', 'both');
+//     } else if (response.data.isCustomer) {
+//       storage.setItem('role', 'customer');
+//       navigate('customers-dashboard');
+//       toast.success('🎉 Logged In As Customer!');
+//     } else if (response.data.isOwner) {
+//       navigate('/minimal-dashboard');
+//       toast.success('🎉 Logged In As Owner!');
+//     } else {
+//       navigate('/user-access');
+//     }
+//   } catch (err) {
+//     setError(err.response?.data?.message || 'Login failed. Try again!');
+//   } finally {
+//     setLoader(false);
+//   }
+// };
+
 const handleLogin = async e => {
   e.preventDefault();
   setError('');
@@ -128,26 +170,25 @@ const handleLogin = async e => {
 
   try {
     setLoader(true);
-    const response = await apiPost('/login', { identifier: normalizedIdentifier, password });
-    console.log(response);
+    const data = await apiPost('/login', { identifier: normalizedIdentifier, password });
+    console.log(data); // ✅ data me token, identifier, roles sab aa raha
 
-    const JWT = response.data.token;
-    storage.setItem('identifier', response.data.identifier);
+    const JWT = data.token; // ✅ correct
+    storage.setItem('identifier', data.identifier);
     storage.setItem('token', JWT);
     setToken(JWT);
-    setAuth(true);
+    setAuth(true); // ✅ triggers UI update
 
-    // ✅ FCM setup turant login ke baad
     await setupNotifications(JWT);
 
-    if (response.data.isOwner && response.data.isCustomer) {
+    if (data.isOwner && data.isCustomer) {
       navigate('/minimal-dashboard');
       storage.setItem('roles', 'both');
-    } else if (response.data.isCustomer) {
+    } else if (data.isCustomer) {
       storage.setItem('role', 'customer');
       navigate('customers-dashboard');
       toast.success('🎉 Logged In As Customer!');
-    } else if (response.data.isOwner) {
+    } else if (data.isOwner) {
       navigate('/minimal-dashboard');
       toast.success('🎉 Logged In As Owner!');
     } else {
@@ -161,52 +202,97 @@ const handleLogin = async e => {
 };
 
 
-  const handleRegister = async e => {
-    e.preventDefault();
-    if (!identifier || !password || !confirmPassword) {
-      setErrorMsg('Please fill all fields correctly.');
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError('Passwords do not match!');
-      return;
-    }
+  // const handleRegister = async e => {
+  //   e.preventDefault();
+  //   if (!identifier || !password || !confirmPassword) {
+  //     setErrorMsg('Please fill all fields correctly.');
+  //     return;
+  //   }
+  //   if (password !== confirmPassword) {
+  //     setError('Passwords do not match!');
+  //     return;
+  //   }
 
-    const normalizedIdentifier = identifier.includes('@') ? identifier.toLowerCase() : identifier;
+  //   const normalizedIdentifier = identifier.includes('@') ? identifier.toLowerCase() : identifier;
 
-    try {
-      setLoader(true);
-      const res = await apiPost('/register', {
-        identifier: normalizedIdentifier,
-        password,
-        confirmPassword
+  //   try {
+  //     setLoader(true);
+  //     const res = await apiPost('/register', {
+  //       identifier: normalizedIdentifier,
+  //       password,
+  //       confirmPassword
+  //     });
+  //     console.log(res)
+
+  //     const data = res.data;
+  //     if (data.success && data.requestId) {
+  //       navigate('/otp-verification', {
+  //         state: {
+  //           identifier: data.identifier,
+  //           identifierType: data.identifierType,
+  //           requestId: data.requestId,
+  //           context: data.context || 'registration',
+  //         },
+  //       });
+  //     } else {
+  //       setErrorMsg(data.message || 'Registration failed. Try again.');
+  //     }
+  //   } catch (err) {
+  //     setErrorMsg(err.response?.data?.message || 'Network error. Please try again.');
+  //   } finally {
+  //     setLoader(false);
+  //   }
+  // };
+
+const handleRegister = async e => {
+  e.preventDefault();
+  if (!identifier || !password || !confirmPassword) {
+    setErrorMsg('Please fill all fields correctly.');
+    return;
+  }
+  if (password !== confirmPassword) {
+    setError('Passwords do not match!');
+    return;
+  }
+
+  const normalizedIdentifier = identifier.includes('@') ? identifier.toLowerCase() : identifier;
+
+  try {
+    setLoader(true);
+    // ✅ new apiPost returns data directly, not response.data
+    const data = await apiPost('/register', {
+      identifier: normalizedIdentifier,
+      password,
+      confirmPassword
+    });
+    console.log('register',data);
+
+    if (data.success && data.requestId) {
+      navigate('/otp-verification', {
+        state: {
+          identifier: data.identifier,
+          identifierType: data.identifierType,
+          requestId: data.requestId,
+          context: data.context || 'registration',
+        },
       });
-      console.log(res)
-
-      const data = res.data;
-      if (data.success && data.requestId) {
-        navigate('/otp-verification', {
-          state: {
-            identifier: data.identifier,
-            identifierType: data.identifierType,
-            requestId: data.requestId,
-            context: data.context || 'registration',
-          },
-        });
-      } else {
-        setErrorMsg(data.message || 'Registration failed. Try again.');
-      }
-    } catch (err) {
-      setErrorMsg(err.response?.data?.message || 'Network error. Please try again.');
-    } finally {
-      setLoader(false);
+    } else {
+      setErrorMsg(data.message || 'Registration failed. Try again.');
     }
-  };
+  } catch (err) {
+    setErrorMsg(err.response?.data?.message || 'Network error. Please try again.');
+  } finally {
+    setLoader(false);
+  }
+};
+
 
   const handleGoogleSuccess = async credentialResponse => {
     try {
       const idToken = credentialResponse.credential;
+      console.log('Google ID Token:', idToken);
       const res = await apiPost('/google-auth', { idToken });
+      console.log('Google Sign-in Response:', res);
 
       if (res.success) {
         navigate('/user-access');

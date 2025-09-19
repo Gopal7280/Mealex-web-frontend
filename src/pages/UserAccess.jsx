@@ -28,6 +28,8 @@ const UserAccess = () => {
   const [activeOtpType, setActiveOtpType] = useState('');
   const [checkboxChecked, setCheckboxChecked] = useState(false);
   const [verifyingCheckbox, setVerifyingCheckbox] = useState(false);
+    const [submitting, setSubmitting] = useState(false); // ✅ new state
+
 
   const location = useLocation();
   const navigate = useNavigate();
@@ -83,35 +85,35 @@ const UserAccess = () => {
     });
 
     // ✅ agar direct token mila to OTP ki zaroorat nahi
-    if (res.data.identifierToken) {
+    if (res.identifierToken) {
       if (type === 'email') {
         setIsEmailVerified(true);
-        setEmailToken(res.data.identifierToken);
+        setEmailToken(res.identifierToken);
         setShowEmailOtpBox(false); 
-        storage.setItem('emailToken', res.data.identifierToken);
-        alert('Email already verified ✅');
+        storage.setItem('emailToken', res.identifierToken);
+        toast.success('Email already verified ✅');
       } else {
         setIsPhoneVerified(true);
-        setPhoneToken(res.data.identifierToken);
+        setPhoneToken(res.identifierToken);
         setShowPhoneOtpBox(false); 
-        storage.setItem('phoneToken', res.data.identifierToken);
-        alert('Phone already verified ✅');
+        storage.setItem('phoneToken', res.identifierToken);
+        toast.success('Phone already verified ✅');
       }
       return;
     }
 
     // ⚡ agar token nahi mila → OTP flow
-    setVerificationRequestId(res.data.requestId);
-    setOtpContext(res.data.context);
+    setVerificationRequestId(res.requestId);
+    setOtpContext(res.context);
     setActiveOtpType(type);
 
     if (type === 'email') setShowEmailOtpBox(true);
     else setShowPhoneOtpBox(true);
 
-    alert(`OTP sent to ${type}`);
+    toast.success(`OTP sent to ${type}`);
   } catch (err) {
-    const errorMsg = err?.response?.data?.message || `Failed to send ${type} OTP`;
-    alert(errorMsg);
+    const errorMsg = err?.response?.message || `Failed to send ${type} OTP`;
+    toast.error(errorMsg);
   }
 };
 
@@ -128,8 +130,8 @@ const UserAccess = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      if (res.data.success) {
-        const returnedToken = res.data.identifierToken;
+      if (res.success) {
+        const returnedToken = res.identifierToken;
         if (activeOtpType === 'email') {
           setIsEmailVerified(true);
           setEmailToken(returnedToken);
@@ -139,12 +141,12 @@ const UserAccess = () => {
           setPhoneToken(returnedToken);
           setShowPhoneOtpBox(false);
         }
-        alert(`${activeOtpType} verified successfully`);
+        toast.success(`${activeOtpType} verified successfully`);
       } else {
-        alert('Invalid OTP');
+        toast.error('Invalid OTP');
       }
     } catch {
-      alert('OTP verification failed');
+      toast.error('OTP verification failed');
     }
   };
 
@@ -173,6 +175,7 @@ const UserAccess = () => {
     };
 
     try {
+      setSubmitting(true); // ✅ disable button + show loading
       const token = storage.getItem('token');
       await apiPost('/user/profile', payload, {
         headers: { Authorization: `Bearer ${token}` }
@@ -181,16 +184,17 @@ const UserAccess = () => {
      toast.success('Profile created successfully!');
       navigate(role === 'Owner' ? '/minimal-dashboard' : '/login/customers-dashboard');
     } catch (err) {
-      alert(err?.response?.data?.message || 'Something went wrong.');
-    }
-  };
+      toast.error(err?.response?.data?.message || 'Something went wrong.');
+ } finally {
+      setSubmitting(false); // ✅ re-enable button
+    }  };
 
   return (
     <form onSubmit={handleSubmit} className="w-full mx-auto p-16 bg-white rounded-2xl space-y-8">
       {/* <h2 className="text-3xl font-bold  text-orange-500 underline"> ← Create User Profile</h2> */}
      <div  
      onClick={() => navigate(-1)}
-     className="flex text-3xl font-bold  text-orange-500 gap-2">
+     className="flex text-3xl font-bold cursor-pointer text-orange-500 gap-2">
        ←   
       <span className="underline"> Create User Profile</span></div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -270,15 +274,15 @@ const UserAccess = () => {
               headers: { Authorization: `Bearer ${token}` }
             });
 
-            const identifierToken = res.data.identifierToken;
+            const identifierToken = res.identifierToken;
             setPhone(previousIdentifier);
             setPhoneToken(identifierToken);
             setIsPhoneVerified(true);
             storage.setItem('phoneToken', identifierToken);
 
-            alert('Phone verified successfully');
+            toast.success('Phone verified successfully');
           } catch {
-            alert('Checkbox phone verification failed');
+            toast.error('Checkbox phone verification failed');
             setCheckboxChecked(false);
           }
         }}
@@ -359,15 +363,15 @@ const UserAccess = () => {
               headers: { Authorization: `Bearer ${token}` }
             });
 
-            const identifierToken = res.data.identifierToken;
+            const identifierToken = res.identifierToken;
             setEmail(previousIdentifier);
             setEmailToken(identifierToken);
             setIsEmailVerified(true);
             storage.setItem('emailToken', identifierToken);
 
-            alert('Email verified successfully');
+            toast.success('Email verified successfully');
           } catch {
-            alert('Checkbox email verification failed');
+            toast.error('Checkbox email verification failed');
             setCheckboxChecked(false);
           }
         }}
@@ -417,8 +421,17 @@ const UserAccess = () => {
       </div>
 
       <div className="flex flex-col items-center">
-        <button type="submit" className="w-1/3 bg-orange-500 text-white font-semibold py-3 rounded-xl hover:bg-orange-600 transition">Submit Details</button>
-        <button className="mt-2 text-sm text-orange-500 underline hover:text-orange-600 transition">Email Or Phone Needs To Be verified Before Submission</button>
+   <button
+          type="submit"
+          disabled={submitting}
+          className={`w-1/3 font-semibold py-3 rounded-xl transition text-white ${
+            submitting
+              ? 'bg-gray-400 cursor-not-allowed'
+              : 'bg-orange-500 hover:bg-orange-600 cursor-pointer'
+          }`}
+        >
+          {submitting ? 'Submitting...' : 'Submit Details'}
+        </button>        <button className="mt-2 text-sm text-orange-500 underline hover:text-orange-600 transition">Email Or Phone Needs To Be verified Before Submission</button>
       </div>
     </form>
   );

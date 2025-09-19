@@ -144,22 +144,24 @@ const handleRejectAll = () => {
   }, [showPastOrders]);
 
 
-  const fetchPastOrders = async (pageNumber = 1) => {
+const [filterType, setFilterType] = useState("today");
+
+const fetchPastOrders = async (pageNumber = 1, days = null) => {
   if (!messId) return;
 
   try {
-    const res = await apiGet(`/owner/mess/${messId}/orders/past?days=7&page=${pageNumber}&limit=10`);
+    let url = `/owner/mess/${messId}/orders/past?page=${pageNumber}&limit=10`;
+    if (days) url += `&days=${days}`;
+
+    const res = await apiGet(url);
     if (res.success) {
       const data = res.data || [];
-      console.log("Past orders fetched:", res);
       setOrders(data);
       setPage(pageNumber);
-        setTotalOrders(res.pagination?.total || data.length); // ✅ fix here
+      setTotalOrders(res.pagination?.total || data.length);
 
-
-      // Enable next if 10 items came, else last page
       if (data.length === 10) {
-        setTotalPages(pageNumber + 1); 
+        setTotalPages(pageNumber + 1);
       } else {
         setTotalPages(pageNumber);
       }
@@ -170,7 +172,6 @@ const handleRejectAll = () => {
 };
 
 
-  // ------------------- Socket listeners -------------------
   useEffect(() => {
     if (!messId || showPastOrders) return; // socket only for live orders
 
@@ -290,23 +291,24 @@ const handleRejectAll = () => {
 
         {selectedOrders.length > 0 && !showPastOrders && (
           <div className="flex justify-between items-center mb-4">
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex  items-center gap-2 cursor-pointer">
               <input
                 type="checkbox"
                 checked={selectedOrders.length === orders.length}
                 onChange={selectAll}
+                className='cursor-pointer'
               />
               <span>Select All</span>
             </label>
             <div className="space-x-4">
               <button
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-1 rounded"
+                className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-4 py-1 rounded"
                 onClick={handleAcceptAll}
               >
                 Accept All ({selectedOrders.length})
               </button>
               <button
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-1 rounded"
+                className="bg-red-600 cursor-pointer hover:bg-red-700 text-white px-4 py-1 rounded"
                 onClick={handleRejectAll}
               >
                 Reject All ({selectedOrders.length})
@@ -326,22 +328,30 @@ const handleRejectAll = () => {
             </h2>
   
   <div className="relative inline-block text-left">
-    <select
-      className="border border-gray-200 rounded px-1 py-1"
-      value={showPastOrders ? "all" : "today"}
-      onChange={(e) => {
-        if (e.target.value === "today") {
-          setShowPastOrders(false);
-        } else {
-          setShowPastOrders(true);
-          fetchPastOrders(1); // fetch first page of past orders
-        }
-      }}
-    >
-      <option value="today">Today </option>
-      <option value="all">All Orders</option>
-    </select>
-  </div>
+  <select
+    className="border border-gray-200 rounded px-2 py-1 cursor-pointer"
+    value={filterType}
+    onChange={(e) => {
+      const val = e.target.value;
+      setFilterType(val);
+
+      if (val === "today") {
+        setShowPastOrders(false); // live API ke liye
+      } else if (val === "7days") {
+        setShowPastOrders(true);
+        fetchPastOrders(1, 7); // last 7 days
+      } else if (val === "all") {
+        setShowPastOrders(true);
+        fetchPastOrders(1, null); // all orders
+      }
+    }}
+  >
+    <option value="today">Today</option>
+    <option value="7days">Last 7 Days</option>
+    <option value="all">All Orders</option>
+  </select>
+</div>
+
 </div>
 
 
@@ -350,12 +360,7 @@ const handleRejectAll = () => {
               <div className={`rounded-lg p-4 relative ${isSelected(order.orderId || order.id) ? 'border-[#FC7C00] bg-orange-50' : 'border-gray-900'}`}>
                 <p className="text-sm font-bold text-[#FC7C00] mb-3">{(order.orderStatus || '').toUpperCase()}</p>
                 {!showPastOrders && (
-                  // <button
-                  //   className="absolute top-4 right-4"
-                  //   onClick={() => toggleOrderSelection(order.orderId)}
-                  // >
-                  //   {isSelected(order.orderId) ? <CheckSquare /> : <Square />}
-                  // </button>
+             
                   <button
   className="absolute top-4 right-4"
   onClick={() => toggleOrderSelection(order.orderId || order.id)}
@@ -364,27 +369,6 @@ const handleRejectAll = () => {
 </button>
 
                 )}
-
-                {/* <div className="grid grid-cols-7 text-center font-poppins font-medium text-gray-700 py-4 border-t border-t-[#DEDEDE] border-b border-b-[#DEDEDE]">
-                  <span className='border-r border-[#DEDEDE] text-[#3C3C4399] p-1'>{order.customerName}</span>
-                  <span className='border-r border-[#DEDEDE] text-[#3C3C4399] p-1'>{order.customerPlanName || order.planName}</span>
-                  <span className='border-r border-[#DEDEDE] text-[#3C3C4399] p-1'>{order.tokenCount} Token(s)</span>
-                  <span className='border-r border-[#DEDEDE] text-[#3C3C4399] p-1'>{new Date(order.createdAt).toLocaleTimeString()}</span>
-                  <span className='border-r border-[#DEDEDE] text-[#3C3C4399] p-1'>{new Date(order.createdAt).toLocaleDateString()}</span>
-
-                  {!showPastOrders ? (
-                    order.orderStatus==='pending' || !order.orderStatus ? (
-                      <>
-                        <button onClick={()=>handleDecision(order.orderId,'accepted')} className="border-r border-gray-300 text-green-600 font-bold">ACCEPT</button>
-                        <button onClick={()=>handleDecision(order.orderId,'rejected')} className="text-red-600 font-bold">REJECT</button>
-                      </>
-                    ) : (
-                      <span className="col-span-2 text-gray-400 italic text-center">Action taken</span>
-                    )
-                  ) : (
-                    <span className="col-span-2 text-gray-400 italic text-center">Past Order</span>
-                  )}
-                </div> */}
                 <div className="overflow-x-auto">
   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-7 text-center font-poppins font-medium text-gray-700 py-4 border-t border-t-[#DEDEDE] border-b border-b-[#DEDEDE] text-xs sm:text-sm md:text-base">
     <span className="md:border-r border-b md:border-b-0 border-[#DEDEDE] text-[#3C3C4399] p-2 break-words">
@@ -408,13 +392,13 @@ const handleRejectAll = () => {
         <>
           <button
             onClick={() => handleDecision(order.orderId, "accepted")}
-            className="md:border-r border-b md:border-b-0 border-gray-300 text-green-600 font-bold w-full py-2"
+            className="md:border-r border-b md:border-b-0 cursor-pointer border-gray-300 text-green-600 font-bold w-full py-2"
           >
             ACCEPT
           </button>
           <button
             onClick={() => handleDecision(order.orderId, "rejected")}
-            className="text-red-600 font-bold w-full py-2"
+            className="text-red-600 font-bold cursor-pointer w-full py-2"
           >
             REJECT
           </button>
@@ -446,14 +430,14 @@ const handleRejectAll = () => {
           {showPastOrders && (
             <div className="flex justify-between mt-4">
               <button
-                className="bg-gray-200 px-3 py-1 rounded disabled:opacity-50"
+                className="bg-gray-200 cursor-pointer px-3 py-1 rounded disabled:opacity-50"
                 disabled={page <= 1}
                 onClick={() => fetchPastOrders(page - 1)}
               >
                 Previous
               </button>
               <button
-                className="bg-gray-200 px-3 py-1 rounded disabled:opacity-50"
+                className="bg-gray-200 px-3 cursor-pointer py-1 rounded disabled:opacity-50"
                 disabled={page >= totalPages}
                 onClick={() => fetchPastOrders(page + 1)}
               >

@@ -55,7 +55,10 @@ import CreateLinkedAccount from '../pages/CreateLinkedAccount';
 import KYC from '../pages/KYC';
 import Stakeholder from '../pages/stakeholder';
 import PlanotpVerification from '../pages/planotpverification';
-
+import OwnerKYCGuide from '../pages/OwnerKycGuide';
+import LinkedAccountDetails from '../pages/LinkAccountDetails';
+import { PrivacyPolicy } from '../pages/PrivacyPolicy';
+import DeactivateAccount from '../pages/DeactivateAccount';
 
 function RouteComponent() {
 
@@ -100,7 +103,7 @@ function RouteComponent() {
 <Route path="/history" element={<History />} />
  <Route path="/owner/history/plans" element={<PlanHistory />} />
   {/* <Route path="/owner/history/account" element={<AccountHistory />} /> */}
-  <Route path="/customer/your-mess" element={<YourMess />} />
+  <Route path="/cust/my-mess" element={<YourMess />} />
   <Route path="/customer/mess-details" element={<CustomerMessDetails />} />
     <Route path="/customer-history" element={<CustomerTransactionHistory />} />
     <Route path="/using-plans" element={<CustomersTokens />} />
@@ -115,6 +118,13 @@ function RouteComponent() {
         <Route path="/Mess-KYC" element={<KYC />} />
         <Route path="/create-stakeholder" element={<Stakeholder />} />
         <Route path="/plan-otp-verification" element={<PlanotpVerification />} />
+        <Route path="/kyc-info" element={<OwnerKYCGuide/>} />
+        <Route path="/linked-account-details" element={<LinkedAccountDetails />} />
+        <Route path="/privacy-policies" element={<PrivacyPolicy/>} />
+        <Route path="/deactivate" element={<DeactivateAccount/>} />
+
+
+
       </Routes>
     )
 }

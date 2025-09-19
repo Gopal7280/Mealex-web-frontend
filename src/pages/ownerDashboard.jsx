@@ -34,6 +34,7 @@ const OwnerDashboard = () => {
       .then(res => {
         if (res.success) {
           const ordersData = res.data || [];
+          console.log('Fetched Orders:', ordersData);
           const mergedOrders = ordersData.map(o => {
             const rawPayload = storage.getItem(`orderPayload_${o.orderId}`);
             const existingPayload = rawPayload ? JSON.parse(rawPayload) : {};
@@ -123,14 +124,14 @@ const OwnerDashboard = () => {
       <main className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <OwnerHeader ownerName={ownerName} messName={messName} logoUrl={logoUrl} />
 
-        <h2 className="text-2xl font-bold text-[#14224A] mb-4 ">
+        <h2 className="text-2xl cusror-pointer font-bold text-[#14224A] mb-4 ">
           Request Summary,</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5  gap-6 mb-10">
           {summaryData.map(({ key, label, value, textColor, borderColor, bgColor }) => (
             <button 
               key={key}
               onClick={() => setActiveFilter(key)}
-              className={`flex gap-2 p-5 bg-white border ${borderColor} rounded-lg shadow-sm w-full text-left transition 
+              className={`flex gap-2 p-5 bg-white border ${borderColor} rounded-lg  shadow-sm w-full text-left transition cursor-pointer
               ${activeFilter === key ? "ring-2 ring-offset-2 ring-green-300 " : ""}`}
             >
               <div className={`w-14 h-14 p-3 rounded-lg ${bgColor} flex items-center justify-center`}>
@@ -145,178 +146,94 @@ const OwnerDashboard = () => {
             </button>
           ))}
         </div>
-        {/* <div  className="bg-white border  rounded-xl overflow-hidden mb-8">
-  <div className="flex justify-between items-center px-12 py-4">
-    <h3 className="text-base font-semibold text-[#33363F]">Recent Orders</h3>
-  </div>
-
-  <div className="max-h-[320px] overflow-y-auto"> 
-    <table className="w-full text-sm rounded-lg text-center">
-      <tbody>
-        {filteredOrders.length === 0 ? (
-          <tr>
-            <td colSpan="5" className="text-center text-[#0000008C] py-6">
-              No Orders Found
-            </td>
-          </tr>
-        ) : (
-          filteredOrders.map((order, idx) => (
-            <tr key={order.orderId || idx} className="border-t">
-              <td colSpan="1" className="px-1 py-2 sm:px-4 sm:py-2">
-                <div className="grid grid-cols-5 gap-1 items-center">
-                  <div className="text-center">{order.customerName}</div>
-                  <div className="text-center">{order.customerPlanName}</div>
-                  <div className="text-center">{order.tokenCount}</div>
-                  <div className="text-center">{order.orderType}</div>
-                  <div className="flex justify-center gap-2">
-                    {order.orderStatus === 'pending' ? (
-                      <>
-                        <button
-                          onClick={() => handleDecision(order.orderId, 'accepted')}
-                          className="text-green-600 font-semibold hover:underline"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => handleDecision(order.orderId, 'rejected')}
-                          className="text-red-600 font-semibold hover:underline"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    ) : (
-                      <span
-                        className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                          order.orderStatus === 'accepted'
-                            ? 'bg-green-100 text-green-700'
-                            : order.orderStatus === 'rejected'
-                            ? 'bg-red-100 text-red-700'
-                            : order.orderStatus === 'cancelled'
-                            ? 'bg-purple-100 text-purple-700'
-                            : 'bg-yellow-100 text-yellow-700'
-                        }`}
-                      >
-                        {order.orderStatus.toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
-</div> */}
-{/* <div className="bg-white border rounded-xl overflow-hidden mb-8">
-  <div className="flex justify-between items-center px-4 sm:px-6 md:px-12 py-4">
-    <h3 className="text-base font-semibold text-[#33363F]">Recent Orders</h3>
-  </div>
-
-  <div className="max-h-[320px] overflow-y-auto">
-    <table className="w-full text-xs sm:text-sm md:text-base rounded-lg text-center">
-      <tbody>
-        {filteredOrders.length === 0 ? (
-          <tr>
-            <td colSpan="5" className="text-center text-[#0000008C] py-6">
-              No Orders Found
-            </td>
-          </tr>
-        ) : (
-          filteredOrders.map((order, idx) => (
-            <tr key={order.orderId || idx} className="border-t">
-              <td className="px-1 py-2 sm:px-4 sm:py-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-2 items-center">
-                  <div className="text-center truncate">{order.customerName}</div>
-                  <div className="text-center truncate">{order.customerPlanName}</div>
-                  <div className="text-center">{order.tokenCount}</div>
-                  <div className="text-center">{order.orderType}</div>
-                  <div className="flex justify-center gap-2 flex-wrap">
-                    {order.orderStatus === "pending" ? (
-                      <>
-                        <button
-                          onClick={() =>
-                            handleDecision(order.orderId, "accepted")
-                          }
-                          className="text-green-600 font-semibold hover:underline"
-                        >
-                          Accept
-                        </button>
-                        <button
-                          onClick={() =>
-                            handleDecision(order.orderId, "rejected")
-                          }
-                          className="text-red-600 font-semibold hover:underline"
-                        >
-                          Reject
-                        </button>
-                      </>
-                    ) : (
-                      <span
-                        className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full ${
-                          order.orderStatus === "accepted"
-                            ? "bg-green-100 text-green-700"
-                            : order.orderStatus === "rejected"
-                            ? "bg-red-100 text-red-700"
-                            : order.orderStatus === "cancelled"
-                            ? "bg-purple-100 text-purple-700"
-                            : "bg-yellow-100 text-yellow-700"
-                        }`}
-                      >
-                        {order.orderStatus.toUpperCase()}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
-</div> */}
+      
 <div className="bg-white border rounded-xl overflow-hidden mb-8">
   <div className="flex justify-between items-center px-4 sm:px-6 md:px-12 py-4">
     <h3 className="text-base font-semibold text-[#33363F]">Recent Orders</h3>
   </div>
 
-  <div className="max-h-[320px] overflow-y-auto">
-    {filteredOrders.length === 0 ? (
-      <div className="text-center text-[#0000008C] py-6">No Orders Found</div>
-    ) : (
-      <div className="divide-y">
+  {filteredOrders.length === 0 ? (
+    <div className="text-center text-[#0000008C] py-6">No Orders Found</div>
+  ) : (
+    <div className="overflow-x-auto">
+      <table className="hidden md:table w-full text-sm text-center">
+        <thead className="bg-gray-50 text-gray-600">
+          <tr>
+            <th className="px-4 py-2">Customer</th>
+            <th className="px-4 py-2">Plan</th>
+            <th className="px-4 py-2">Tokens</th>
+            <th className="px-4 py-2">Type</th>
+            <th className="px-4 py-2">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filteredOrders.map((order, idx) => (
+            <tr key={order.orderId || idx} className="border-t">
+              <td className="px-4 py-2">{order.customerName}</td>
+              <td className="px-4 py-2">{order.customerPlanName}</td>
+              <td className="px-4 py-2">{order.tokenCount}</td>
+              <td className="px-4 py-2">{order.orderType}</td>
+              <td className="px-4 py-2">
+                {order.orderStatus === "pending" ? (
+                  <div className="flex gap-2 justify-center">
+                    <button
+                      onClick={() => handleDecision(order.orderId, "accepted")}
+                      className="text-green-600 font-semibold hover:underline"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => handleDecision(order.orderId, "rejected")}
+                      className="text-red-600 font-semibold hover:underline"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                ) : (
+                  <span
+                    className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full ${
+                      order.orderStatus === "accepted"
+                        ? "bg-green-100 text-green-700"
+                        : order.orderStatus === "rejected"
+                        ? "bg-red-100 text-red-700"
+                        : order.orderStatus === "cancelled"
+                        ? "bg-purple-100 text-purple-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {order.orderStatus.toUpperCase()}
+                  </span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {/* 🔹 Mobile Responsive (Card Style) */}
+      <div className="md:hidden divide-y">
         {filteredOrders.map((order, idx) => (
-          <div
-            key={order.orderId || idx}
-            className="p-4 grid grid-cols-1 md:grid-cols-5 gap-4 text-sm md:text-base items-center"
-          >
-            {/* 🔹 Mobile: label + value vertically */}
-            <div className="flex md:block justify-between">
-              <span className="md:hidden font-medium text-gray-700">Customer</span>
-              <span className="truncate">{order.customerName}</span>
+          <div key={order.orderId || idx} className="p-4 space-y-2 text-sm">
+            <div className="flex justify-between">
+              <span className="font-medium text-gray-700">Customer</span>
+              <span>{order.customerName}</span>
             </div>
-
-            <div className="flex md:block justify-between">
-              <span className="md:hidden font-medium text-gray-700">Plan</span>
-              <span className="truncate">{order.customerPlanName}</span>
+            <div className="flex justify-between">
+              <span className="font-medium text-gray-700">Plan</span>
+              <span>{order.customerPlanName}</span>
             </div>
-
-            <div className="flex md:block justify-between">
-              <span className="md:hidden font-medium text-gray-700">Tokens</span>
+            <div className="flex justify-between">
+              <span className="font-medium text-gray-700">Tokens</span>
               <span>{order.tokenCount}</span>
             </div>
-
-            <div className="flex md:block justify-between">
-              <span className="md:hidden font-medium text-gray-700">Type</span>
+            <div className="flex justify-between">
+              <span className="font-medium text-gray-700">Type</span>
               <span>{order.orderType}</span>
             </div>
-
-            <div className="flex md:block justify-between">
-              <span className="md:hidden font-medium text-gray-700">Status</span>
+            <div className="flex justify-between">
+              <span className="font-medium text-gray-700">Status</span>
               {order.orderStatus === "pending" ? (
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2">
                   <button
                     onClick={() => handleDecision(order.orderId, "accepted")}
                     className="text-green-600 font-semibold hover:underline"
@@ -332,7 +249,7 @@ const OwnerDashboard = () => {
                 </div>
               ) : (
                 <span
-                  className={`text-xs sm:text-sm font-semibold px-3 py-1 rounded-full ${
+                  className={`text-xs font-semibold px-3 py-1 rounded-full ${
                     order.orderStatus === "accepted"
                       ? "bg-green-100 text-green-700"
                       : order.orderStatus === "rejected"
@@ -349,9 +266,10 @@ const OwnerDashboard = () => {
           </div>
         ))}
       </div>
-    )}
-  </div>
+    </div>
+  )}
 </div>
+
 
 
 

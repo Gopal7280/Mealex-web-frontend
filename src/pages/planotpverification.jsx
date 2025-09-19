@@ -63,7 +63,7 @@ const PlanOtpVerification = () => {
         identifierType: verificationData?.identifierType,
       });
 
-      if (res.data.success) {
+      if (res.success) {
         toast.success("🎉 Plan issued successfully!");
         storage.removeItem("planIssueResponse");
         navigate("/customer-profile/plans");

@@ -124,7 +124,7 @@ const handleVerifyOtp = async (e) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded transition"
+                className="w-full bg-orange-500 cursor-pointer hover:bg-orange-600 text-white py-2 rounded transition"
               >
                 {loading ? 'Sending OTP...' : 'Send OTP'}
               </button>
@@ -143,7 +143,7 @@ const handleVerifyOtp = async (e) => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-green-500 hover:bg-green-600 text-white py-2 rounded transition"
+                className="w-full bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded transition"
               >
                 {loading ? 'Verifying...' : 'Verify OTP'}
               </button>

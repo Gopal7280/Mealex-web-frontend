@@ -7,6 +7,8 @@ import PlanOptions from './PlanOptions';
 import { apiGet, apiPost } from '../services/api';
 import storage from '../utils/storage';
 import planIllustration from '../assets/clipboard.png.png';
+import { toast } from "react-hot-toast";
+
 
 const Plans = () => {
   const navigate = useNavigate();
@@ -38,8 +40,50 @@ const Plans = () => {
     }
   };
 
+// const handleAction = async (action, planId) => {
+//   if (action === 'close') {
+//     setSelectedPlanId(null);
+//     return;
+//   }
+
+//   const endpointMap = {
+//     activate: `/owner/mess/plan/activate/${planId}`,
+//     deactivate: `/owner/mess/plan/deactivate/${planId}`,
+//     delete: `/owner/mess/plan/delete/${planId}`,
+//   };
+
+//   try {
+//     const res = await apiPost(endpointMap[action]);
+//     console.log(`✅ Plan ${action}d:`, res);
+
+//     if (res?.success) {
+//       setPlans((prevPlans) =>
+//         prevPlans
+//           .map((plan) => {
+//             if (plan._id === planId) {
+//               if (action === 'delete') return null;
+
+//               return {
+//                 ...plan,
+//                 isActive: action === 'activate',
+//                 status: action === 'activate' ? 'active' : 'deactivated', // ✅ update UI instantly
+//               };
+//             }
+//             return plan;
+//           })
+//           .filter(Boolean)
+//       );
+//     }
+//     setSelectedPlanId(null);
+//   } catch (err) {
+//     console.error(`❌ Failed to ${action} plan`, err);
+//   }
+// };
+
+
+
 const handleAction = async (action, planId) => {
-  if (action === 'close') {
+  if (action === "close") {
     setSelectedPlanId(null);
     return;
   }
@@ -53,27 +97,40 @@ const handleAction = async (action, planId) => {
   try {
     const res = await apiPost(endpointMap[action]);
 
-    if (res?.data?.success) {
+    if (res?.success) {
+      if (action === "delete") {
+        toast.success("Plan deleted successfully ✅");
+      } else if (action === "activate") {
+        toast.success("Plan activated successfully ✅");
+      } else if (action === "deactivate") {
+        toast.success("Plan deactivated successfully ✅");
+      }
+
       setPlans((prevPlans) =>
         prevPlans
           .map((plan) => {
             if (plan._id === planId) {
-              if (action === 'delete') return null;
-
+              if (action === "delete") return null;
               return {
                 ...plan,
-                isActive: action === 'activate',
-                status: action === 'activate' ? 'active' : 'deactivated', // ✅ update UI instantly
+                isActive: action === "activate",
+                status: action === "activate" ? "active" : "deactivated",
               };
             }
             return plan;
           })
           .filter(Boolean)
       );
+    } else {
+      toast.error(res?.message || "Something went wrong ❌");
     }
+
     setSelectedPlanId(null);
   } catch (err) {
     console.error(`❌ Failed to ${action} plan`, err);
+    const errorMessage =
+      err?.response?.data?.message || `Failed to ${action} plan`;
+    toast.error(errorMessage);
   }
 };
 
@@ -113,13 +170,13 @@ const handleAction = async (action, planId) => {
       <Navbar />
       {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
       <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
-        <OwnerHeader ownerName="Pranav" messName="Test Mess 1" />
+        <OwnerHeader  />
         <p className="text-2xl font-semibold  text-[#232325] mb-4">
           Your Plans ({plans.length}),
         </p>
 
         {/* SORTING CONTROLS */}
-        <div className="flex gap-2 mb-6 relative">
+        <div className="flex  gap-2 mb-6 relative">
           {/* 💰 Price Button */}
 
 
@@ -127,7 +184,7 @@ const handleAction = async (action, planId) => {
           <div className="relative">
             <button
               onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-              className="border px-4 py-1 rounded-md bg-white shadow-sm text-sm"
+              className="border px-4 py-1 rounded-md bg-white shadow-sm cursor-pointer text-sm"
             >
               ⇅ Sort
             </button>
@@ -141,7 +198,7 @@ const handleAction = async (action, planId) => {
                   }}
                   disabled={!isPriceClicked}
                   className={`block w-full text-left p-1 rounded ${
-                    isPriceClicked ? 'hover:bg-gray-100 text-black' : 'text-gray-400 cursor-not-allowed'
+                    isPriceClicked ? 'hover:bg-gray-100 cursor-pointer text-black' : 'text-gray-400 cursor-not-allowed'
                   }`}
                 >
                   🔼 Price Ascending
@@ -153,7 +210,7 @@ const handleAction = async (action, planId) => {
                   }}
                   disabled={!isPriceClicked}
                   className={`block w-full text-left p-1 rounded ${
-                    isPriceClicked ? 'hover:bg-gray-100 text-black' : 'text-gray-400 cursor-not-allowed'
+                    isPriceClicked ? 'hover:bg-gray-100 cursor-pointer text-black' : 'text-gray-400 cursor-not-allowed'
                   }`}
                 >
                   🔽 Price Descending
@@ -163,7 +220,7 @@ const handleAction = async (action, planId) => {
                     setSortType('alpha');
                     setIsSortDropdownOpen(false);
                   }}
-                  className="block w-full text-left hover:bg-gray-100 p-1 rounded"
+                  className="block w-full text-left cursor-pointer hover:bg-gray-100 p-1 rounded"
                 >
                   🔤 Alphabetical (Name)
                 </button>
@@ -172,7 +229,7 @@ const handleAction = async (action, planId) => {
           </div>
                     <button
             onClick={() => setIsPriceClicked(true)}
-            className="border px-4 py-1 rounded-md bg-white shadow-sm text-sm"
+            className="border px-4 py-1 rounded-md cursor-pointer bg-white shadow-sm text-sm"
           >
             💰 Price
           </button>
@@ -196,7 +253,7 @@ const handleAction = async (action, planId) => {
             <p className="text-sm">Let's create a plan to get started.</p>
             <button
               onClick={() => navigate('/add-plan')}
-              className="bg-orange-500 text-white mt-2 md:mt-24 w-1/2 py-3 rounded-xl"
+              className="bg-orange-500 cursor-pointer text-white mt-2 md:mt-24 w-1/2 py-3 rounded-xl"
             >
               Create New Plan
             </button>
@@ -217,7 +274,7 @@ const handleAction = async (action, planId) => {
   >
    */}
      <div
-                    className={`flex bg-white border rounded-xl p-4 shadow-md transition-all duration-300 gap-4 ${
+                    className={`flex bg-white border rounded-xl cursor-pointer p-4 shadow-md transition-all duration-300 gap-4 ${
                       isSelected ? 'grayscale opacity-50' : plan.isActive ? '' : 'grayscale opacity-50'
                     }`}
                   >
@@ -250,8 +307,8 @@ onChange={async (e) => {
       { headers: { 'Content-Type': 'multipart/form-data' } }
     );
 
-    if (res?.data?.success) {
-      const updatedImageUrl = res.data.data.imageUrl + `?t=${Date.now()}`;
+    if (res?.success) {
+      const updatedImageUrl = res.data.imageUrl + `?t=${Date.now()}`;
 
       setPlans((prevPlans) =>
         prevPlans.map((p) =>
@@ -309,7 +366,7 @@ onChange={async (e) => {
           onClick={() =>
             navigate('/edit-plan', { state: { plan: planDataWithoutImage } })
           }
-          className="text-purple-600 hover:text-purple-800 text-sm"
+          className="text-purple-600 cursor-pointer hover:text-purple-800 text-sm"
         >
           Edit &gt;
         </button>

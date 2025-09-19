@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import mealx from "../assets/mealx.png";
@@ -69,8 +68,8 @@ const Sidebar = () => {
           </Link>
 
           <Link
-            to="/customer/your-mess"
-            className={getLinkClasses("/customer/your-mess")}
+            to="/customer-activeplans"
+            className={getLinkClasses("/customer-activeplans")}
             onClick={() => setIsOpen(false)}
           >
             <ClipboardList size={20} />
@@ -104,14 +103,14 @@ const Sidebar = () => {
             Switch Role
           </Link>
 
-          <Link
+          {/* <Link
             to="/settings"
             className={getLinkClasses("/settings")}
             onClick={() => setIsOpen(false)}
           >
             <Settings size={20} />
             Settings
-          </Link>
+          </Link> */}
         </div>
 
         {/* Footer */}

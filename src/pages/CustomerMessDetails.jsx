@@ -23,6 +23,7 @@ const ExploreMessDetails = () => {
   const fetchSubscribedMessIds = async () => {
   try {
     const res = await apiGet('/customer/mess/subscribed');
+    console.log(res);
     if (res.success && Array.isArray(res.data)) {
       // extract only messIds
       const messIds = res.data.map(m => m.messId);
@@ -59,6 +60,7 @@ const ExploreMessDetails = () => {
   const fetchPlans = async (messId) => {
     try {
       const res = await apiGet(`/customer/mess/plans/${messId}`);
+      console.log(res);
       if (res?.success) {
         setPlans(res.data || []);
         console.log('Fetched plans:', res.data);
@@ -71,7 +73,8 @@ const ExploreMessDetails = () => {
   const handleSubscribe = async () => {
     try {
       const response = await apiPost('/customer/mess/add', { messId: mess.messId });
-      const res = response?.data;
+      const res = response;
+      console.log(response);
 
       if (res?.success && Array.isArray(res?.mess_ids)) {
         localStorage.setItem('subscribedMessIds', JSON.stringify(res.mess_ids));
@@ -79,15 +82,15 @@ const ExploreMessDetails = () => {
         toast.success(`Subscribed to ${mess.messName} successfully!`);
       } else {
         console.error('Unexpected response structure:', res);
-        alert('Subscription failed. Try again.');
+        toast.error('Subscription failed. Try again.');
       }
     } catch (error) {
       if (error?.response?.status === 409) {
-        alert('Already subscribed.');
+        toast.success('Already subscribed.');
         setSubscribed(true);
       } else {
         console.error('Subscription error:', error);
-        alert('Failed to subscribe.');
+        toast.error('Failed to subscribe.');
       }
     }
   };
@@ -120,7 +123,7 @@ const ExploreMessDetails = () => {
                   className={`border px-4 py-2 rounded-xl ${
                     subscribed
                       ? 'bg-orange-400 text-white cursor-not-allowed'
-                      : 'border-orange-400 text-orange-400 hover:bg-orange-50'
+                      : 'border-orange-400 text-orange-400 cursor-pointer hover:bg-orange-50'
                   }`}
                 >
                   {subscribed ? 'Subscribed' : 'Subscribe'}
@@ -210,9 +213,9 @@ const ExploreMessDetails = () => {
 
               <div className="mt-6">
                 <button
-                  className={`w-full py-3 rounded-lg text-lg font-medium transition-colors ${
+                  className={`w-full py-3 rounded-lg  text-lg font-medium transition-colors ${
                     selectedPlan
-                      ? 'bg-orange-500 text-white hover:bg-orange-600'
+                      ? 'bg-orange-500 text-white cursor-pointer hover:bg-orange-600'
                       : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   }`}
                   onClick={() => selectedPlan && setShowPaymentModal(true)}
@@ -231,10 +234,10 @@ const ExploreMessDetails = () => {
               <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
               <div className="flex flex-col gap-3">
                 <button
-                  className="bg-green-500 hover:bg-green-600 text-white py-2 rounded"
+                  className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
                   onClick={() => {
                     setShowPaymentModal(false);
-                    alert('💵 Cash payment selected. Please pay at mess counter.');
+                    toast.success('💵 Cash payment selected. Please pay at mess counter.');
                   }}
                 >
                   Pay with Cash
@@ -248,14 +251,14 @@ const ExploreMessDetails = () => {
                       setShowPaymentModal(false);    
                       fetchPlans(mess.messId);        
                       setTimeout(() => {
-                        navigate('/customer/your-mess');
+                        navigate('/cust/my-mess');
                       }, 4000); 
                     }}
                   />
                 )}
 
                 <button
-                  className="text-sm text-gray-500 mt-2 hover:text-red-500"
+                  className="text-sm text-gray-500 mt-2 cursor-pointer hover:text-red-500"
                   onClick={() => setShowPaymentModal(false)}
                 >
                   Cancel

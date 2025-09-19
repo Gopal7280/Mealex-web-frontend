@@ -232,28 +232,54 @@ const SwitchRole = () => {
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSwitchRole = async () => {
-    setIsLoading(true);
-    try {
-      const response = await apiPost("/owner/role/change");
+  // const handleSwitchRole = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await apiPost("/owner/role/change");
+  //     console.log(response);
 
-      if (response.data.success) {
-        toast.success(response.data.message);
+  //     if (response.data.success) {
+  //       toast.success(response.data.message);
 
-        if (response.data.token) {
-          storage.setToken(response.data.token);
-        }
+  //       if (response.data.token) {
+  //         storage.setToken(response.data.token);
+  //       }
 
-        navigate("/login/customers-dashboard");
-      } else {
-        toast.error("Something went wrong!");
+  //       navigate("/login/customers-dashboard");
+  //     } else {
+  //       toast.error("Something went wrong!");
+  //     }
+  //   } catch (error) {
+  //     toast.error(error.response?.data?.message || "Failed to switch role");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+const handleSwitchRole = async () => {
+  setIsLoading(true);
+  try {
+    const response = await apiPost("/owner/role/change"); // response already data
+    console.log(response);
+
+    if (response.success) {
+      toast.success(response.message);
+
+      if (response.token) {
+        storage.setToken(response.token);
       }
-    } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to switch role");
-    } finally {
-      setIsLoading(false);
+
+      navigate("/login/customers-dashboard");
+    } else {
+      toast.error("Something went wrong!");
     }
-  };
+  } catch (error) {
+    toast.error(error.response?.data?.message || "Failed to switch role");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="flex h-screen">
@@ -283,7 +309,7 @@ const SwitchRole = () => {
               onClick={handleSwitchRole}
               disabled={isLoading}
               className={`px-6 py-3 rounded-xl shadow-md text-white transition flex items-center gap-2 
-                ${isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-orange-500 hover:bg-orange-600"}
+                ${isLoading ? "bg-gray-400 cursor-not-allowed" : "bg-orange-500 cursor-pointer  hover:bg-orange-600"}
               `}
             >
               {isLoading ? (

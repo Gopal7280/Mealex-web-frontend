@@ -6,7 +6,7 @@
 import React, { useEffect, useState } from 'react';
 import Navbar2 from '../layouts/Navbar2';
 import { CheckCircle, AlertCircle, Info } from 'lucide-react';
-import { apiGet } from '../services/api';
+import { apiGet, apiPost } from '../services/api';
 import CustomerHeader from '../layouts/CustomerHeader';
 import getNotificationStyle from './icons';
 
@@ -40,6 +40,35 @@ const CustomerNotifications = () => {
     };
     fetchCustomerMesses();
   }, []);
+
+
+useEffect(() => {
+  if (notifications.length > 0) {
+    const unreadIds = notifications
+      .filter((n) => !n.isRead)
+      .map((n) => n.id);
+
+    if (unreadIds.length > 0) {
+      const timer = setTimeout(async () => {
+        try {
+          await apiPost("/user/notifications/read", {
+            notificationIds: unreadIds,
+          });
+          setNotifications((prev) =>
+            prev.map((n) =>
+              unreadIds.includes(n.id) ? { ...n, isRead: true } : n
+            )
+          );
+        } catch (error) {
+          console.error("Error marking notifications read:", error);
+        }
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }
+}, [notifications]);
+
 
   const fetchNotifications = async (currentPage = 1) => {
     try {
@@ -100,18 +129,7 @@ const CustomerNotifications = () => {
     fetchNotifications(page);
   }, [page]);
 
-  // const getNotificationStyle = (type) => {
-  //   switch (type) {
-  //     case 'purchased':
-  //       return { icon: <CheckCircle className="text-green-600 w-5 h-5" />, color: 'text-green-700' };
-  //     case 'expiry':
-  //       return { icon: <AlertCircle className="text-red-500 w-5 h-5" />, color: 'text-red-600' };
-  //     case 'used':
-  //       return { icon: <Info className="text-orange-400 w-5 h-5" />, color: 'text-orange-600' };
-  //     default:
-  //       return { icon: <Info className="text-gray-400 w-5 h-5" />, color: 'text-gray-700' };
-  //   }
-  // };
+ 
 
   const formatTimeAgo = (dateString) => {
     const date = new Date(dateString);
@@ -147,7 +165,7 @@ const CustomerNotifications = () => {
     setSelectedMess(e.target.value);
     localStorage.setItem('selectedMessId', e.target.value);
   }}
-  className="border px-3 py-1 rounded text-sm"
+  className="border px-3 cursor-pointer py-1 rounded text-sm"
 >
   <option value="all">All Messes</option>
   {messes.map((mess) => (
@@ -164,7 +182,7 @@ const CustomerNotifications = () => {
           <button
             onClick={() => setFilter('purchased')}
             className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === 'purchased' ? 'border-black font-semibold' : 'border-[#5B5B5B]'
+              filter === 'purchased' ? 'border-black font-semibold' : 'border-[#5B5B5B] cursor-pointer'
             }`}
           >
             Purchased
@@ -172,7 +190,7 @@ const CustomerNotifications = () => {
           <button
             onClick={() => setFilter('used')}
             className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === 'used' ? 'border-black font-semibold' : 'border-[#5B5B5B]'
+              filter === 'used' ? 'border-black font-semibold' : 'border-[#5B5B5B] cursor-pointer'
             }`}
           >
             Used
@@ -180,7 +198,7 @@ const CustomerNotifications = () => {
           <button
             onClick={() => setFilter('expiry')}
             className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === 'expiry' ? 'border-black font-semibold' : 'border-[#5B5B5B]'
+              filter === 'expiry' ? 'border-black font-semibold' : 'cursor-pointer border-[#5B5B5B]'
             }`}
           >
             Expiry
@@ -188,7 +206,7 @@ const CustomerNotifications = () => {
           <button
             onClick={() => setFilter('all')}
             className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === 'all' ? 'border-black font-semibold' : 'border-[#5B5B5B]'
+              filter === 'all' ? 'border-black font-semibold' : 'cursor-pointer border-[#5B5B5B]'
             }`}
           >
             All
@@ -210,7 +228,14 @@ const CustomerNotifications = () => {
                     <div className="flex items-start gap-3 pb-3">
                       {icon}
                       <div className="text-sm">
-                        <p className={`font-semibold ${color}`}>{notif.title || notif.planName}</p>
+                        <p className={`font-semibold ${color}`}>{notif.title || notif.planName}
+                          {!notif.isRead && (
+  <span className="ml-2 text-xs bg-yellow-400 text-white px-2 py-0.5 rounded-full">
+    NEW
+  </span>
+)}
+
+                        </p>
                         <p className="text-gray-700 mt-0.5">
                           {notif.message || `${notif.submittedByName || 'Someone'} performed an action`}
                         </p>
@@ -232,7 +257,7 @@ const CustomerNotifications = () => {
             onClick={() => setPage((prev) => prev - 1)}
             disabled={page === 1}
             className={`px-3 py-1 rounded ${
-              page === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-500 text-white'
+              page === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-500 cursor-pointer text-white'
             }`}
           >
             Previous
@@ -241,7 +266,7 @@ const CustomerNotifications = () => {
             onClick={() => setPage((prev) => prev + 1)}
             disabled={!hasMore}
             className={`px-3 py-1 rounded ${
-              !hasMore ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-500 text-white'
+              !hasMore ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-500 cursor-pointer text-white'
             }`}
           >
             Next

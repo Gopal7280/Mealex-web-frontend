@@ -19,40 +19,75 @@ const CustomerHistory = () => {
   const messId = storage.getItem('messId');
   const customerId = storage.getItem('customerId');
 
-  const fetchHistory = async () => {
-    if (!messId || !customerId) {
-      console.error('Missing messId or customerId');
-      return;
-    }
+//   const fetchHistory = async () => {
+//     if (!messId || !customerId) {
+//       console.error('Missing messId or customerId');
+//       return;
+//     }
 
-    setLoading(true);
-    try {
-      const response = await apiPost(
-        `/owner/mess/stats/customer/transactions?limit=${pagination.limit}&offset=${pagination.offset}`,
-        { messId, customerId }
-      );
+//     setLoading(true);
+//     try {
+//       const response = await apiPost(
+//         `/owner/mess/stats/customer/transactions?limit=${pagination.limit}&offset=${pagination.offset}`,
+//         { messId, customerId }
+//       );
+//  console.log('Fetched history data:', response?.data);
+//       if (response.data.success) {
+//         // map type for UI
+//         const mappedData = (response.data.data || []).map(item => ({
+//           ...item,
+//           type: item.type === "transaction" ? "Purchased" : "Used",
+//         }));
 
-      if (response.data.success) {
-        // map type for UI
-        const mappedData = (response.data.data || []).map(item => ({
-          ...item,
-          type: item.type === "transaction" ? "Purchased" : "Used",
-        }));
+//         setHistoryData(mappedData);
+//         setPagination(prev => ({
+//           ...prev,
+//           hasMore: response.data.pagination.hasMore,
+//         }));
+//       } else {
+//         console.warn('API responded without success flag:', response.data);
+//       }
+//     } catch (error) {
+//       console.error('Error fetching history:', error?.response?.data || error.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
 
-        setHistoryData(mappedData);
-        setPagination(prev => ({
-          ...prev,
-          hasMore: response.data.pagination.hasMore,
-        }));
-      } else {
-        console.warn('API responded without success flag:', response.data);
-      }
-    } catch (error) {
-      console.error('Error fetching history:', error?.response?.data || error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+const fetchHistory = async () => {
+  if (!messId || !customerId) return;
+
+  setLoading(true);
+  try {
+    const response = await apiPost(
+      `/owner/mess/stats/customer/transactions?limit=${pagination.limit}&offset=${pagination.offset}`,
+      { messId, customerId }
+    );
+
+    console.log('Fetched history data:', response.data);
+
+    const mappedData = response.data.map(item => ({
+      ...item,
+      type: item.type === "transaction" ? "Purchased" : "Used",
+      tokensCount: item.type === "transaction" ? (item.tokensPurchased || 0) : (item.submittedTokens?.length || 0)
+    }));
+
+    // Append if offset > 0
+    setHistoryData(prev => pagination.offset === 0 ? mappedData : [ ...mappedData]);
+
+    // Update hasMore from API
+    setPagination(prev => ({
+      ...prev,
+      hasMore: response.pagination?.hasMore || false
+    }));
+
+  } catch (err) {
+    console.error('Error fetching history:', err);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   useEffect(() => {
     fetchHistory();
@@ -87,13 +122,13 @@ const CustomerHistory = () => {
           {/* ✅ Tabs */}
           <div className="bg-white rounded-xl shadow-md px-6 py-4">
             <div className="flex gap-6 mb-6 border-b pb-1">
-              <button onClick={() => navigate('/owner-customer-profile')} className={`capitalize text-md font-medium ${currentPath === '/customer-profile' ? 'text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
+              <button onClick={() => navigate('/owner-customer-profile')} className={`capitalize cursor-pointer text-md font-medium ${currentPath === '/customer-profile' ? 'text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
                 Profile
               </button>
-              <button onClick={() => navigate('/customer-profile/plans')} className={`capitalize text-md font-medium ${currentPath === '/customer-profile/plans' ? 'text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
+              <button onClick={() => navigate('/customer-profile/plans')} className={`capitalize cursor-pointer text-md font-medium ${currentPath === '/customer-profile/plans' ? 'text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
                 Plans
               </button>
-              <button onClick={() => navigate('/customer-profile/history')} className={`capitalize text-md font-medium ${currentPath === '/customer-profile/history' ? 'text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
+              <button onClick={() => navigate('/customer-profile/history')} className={`capitalize cursor-pointer text-md font-medium ${currentPath === '/customer-profile/history' ? 'text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
                 History
               </button>
             </div>
@@ -104,7 +139,7 @@ const CustomerHistory = () => {
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`border px-3 py-1 rounded shadow-sm text-sm ${
+                  className={`border px-3 py-1 cursor-pointer rounded shadow-sm text-sm ${
                     filter === f ? "bg-orange-500 text-white" : "bg-white"
                   }`}
                 >
@@ -156,14 +191,14 @@ const CustomerHistory = () => {
             {/* ✅ Pagination */}
             <div className="flex justify-between mt-4">
               <button
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded disabled:opacity-50"
+                className="px-4 py-2 cursor-pointer bg-gray-200 text-gray-700 rounded disabled:opacity-50"
                 disabled={pagination.offset === 0}
                 onClick={handlePrevious}
               >
                 Previous
               </button>
               <button
-                className="px-4 py-2 bg-orange-500 text-white rounded disabled:opacity-50"
+                className="px-4 py-2 cursor-pointer bg-orange-500 text-white rounded disabled:opacity-50"
                 disabled={!pagination.hasMore}
                 onClick={handleNext}
               >

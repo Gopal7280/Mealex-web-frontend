@@ -4,6 +4,7 @@ import OwnerHeader from './ownerHeader';
 import { apiGet, apiPost } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 import storage from '../utils/storage';
+import { toast } from 'react-hot-toast';
 
 const UseTokens = () => {
   const [planData, setPlanData] = useState(null);
@@ -15,6 +16,8 @@ const UseTokens = () => {
   const [showModal, setShowModal] = useState(false);
   const [orderType, setOrderType] = useState('');
   const [address, setAddress] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
 
   const messId = storage.getItem('messId');
   const customerId = storage.getItem('customerId');
@@ -24,13 +27,13 @@ const UseTokens = () => {
     if (!messId || !customerId || !customerPlanId) return;
     apiGet(`/owner/mess/${messId}/customer/${customerId}/active-plans/${customerPlanId}`)
       .then(res => {
-              console.log('🔍 Active Plan API Response:', res.data);  // <-- ✅ Add this
-
+              console.log('🔍 Active Plan API Response:', res);  // <-- ✅ Add this
         const data = res.data;
         const issued = data.issuedTokenCount || data.issuedTokens?.length || 0;
         const used = data.usedTokenCount || data.usedTokens?.length || 0;
         data.remainingTokens = issued - used;
         setPlanData(data);
+        
       })
       .catch(console.error)
       .finally(() => setLoading(false));
@@ -53,6 +56,8 @@ const handleUsePlan = async () => {
     .slice(0, selectedCount);
 
   try {
+        setIsSubmitting(true); // ✅ start submitting
+
     const payload = {
       customerPlanId,
       tokens: unusedTokens,
@@ -62,8 +67,8 @@ const handleUsePlan = async () => {
     };
 
     const res = await apiPost('/owner/token/submit/initiate', payload);
-
-    const { requestId, verificationToken, context, identifier, identifierType } = res.data;
+console.log('✅ Token Use Initiation Response:', res);
+    const { requestId, verificationToken, context, identifier, identifierType } = res;
     storage.setItem('otpRequestContext', JSON.stringify({
       requestId, verificationToken, context, identifier, identifierType
     }));
@@ -72,9 +77,12 @@ const handleUsePlan = async () => {
       state: { name, context, identifier, identifierType,orderType, address }
     });
   } catch (err) {
-    alert('Error initiating token use, please try again');
+    toast.error (err.response?.data?.message || err.message || 'Error initiating token use, please try again');
     console.error('❌ Token submission failed:', err.response || err);
+  }  finally {
+    setIsSubmitting(false); // ✅ reset always
   }
+
 };
 
 
@@ -88,18 +96,20 @@ const handleUsePlan = async () => {
 
         {/* Tabs */}
         <div className="flex gap-2 mb-6">
-          <button
+          {/* <button
             onClick={() => setActiveTab('all')}
             className={`px-4 py-1 rounded text-sm ${activeTab === 'all' ? 'bg-orange-500 text-white' : 'bg-white'}`}
           >
             All Tokens ({issuedTokens.length})
-          </button>
-          {/* <button
-            onClick={() => setActiveTab('used')}
-            className={`px-4 py-1 rounded text-sm ${activeTab === 'used' ? 'bg-orange-500 text-white' : 'bg-white'}`}
-          >
-            Used Tokens ({usedTokens.length})
           </button> */}
+          <button
+  onClick={() => setActiveTab('all')}
+  className={`px-4 py-1 rounded text-sm ${activeTab === 'all' ? 'bg-orange-500 text-white' : 'bg-white'}`}
+>
+  All Tokens ({(issuedTokens.length + usedTokens.length)})
+</button>
+
+   
         </div>
 
     
@@ -123,7 +133,7 @@ const handleUsePlan = async () => {
     <div className="text-base font-bold text-gray-800">₹ {price}</div>
 
     <div className="text-sm text-gray-500">
-      {usedTokens.length}/{issuedTokens.length} Tokens
+      {usedTokens.length} / {(issuedTokens.length + usedTokens.length)} Tokens
     </div>
 
     <div className="text-sm text-gray-500">
@@ -139,13 +149,13 @@ const handleUsePlan = async () => {
             <button
               onClick={() => setSelectedCount(c => Math.max(1, c - 1))}
               disabled={selectedCount <= 1}
-              className="px-3 py-1 rounded bg-gray-200"
+              className="px-3 py-1 rounded cursor-pointer bg-gray-200"
             >−</button>
             <span className="text-2xl font-bold">{selectedCount}</span>
             <button
               onClick={() => setSelectedCount(c => Math.min(remainingTokens, c + 1))}
               disabled={selectedCount >= remainingTokens}
-              className="px-3 py-1 rounded bg-gray-200"
+              className="px-3 py-1 rounded cursor-pointer bg-gray-200"
             >+</button>
           </div>
         )}
@@ -157,7 +167,7 @@ const handleUsePlan = async () => {
 onClick={() => setShowModal(true)}
 
           disabled={activeTab !== 'all' || selectedCount < 1}
-        className="w-[600px] h-[50px] bg-orange-500 text-white text-lg font-semibold rounded-2xl hover:bg-orange-600 m-2 mb-8 "
+        className="w-[600px] h-[50px] bg-orange-500 cursor-pointer text-white text-lg font-semibold rounded-2xl hover:bg-orange-600 m-2 mb-8 "
       >
           Use Plan
       </button>
@@ -173,7 +183,7 @@ onClick={() => setShowModal(true)}
           <button
             key={type}
             onClick={() => setOrderType(type)}
-            className={`px-4 py-2 rounded-full border ${
+            className={`px-4 py-2 rounded-full cursor-pointer border ${
               orderType === type ? 'bg-orange-500 text-white' : 'bg-gray-100 text-gray-700'
             }`}
           >
@@ -195,11 +205,11 @@ onClick={() => setShowModal(true)}
       <div className="flex justify-between">
         <button
           onClick={() => setShowModal(false)}
-          className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+          className="px-4 py-2 cursor-pointer bg-gray-300 rounded hover:bg-gray-400"
         >
           Cancel
         </button>
-        <button
+        {/* <button
           onClick={async () => {
             if (!orderType) return alert('Please select an order type');
             if (orderType === 'delivery' && !address.trim()) return alert('Please enter address');
@@ -207,10 +217,31 @@ onClick={() => setShowModal(true)}
             setShowModal(false);
             await handleUsePlan(); // call with selected values
           }}
-          className="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600"
+          className="px-4 py-2 bg-orange-500 cursor-pointer text-white rounded hover:bg-orange-600"
         >
           Confirm
-        </button>
+        </button> */}
+        <button
+  onClick={async () => {
+    if (!orderType) return alert('Please select an order type');
+    if (orderType === 'delivery' && !address.trim()) return alert('Please enter address');
+
+    await handleUsePlan();
+    setShowModal(false);
+  }}
+  disabled={isSubmitting}
+  className="px-4 py-2 bg-orange-500 cursor-pointer text-white rounded hover:bg-orange-600 disabled:opacity-50 flex items-center gap-2"
+>
+  {isSubmitting ? (
+    <>
+      <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>
+      Confirming...
+    </>
+  ) : (
+    "Confirm"
+  )}
+</button>
+
       </div>
     </div>
   </div>

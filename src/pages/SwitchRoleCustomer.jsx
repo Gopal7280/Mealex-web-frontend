@@ -211,30 +211,57 @@ const SwitchRoleCustomer = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSwitchRole = async () => {
-    setIsLoading(true);
-    try {
-      const response = await apiPost("/customer/role/change");
+  // const handleSwitchRole = async () => {
+  //   setIsLoading(true);
+  //   try {
+  //     const response = await apiPost("/customer/role/change");
 
-      if (response?.data?.success) {
-        const newToken = response?.data?.token;
+  //     if (response?.data?.success) {
+  //       const newToken = response?.data?.token;
 
-        if (newToken) {
-          setToken(newToken); // ✅ replace old token
-        }
+  //       if (newToken) {
+  //         setToken(newToken); // ✅ replace old token
+  //       }
 
-        toast.success(response?.data?.message || "Role switched to Owner!");
-        navigate("/minimal-dashboard");
-      } else {
-        toast.error("Unable to switch role. Try again.");
+  //       toast.success(response?.data?.message || "Role switched to Owner!");
+  //       navigate("/minimal-dashboard");
+  //     } else {
+  //       toast.error("Unable to switch role. Try again.");
+  //     }
+  //   } catch (error) {
+  //     console.error("Role switch error:", error);
+  //     toast.error(error.response?.data?.message || "Something went wrong!");
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // };
+
+const handleSwitchRole = async () => {
+  setIsLoading(true);
+  try {
+    const response = await apiPost("/customer/role/change"); // response already data
+    console.log(response);
+
+    if (response.success) {
+      const newToken = response.token;
+
+      if (newToken) {
+        setToken(newToken); // update token
       }
-    } catch (error) {
-      console.error("Role switch error:", error);
-      toast.error(error.response?.data?.message || "Something went wrong!");
-    } finally {
-      setIsLoading(false);
+
+      toast.success(response.message || "Role switched to Owner!");
+      navigate("/minimal-dashboard");
+    } else {
+      toast.error("Unable to switch role. Try again.");
     }
-  };
+  } catch (error) {
+    console.error("Role switch error:", error);
+    toast.error(error.response?.data?.message || "Something went wrong!");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="flex h-screen">
@@ -269,7 +296,7 @@ const SwitchRoleCustomer = () => {
                 ${
                   isLoading
                     ? "bg-gray-400 cursor-not-allowed"
-                    : "bg-orange-500 hover:bg-orange-600"
+                    : "bg-orange-500 cursor-pointer hover:bg-orange-600"
                 }
               `}
             >

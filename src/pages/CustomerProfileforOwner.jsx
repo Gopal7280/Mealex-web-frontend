@@ -28,7 +28,6 @@ const CustomerProfile = () => {
     }
 
     apiGet(`/owner/mess/${messId}/customer/${customerId}`)
-      // .then(res => setProfile(res.customer ?? res.data?.customer ?? null))
   .then(res => {
     console.log("✅ API response:", res);   // 👈 log full response
     setProfile(res.customer ?? res.data?.customer ?? null);
@@ -55,7 +54,7 @@ const CustomerProfile = () => {
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">Customer Profile</h2>
 
           <div className="bg-white rounded-lg ">
-            <div className="flex gap-6 mb-2 p-4 pb-2">
+            <div className="flex gap-6  mb-2 p-4 pb-2">
               <TabButton label="Profile Details" active={activeTab === 'profile'} onClick={() => navigate('/owner-customer-profile')} />
               <TabButton label="Plans" active={activeTab === 'plans'} onClick={() => navigate('/customer-profile/plans')} />
               <TabButton label="History" active={activeTab === 'history'} onClick={() => navigate('/customer-profile/history')} />
@@ -74,7 +73,7 @@ const CustomerProfile = () => {
 const TabButton = ({ label, active, onClick }) => (
   <button
     onClick={onClick}
-    className={`capitalize text-md font-medium transition-opacity ${
+    className={`capitalize text-md font-medium cursor-pointer transition-opacity ${
       active
         ? 'opacity-100 text-orange-600 border-b-2 border-orange-500'
         : 'opacity-50 hover:opacity-80'
@@ -83,8 +82,6 @@ const TabButton = ({ label, active, onClick }) => (
     {label}
   </button>
 );
-
-
 
 const ProfileDetails = ({ profile }) => {
   const {
@@ -101,72 +98,68 @@ const ProfileDetails = ({ profile }) => {
     isActive
   } = profile;
 
+  const details = [
+    { label: "Name", value: customerName || "—" },
+    { label: "Email", value: contactEmail || "—" },
+    { label: "Contact", value: contactNumber || "N/A" },
+    { label: "Address", value: customerAddress || "—" },
+    { label: "City", value: city || "—" },
+    { label: "State", value: state || "—" },
+    { label: "Pincode", value: pincode || "—" },
+    { label: "Gender", value: gender || "—" },
+    { label: "DOB", value: dateofbirth || "—" },
+  ];
+
   return (
-    <div className="bg-white px-6 flex flex-col md:flex-row gap-6 items-start">
-      <div className="w-full  flex-shrink-0 p-2">
-        <div className="flex flex-row gap-4">
+    <div className="bg-white px-4 md:px-6 flex flex-col md:flex-row gap-4 md:gap-6 items-start">
+      <div className="w-full flex-shrink-0 p-2">
+        {/* Header: image + name */}
+        <div className="flex flex-col md:flex-row gap-4 items-center md:items-start">
           <img
-            src={profileImage || '/default-avatar.png'}
+            src={profileImage || "/default-avatar.png"}
             alt={customerName}
-            className="w-32 h-32 rounded-lg border mb-4 mt-2 border-orange-500 object-cover"
+            className="w-24 h-24 md:w-32 md:h-32 rounded-lg border mb-2 md:mb-4 border-orange-500 object-cover"
           />
-          <div>
-            <p className="text-3xl text-[#393939] font-semibold font-poppins">
+          <div className="text-center md:text-left">
+            <p className="text-2xl md:text-3xl text-[#393939] font-semibold font-poppins">
               {customerName}
             </p>
-            <span className={`text-xl ${isActive ? 'text-[#34A853]' : 'text-red-500'}`}>
-              {isActive ? '((.)) Active' : 'Inactive'}
+            <span
+              className={`text-lg md:text-xl ${
+                isActive ? "text-[#34A853]" : "text-red-500"
+              }`}
+            >
+              {isActive ? "((.)) Active" : "Inactive"}
             </span>
           </div>
         </div>
 
-        {/* Two-column layout for details */}
-        <div className="flex justify-between w-full gap-2 font-poppins text-[#535353] mt-8">
-          {/* Left column: labels */}
-          <div className="flex flex-col items-start space-y-6 w-1/2 md:pl-4 pl-1 text-lg">
-            <p>Name:</p>
-            <p>Email:</p>
-            <p>Contact:</p>
-            <p>Address:</p>
-            <p>City:</p>
-            <p>State:</p>
-            <p>Pincode:</p>
-            <p>Gender:</p>
-            <p>DOB:</p>
-          </div>
-
-          {/* Right column: values */}
-          <div className="flex flex-col items-end space-y-6 w-1/2 md:pr-4 pr-1 text-lg text-gray-600">
-            <p>{customerName || '—'}</p>
-            <p>{contactEmail || '—'}</p>
-            <p>{contactNumber || 'N/A'}</p>
-            <p>{customerAddress || '—'}</p>
-            <p>{city || '—'}</p>
-            <p>{state || '—'}</p>
-            <p>{pincode || '—'}</p>
-            <p>{gender || '—'}</p>
-            <p>{dateofbirth || '—'}</p>
-          </div>
+        {/* Label + Value pairs */}
+        <div className="mt-6 md:mt-8 space-y-4 md:space-y-2">
+          {details.map((item, idx) => (
+            <div
+              key={idx}
+              className="flex flex-col md:flex-row md:justify-between  pb-2 md:pb-1"
+            >
+              <span className="font-medium text-gray-700">{item.label}:</span>
+              <span className="text-gray-600 md:text-right">{item.value}</span>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-6 flex flex-wrap gap-4">
-          <button className="bg-orange-500 text-white font-poppins px-4 py-2 rounded-md hover:bg-orange-600">
-            Switch to User Profile ⮞
-          </button>
-          <button className="border border-red-500 text-red-500 font-poppins px-4 py-2 rounded-md hover:bg-red-50">
-            Log Out ⮞
-          </button>
-        </div>
+        {/* Buttons */}
+        
       </div>
     </div>
   );
 };
 
-const Detail = ({ label, value }) => (
-  <div className="flex justify-between border-b pb-1">
-    <span className="font-medium">{label}</span>
-    <span className="text-right">{value}</span>
-  </div>
-);
+
+// const Detail = ({ label, value }) => (
+//   <div className="flex justify-between border-b pb-1">
+//     <span className="font-medium">{label}</span>
+//     <span className="text-right">{value}</span>
+//   </div>
+// );
 
 export default CustomerProfile;

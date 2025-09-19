@@ -7,6 +7,7 @@ import storage from '../utils/storage';
 import { useNavigate } from 'react-router-dom';
 import PaymentGateway from './PaymentGateway';
 import { FiArrowRight } from "react-icons/fi";
+import { toast } from 'react-hot-toast';
 
 const CustomerPlansView = () => {
   const [messes, setMesses] = useState([]);
@@ -23,6 +24,7 @@ const CustomerPlansView = () => {
 
   const fetchMesses = async () => {
     const res = await apiGet('/customer/mess/subscribed');
+    console.log(res);
     if (res.success && Array.isArray(res.data)) {
       setMesses(res.data);
     }
@@ -75,16 +77,16 @@ const CustomerPlansView = () => {
         {/* Tabs */}
         <div className="flex space-x-6 border-b mb-6">
              <button
-            className="pb-2 text-gray-500 hover:text-orange-600"
+            className="pb-2 text-gray-500 cursor-pointer hover:text-orange-600"
             onClick={() => navigate('/customer-activeplans')}
           >
             My Plans
           </button>
-          <button className="pb-2 border-b-2 border-orange-500 text-orange-600">
+          <button className="pb-2 border-b-2 cursor-pointer border-orange-500 text-orange-600">
             My Mess
           </button>
           <button
-            className="pb-2 text-gray-500 hover:text-orange-600"
+            className="pb-2 text-gray-500 cursor-pointer hover:text-orange-600"
             onClick={() => navigate('/customer-minimal-dashboard')}
           >
             Available Mess
@@ -127,7 +129,10 @@ const CustomerPlansView = () => {
                       <div className="flex-1">
                 <p className="font-semibold">{mess.messName}</p>
                 <p className="text-l text-gray-500">{mess.city} • {mess.pincode}</p>
-                <p className="text-sm text-gray-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
+                <p className="text-sm text-green-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
+                  {/* <p className="text-sm text-gray-600 font-semibold">
+      Days Open: {Array.isArray(mess.daysOpen) ? mess.daysOpen.join(", ") : mess.daysOpen}
+    </p> */}
               </div>
                     <div
                       onClick={(e) => {
@@ -177,7 +182,7 @@ const CustomerPlansView = () => {
                                 </div>
                                 <button
                                   onClick={() => handleUseTokens(plan.customerPlanId)}
-                                  className="text-sm text-orange-600 hover:underline"
+                                  className="text-sm cursor-pointer text-orange-600 hover:underline"
                                 >
                                   Use Tokens
                                 </button>
@@ -235,7 +240,7 @@ const CustomerPlansView = () => {
                                   </div>
                                   {isSelected && (
                                     <button
-                                      className="mt-2 bg-orange-500 hover:bg-orange-600 text-white py-1 px-3 rounded"
+                                      className="mt-2 bg-orange-500 cursor-pointer hover:bg-orange-600 text-white py-1 px-3 rounded"
                                       onClick={(e) => {
                                         e.stopPropagation();
                                         setShowPaymentModal(true);
@@ -265,10 +270,10 @@ const CustomerPlansView = () => {
               <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
               <div className="flex flex-col gap-3">
                 <button
-                  className="bg-green-500 hover:bg-green-600 text-white py-2 rounded"
+                  className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
                   onClick={() => {
                     setShowPaymentModal(false);
-                    alert('💵 Cash payment selected. Please pay at mess counter.');
+                    toast.success('💵 Cash payment selected. Please pay at mess counter.');
                   }}
                 >
                   Pay with Cash
@@ -281,7 +286,7 @@ const CustomerPlansView = () => {
                 />
 
                 <button
-                  className="text-sm text-gray-500 mt-2 hover:text-red-500"
+                  className="text-sm text-gray-500 mt-2 cursor-pointer hover:text-red-500"
                   onClick={() => setShowPaymentModal(false)}
                 >
                   Cancel

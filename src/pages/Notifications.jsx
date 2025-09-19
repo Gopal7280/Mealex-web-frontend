@@ -1,13 +1,11 @@
 
-
-
-
 import React, { useEffect, useState } from 'react';
 import Navbar from '../layouts/Navbar';
 import { CheckCircle, AlertCircle, Info } from 'lucide-react';
-import { apiGet } from '../services/api';
+import { apiGet, apiPost } from '../services/api';
 import OwnerHeader from './ownerHeader';
 import getNotificationStyle from './icons';
+
 
 
 const Notifications = () => {
@@ -45,6 +43,34 @@ const Notifications = () => {
     fetchOwnerMesses();
   }, []);
 
+
+useEffect(() => {
+  if (notifications.length > 0) {
+    const unreadIds = notifications
+      .filter((n) => !n.isRead)
+      .map((n) => n.id);
+
+    if (unreadIds.length > 0) {
+      const timer = setTimeout(async () => {
+        try {
+          await apiPost("/user/notifications/read", {
+            notificationIds: unreadIds,
+          });
+          setNotifications((prev) =>
+            prev.map((n) =>
+              unreadIds.includes(n.id) ? { ...n, isRead: true } : n
+            )
+          );
+        } catch (error) {
+          console.error("Error marking notifications read:", error);
+        }
+      }, 2000);
+
+      return () => clearTimeout(timer);
+    }
+  }
+}, [notifications]);
+
  
   const fetchNotifications = async (currentPage = 1) => {
   try {
@@ -58,6 +84,7 @@ const Notifications = () => {
     }
 
     let data = [];
+    console.log("Fetched notifications:", res);
     if (res?.success) {
       data = res.notifications || [];
 
@@ -65,7 +92,7 @@ const Notifications = () => {
       if (filter !== "all") {
         data = data.filter((n) => {
           if (filter === "purchased") {
-            return n.title?.toLowerCase().includes("plan purchase successful");
+            return n.title?.toLowerCase().includes("Plan purchase successful");
           }
           if (filter === "used") {
             return (
@@ -143,15 +170,15 @@ const Notifications = () => {
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Notifications</h2>
 
         {/* Mess Filter Dropdown */}
-        <div className="flex gap-3 mb-4">
+        <div className="flex gap-3 mb-4 cursor-pointer">
           <select
             value={selectedMess}
             onChange={(e) => setSelectedMess(e.target.value)}
-            className="border px-3 py-1 rounded text-sm"
+            className="border px-3 py-1 rounded text-sm cursor-pointer"
           >
-            <option value="all">All Messes</option>
+            <option value="all" className='cursor-pointer'>All Messes</option>
             {messes.map((mess) => (
-              <option key={mess.messId} value={mess.messId}>
+              <option key={mess.messId} value={mess.messId} className=''>
                 {mess.messName}
               </option>
             ))}
@@ -162,7 +189,7 @@ const Notifications = () => {
         <div className="flex gap-3 mb-4">
           <button
             onClick={() => setFilter("purchased")}
-            className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
+            className={`border cursor-pointer text-sm px-3 py-1 rounded hover:bg-gray-100 ${
               filter === "purchased" ? "border-black font-semibold" : "border-[#5B5B5B]"
             }`}
           >
@@ -170,7 +197,7 @@ const Notifications = () => {
           </button>
           <button
             onClick={() => setFilter("used")}
-            className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
+            className={`border cursor-pointer text-sm px-3 py-1 rounded hover:bg-gray-100 ${
               filter === "used" ? "border-black font-semibold" : "border-[#5B5B5B]"
             }`}
           >
@@ -178,7 +205,7 @@ const Notifications = () => {
           </button>
           <button
             onClick={() => setFilter("expiry")}
-            className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
+            className={`border cursor-pointer text-sm px-3 py-1 rounded hover:bg-gray-100 ${
               filter === "expiry" ? "border-black font-semibold" : "border-[#5B5B5B]"
             }`}
           >
@@ -186,7 +213,7 @@ const Notifications = () => {
           </button>
           <button
             onClick={() => setFilter("all")}
-            className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
+            className={`border cursor-pointer text-sm px-3 py-1 rounded hover:bg-gray-100 ${
               filter === "all" ? "border-black font-semibold" : "border-[#5B5B5B]"
             }`}
           >
@@ -209,7 +236,15 @@ const Notifications = () => {
                     <div className="flex items-start gap-3 pb-3">
                       {icon}
                       <div className="text-sm">
-                        <p className={`font-semibold ${color}`}>{notif.title || notif.planName}</p>
+                        <p className={`font-semibold ${color}`}>{notif.title || notif.planName}
+                          {!notif.isRead && (
+  <span className="ml-2 text-xs bg-yellow-400 text-white px-2 py-0.5 rounded-full">
+    NEW
+  </span>
+)}
+
+                        </p>
+                        
                         <p className="text-gray-700 mt-0.5">
                           {notif.message || `${notif.submittedByName || "Someone"} performed an action`}
                         </p>
@@ -225,37 +260,14 @@ const Notifications = () => {
           )}
         </div>
 
-        {/* Pagination Controls */}
-        {/* <div className="flex justify-between mt-6">
-          <button
-            onClick={() => setPage((prev) => prev - 1)}
-            disabled={page === 1}
-            className={`px-3 py-1 rounded ${
-              page === 1 ? "bg-gray-300 cursor-not-allowed" : "bg-gray-500 text-white"
-            }`}
-          >
-            Previous
-          </button>
-          <button
-            onClick={() => setPage((prev) => prev + 1)}
-            disabled={!hasMore}
-            className={`px-3 py-1 rounded ${
-              !hasMore ? "bg-gray-300 cursor-not-allowed" : "bg-gray-500 text-white"
-            }`}
-          >
-            Next
-          </button>
-        </div> */}
-        {/* Pagination Controls */}
-{/* Pagination Controls */}
-{/* Pagination Controls */}
+    
 {pagination?.totalPages > 1 && (
   <div className="flex flex-col items-center mt-6 gap-3">
     {/* Prev / Next */}
     <div className="flex gap-2">
       <button
         disabled={page === 1}
-        className="px-3 py-1 rounded bg-gray-200 text-gray-600 disabled:opacity-50"
+        className="px-3 py-1 rounded cursor-pointer bg-gray-200 text-gray-600 disabled:opacity-50"
         onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
       >
         Prev
@@ -267,7 +279,7 @@ const Notifications = () => {
 
       <button
         disabled={page === pagination.totalPages}
-        className="px-3 py-1 rounded bg-gray-200 text-gray-600 disabled:opacity-50"
+        className="px-3 py-1 rounded cursor-pointer bg-gray-200 text-gray-600 disabled:opacity-50"
         onClick={() => setPage((prev) => Math.min(prev + 1, pagination.totalPages))}
       >
         Next
@@ -281,7 +293,7 @@ const Notifications = () => {
         min="1"
         max={pagination.totalPages}
         placeholder="Page no."
-        className="border px-3 py-1 rounded w-24 text-sm"
+        className="border px-3 py-1  rounded w-24 text-sm"
         value={gotoPage}
         onChange={(e) => setGotoPage(e.target.value)}
         onKeyDown={(e) => {
@@ -295,7 +307,7 @@ const Notifications = () => {
         }}
       />
       <button
-        className="px-3 py-1 bg-orange-500 text-white rounded text-sm"
+        className="px-3 py-1 bg-orange-500 cursor-pointer text-white rounded text-sm"
         onClick={() => {
           const pageNum = Number(gotoPage);
           if (pageNum >= 1 && pageNum <= pagination.totalPages) {
