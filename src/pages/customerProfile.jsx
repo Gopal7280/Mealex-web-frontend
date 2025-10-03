@@ -431,7 +431,6 @@ const CustomerProfileDetails = () => {
         const res = await apiGet("/customer/profile/complete");
         setProfile(res?.data);
       } catch (error) {
-        console.error("❌ Failed to fetch profile:", error);
       }
     };
     fetchProfile();
@@ -447,7 +446,6 @@ const CustomerProfileDetails = () => {
         { headers: { Authorization: `Bearer ${userJwt}` } }
       );
     } catch (err) {
-      console.error("❌ Logout API failed:", err);
     } finally {
       storage.clear();
       localStorage.clear();
@@ -479,7 +477,6 @@ const CustomerProfileDetails = () => {
         }));
       }
     } catch (err) {
-      console.error("❌ Failed to upload image:", err);
     } finally {
       setUploading(false);
     }
@@ -521,7 +518,6 @@ const CustomerProfileDetails = () => {
         toast.error(res?.message || "Update failed");
       }
     } catch (err) {
-      console.error("Update error:", err);
       toast.error("Something went wrong.");
     } finally {
       setSaving(false);
@@ -730,6 +726,12 @@ const CustomerProfileDetails = () => {
           >
             LOG OUT
           </button>
+           <button
+      onClick={() => navigate("/delete-account")}
+  className="absolute opacity-0"
+>
+  Delete Account
+</button>
         </div>
       </div>
     </div>

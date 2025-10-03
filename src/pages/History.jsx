@@ -79,7 +79,6 @@ const History = () => {
 
 const fetchTransactions = async () => {
   if (!token || !messId) {
-    console.error('❌ Token or Mess ID missing');
     return;
   }
 
@@ -90,7 +89,6 @@ const fetchTransactions = async () => {
       { messId },
     );
 
-    console.log('✅ API Success Response:', res);
 
     if (res?.success) {
       setTransactions(res.data || []);
@@ -101,7 +99,6 @@ const fetchTransactions = async () => {
       }));
     }
   } catch (err) {
-    console.error('❌ API Error:', err);
   } finally {
     setLoading(false);
   }
@@ -148,8 +145,8 @@ const fetchTransactions = async () => {
               <button onClick={() => navigate('/owner/history/plans')} className={` cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/plans' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
                 Plan History
               </button>
-              <button onClick={() => navigate('/owner/history/account')} className={`cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/account' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
-                Account History
+              <button onClick={() => navigate('/owner/purchased-plans')} className={`cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/account' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
+            Plans Requests
               </button>
             </div>
 

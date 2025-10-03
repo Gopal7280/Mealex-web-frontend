@@ -40,14 +40,11 @@ const CustomerUseTokens = () => {
           
           data.remainingTokens = issued - used;
           setPlanData(data);
-          console.log("✅ Plan data re-fetched:", res.data);
         } else {
-          console.error("❌ API failed:", res.message);
           setPlanData(null);
         }
       })
       .catch((err) => {
-        console.error("❌ API Error:", err);
         setPlanData(null);
       })
       .finally(() => setLoading(false));
@@ -62,7 +59,6 @@ useEffect(() => {
     try {
       setServices(JSON.parse(savedServices));
     } catch (e) {
-      console.error("Invalid services data", e);
     }
   }
 }, []);
@@ -72,13 +68,11 @@ useEffect(() => {
     const token = storage.getItem('token');
     if (token) {
       connectSocket(token);
-      console.log("🔗 WebSocket initialized from CustomerUseTokens");
     }
     if (!messId || !customerPlanId) return;
     refetchPlan();
 
     const handleOrderResponse = (response) => {
-      console.log('📦 Received order_response:', response);
       if (response?.success) {
         toast.success('Order placed successfully!');
         setIsModalOpen(false);
@@ -102,7 +96,6 @@ useEffect(() => {
     
 
     const handleUpdate = (res) => {
-      console.log('📢 order_update:', res);
       if (res?.success && res.data?.orderStatus) {
         if (res.data.orderStatus === 'accepted') {
           toast.success('🎉 Order accepted');
@@ -245,7 +238,6 @@ const handleSubmitOrder = async () => {
       setIsSubmitting(false); // ✅ always reset after socket response
     });
   } catch (err) {
-    console.error("❌ Submit error:", err);
     toast.error("Unexpected error. Please try again.");
     setIsSubmitting(false); // ✅ reset on unexpected error
   }
@@ -306,22 +298,7 @@ const handleSubmitOrder = async () => {
         Select Order Type
       </Dialog.Title>
 
-      {/* Order Type Buttons - Same row like Owner modal */}
-      {/* <div className="flex gap-3 justify-center mb-4">
-        {['dine', 'take-away', 'delivery'].map((service) => (
-          <button
-            key={service}
-            onClick={() => setSelectedService(service)}
-            className={`px-4 py-2 rounded-full cursor-pointer border ${
-              selectedService === service
-                ? 'bg-orange-500 text-white'
-                : 'bg-gray-100 text-gray-700'
-            }`}
-          >
-            {service.charAt(0).toUpperCase() + service.slice(1)}
-          </button>
-        ))}
-      </div> */}
+    
       {services.length === 0 ? (
   <p className="text-center text-gray-500">No services available for this mess.</p>
 ) : (

@@ -17,11 +17,9 @@ const MessVerificationStatus = () => {
 const fetchMess = async () => {
   try {
     const res = await apiGet(`/owner/mess/id/${messId}`);
-    console.log('🧾 Full API response:', res);
     
 
     const data = res?.data;
-console.log('📌 Status:', data.status);
 
     // if (!data) throw new Error("Invalid response format from backend");
 
@@ -44,7 +42,6 @@ storage.setItem('messId', messId);
 
     setFailedFields(data.failedFields || []);
   } catch (err) {
-    console.error('❌ Error fetching mess:', err);
   }
 };
 

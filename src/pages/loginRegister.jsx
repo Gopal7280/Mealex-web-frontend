@@ -57,7 +57,6 @@ const LoginRegister = ({ setAuth }) => {
           xfbml: false,
           version: 'v18.0',
         });
-        console.log('✅ Facebook SDK initialized');
       };
 
       // Inject Facebook SDK script dynamically
@@ -82,85 +81,6 @@ const LoginRegister = ({ setAuth }) => {
     });
   };
 
-  // const handleLogin = async e => {
-  //   e.preventDefault();
-  //   setError('');
-
-  //   const normalizedIdentifier = identifier.includes('@') ? identifier.toLowerCase() : identifier;
-
-  //   try {
-  //     setLoader(true);
-  //     const response = await apiPost('/login', { identifier: normalizedIdentifier, password });
-  // console.log(response)
-  //     const JWT = response.data.token;
-  //     storage.setItem('identifier', response.data.identifier);
-  //     storage.setItem('token', JWT);
-  //     setToken(JWT);
-  //     setAuth(true);
-  //           await initFCM(); // <-- yaha call karna hai
-
-
-  //     if (response.data.isOwner && response.data.isCustomer) {
-  //       navigate('/minimal-dashboard');
-  //       storage.setItem('roles', 'both');
-  //     } else if (response.data.isCustomer) {
-  //       storage.setItem('role', 'customer');
-  //       navigate('customers-dashboard');
-  //       toast.success('🎉 Logged In As Customer!');
-  //     } else if (response.data.isOwner ) {
-  //       navigate('/minimal-dashboard');
-  //       toast.success('🎉 Logged In As Owner!');
-  //     } else {
-  //       navigate('/user-access');
-  //     }
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || 'Login failed. Try again!');
-  //   } finally {
-  //     setLoader(false);
-  //   }
-  // };
-
-// const handleLogin = async e => {
-//   e.preventDefault();
-//   setError('');
-
-//   const normalizedIdentifier = identifier.includes('@') ? identifier.toLowerCase() : identifier;
-
-//   try {
-//     setLoader(true);
-//     const response = await apiPost('/login', { identifier: normalizedIdentifier, password });
-//     console.log(response);
-
-//     // const JWT = response.data.token;
-//     const JWT = data.token;
-
-//     storage.setItem('identifier', response.data.identifier);
-//     storage.setItem('token', JWT);
-//     setToken(JWT);
-//     setAuth(true);
-
-//     // ✅ FCM setup turant login ke baad
-//     await setupNotifications(JWT);
-
-//     if (response.data.isOwner && response.data.isCustomer) {
-//       navigate('/minimal-dashboard');
-//       storage.setItem('roles', 'both');
-//     } else if (response.data.isCustomer) {
-//       storage.setItem('role', 'customer');
-//       navigate('customers-dashboard');
-//       toast.success('🎉 Logged In As Customer!');
-//     } else if (response.data.isOwner) {
-//       navigate('/minimal-dashboard');
-//       toast.success('🎉 Logged In As Owner!');
-//     } else {
-//       navigate('/user-access');
-//     }
-//   } catch (err) {
-//     setError(err.response?.data?.message || 'Login failed. Try again!');
-//   } finally {
-//     setLoader(false);
-//   }
-// };
 
 const handleLogin = async e => {
   e.preventDefault();
@@ -171,7 +91,7 @@ const handleLogin = async e => {
   try {
     setLoader(true);
     const data = await apiPost('/login', { identifier: normalizedIdentifier, password });
-    console.log(data); // ✅ data me token, identifier, roles sab aa raha
+    console.log('Login response data:', data); // ✅ log entire response
 
     const JWT = data.token; // ✅ correct
     storage.setItem('identifier', data.identifier);
@@ -182,10 +102,12 @@ const handleLogin = async e => {
     await setupNotifications(JWT);
 
     if (data.isOwner && data.isCustomer) {
-      navigate('/minimal-dashboard');
+  navigate('/minimal-dashboard', { state: { customerId: data.id } });
+
       storage.setItem('roles', 'both');
     } else if (data.isCustomer) {
       storage.setItem('role', 'customer');
+        storage.setItem('customerId', data.id); // simple customer
       navigate('customers-dashboard');
       toast.success('🎉 Logged In As Customer!');
     } else if (data.isOwner) {
@@ -201,48 +123,6 @@ const handleLogin = async e => {
   }
 };
 
-
-  // const handleRegister = async e => {
-  //   e.preventDefault();
-  //   if (!identifier || !password || !confirmPassword) {
-  //     setErrorMsg('Please fill all fields correctly.');
-  //     return;
-  //   }
-  //   if (password !== confirmPassword) {
-  //     setError('Passwords do not match!');
-  //     return;
-  //   }
-
-  //   const normalizedIdentifier = identifier.includes('@') ? identifier.toLowerCase() : identifier;
-
-  //   try {
-  //     setLoader(true);
-  //     const res = await apiPost('/register', {
-  //       identifier: normalizedIdentifier,
-  //       password,
-  //       confirmPassword
-  //     });
-  //     console.log(res)
-
-  //     const data = res.data;
-  //     if (data.success && data.requestId) {
-  //       navigate('/otp-verification', {
-  //         state: {
-  //           identifier: data.identifier,
-  //           identifierType: data.identifierType,
-  //           requestId: data.requestId,
-  //           context: data.context || 'registration',
-  //         },
-  //       });
-  //     } else {
-  //       setErrorMsg(data.message || 'Registration failed. Try again.');
-  //     }
-  //   } catch (err) {
-  //     setErrorMsg(err.response?.data?.message || 'Network error. Please try again.');
-  //   } finally {
-  //     setLoader(false);
-  //   }
-  // };
 
 const handleRegister = async e => {
   e.preventDefault();
@@ -265,7 +145,6 @@ const handleRegister = async e => {
       password,
       confirmPassword
     });
-    console.log('register',data);
 
     if (data.success && data.requestId) {
       navigate('/otp-verification', {
@@ -287,22 +166,65 @@ const handleRegister = async e => {
 };
 
 
-  const handleGoogleSuccess = async credentialResponse => {
-    try {
-      const idToken = credentialResponse.credential;
-      console.log('Google ID Token:', idToken);
-      const res = await apiPost('/google-auth', { idToken });
-      console.log('Google Sign-in Response:', res);
+  // const handleGoogleSuccess = async credentialResponse => {
+  //   try {
+  //     const idToken = credentialResponse.credential;
+  //     const res = await apiPost('/google-auth', { idToken });
 
-      if (res.success) {
-        navigate('/user-access');
+  //     if (res.success) {
+  //       navigate('/user-access');
+  //     } else {
+  //     }
+  //   } catch (err) {
+  //   }
+  // };
+
+const handleGoogleSuccess = async (credentialResponse) => {
+  try {
+    const idToken = credentialResponse.credential;
+    const res = await apiPost('/google-auth', { idToken });
+
+    if (res.success) {
+      // Store token & identifier
+      const { token, identifier, identifierType, isOwner, isCustomer } = res;
+
+      storage.setItem('token', token);
+      storage.setItem('identifier', identifier);
+      setToken(token);
+
+      // Optional: store role info if needed
+      // if (isOwner && isCustomer) storage.setItem('roles', 'both');
+      // else if (isCustomer) storage.setItem('role', 'customer');
+      // else if (isOwner) storage.setItem('role', 'owner');
+
+      // Navigate based on role, same as handleLogin
+      if (isOwner && isCustomer) {
+        storage.setItem('roles', 'both');
+  navigate('/minimal-dashboard', { state: { customerId: res.id } });
+      } else if (isCustomer) {
+        storage.setItem('role', 'customer');
+          storage.setItem('customerId', res.id); // simple customer
+
+        navigate('customers-dashboard');
+        toast.success('🎉 Logged In As Customer!');
+      } else if (isOwner) {
+        storage.setItem('role', 'owner');
+        navigate('/minimal-dashboard');
+        toast.success('🎉 Logged In As Owner!');
       } else {
-        console.error('Google Sign-in failed:', res.message);
+        navigate('/user-access', {
+          state: { identifier, identifierType, token }
+        });
       }
-    } catch (err) {
-      console.error('Google Sign-in error:', err);
+    } else {
+      toast.error(res.message || 'Google Sign-In failed');
     }
-  };
+  } catch (err) {
+    console.error('Google login error:', err);
+    toast.error('Something went wrong with Google Sign-In');
+  }
+};
+
 
   const forgotPassword = async () => {
     if (!modalIdentifier) {
@@ -311,7 +233,9 @@ const handleRegister = async e => {
     }
     try {
       const res = await apiPost('/forget-password', { identifier: modalIdentifier });
+      console.log('Forgot password response:', res);
       const { requestId, identifierType, context } = res.data;
+      toast.success('OTP sent successfully to your ' + identifierType);
 
       setVisible(false); 
       navigate('/reset-otp', { state: { identifier: modalIdentifier, identifierType, requestId, context } });
@@ -327,6 +251,7 @@ const handleRegister = async e => {
 
       <div className="flex flex-col justify-center items-center w-full max-w-md mx-auto py-8">
         <img src={mealx} alt="MealX Logo" className="w-24 sm:w-28 md:w-32 mb-6" />
+
 
         <div className="flex justify-center space-x-10 w-full mb-6">
           <button
@@ -437,6 +362,25 @@ const handleRegister = async e => {
             </div>
           )}
 
+<div className="text-center text-sm text-gray-500 mb-4">
+  By logging in, you agree to MealEX's{' '}
+  <span
+    className="text-orange-500 cursor-pointer hover:underline"
+    onClick={() => navigate('/privacy-policies')}
+  >
+    Terms & Conditions
+  </span>{' '}
+  and{' '}
+  <span
+    className="text-orange-500 cursor-pointer hover:underline"
+    onClick={() => navigate('/privacy-policies')}
+  >
+    Privacy Policy
+  </span>
+  .
+</div>
+
+
           <button
             type="submit"
             disabled={loader}
@@ -476,6 +420,7 @@ const handleRegister = async e => {
           maskClassName="bg-black/50 backdrop-blur-sm backdrop-brightness-75 border-md"
           onHide={() => setVisible(false)}
         >
+          
           <div className="space-y-4 p-4 border-2 border-gray-200 rounded-lg shadow-md bg-white">
             <input
               type="text"
@@ -484,6 +429,7 @@ const handleRegister = async e => {
               value={modalIdentifier}
               onChange={(e) => setModalIdentifier(e.target.value)}
             />
+            
             <button
               onClick={forgotPassword}
               className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600 font-semibold transition cursor-pointer"

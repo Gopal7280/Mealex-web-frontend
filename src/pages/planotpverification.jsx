@@ -71,7 +71,6 @@ const PlanOtpVerification = () => {
         setError("Invalid OTP");
       }
     } catch (err) {
-      console.error(err);
       setError("Verification failed. Please try again.");
     }
   };
@@ -90,7 +89,7 @@ const PlanOtpVerification = () => {
       });
 
       if (res.success && res.requestId) {
-        toast.success("✅ OTP resent successfully.");
+        toast.success("OTP resent successfully.");
         setVerificationData((prev) => ({
           ...prev,
           requestId: res.requestId,
@@ -103,7 +102,6 @@ const PlanOtpVerification = () => {
         setError(res.message || "Failed to resend OTP");
       }
     } catch (err) {
-      console.error("Resend OTP failed:", err);
       setError("Resend failed. Please try again.");
     }
   };

@@ -15,7 +15,6 @@ const CustomerHeader = () => {
     const fetchProfile = async () => {
       try {
         const res = await apiGet('/customer/profile/basic');
-        console.log('Customer Profile Response:', res);
         if (res?.success && res?.data) {
           const { customerName, messes, profileImage } = res.data;
 
@@ -28,7 +27,6 @@ const CustomerHeader = () => {
           }
         }
       } catch (err) {
-        console.error('❌ Error fetching customer profile:', err);
       }
     };
 
@@ -41,9 +39,11 @@ const CustomerHeader = () => {
   return (
     <div className="flex justify-between items-center mb-6">
       <div>
-        <p className="text-sm text-slate-800 font-medium">Welcome</p>
+        {/* <p className="text-sm text-slate-800 font-medium">Welcome Customer,</p> */}
+         <p className="text-sm sm:text-sm text-gray-700 font-bold">Welcome Customer,</p>
+
         <p className="text-3xl font-bold text-orange-600">{customerName}</p>
-        <p className="text-sm text-green-600 px-1">(Customer)</p>
+        {/* <p className="text-sm text-green-600 px-1">(Customer)</p> */}
       </div>
 
       <div className="flex items-center gap-4">

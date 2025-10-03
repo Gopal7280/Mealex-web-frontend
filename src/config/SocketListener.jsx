@@ -634,7 +634,6 @@ const SocketListener = () => {
       // Ensure owner always stays connected
       const heartbeatCheck = setInterval(() => {
         if (!socket.connected) {
-          console.log('⚠️ Owner socket disconnected, reconnecting...');
           socket.connect();
         }
       }, 30_000);

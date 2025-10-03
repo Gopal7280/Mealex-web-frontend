@@ -30,23 +30,19 @@ export const connectSocket = (token) => {
 
   socket.on('connect', () => {
     isConnected = true;
-    console.log('🟢 WebSocket connected', socket.id);
     startHeartbeat();
   });
 
   socket.on('disconnect', (reason) => {
     isConnected = false;
-    console.log('🔴 WebSocket disconnected', reason);
     // heartbeat will try to reconnect automatically
   });
 
   socket.io.on('reconnect', (attempt) => {
-    console.log('🔄 Reconnected after', attempt, 'attempts');
     startHeartbeat(); // restart heartbeat after reconnect
   });
 
   socket.on('connect_error', (err) => {
-    console.error('Socket connect_error', err?.message || err);
   });
 
   // ---------------- Event Handlers ----------------
@@ -137,7 +133,6 @@ socket.on('incoming_order', (res) => {
 
     for (const h of incomingOrderHandlers) h(res);
   } else {
-    console.log("⏭️ Ignored order for different messId:", res?.data?.messId);
   }
 });
 
@@ -146,7 +141,6 @@ socket.on('incoming_order', (res) => {
   socket.on('order_cancel_by_customer', (data) => {
     for (const h of orderCancelHandlers) h(data);
   });
-
   return socket;
 };
 
@@ -157,9 +151,7 @@ function startHeartbeat(interval = HEARTBEAT_INTERVAL_MS) {
   heartbeatInterval = setInterval(() => {
     if (socket && socket.connected) {
       socket.emit('heartbeat');
-      console.log('💓 Heartbeat sent');
     } else if (socket) {
-      console.log('⚠️ Socket disconnected, trying to reconnect...');
       socket.connect(); // attempt reconnect
     }
   }, interval);

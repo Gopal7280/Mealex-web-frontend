@@ -1,4 +1,4 @@
-import { User, MessageCircle, Utensils, Coins, CreditCard, Bookmark, Package, Info } from "lucide-react";
+import { User, MessageCircle, Utensils, Coins, CreditCard, Bookmark, Package, Info, FileText ,AlertCircle   } from "lucide-react";
 
 const getNotificationStyle = (type) => {
   switch (type) {
@@ -16,6 +16,10 @@ const getNotificationStyle = (type) => {
       return { icon: <Bookmark className="text-indigo-600 w-6 h-6" />, color: "text-indigo-700" };
     case "order":
       return { icon: <Package className="text-orange-600 w-6 h-6" />, color: "text-orange-700" };
+          case "requests": // new notification type
+      return { icon: <FileText className="text-orange-500 w-6 h-6" />, color: "text-orange-600" };
+          case "plan": // new type for expired plans
+      return { icon: <AlertCircle className="text-red-500 w-6 h-6" />, color: "text-red-600" };
     default:
       return { icon: <Info className="text-gray-500 w-6 h-6" />, color: "text-gray-700" };
   }

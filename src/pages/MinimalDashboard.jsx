@@ -2,7 +2,7 @@
 
 
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate ,useLocation } from "react-router-dom";
 import { apiGet } from "../services/api";
 import mealx from "../assets/mealx.png";
 import chefIcon from "../assets/no-mess.webp";
@@ -14,11 +14,14 @@ import { ArrowLeft } from 'lucide-react';
 
 
 const MinimalDashboard = () => {
+    const location = useLocation(); // ✅ location.state milne ke liye
+
   const navigate = useNavigate();
   const [messes, setMesses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [ownerName, setOwnerName] = useState("");
   const roles = storage.getItem("roles"); // "both" or single role
+  
   const [activeRole, setActiveRole] = useState(
     roles === "both" ? "owner" : storage.getItem("role") || "owner"
   );
@@ -30,7 +33,6 @@ const MinimalDashboard = () => {
       const fetchMesses = async () => {
         try {
           const res = await apiGet("/owner/mess/all");
-          console.log("Fetched Messes:", res);
           const messArray = res?.data || [];
           setMesses(messArray);
 
@@ -40,7 +42,6 @@ const MinimalDashboard = () => {
             setOwnerName(res?.ownerName || "Owner");
           }
         } catch (error) {
-          console.error("❌ Failed to fetch mess list:", error);
         } finally {
           setIsLoading(false);
         }
@@ -58,6 +59,8 @@ const MinimalDashboard = () => {
       </div>
     );
   }
+
+  
 
   const hasNoMesses = messes.length === 0;
 
@@ -220,11 +223,10 @@ const MinimalDashboard = () => {
           </button>
         </div>
       )} */}
-      {/* Customer Dashboard CTA */}
-{activeRole === "customer" && (
+      {activeRole === "customer" && (
   <div className="flex flex-col items-center justify-center mt-12 sm:mt-20 text-center">
     <img
-      src={customer} // ✅ customer avatar icon (ya apna asset use kar sakte ho)
+      src={customer} 
       alt="Customer Avatar"
       className="w-20 sm:w-24 mx-auto"
     />
@@ -235,11 +237,14 @@ const MinimalDashboard = () => {
       Continue exploring messes and plans.
     </p>
 
-    {/* Button same placement as "Add Your Mess" */}
     <div className="flex justify-center mt-10 sm:mt-16 md:mt-24">
       <button
         onClick={() => {
           storage.setItem("role", "customer");
+          // ✅ store customerId from state if coming via both roles
+          if (!storage.getItem("customerId") && location.state?.customerId) {
+            storage.setItem("customerId", location.state.customerId);
+          }
           toast.success("🎉 Logged In As Customer!");
           navigate("/login/customers-dashboard");
         }}
@@ -250,8 +255,47 @@ const MinimalDashboard = () => {
     </div>
   </div>
 )}
+
+      {/* Customer Dashboard CTA */}
+
     </div>
   );
 };
 
 export default MinimalDashboard;
+
+
+
+
+
+
+
+// {activeRole === "customer" && (
+//   <div className="flex flex-col items-center justify-center mt-12 sm:mt-20 text-center">
+//     <img
+//       src={customer} // ✅ customer avatar icon (ya apna asset use kar sakte ho)
+//       alt="Customer Avatar"
+//       className="w-20 sm:w-24 mx-auto"
+//     />
+//     <h3 className="text-orange-500 font-bold text-lg sm:text-xl mt-4">
+//       Welcome {ownerName}
+//     </h3>
+//     <p className="text-gray-500 text-sm sm:text-base">
+//       Continue exploring messes and plans.
+//     </p>
+
+//     {/* Button same placement as "Add Your Mess" */}
+//     <div className="flex justify-center mt-10 sm:mt-16 md:mt-24">
+//       <button
+//         onClick={() => {
+//           storage.setItem("role", "customer");
+//           toast.success("🎉 Logged In As Customer!");
+//           navigate("/login/customers-dashboard");
+//         }}
+//         className="bg-orange-500 cursor-pointer text-white px-10 sm:px-20 md:px-40 py-3 rounded-lg font-semibold shadow-lg hover:bg-orange-600 transition text-sm sm:text-base"
+//       >
+//         Continue as Customer
+//       </button>
+//     </div>
+//   </div>
+// )}

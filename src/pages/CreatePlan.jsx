@@ -344,6 +344,9 @@ const CreatePlan = () => {
     image: null,
   });
   const [loading, setLoading] = useState(false);
+  const [menu, setMenu] = useState([]); // menu items array
+const [menuItem, setMenuItem] = useState(''); // input for single item
+
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -360,8 +363,7 @@ const CreatePlan = () => {
 
     if (
       !form.name.trim() ||
-      !form.description.trim() ||
-      !form.menu.trim() ||
+      menu.length === 0 ||
       !form.durationDays ||
       !form.price ||
       !form.totalTokens ||
@@ -388,16 +390,19 @@ const CreatePlan = () => {
     formData.append('price', Number(form.price));
     formData.append('totalTokens', Number(form.totalTokens));
     formData.append('image', form.image);
-    formData.append(
-      'menu',
-      JSON.stringify(form.menu.split(',').map((item) => item.trim()))
-    );
+    // formData.append(
+    //   'menu',
+    //   JSON.stringify(form.menu.split(',').map((item) => item.trim()))
+    // );
+    formData.append('menu', JSON.stringify(menu));
+   console.log("📦 Menu being sent:", menu);
 
     try {
       await apiPost('/owner/mess/plan/create', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       toast.success(`Plan "${form.name}" created successfully!`);
+      
 
       setForm({
         name: '',
@@ -451,7 +456,7 @@ const CreatePlan = () => {
           </div>
 
           <div>
-            <label className="block font-semibold mb-1">Description*</label>
+            <label className="block font-semibold mb-1">Description</label>
             <input
               type="text"
               name="description"
@@ -459,11 +464,11 @@ const CreatePlan = () => {
               value={form.description}
               onChange={handleChange}
               className="w-full border border-black rounded-md px-3 py-2 sm:px-4 sm:py-2"
-              required
+              
             />
           </div>
 
-          <div>
+          {/* <div>
             <label className="block font-semibold mb-1">
               Menu* (comma-separated)
             </label>
@@ -476,7 +481,52 @@ const CreatePlan = () => {
               className="w-full border border-black rounded-md px-3 py-2 sm:px-4 sm:py-2"
               required
             />
-          </div>
+          </div> */}
+          <div>
+  <label className="block font-semibold mb-1">Menu Items*</label>
+  <div className="flex gap-2">
+    <input
+      type="text"
+      placeholder="Add item..."
+      value={menuItem}
+      onChange={(e) => setMenuItem(e.target.value)}
+      className="w-full border border-black rounded-md px-3 py-2"
+    />
+    <button
+      type="button"
+      onClick={() => {
+        if (menuItem.trim() !== '') {
+          setMenu([...menu, menuItem.trim()]);
+          setMenuItem('');
+        }
+      }}
+      className="bg-orange-500 text-white px-4 py-2 rounded-md font-semibold"
+    >
+      +
+    </button>
+  </div>
+
+  <div className="mt-2 flex flex-wrap gap-2">
+    {menu.map((item, index) => (
+      <span
+        key={index}
+        className="bg-gray-200 px-3 py-1 rounded-full flex items-center gap-1"
+      >
+        {item}
+        <button
+          type="button"
+          onClick={() =>
+            setMenu(menu.filter((_, i) => i !== index))
+          }
+          className="text-red-500 font-bold ml-1"
+        >
+          x
+        </button>
+      </span>
+    ))}
+  </div>
+</div>
+
 
           <div>
             <label className="block font-semibold mb-1">Duration* (in days)</label>

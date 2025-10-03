@@ -229,20 +229,183 @@
 
 
 
+// import axios from "axios";
+// import { getToken, setToken, logoutUser } from "./authService";
+// import { config } from "../config/app.js";
+
+// const REFRESH_URL = "https://mealex.in/auth/refresh";
+
+// // Axios instance
+// const apiClient = axios.create({
+//   baseURL: config.apiBaseUrl,
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+//     withCredentials: true,   // 👈 yeh add karna hai
+
+// });
+
+// // ---------- TOKEN REFRESH HANDLING ----------
+// let isRefreshing = false;
+// let refreshSubscribers = [];
+
+// const subscribeTokenRefresh = (cb) => refreshSubscribers.push(cb);
+// const onRefreshed = (token) => {
+//   refreshSubscribers.forEach((cb) => cb(token));
+//   refreshSubscribers = [];
+// };
+
+// // ---------- REQUEST INTERCEPTOR ----------
+// apiClient.interceptors.request.use(
+//   (reqConfig) => {
+//     if (!reqConfig || !reqConfig.url) return reqConfig;
+
+//     // Skip auth for login/signup/refresh
+//     const skipAuth = ["/login", "/signUp", "/auth/refresh"].some((p) =>
+//       reqConfig.url.includes(p)
+//     );
+//     if (skipAuth) return reqConfig;
+
+//     // const token = getToken();
+//     // if (token) reqConfig.headers.Authorization = `Bearer ${token}`;
+//     const token = getToken();
+// if (token) {
+//   reqConfig.headers.Authorization = `Bearer ${token}`;
+// } else {
+//   console.warn("No token found while making request:", reqConfig.url);
+// }
+
+
+//     // If refresh is in progress, queue request
+//     if (isRefreshing) {
+//       return new Promise((resolve) => {
+//         subscribeTokenRefresh((newToken) => {
+//           if (newToken) reqConfig.headers.Authorization = `Bearer ${newToken}`;
+//           resolve(reqConfig);
+//         });
+//       });
+//     }
+
+//     return reqConfig;
+//   },
+//   (error) => Promise.reject(error)
+// );
+
+// // ---------- RESPONSE INTERCEPTOR ----------
+// apiClient.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     const originalRequest = error.config;
+//     if (!originalRequest) return Promise.reject(error);
+
+//     const status = error.response?.status;
+//     const message = error.response?.data?.message;
+
+//     const isAuthError =
+//       status === 401 ||
+//       message === "Invalid or expired token." ||
+//       message === "Unauthorized first login yourself";
+
+//     const isRefreshOrAuthEndpoint = (url) =>
+//       url && ["/login", "/signUp", "/auth/refresh"].some((p) => url.includes(p));
+
+//     if (!originalRequest._retry && isAuthError && !isRefreshOrAuthEndpoint(originalRequest.url)) {
+//       originalRequest._retry = true;
+
+//       if (!isRefreshing) {
+//         isRefreshing = true;
+//         try {
+//           const refreshRes = await axios.get(REFRESH_URL, { withCredentials: true });
+//           const newToken = refreshRes.data?.token;
+
+//           if (newToken) {
+//             setToken(newToken);
+//             apiClient.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+//           }
+
+//           isRefreshing = false;
+//           onRefreshed(newToken);
+//         } catch (err) {
+//           isRefreshing = false;
+//           onRefreshed(null);
+//           logoutUser(); // Force logout if refresh fails
+//           return Promise.reject(err);
+//         }
+//       }
+
+//       // Wait until refresh is done and retry the original request
+//       return new Promise((resolve, reject) => {
+//         subscribeTokenRefresh((newToken) => {
+//           if (newToken) {
+//             originalRequest.headers.Authorization = `Bearer ${newToken}`;
+//             resolve(apiClient(originalRequest));
+//           } else {
+//             reject(error);
+//           }
+//         });
+//       });
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
+// // ---------- API HELPER METHODS ----------
+// export const apiGet = async (url, config = {}) => {
+//   try {
+//     const response = await apiClient.get(url, config);
+//     return response.data;
+//   } catch (error) {
+//     console.error("API GET request failed", error);
+//     throw error;
+//   }
+// };
+
+// export const apiPost = async (url, data, config = {}) => {
+//   try {
+//     const response = await apiClient.post(url, data, config);
+//     return response.data;
+//   } catch (error) {
+//     console.error("API POST request failed", error);
+//     throw error;
+//   }
+// };
+
+// export const apiPut = async (url, data, config = {}) => {
+//   try {
+//     const response = await apiClient.put(url, data, config);
+//     return response.data;
+//   } catch (error) {
+//     console.error("API PUT request failed", error);
+//     throw error;
+//   }
+// };
+
+// export const apiDelete = async (url, config = {}) => {
+//   try {
+//     const response = await apiClient.delete(url, config);
+//     return response.data;
+//   } catch (error) {
+//     console.error("API DELETE request failed", error);
+//     throw error;
+//   }
+// };
+
+
 import axios from "axios";
 import { getToken, setToken, logoutUser } from "./authService";
 import { config } from "../config/app.js";
+import { updateToken } from '../config/socket';
+
 
 const REFRESH_URL = "https://mealex.in/auth/refresh";
 
-// Axios instance
 const apiClient = axios.create({
   baseURL: config.apiBaseUrl,
   headers: {
     "Content-Type": "application/json",
   },
-    withCredentials: true,   // 👈 yeh add karna hai
-
+  withCredentials: true,
 });
 
 // ---------- TOKEN REFRESH HANDLING ----------
@@ -260,27 +423,24 @@ apiClient.interceptors.request.use(
   (reqConfig) => {
     if (!reqConfig || !reqConfig.url) return reqConfig;
 
-    // Skip auth for login/signup/refresh
+    // login/signup/refresh ke liye token attach mat karo
     const skipAuth = ["/login", "/signUp", "/auth/refresh"].some((p) =>
       reqConfig.url.includes(p)
     );
     if (skipAuth) return reqConfig;
 
-    // const token = getToken();
-    // if (token) reqConfig.headers.Authorization = `Bearer ${token}`;
     const token = getToken();
-if (token) {
-  reqConfig.headers.Authorization = `Bearer ${token}`;
-} else {
-  console.warn("No token found while making request:", reqConfig.url);
-}
+    if (token) {
+      reqConfig.headers.Authorization = `Bearer ${token}`;
+    }
 
-
-    // If refresh is in progress, queue request
+    // Agar refresh chal raha hai → request ko queue karo
     if (isRefreshing) {
       return new Promise((resolve) => {
         subscribeTokenRefresh((newToken) => {
-          if (newToken) reqConfig.headers.Authorization = `Bearer ${newToken}`;
+          if (newToken) {
+            reqConfig.headers.Authorization = `Bearer ${newToken}`;
+          }
           resolve(reqConfig);
         });
       });
@@ -303,12 +463,13 @@ apiClient.interceptors.response.use(
 
     const isAuthError =
       status === 401 ||
-      message === "Invalid or expired token." ||
+      message === "Invalid or expired refresh token." ||
       message === "Unauthorized first login yourself";
 
     const isRefreshOrAuthEndpoint = (url) =>
       url && ["/login", "/signUp", "/auth/refresh"].some((p) => url.includes(p));
 
+    // ✅ Sirf jab 401 aaye aur endpoint refresh/login nahi ho
     if (!originalRequest._retry && isAuthError && !isRefreshOrAuthEndpoint(originalRequest.url)) {
       originalRequest._retry = true;
 
@@ -321,6 +482,8 @@ apiClient.interceptors.response.use(
           if (newToken) {
             setToken(newToken);
             apiClient.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+            updateToken(newToken);
+
           }
 
           isRefreshing = false;
@@ -328,12 +491,12 @@ apiClient.interceptors.response.use(
         } catch (err) {
           isRefreshing = false;
           onRefreshed(null);
-          logoutUser(); // Force logout if refresh fails
+          // logoutUser(); // refresh fail → logout
           return Promise.reject(err);
         }
       }
 
-      // Wait until refresh is done and retry the original request
+      // wait until refresh completes
       return new Promise((resolve, reject) => {
         subscribeTokenRefresh((newToken) => {
           if (newToken) {
@@ -352,41 +515,21 @@ apiClient.interceptors.response.use(
 
 // ---------- API HELPER METHODS ----------
 export const apiGet = async (url, config = {}) => {
-  try {
-    const response = await apiClient.get(url, config);
-    return response.data;
-  } catch (error) {
-    console.error("API GET request failed", error);
-    throw error;
-  }
+  const response = await apiClient.get(url, config);
+  return response.data;
 };
 
 export const apiPost = async (url, data, config = {}) => {
-  try {
-    const response = await apiClient.post(url, data, config);
-    return response.data;
-  } catch (error) {
-    console.error("API POST request failed", error);
-    throw error;
-  }
+  const response = await apiClient.post(url, data, config);
+  return response.data;
 };
 
 export const apiPut = async (url, data, config = {}) => {
-  try {
-    const response = await apiClient.put(url, data, config);
-    return response.data;
-  } catch (error) {
-    console.error("API PUT request failed", error);
-    throw error;
-  }
+  const response = await apiClient.put(url, data, config);
+  return response.data;
 };
 
 export const apiDelete = async (url, config = {}) => {
-  try {
-    const response = await apiClient.delete(url, config);
-    return response.data;
-  } catch (error) {
-    console.error("API DELETE request failed", error);
-    throw error;
-  }
+  const response = await apiClient.delete(url, config);
+  return response.data;
 };

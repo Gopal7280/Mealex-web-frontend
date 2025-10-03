@@ -83,11 +83,11 @@ const StakeholderAndBankForm = () => {
       const res = await apiMethod(endpoint, payload);
 
       if (type === "stakeholder") {
-        toast.success("✅ Stakeholder created successfully!");
+        toast.success("Stakeholder created successfully!");
         // ⏳ auto switch to bank tab after 2s
         setTimeout(() => setActiveTab("bank"), 2000);
       } else {
-        toast.success("✅ Bank details added successfully!");
+        toast.success("Bank details added successfully!");
         navigate("/owner-dashboard");
       }
     } catch (err) {

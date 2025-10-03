@@ -8,6 +8,8 @@ import { useNavigate } from 'react-router-dom';
 import PaymentGateway from './PaymentGateway';
 import { FiArrowRight } from "react-icons/fi";
 import { toast } from 'react-hot-toast';
+import { AiOutlineBarcode } from "react-icons/ai";
+
 
 const CustomerPlansView = () => {
   const [messes, setMesses] = useState([]);
@@ -26,8 +28,7 @@ const CustomerPlansView = () => {
 
   const fetchMesses = async () => {
     const res = await apiGet('/customer/mess/subscribed');
-    console.log('Fetched messes:', res); // <-- ✅ Add this
-    console.log(res);
+    console.log('Fetched messes:', res);
     if (res.success && Array.isArray(res.data)) {
       setMesses(res.data);
     }
@@ -38,8 +39,7 @@ const CustomerPlansView = () => {
       apiGet(`/customer/mess/${messId}/plan/issued`),
       apiGet(`/customer/mess/plans/${messId}`),
     ]);
-    console.log('Issued Plans:', issuedRes);
-    console.log('All Plans:', allPlansRes);
+ 
     setPlansByMess((prev) => ({
       ...prev,
       [messId]: {
@@ -138,7 +138,7 @@ const handleMessClick = (mess) => {
 
               return (
                 <div key={mess.messId} className="border rounded-xl bg-white p-4 shadow-sm flex flex-col">
-                  <div
+                  {/* <div
                     onClick={() => handleMessClick(mess)}
                     className={`flex items-center gap-4 cursor-pointer p-2 rounded-lg border ${
                       isExpanded ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
@@ -165,13 +165,58 @@ const handleMessClick = (mess) => {
                     >
                       <FiArrowRight />
                     </div>
-                  </div>
+                  </div> */}
+                  <div
+  key={mess.messId}
+  onClick={() => handleMessClick(mess)}
+  className="cursor-pointer border rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+>
+  {/* Image + Header */}
+  <div className="relative">
+    <img
+      src={mess.logoUrl || '/default-icon.png'}
+      alt={mess.messName}
+      className="w-full h-40 object-cover"
+    />
+    <span
+      className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full ${
+        mess.status === 'active'
+          ? 'bg-green-100 text-green-700'
+          : 'bg-red-100 text-red-700'
+      }`}
+    >
+      {mess.status}
+    </span>
+  </div>
+
+  {/* Content */}
+  <div className="p-4 flex flex-col flex-1">
+    <h3 className="text-lg font-bold text-gray-800 mb-1">{mess.messName}</h3>
+    <p className="text-sm text-gray-500 mb-3 capitalize">Type: {mess.messType}</p>
+
+    <div className="space-y-1 text-sm text-gray-700">
+      <p><span className="font-semibold">City:</span> {mess.city}</p>
+      <p className="break-words whitespace-normal">
+        <span className="font-semibold">Address:</span> {mess.address}
+      </p>
+      <p><span className="font-semibold">Contact:</span> {mess.contactNumber}</p>
+      <p className="break-words whitespace-normal">
+        <span className="font-semibold">Email:</span> {mess.email}
+      </p>
+      <p className="break-words whitespace-normal">
+        <span className="font-semibold">Services:</span>{" "}
+        {mess.services?.length ? mess.services.join(", ") : "N/A"}
+      </p>
+    </div>
+  </div>
+</div>
+
 
                   {/* Expanded Section */}
                   {isExpanded && (
                     <div className="mt-4 space-y-6">
                       {/* Purchased Plans */}
-                      <div>
+                      {/* <div>
                         <p className="text-lg font-semibold mb-2">
                           Purchased Plans ({plans.purchased.length})
                         </p>
@@ -194,8 +239,11 @@ const handleMessClick = (mess) => {
                                     <p className="font-medium">{plan.name}</p>
                                     <p className="text-sm text-gray-600">{plan.description}</p>
                                     <p className="text-sm text-gray-500">
-                                      {plan.issuedTokenCount} Tokens / {plan.durationDays} Days
+                                     Total: {plan.issuedTokenCount} Tokens / {plan.durationDays} Days
                                     </p>
+                                        <p className="text-sm text-gray-600">
+        Tokens Used: {plan.usedTokenCount} / {plan.issuedTokenCount}
+      </p>
                                     <p className="text-sm text-gray-700 font-semibold">
   {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
 </p>
@@ -217,7 +265,63 @@ const handleMessClick = (mess) => {
                             ))}
                           </div>
                         )}
-                      </div>
+                      </div> */}
+{/* Purchased Plans */}
+<div>
+  <p className="text-lg font-semibold mb-2">
+    Purchased Plans ({plans.purchased.length})
+  </p>
+  {plans.purchased.length === 0 ? (
+    <p className="text-red-500 font-medium">No plans purchased</p>
+  ) : (
+    <div className="grid grid-cols-1 gap-4">
+      {plans.purchased.map((plan) => (
+        <div
+          key={plan.customerPlanId}
+          className="border p-3 rounded-xl bg-white shadow-sm relative"
+        >
+          <div className="flex gap-4">
+            <img
+              src={plan.imageUrl || '/default-plan.jpg'}
+              alt="plan"
+              className="w-16 h-16 rounded"
+            />
+            <div>
+              <p className="font-medium">{plan.name}</p>
+              <p className="text-sm text-gray-600">{plan.description}</p>
+              <p className="text-sm text-gray-500">
+                Total: {plan.issuedTokenCount} Tokens / {plan.durationDays} Days
+              </p>
+              <p className="text-sm text-gray-600">
+                Tokens Used: {plan.usedTokenCount} / {plan.issuedTokenCount}
+              </p>
+              <p className="text-sm text-gray-700 font-semibold">
+                {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
+              </p>
+            </div>
+          </div>
+
+          {/* ✅ Use Tokens button like in CustomerActivePlans */}
+          <div className="absolute top-3 right-3">
+            <button
+              onClick={() =>
+                handleUseTokens(
+                  plan.customerPlanId,
+                  plan.messId,
+                  plan.MessProfile?.services || []
+                )
+              }
+              className="flex items-center gap-1 px-2 py-1 text-xs text-white border cursor-pointer bg-green-500 border-gray-300 rounded hover:bg-green-700"
+            >
+              <AiOutlineBarcode className="w-3 h-3" />
+              Use Tokens
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
                       {/* Available Plans */}
                       <div>
@@ -290,38 +394,6 @@ const handleMessClick = (mess) => {
           </div>
         )}
 
-        {/* Payment Modal */}
-        {/* {showPaymentModal && selectedAvailablePlan && (
-          <div className="fixed inset-0 bg-opacity-50 backdrop-brightness-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">
-              <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
-              <div className="flex flex-col gap-3">
-                <button
-                  className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
-                  onClick={() => {
-                    setShowPaymentModal(false);
-                    toast.success('💵 Cash payment selected. Please pay at mess counter.');
-                  }}
-                >
-                  Pay with Cash
-                </button>
-
-                <PaymentGateway
-                  messId={selectedAvailablePlan.messId}
-                  plan={{ ...selectedAvailablePlan.plan, planId: selectedAvailablePlan.planId }}
-                  onSuccess={handlePaymentSuccess}
-                />
-
-                <button
-                  className="text-sm text-gray-500 mt-2 cursor-pointer hover:text-red-500"
-                  onClick={() => setShowPaymentModal(false)}
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )} */}
         {showPaymentModal && selectedAvailablePlan && (
   <div className="fixed inset-0 bg-opacity-50 backdrop-brightness-50 flex items-center justify-center z-50">
     <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">
@@ -331,10 +403,11 @@ const handleMessClick = (mess) => {
           className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
           onClick={() => {
             setShowPaymentModal(false);
+    navigate(`/customer/cash-payment/${selectedAvailablePlan.planId}`); // use selectedAvailablePlan.planId
             toast.success('💵 Cash payment selected. Please pay at mess counter.');
           }}
         >
-          Pay with Cash
+          Pay via Cash / UPI
         </button>
 
         {selectedMessKyc >= 3 ? (

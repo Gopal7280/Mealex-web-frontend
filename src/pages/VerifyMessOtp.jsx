@@ -170,7 +170,6 @@ const VerifyMessOtp = () => {
         setError('Invalid OTP');
       }
     } catch (err) {
-      console.error(err);
       setError('Verification failed. Please try again.');
     }
   };
@@ -188,7 +187,6 @@ const handleResend = async () => {
       context: 'mess-registration',
       requestId
     });
-   console.log(res);
     if (res.success && res.requestId) {
       setRequestId(res.requestId);
       storage.setItem('messRequestId', res.requestId);
@@ -196,7 +194,6 @@ const handleResend = async () => {
       setError(res.message || 'Failed to resend OTP');
     }
   } catch (err) {
-    console.error('Resend OTP failed:', err);
     setError('Resend failed. Please try again.');
   }
 };

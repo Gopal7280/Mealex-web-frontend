@@ -240,7 +240,6 @@ const handleSwitchRole = async () => {
   setIsLoading(true);
   try {
     const response = await apiPost("/customer/role/change"); // response already data
-    console.log(response);
 
     if (response.success) {
       const newToken = response.token;
@@ -255,7 +254,6 @@ const handleSwitchRole = async () => {
       toast.error("Unable to switch role. Try again.");
     }
   } catch (error) {
-    console.error("Role switch error:", error);
     toast.error(error.response?.data?.message || "Something went wrong!");
   } finally {
     setIsLoading(false);

@@ -90,7 +90,6 @@ const PlanHistory = () => {
 
 const fetchRecords = async () => {
   if (!messId) {
-    console.error('❌ Mess ID missing');
     return;
   }
 
@@ -101,7 +100,6 @@ const fetchRecords = async () => {
       { messId }
     );
 
-    console.log('✅ API Response:', res);
 
     let records = [];
     let total = 0;
@@ -122,7 +120,6 @@ const fetchRecords = async () => {
       hasMore: total > prev.offset + prev.limit,
     }));
   } catch (err) {
-    console.error('❌ Error fetching plans:', err);
   } finally {
     setLoading(false);
   }
@@ -139,8 +136,6 @@ const fetchRecords = async () => {
   if (filter === 'All') return true;
   return r.action?.toLowerCase() === filter.toLowerCase();
 });
-console.log("📌 Records length:", records.length);
-console.log("📌 Pagination state:", pagination);
 
 
   // const handleNext = () =>
@@ -191,13 +186,13 @@ const handlePrev = () => {
             Plan History
           </button>
           <button
-            onClick={() => navigate('/owner/history/account')}
+            onClick={() => navigate('/owner/purchased-plans')}
             className={`cursor-pointer capitalize text-md font-medium transition-opacity ${
               currentTab === 'account'
                 ? 'opacity-100 text-orange-600 border-b-2 border-orange-500'
                 : 'opacity-50 hover:opacity-80'
             }`}>
-            Account History
+            Plans Requests
           </button>
         </div>
 

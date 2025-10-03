@@ -64,7 +64,6 @@ const fetchHistory = async () => {
       { messId, customerId }
     );
 
-    console.log('Fetched history data:', response.data);
 
     const mappedData = response.data.map(item => ({
       ...item,
@@ -82,7 +81,6 @@ const fetchHistory = async () => {
     }));
 
   } catch (err) {
-    console.error('Error fetching history:', err);
   } finally {
     setLoading(false);
   }

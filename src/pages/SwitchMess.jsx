@@ -256,14 +256,12 @@ const SwitchMess = () => {
     setLoading(true);
     try {
       const res = await apiGet("/owner/mess/all");
-      console.log("✅ Fetched messes:", res); // <-- ✅ Add this
       if (res?.success && Array.isArray(res.data)) {
         setMesses(res.data);
       } else {
         setMesses([]);
       }
     } catch (err) {
-      console.error("❌ Error fetching owner messes:", err);
       setMesses([]);
     } finally {
       setLoading(false);

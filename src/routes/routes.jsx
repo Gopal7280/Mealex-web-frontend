@@ -58,7 +58,11 @@ import PlanotpVerification from '../pages/planotpverification';
 import OwnerKYCGuide from '../pages/OwnerKycGuide';
 import LinkedAccountDetails from '../pages/LinkAccountDetails';
 import { PrivacyPolicy } from '../pages/PrivacyPolicy';
-import DeactivateAccount from '../pages/DeactivateAccount';
+import DeletedAccount from '../pages/DeletedAccount';
+import CashPaymentPage from '../pages/CashPaymentPage';
+import PurchasedPlans from '../pages/PurchasedPlans';
+import CustomerPlansRequests from '../pages/CustomerPlansRequests';
+import OwnerPaymentSetup from '../pages/OwnerPaymentSetup';
 
 function RouteComponent() {
 
@@ -121,9 +125,12 @@ function RouteComponent() {
         <Route path="/kyc-info" element={<OwnerKYCGuide/>} />
         <Route path="/linked-account-details" element={<LinkedAccountDetails />} />
         <Route path="/privacy-policies" element={<PrivacyPolicy/>} />
-        <Route path="/deactivate" element={<DeactivateAccount/>} />
-
-
+        <Route path="/delete-account" element={<DeletedAccount />} />
+        <Route path="/customer/cash-payment/:planId" element={<CashPaymentPage />} />
+        <Route path="/owner/purchased-plans" element={<PurchasedPlans />} />
+        <Route path="/customer/plans-requests" element={<CustomerPlansRequests />} />
+        <Route path="/owner/mess/payment-info" element={<OwnerPaymentSetup />} />
+"
 
       </Routes>
     )

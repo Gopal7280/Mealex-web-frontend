@@ -27,7 +27,6 @@ const UseTokens = () => {
     if (!messId || !customerId || !customerPlanId) return;
     apiGet(`/owner/mess/${messId}/customer/${customerId}/active-plans/${customerPlanId}`)
       .then(res => {
-              console.log('🔍 Active Plan API Response:', res);  // <-- ✅ Add this
         const data = res.data;
         const issued = data.issuedTokenCount || data.issuedTokens?.length || 0;
         const used = data.usedTokenCount || data.usedTokens?.length || 0;
@@ -67,7 +66,6 @@ const handleUsePlan = async () => {
     };
 
     const res = await apiPost('/owner/token/submit/initiate', payload);
-console.log('✅ Token Use Initiation Response:', res);
     const { requestId, verificationToken, context, identifier, identifierType } = res;
     storage.setItem('otpRequestContext', JSON.stringify({
       requestId, verificationToken, context, identifier, identifierType
@@ -78,7 +76,6 @@ console.log('✅ Token Use Initiation Response:', res);
     });
   } catch (err) {
     toast.error (err.response?.data?.message || err.message || 'Error initiating token use, please try again');
-    console.error('❌ Token submission failed:', err.response || err);
   }  finally {
     setIsSubmitting(false); // ✅ reset always
   }

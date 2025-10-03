@@ -46,7 +46,6 @@ const CustomerMinimalDashboard = () => {
 
       const res = await apiGet(url);
       if (res?.success && Array.isArray(res.data)) {
-        console.log('Messes Response:', res);
         setMesses(res.data);
         setPagination(res.pagination || { currentPage: 1, totalPages: 1 });
       } else {
@@ -54,7 +53,6 @@ const CustomerMinimalDashboard = () => {
         setPagination({ currentPage: 1, totalPages: 1 });
       }
     } catch (err) {
-      console.error('❌ Error fetching messes:', err);
       setMesses([]);
     } finally {
       setLoading(false);
@@ -64,25 +62,16 @@ const CustomerMinimalDashboard = () => {
   const fetchPlans = async (messId) => {
     try {
       const res = await apiGet(`/customer/mess/plans/${messId}`);
-      console.log('Plans Response:', res);
+      console.log(res);
       setPlansByMess((prev) => ({
         ...prev,
         [messId]: res?.success ? res.data : [],
       }));
     } catch (err) {
-      console.error('Error fetching plans:', err);
       setPlansByMess((prev) => ({ ...prev, [messId]: [] }));
     }
   };
 
-  // const handleMessClick = (mess) => {
-  //   mess.services=mess.services || (Array.isArray(mess.services) ? mess.services : mess.services ? [mess.services] : []);
-  //   const alreadyExpanded = expandedMessId === mess.messId;
-  //   setExpandedMessId(alreadyExpanded ? null : mess.messId);
-  //   storage.setItem('messId', mess.messId);
-  //   if (!plansByMess[mess.messId]) fetchPlans(mess.messId);
-  //   setSelectedPlan(null);
-  // };
   const handleMessClick = (mess) => {
   mess.services = mess.services || (Array.isArray(mess.services) ? mess.services : mess.services ? [mess.services] : []);
   const alreadyExpanded = expandedMessId === mess.messId;
@@ -158,107 +147,239 @@ const CustomerMinimalDashboard = () => {
   ) : messes.length === 0 ? (
     <p className="text-gray-500">No messes found.</p>
   ) : (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {messes.map((mess) => {
-        const isExpanded = expandedMessId === mess.messId;
-        const plans = plansByMess[mess.messId] || [];
+//     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+//       {messes.map((mess) => {
+//         const isExpanded = expandedMessId === mess.messId;
+//         const plans = plansByMess[mess.messId] || [];
 
-        return (
-          <div
-            key={mess.messId}
-            className="border rounded-xl bg-white p-4 shadow-sm flex flex-col"
-          >
-            <div
-              onClick={() => handleMessClick(mess)}
-              className={`flex items-center gap-4 cursor-pointer p-2 rounded-lg border ${
-                isExpanded ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
-              }`}
-            >
-              <img
-                src={mess.logoUrl || defaultIcon}
-                alt="logo"
-                className="w-14 h-14 rounded-md object-cover"
-              />
-              <div className="flex-1">
-                <p className="font-semibold">{mess.messName}</p>
-                <p className="text-l text-gray-500">{mess.city} • {mess.pincode}</p>
-                <p className="text-sm text-green-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
+//         return (
+//           <div
+//             key={mess.messId}
+//             className="border rounded-xl bg-white p-4 shadow-sm flex flex-col"
+//           >
+//             <div
+//               onClick={() => handleMessClick(mess)}
+//               className={`flex items-center gap-4 cursor-pointer p-2 rounded-lg border ${
+//                 isExpanded ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
+//               }`}
+//             >
+//               <img
+//                 src={mess.logoUrl || defaultIcon}
+//                 alt="logo"
+//                 className="w-14 h-14 rounded-md object-cover"
+//               />
+//               <div className="flex-1">
+//                 <p className="font-semibold">{mess.messName}</p>
+//                 <p className="text-l text-gray-500">{mess.city} • {mess.pincode}</p>
+//                 <p className="text-sm text-green-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
        
-              </div>
-              <div
-                onClick={(e) => {
-                  e.stopPropagation();
-                  storage.setItem('messId', mess.messId);
-                  navigate('/customer/mess-details', { state: { mess } });
-                }}
-                className="text-orange-500 text-xl"
-              >
-                <FiArrowRight />
-              </div>
+//               </div>
+//               <div
+//                 onClick={(e) => {
+//                   e.stopPropagation();
+//                   storage.setItem('messId', mess.messId);
+//                   navigate('/customer/mess-details', { state: { mess } });
+//                 }}
+//                 className="text-orange-500 text-xl"
+//               >
+//                 <FiArrowRight />
+//               </div>
+//             </div>
+
+//             {isExpanded && (
+//               <div className="mt-4 space-y-4">
+//                 <p className="text-lg font-semibold mb-2">
+//                   Available Plans ({plans.length})
+//                 </p>
+//                 <div className="grid grid-cols-1 gap-4">
+//                   {plans.length === 0 ? (
+//                     <p className="text-gray-500">No plans available</p>
+//                   ) : (
+//                     plans.map((plan) => {
+//                       const isSelected = selectedPlan?.planId === plan.planId;
+//                       return (
+//                         <div
+//                           key={plan.planId}
+//                           className={`border p-3 rounded-xl shadow-sm cursor-pointer transition-all ${
+//                             isSelected ? 'border-orange-500 bg-orange-50' : 'bg-white border-gray-300'
+//                           }`}
+//                           onClick={() => setSelectedPlan(plan)}
+//                         >
+//                           <div className="flex gap-4">
+//                             <img
+//                               src={plan.imageUrl || '/default-plan.jpg'}
+//                               alt="plan"
+//                               className="w-16 h-16 rounded object-cover"
+//                             />
+//                             <div className="flex-1">
+//                               <p className="font-medium">{plan.name}</p>
+//                               <p className="text-sm text-gray-600">{plan.description}</p>
+//                               <p className="text-sm text-gray-500">
+//                                 {plan.totalTokens} Tokens / {plan.durationDays} Days
+//                               </p>
+//                               <p className="text-sm text-gray-700 font-semibold">₹{plan.price}</p>
+
+// <p className="text-sm text-gray-700 font-semibold">
+//   {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
+// </p>
+
+
+//                             </div>
+//                           </div>
+//                           {isSelected && (
+//                             <button
+//                               className="mt-2 bg-orange-500 cursor-pointer hover:bg-orange-600 text-white py-1 px-3 rounded"
+//                               onClick={(e) => {
+//                                 e.stopPropagation();
+//                                 setShowPaymentModal(true);
+//                               }}
+//                             >
+//                               Purchase Plan
+//                             </button>
+//                           )}
+//                         </div>
+//                       );
+//                     })
+//                   )}
+//                 </div>
+//               </div>
+//             )}
+//           </div>
+//         );
+//       })}
+//     </div>
+
+
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {messes.map((mess) => {
+    const isExpanded = expandedMessId === mess.messId;
+    const plans = plansByMess[mess.messId] || [];
+
+    return (
+      <div
+        key={mess.messId}
+        className="cursor-pointer border rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+      >
+        {/* Mess Image + Status */}
+        <div className="relative">
+          <img
+            src={mess.logoUrl || defaultIcon}
+            alt={mess.messName}
+            className="w-full h-40 object-cover"
+          />
+          <span
+            className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full ${
+              mess.status === 'active'
+                ? 'bg-green-100 text-green-700'
+                : 'bg-red-100 text-red-700'
+            }`}
+          >
+            {mess.status}
+          </span>
+        </div>
+
+        {/* Mess Content */}
+        <div
+          onClick={() => handleMessClick(mess)}
+          className={`p-4 flex flex-col flex-1 ${
+            isExpanded ? 'bg-orange-50 border-t-2 border-orange-400' : ''
+          }`}
+        >
+          <div className="flex items-start justify-between mb-2">
+            <h3 className="text-lg font-bold text-gray-800">{mess.messName}</h3>
+            <div
+              onClick={(e) => {
+                e.stopPropagation();
+                storage.setItem('messId', mess.messId);
+                navigate('/customer/mess-details', { state: { mess } });
+              }}
+              className="text-orange-500 text-xl"
+            >
+              <FiArrowRight />
             </div>
-
-            {isExpanded && (
-              <div className="mt-4 space-y-4">
-                <p className="text-lg font-semibold mb-2">
-                  Available Plans ({plans.length})
-                </p>
-                <div className="grid grid-cols-1 gap-4">
-                  {plans.length === 0 ? (
-                    <p className="text-gray-500">No plans available</p>
-                  ) : (
-                    plans.map((plan) => {
-                      const isSelected = selectedPlan?.planId === plan.planId;
-                      return (
-                        <div
-                          key={plan.planId}
-                          className={`border p-3 rounded-xl shadow-sm cursor-pointer transition-all ${
-                            isSelected ? 'border-orange-500 bg-orange-50' : 'bg-white border-gray-300'
-                          }`}
-                          onClick={() => setSelectedPlan(plan)}
-                        >
-                          <div className="flex gap-4">
-                            <img
-                              src={plan.imageUrl || '/default-plan.jpg'}
-                              alt="plan"
-                              className="w-16 h-16 rounded object-cover"
-                            />
-                            <div className="flex-1">
-                              <p className="font-medium">{plan.name}</p>
-                              <p className="text-sm text-gray-600">{plan.description}</p>
-                              <p className="text-sm text-gray-500">
-                                {plan.totalTokens} Tokens / {plan.durationDays} Days
-                              </p>
-                              <p className="text-sm text-gray-700 font-semibold">₹{plan.price}</p>
-
-<p className="text-sm text-gray-700 font-semibold">
-  {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
-</p>
-
-
-                            </div>
-                          </div>
-                          {isSelected && (
-                            <button
-                              className="mt-2 bg-orange-500 cursor-pointer hover:bg-orange-600 text-white py-1 px-3 rounded"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setShowPaymentModal(true);
-                              }}
-                            >
-                              Purchase Plan
-                            </button>
-                          )}
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
-              </div>
-            )}
           </div>
-        );
-      })}
-    </div>
+
+          <p className="text-sm text-gray-500 mb-2 capitalize">
+            Type: {mess.messType}
+          </p>
+
+          <div className="space-y-1 text-sm text-gray-700">
+            <p><span className="font-semibold">City:</span> {mess.city}</p>
+            <p className="break-words whitespace-normal">
+              <span className="font-semibold">Address:</span> {mess.address}
+            </p>
+            <p><span className="font-semibold">Contact:</span> {mess.contactNumber}</p>
+            <p className="break-words whitespace-normal">
+              <span className="font-semibold">Email:</span> {mess.email}
+            </p>
+            <p className="text-green-600 text-sm">
+              Open: {mess.openTime} - Close: {mess.closeTime}
+            </p>
+          </div>
+        </div>
+
+        {/* Expanded Plans */}
+        {isExpanded && (
+          <div className="px-4 pb-4">
+            <p className="text-lg font-semibold mt-4 mb-2">
+              Available Plans ({plans.length})
+            </p>
+            <div className="grid grid-cols-1 gap-4">
+              {plans.length === 0 ? (
+                <p className="text-gray-500">No plans available</p>
+              ) : (
+                plans.map((plan) => {
+                  const isSelected = selectedPlan?.planId === plan.planId;
+                  return (
+                    <div
+                      key={plan.planId}
+                      className={`border p-3 rounded-xl shadow-sm cursor-pointer transition-all ${
+                        isSelected
+                          ? 'border-orange-500 bg-orange-50'
+                          : 'bg-white border-gray-300'
+                      }`}
+                      onClick={() => setSelectedPlan(plan)}
+                    >
+                      <div className="flex gap-4">
+                        <img
+                          src={plan.imageUrl || '/default-plan.jpg'}
+                          alt="plan"
+                          className="w-16 h-16 rounded object-cover"
+                        />
+                        <div className="flex-1">
+                          <p className="font-medium">{plan.name}</p>
+                          <p className="text-sm text-gray-600">{plan.description}</p>
+                          <p className="text-sm text-gray-500">
+                            {plan.totalTokens} Tokens / {plan.durationDays} Days
+                          </p>
+                          <p className="text-sm text-gray-700 font-semibold">₹{plan.price}</p>
+                          <p className="text-sm text-gray-700 font-semibold">
+                            {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
+                          </p>
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <button
+                          className="mt-2 bg-orange-500 hover:bg-orange-600 cursor-pointer text-white py-1 px-3 rounded"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setShowPaymentModal(true);
+                          }}
+                        >
+                          Purchase Plan
+                        </button>
+                      )}
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  })}
+</div>
 
 
     
@@ -378,10 +499,11 @@ const CustomerMinimalDashboard = () => {
           className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
           onClick={() => {
             setShowPaymentModal(false);
+                navigate(`/customer/cash-payment/${selectedPlan.planId}`);
             toast.success('💵 Cash payment selected. Please pay at mess counter.');
           }}
         >
-          Pay with Cash
+Pay via Cash / UPI
         </button>
 
         {/* UPI / Online only if KYC complete */}

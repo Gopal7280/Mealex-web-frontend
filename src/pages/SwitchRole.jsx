@@ -260,8 +260,7 @@ const handleSwitchRole = async () => {
   setIsLoading(true);
   try {
     const response = await apiPost("/owner/role/change"); // response already data
-    console.log(response);
-
+   console.log("🔄 Role switch response:", response); // Debug log
     if (response.success) {
       toast.success(response.message);
 

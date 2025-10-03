@@ -6,8 +6,6 @@ import { apiGet, apiPost } from '../services/api';
 import OwnerHeader from './ownerHeader';
 import getNotificationStyle from './icons';
 
-
-
 const Notifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -30,13 +28,13 @@ const Notifications = () => {
     const fetchOwnerMesses = async () => {
       try {
         const res = await apiGet("/owner/mess/all");
+        console.log("Messes response:", res);
         if (res?.success) {
           setMesses(res.data || []);
         } else {
           setMesses([]);
         }
       } catch (error) {
-        console.error("Error fetching owner messes:", error);
         setMesses([]);
       }
     };
@@ -62,7 +60,6 @@ useEffect(() => {
             )
           );
         } catch (error) {
-          console.error("Error marking notifications read:", error);
         }
       }, 2000);
 
@@ -82,9 +79,9 @@ useEffect(() => {
     } else {
       res = await apiGet(`/owner/mess/${selectedMess}/notifications?page=${currentPage}&limit=${limit}`);
     }
+    console.log("Notifications response:", res);
 
     let data = [];
-    console.log("Fetched notifications:", res);
     if (res?.success) {
       data = res.notifications || [];
 
@@ -121,7 +118,6 @@ useEffect(() => {
       setHasMore(false);
     }
   } catch (error) {
-    console.error("Error fetching notifications:", error);
     setNotifications([]);
     setHasMore(false);
   } finally {

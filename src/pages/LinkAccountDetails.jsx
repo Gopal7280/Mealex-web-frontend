@@ -233,7 +233,6 @@ const LinkedAccountDetails = () => {
       setLoading(true);
       try {
         const res = await apiGet(`/owner/account/details/${messId}`);
-        console.log(res);
         if (res?.success && res.data) {
           setDetails(res.data);
           setErrorMessage("");
@@ -244,7 +243,6 @@ const LinkedAccountDetails = () => {
           );
         }
       } catch (err) {
-        console.error("Error:", err);
         toast.error("Error fetching account details");
         setErrorMessage("Error fetching account details");
       } finally {

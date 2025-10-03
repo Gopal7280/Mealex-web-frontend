@@ -138,12 +138,11 @@ const handleSubmit = async (e) => {
     legal_info,
   };
 
-  console.log("Payload", payload);
 
   try {
     const res = await apiPost("/owner/add/linked-account", payload);
     setResponse({ success: true, result: res });
-    toast.success(`✅ Linked account created! ID: ${res.id || "Success"}`);
+    toast.success(`Linked account created! ID: ${res.id || "Success"}`);
 
     navigate("/create-stakeholder");
   } catch (err) {

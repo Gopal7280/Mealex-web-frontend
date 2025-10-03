@@ -29,12 +29,10 @@ const CustomerNotifications = () => {
         const res = await apiGet('/customer/mess/subscribed'); // Adjust this API if different
         if (res?.success) {
   setMesses(res.data || []);
-          console.log('Fetched Messes:', res);
         } else {
           setMesses([]);
         }
       } catch (error) {
-        console.error("Error fetching customer messes:", error);
         setMesses([]);
       }
     };
@@ -60,7 +58,6 @@ useEffect(() => {
             )
           );
         } catch (error) {
-          console.error("Error marking notifications read:", error);
         }
       }, 2000);
 
@@ -83,10 +80,9 @@ useEffect(() => {
         
         );
       }
-
+ console.log(res);
     if (res?.success) {
   let data = res.notifications || [];
-  console.log('Fetched Notifications:', data);
 
   // Apply title-based filter
   if (filter !== 'all') {

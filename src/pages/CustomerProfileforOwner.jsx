@@ -29,14 +29,11 @@ const CustomerProfile = () => {
 
     apiGet(`/owner/mess/${messId}/customer/${customerId}`)
   .then(res => {
-    console.log("✅ API response:", res);   // 👈 log full response
     setProfile(res.customer ?? res.data?.customer ?? null);
   })
 
       .catch(() => setProfile(null))
       .finally(() => setIsLoading(false));
-      console.log('🔑 Fetching with IDs:', { messId, customerId });
-      console.log('✅ API response:', );
   }, []);
 
 

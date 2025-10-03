@@ -39,16 +39,16 @@ const AddCustomer = () => {
     setMsg(null);
 
     try {
-      const res = await apiPost('/owner/customer/add', { identifier });
-      if (res.data.success) {
-        setMsg({ type: 'success', text: res.data.message });
-        setRequestId(res.data.requestId);
+      const res = await apiPost('/owner/customer/add', { identifier ,messId });
+      if (res.success) {
+        setMsg({ type: 'success', text: res.message });
+        setRequestId(res.requestId);
         setOtpSent(true);
       } else {
-        setMsg({ type: 'error', text: res.data.message || 'Failed to send OTP.' });
+        setMsg({ type: 'error', text: res.message || 'Failed to send OTP.' });
       }
     } catch (err) {
-      setMsg({ type: 'error', text: err.response?.data?.message || err.message || 'Server error.' });
+      setMsg({ type: 'error', text: err.response?.message || err.message || 'Server error.' });
     } finally {
       setLoading(false);
     }
@@ -75,9 +75,8 @@ const handleVerifyOtp = async (e) => {
     };
 
     const res = await apiPost('/owner/customer/verify', payload);
-
-    if (res.data.success) {
-      setMsg({ type: 'success', text: res.data.message || 'Customer verified successfully.' });
+    if (res.success) {
+      setMsg({ type: 'success', text: res.message || 'Customer verified successfully.' });
       setOtpSent(false);
       setIdentifier('');
       setOtp('');
@@ -85,10 +84,10 @@ const handleVerifyOtp = async (e) => {
       // ✅ Navigate to next page
       navigate('/customers'); // Replace with your desired route
     } else {
-      setMsg({ type: 'error', text: res.data.message || 'Invalid OTP.' });
+      setMsg({ type: 'error', text: res.message || 'Invalid OTP.' });
     }
   } catch (err) {
-    setMsg({ type: 'error', text: err.response?.data?.message || err.message });
+    setMsg({ type: 'error', text: err.response?.message || err.message });
   } finally {
     setLoading(false);
   }

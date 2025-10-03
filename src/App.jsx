@@ -390,6 +390,99 @@
 
 // export default App;
 
+
+
+// import React, { useEffect, useRef, useState } from "react";
+// import { BrowserRouter } from "react-router-dom";
+// import RouteComponent from "./routes/routes";
+// import SocketListener from "./config/SocketListener";
+// import { Toaster, toast } from "react-hot-toast";
+// import storage from "./utils/storage";
+// import { connectSocket, disconnectSocket } from "./config/socket";
+// import { initFCM, onMessageListener } from "./firebase";
+// import { apiPost } from "./services/api";
+// import axios from "axios";              // ✅ add this
+// import { setToken } from "./services/authService";  // ✅ add this
+
+// const FCM_TOKEN_KEY = "fcmToken";
+// const FCM_SYNC_KEY_PREFIX = "fcmSynced:";
+
+// export const setupNotifications = async (token, foregroundListenerBound) => {
+//   const saved = storage.getItem(FCM_TOKEN_KEY);
+//   let fcmToken = saved;
+
+//   if (!fcmToken) {
+//     fcmToken = await initFCM();
+//     if (fcmToken) storage.setItem(FCM_TOKEN_KEY, fcmToken);
+//   }
+
+//   if (!fcmToken) return;
+
+//   const syncKey = `${FCM_SYNC_KEY_PREFIX}${token}`;
+//   const alreadySynced = storage.getItem(syncKey);
+
+//   if (!alreadySynced) {
+//     await apiPost(
+//       "/user/notification-token",
+//       { token: fcmToken, deviceType: "web" },
+//       { headers: { Authorization: `Bearer ${token}` } }
+//     );
+//     storage.setItem(syncKey, "1");
+//   }
+
+//   if (foregroundListenerBound && !foregroundListenerBound.current) {
+//     foregroundListenerBound.current = true;
+//     onMessageListener().then((payload) => {
+//       const { title, body } = payload?.notification || {};
+//       if (title || body) toast(`${title || "Notification"}: ${body || ""}`);
+//     });
+//   }
+// };
+
+// function App() {
+//   const [auth, setAuth] = useState(!!storage.getItem("token"));
+//   const foregroundListenerBound = useRef(false);
+
+//   // 🔹 Step 3: Auto refresh token on app load
+//   useEffect(() => {
+//     const refreshToken = async () => {
+//       try {
+//         const res = await axios.get("https://mealex.in/auth/refresh", { withCredentials: true });
+//         if (res.data?.token) {
+//           setToken(res.data.token); // localStorage me save
+//           setAuth(true);           // ensure logged in state
+//         }
+//       } catch (err) {
+//         console.error("Auto refresh on app load failed", err);
+//         setAuth(false);
+//       }
+//     };
+
+//     refreshToken();
+//   }, []); // ✅ run only once on first load
+
+//   useEffect(() => {
+//     const token = storage.getItem("token");
+//     if (token) {
+//       connectSocket(token);
+//       setupNotifications(token, foregroundListenerBound);
+//     }
+//     return () => disconnectSocket();
+//   }, [auth]);
+
+//   return (
+//     <BrowserRouter>
+//       <SocketListener />
+//       <RouteComponent auth={auth} setAuth={setAuth} />
+//       <Toaster position="top-right" reverseOrder={false} />
+//     </BrowserRouter>
+//   );
+// }
+
+// export default App;
+
+
+
 import React, { useEffect, useRef, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import RouteComponent from "./routes/routes";
@@ -399,8 +492,6 @@ import storage from "./utils/storage";
 import { connectSocket, disconnectSocket } from "./config/socket";
 import { initFCM, onMessageListener } from "./firebase";
 import { apiPost } from "./services/api";
-import axios from "axios";              // ✅ add this
-import { setToken } from "./services/authService";  // ✅ add this
 
 const FCM_TOKEN_KEY = "fcmToken";
 const FCM_SYNC_KEY_PREFIX = "fcmSynced:";
@@ -441,24 +532,6 @@ function App() {
   const [auth, setAuth] = useState(!!storage.getItem("token"));
   const foregroundListenerBound = useRef(false);
 
-  // 🔹 Step 3: Auto refresh token on app load
-  useEffect(() => {
-    const refreshToken = async () => {
-      try {
-        const res = await axios.get("https://mealex.in/auth/refresh", { withCredentials: true });
-        if (res.data?.token) {
-          setToken(res.data.token); // localStorage me save
-          setAuth(true);           // ensure logged in state
-        }
-      } catch (err) {
-        console.error("Auto refresh on app load failed", err);
-        setAuth(false);
-      }
-    };
-
-    refreshToken();
-  }, []); // ✅ run only once on first load
-
   useEffect(() => {
     const token = storage.getItem("token");
     if (token) {
@@ -479,87 +552,3 @@ function App() {
 
 export default App;
 
-
-
-
-// import React, { useEffec
-// t, useRef, useState } from 'react';
-// import { BrowserRouter } from 'react-router-dom';
-// import RouteComponent from "./routes/routes";
-// import SocketListener from './config/SocketListener';
-// import { Toaster, toast } from 'react-hot-toast';
-// import storage from './utils/storage';
-// import { connectSocket, disconnectSocket } from './config/socket';
-// import { initFCM, onMessageListener } from './firebase';
-// import { apiPost } from './services/api';
-
-// const FCM_TOKEN_KEY = 'fcmToken';
-// const FCM_SYNC_KEY_PREFIX = 'fcmSynced:';
-
-// function App() {
-//   const [auth, setAuth] = useState(!!storage.getItem('token'));
-//   const foregroundListenerBound = useRef(false);
-
-//   // 🔹 Socket connection + Notifications setup
-//   useEffect(() => {
-//     const token = storage.getItem('token');
-//     if (token) {
-//       connectSocket(token);
-//       setupNotifications(token);
-//     }
-//     return () => {
-//       disconnectSocket();
-//     };
-//   }, [auth]);
-
-//   // 🔹 Notification setup extracted as function
-//   const setupNotifications = async (jwtToken) => {
-//     try {
-//       let fcmToken = storage.getItem(FCM_TOKEN_KEY);
-
-//       // Generate token immediately if not found
-//       if (!fcmToken) {
-//         fcmToken = await initFCM();
-//         if (fcmToken) storage.setItem(FCM_TOKEN_KEY, fcmToken);
-//       }
-
-//       if (!fcmToken) return;
-
-//       // Sync with backend if not synced for this user
-//       const syncKey = `${FCM_SYNC_KEY_PREFIX}${jwtToken}`;
-//       const alreadySynced = storage.getItem(syncKey);
-
-//       if (!alreadySynced) {
-//         await apiPost(
-//           "/user/notification-token",
-//           { token: fcmToken, deviceType: "web" },
-//           { headers: { Authorization: `Bearer ${jwtToken}` } }
-//         );
-//         storage.setItem(syncKey, '1');
-//       }
-
-//       // Bind foreground notification listener once
-//       if (!foregroundListenerBound.current) {
-//         foregroundListenerBound.current = true;
-//         onMessageListener().then((payload) => {
-//           const { title, body } = payload?.notification || {};
-//           if (title || body) {
-//             toast(`${title || 'Notification'}: ${body || ''}`);
-//           }
-//         });
-//       }
-//     } catch (err) {
-//       console.error("❌ Error setting up FCM notifications:", err);
-//     }
-//   };
-
-//   return (
-//     <BrowserRouter>
-//       <SocketListener />
-//       <RouteComponent auth={auth} setAuth={setAuth} />
-//       <Toaster position="top-right" reverseOrder={false} />
-//     </BrowserRouter>
-//   );
-// }
-
-// export default App;

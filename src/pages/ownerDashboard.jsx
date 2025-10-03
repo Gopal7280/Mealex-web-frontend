@@ -34,7 +34,6 @@ const OwnerDashboard = () => {
       .then(res => {
         if (res.success) {
           const ordersData = res.data || [];
-          console.log('Fetched Orders:', ordersData);
           const mergedOrders = ordersData.map(o => {
             const rawPayload = storage.getItem(`orderPayload_${o.orderId}`);
             const existingPayload = rawPayload ? JSON.parse(rawPayload) : {};

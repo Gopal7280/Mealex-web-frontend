@@ -668,6 +668,7 @@ const CustomerDashboard = () => {
 
     apiGet('/customer/profile/basic')
       .then((res) => {
+        console.log(res);
         if (res.success && res.data) {
           setTotalActivePlans(res.data.activePlansCount || 0);
           setTotalMessSubscribed(res.data.mess_ids?.length || 0);
@@ -676,11 +677,13 @@ const CustomerDashboard = () => {
 
     apiGet('/customer/mess/orders')
       .then((res) => {
+                console.log(res);
         if (res.success) setOrders(res.data || []);
       });
 
     apiGet('/customer/plan/expiry-soon')
       .then((res) => {
+                console.log(res);
         if (res.success) setExpiringPlans(res.data || []);
       });
   }, []);

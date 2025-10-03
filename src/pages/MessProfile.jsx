@@ -507,7 +507,6 @@ const MessProfile = () => {
       const payload = res.data || res.data?.owner || null;
       setOwner(payload);
     } catch (e) {
-      console.error(e);
       setOwner(null);
     } finally {
       setIsLoading(false);
@@ -518,7 +517,6 @@ const MessProfile = () => {
     setIsLoading(true);
     try {
       const res = await apiGet(`/owner/mess/id/${id}`);
-      console.log(res)
       if (res?.success) {
         setMess(res.data);
       } else {
@@ -526,7 +524,6 @@ const MessProfile = () => {
         setMess(null);
       }
     } catch (e) {
-      console.error("Error fetching mess profile:", e);
       setMess(null);
     } finally {
       setIsLoading(false);
@@ -552,7 +549,6 @@ const MessProfile = () => {
         }));
       }
     } catch (err) {
-      console.error("❌ Image upload failed:", err);
     } finally {
       setUploading(false);
     }
@@ -565,7 +561,6 @@ const MessProfile = () => {
         const res = await apiGet("/owner/mess/all");
         if (res?.success) setMesses(res.data || []);
       } catch (error) {
-        console.error("Error fetching owner messes:", error);
       }
     })();
   }, []);
@@ -580,7 +575,6 @@ const MessProfile = () => {
         { headers: { Authorization: `Bearer ${userJwt}` } }
       );
     } catch (err) {
-      console.error("❌ Logout API failed:", err);
     } finally {
       storage.clear();
       localStorage.clear();
@@ -638,7 +632,6 @@ const MessProfile = () => {
         toast.error(res?.message || "Update failed");
       }
     } catch (err) {
-      console.error("Update error:", err);
       toast.error("Something went wrong.");
     } finally {
       setSaving(false);
@@ -957,6 +950,7 @@ const MessProfile = () => {
                 </div>
               </div>
             )}
+            
 
             {isEditing && activeProfileType === "owner" && (
               <div className="flex gap-3 mt-6">
@@ -1002,8 +996,19 @@ const MessProfile = () => {
           >
             LOG OUT
           </button>
+           <button
+      onClick={() => navigate("/delete-account")}
+  className="absolute opacity-0 "
+>
+  Delete Account
+</button>
+          {/* Invisible Delete Account Button */}
+
+
         </div>
+       
       </div>
+      
 
       {/* Mess Select Modal */}
       {showModal && (

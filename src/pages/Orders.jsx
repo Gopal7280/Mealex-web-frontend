@@ -6,8 +6,13 @@ import { CheckSquare, Square } from 'lucide-react';
 import storage from '../utils/storage';
 import { getSocket, onIncomingOrder, onOrderResponse, onOrderCancelByCustomer } from '../config/socket';
 import { apiGet } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-hot-toast';
+
 
 const Orders = () => {
+  const navigate = useNavigate();
+
   const [orders, setOrders] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
   const [showPastOrders, setShowPastOrders] = useState(false);
@@ -55,7 +60,6 @@ const handleAcceptAll = () => {
     // Emit socket event (backend confirm karega)
     socket.emit("owner_order_decision", finalPayload, (response) => {
       if (!response?.success) {
-        console.warn("❌ Accept all failed for:", orderId, response?.message);
       }
     });
   });
@@ -81,7 +85,6 @@ const handleRejectAll = () => {
 
     socket.emit("owner_order_decision", finalPayload, (response) => {
       if (!response?.success) {
-        console.warn("❌ Reject all failed for:", orderId, response?.message);
       }
     });
   });
@@ -103,7 +106,6 @@ const handleRejectAll = () => {
           const res = await apiGet(`/owner/mess/${messId}/orders`);
           if (res.success) {
             const data = res.data || [];
-            console.log(res);
   setTotalOrders(data.length); // ✅ fix here
 
             const mergedOrders = data.map(o => {
@@ -135,7 +137,6 @@ const handleRejectAll = () => {
             setOrders(mergedOrders);
           }
         } catch (err) {
-          console.error("❌ Error fetching orders:", err);
         }
       };
 
@@ -167,7 +168,6 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
       }
     }
   } catch (err) {
-    console.error("❌ Error fetching past orders:", err);
   }
 };
 
@@ -208,7 +208,6 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
 
  
     onOrderResponse(res => {
-  console.log("Order response received:", res);
 
   if (res?.success && res.data?.submittedTokenIds?.length > 0) {
     const tokenIds = res.data.submittedTokenIds;
@@ -277,12 +276,28 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
 
      
         <div className="flex justify-between items-center mb-2">
-  {/* <h2 className="font-bold text-[#33363F] text-lg md:px-4 px-1 mb-4">
-    Orders ({orders.length})
-  </h2> */}
   <h2 className="font-bold text-[#33363F] text-lg md:px-4 px-1 mb-4">
+    Orders ({orders.length})
+  </h2>
+  {/* <h2 className="font-bold text-[#33363F] text-lg md:px-4 px-1 mb-4">
   Orders ({totalOrders})
-</h2>
+</h2> */}
+{/* <div className="flex gap-4 mb-6 border-b border-gray-200">
+  Orders Tab - active
+  <button
+    className="px-4 py-2 -mb-1 font-medium text-gray-700 border-b-2 border-orange-500"
+  >
+    Orders
+  </button>
+
+  <button
+    className="px-4 py-2 -mb-1 font-medium text-gray-500 hover:text-orange-500"
+    onClick={() => navigate('/owner/purchased-plans')}
+  >
+    Purchased Plans
+  </button>
+</div> */}
+
 
   
   

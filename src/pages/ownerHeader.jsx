@@ -31,7 +31,6 @@ const OwnerHeader = () => {
           setMessAddress(address || 'Address of Mess');
         }
       } catch (err) {
-        console.error('❌ Error loading owner data:', err);
       }
     };
 
@@ -47,9 +46,9 @@ const OwnerHeader = () => {
       
       {/* Left: Owner Info */}
       <div className="">
-        <p className="text-xs sm:text-sm text-gray-700 font-semibold">Welcome,</p>
+        <p className="text-sm sm:text-sm text-gray-700 font-bold">Welcome Owner,</p>
         <h2 className="text-xl sm:text-3xl font-bold text-orange-600">{ownerName}</h2>
-        <p className="text-xs sm:text-sm text-green-600">(Owner)</p>
+        {/* <p className="text-sm sm:text-sm font-semibold text-gray-700"> Owner</p> */}
       </div>
 
       {/* Right: Mess Info + Icons */}

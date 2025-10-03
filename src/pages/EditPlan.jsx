@@ -323,11 +323,9 @@ const EditPlan = () => {
 
     try {
       const res = await apiPost(`/owner/mess/plan/update/${plan._id}`, payload);
-      console.log('✅ Plan Updated:', res.data);
       toast.success('Plan updated successfully!');
       navigate('/plans'); // back to plans list
     } catch (error) {
-      console.error('❌ Update Failed:', error);
       setLoading(false);
       toast.error('Failed to update plan. Please try again.');
     }

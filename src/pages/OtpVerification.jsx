@@ -524,7 +524,6 @@ const OtpVerification = () => {
         requestId,
         context,
       });
-  console.log(response);
       if (response.success) {
         const token = response.token;
         const identifier = response.identifier;
@@ -543,7 +542,6 @@ const OtpVerification = () => {
         setError(response.message || 'OTP verification failed');
       }
     } catch (err) {
-      console.error('❌ OTP verification failed:', err);
       setError(err.response?.message || 'OTP verification failed');
     } finally {
       setLoading(false); // ✅ stop loading

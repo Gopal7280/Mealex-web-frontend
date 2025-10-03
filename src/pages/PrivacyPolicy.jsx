@@ -1,105 +1,118 @@
 // // src/PrivacyPolicy.jsx
 
-// import React from 'react';
+// import React from "react";
+// import { useNavigate } from "react-router-dom";
+// import { FiArrowLeft } from "react-icons/fi";
 
-// // This is the modified, compliant Privacy Policy component for your "Coming Soon" app.
-// // It clearly states that NO user data is collected by this version of the app.
 // export function PrivacyPolicy() {
+//   const navigate = useNavigate();
+
 //   return (
-//     <div className="bg-white py-8 px-4 sm:px-6 lg:px-8">
-//       <div className="max-w-3xl mx-auto">
+//     <div className="bg-white min-h-screen py-4 px-4 sm:px-6 lg:px-8">
+//         {/* Back Button */}
+//         <button
+//           onClick={() => navigate(-1)}
+//           className="flex items-center gap-2 mb-6 text-orange-500 font-semibold hover:text-orange-600"
+//         >
+//           <FiArrowLeft size={20} /> Back
+//         </button>
+//               <div className="max-w-3xl mx-auto">
+
+
 //         <div className="prose prose-blue text-gray-700 mx-auto">
-//           {/* Main Title */}
-//           <h1 className="text-3xl font-extrabold text-gray-900 mb-4">
+//           <h1 className="text-3xl font-extrabold text-orange-500 mb-4">
 //             Privacy Policy
 //           </h1>
 
-//           {/* Last Updated Date */}
 //           <p className="text-gray-500 text-sm mb-6">
-//             Last Updated: September 3, 2025
+//             Last Updated: September 18, 2025
 //           </p>
 
-//           {/* Introduction */}
 //           <p className="mb-4">
-//             This Privacy Policy describes the practices of <strong>Compunic Private Limited</strong> ("we", "us", "our") regarding the "MealEx (Coming Soon)" mobile application (the "App").
+//             This Privacy Policy describes the practices of <strong>Compunic Private Limited</strong> ("we", "us", "our") regarding the <strong>MealEX</strong> web application (the "App").
 //           </p>
 //           <p className="mb-6">
 //             This policy is written in compliance with the Digital Personal Data Protection Act, 2023 (DPDP Act) of India.
 //           </p>
 
-//           {/* Section 1: Data Collection */}
-//           <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
+//           <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
 //             1. Data Collection and Usage
 //           </h2>
-//           <p className="font-semibold text-gray-800">
-//             This version of the App is for informational purposes only and does not collect, store, or share any personal data from its users.
+//           <p className="mb-4">
+//             To deliver our services, we collect and process certain personal and transactional data when you interact with the App.
 //           </p>
 //           <ul className="list-disc list-outside space-y-2 pl-5 mt-4">
 //             <li>
-//               <strong>No Account Creation:</strong> You do not need to create an account to use the App.
+//               <strong>Account Information:</strong> When you sign up using Google, Facebook, or email, we collect basic profile details (name, email, profile photo).
 //             </li>
 //             <li>
-//               <strong>No Personal Information:</strong> We do not ask for, access, or collect any personally identifiable information such as your name, email address, phone number, or financial details through this App.
+//               <strong>Mess and Customer Profiles:</strong> Customers and mess owners provide information such as mess name, contact details, location, and food preferences.
 //             </li>
 //             <li>
-//               <strong>No Usage Data:</strong> The App does not use analytics tools to track your interaction with the App.
+//               <strong>Plans and Payments:</strong> We collect subscription details, payment confirmations, and transaction records.
+//             </li>
+//             <li>
+//               <strong>Usage Data:</strong> Logs related to plan usage, token consumption, and order activity to provide accurate dashboards.
+//             </li>
+//             <li>
+//               <strong>Communication Data:</strong> Notifications via WebSockets for real-time updates.
 //             </li>
 //           </ul>
 
-//           {/* Section 2: Links */}
-//           <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
+//           <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
 //             2. Links to Other Sites
 //           </h2>
 //           <p className="mb-4">
-//             The App contains a link to our full-featured website,{" "}
-//             <a href="https://mealex.in" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+//             The App may contain links to our official website,{" "}
+//             <a
+//               href="https://mealex.in"
+//               target="_blank"
+//               rel="noopener noreferrer"
+//               className="text-orange-500 hover:underline"
+//             >
 //               https://mealex.in
-//             </a>. If you click on this link, you will be directed to our website. Please be aware that our website is governed by its own separate Privacy Policy, which describes the data practices for the full web service. We have no control over and assume no responsibility for the content or privacy practices of our website.
+//             </a>. We have no control over other sites’ privacy practices.
 //           </p>
 
-//           {/* Section 3: Security */}
-//           <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
+//           <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
 //             3. Data Security
 //           </h2>
 //           <p className="mb-4">
-//             As we do not collect any personal data through this App, there is no personal data to be secured in the context of your App usage.
+//             We implement reasonable technical and organizational measures including encrypted token-based authentication and secure payment gateways.
 //           </p>
 
-//           {/* Section 4: Changes */}
-//           <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
+//           <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
 //             4. Changes to This Privacy Policy
 //           </h2>
 //           <p className="mb-4">
-//             We may update our Privacy Policy in the future, especially upon the release of the full-featured version of the mealex application. We will notify you of any changes by posting the new Privacy Policy on this page.
+//             Updates may be posted on this page with a revised "Last Updated" date.
 //           </p>
-          
-//           {/* Section 5: Rights */}
-//           <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
+
+//           <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
 //             5. Your Rights
 //           </h2>
 //           <p className="mb-4">
-//              Under the DPDP Act, you have rights regarding your personal data. However, as this App does not collect any personal data, these rights are not applicable to your use of this specific "Coming Soon" version of the App.
+//             Under the DPDP Act, you can access, correct, and request deletion of your data. Contact us for any requests.
 //           </p>
 
-//           {/* Section 6: Contact */}
-//           <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
+//           <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
 //             6. Contact Us / Grievance Officer
 //           </h2>
 //           <p className="mb-4">
-//             If you have any questions about this Privacy Policy, please contact our Grievance Officer:
+//             If you have any questions about this Privacy Policy, contact our Grievance Officer:
 //           </p>
 //           <address className="not-italic bg-gray-50 p-4 rounded-lg border border-gray-200">
 //             <strong>Data Privacy Team</strong>
 //             <br />
 //             Email:{" "}
 //             <a
-//               href="mailto:compuniclimited@gmail.com"
-//               className="font-medium text-blue-600 no-underline hover:underline"
+//               href="mailto:support@mealex.in"
+//               className="font-medium text-orange-500 hover:underline"
 //             >
-//               compuniclimited@gmail.com
+//               support@mealex.in
 //             </a>
 //             <br />
-//             Address: Compunic Private Limited, 198, Somani Nagar, 60 Ft. Airport Road Indore-452005
+//             Address: Compunic Private Limited, 198, Somani Nagar, 60 Ft. Airport Road, Indore-452005
 //           </address>
 //         </div>
 //       </div>
@@ -108,122 +121,183 @@
 // }
 
 
-// src/PrivacyPolicy.jsx
 
-import React from 'react';
+
+
+
+// src/MealexPrivacyPolicy.jsx
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { FiArrowLeft } from "react-icons/fi";
+import mealexLogo from "../assets/mealx.png"; // your uploaded logo
+import { FaInstagram, FaLinkedin, FaFacebook } from "react-icons/fa";
 
 export function PrivacyPolicy() {
+  const navigate = useNavigate();
+
   return (
-    <div className="bg-white py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+    <div className="bg-white min-h-screen py-4 px-4 sm:px-6 lg:px-8">
+      <button
+        onClick={() => navigate(-1)}
+        aria-label="Go back"
+        className="flex items-center gap-2 mb-6 text-orange-500 font-semibold hover:text-orange-600"
+      >
+        <FiArrowLeft size={20} /> Back
+      </button>
+
+      <div className="max-w-4xl mx-auto">
         <div className="prose prose-blue text-gray-700 mx-auto">
-          <h1 className="text-3xl font-extrabold text-gray-900 mb-4">
-            Privacy Policy
+          <h1 className="text-3xl font-extrabold text-orange-500 mb-4">
+            Privacy Policy & Terms of Service - MealEX
           </h1>
 
           <p className="text-gray-500 text-sm mb-6">
-            Last Updated: September 18, 2025
+            Last Updated: September 27, 2025
           </p>
 
           <p className="mb-4">
-            This Privacy Policy describes the practices of <strong>Compunic Private Limited</strong> ("we", "us", "our") regarding the <strong>MealEX</strong> web application (the "App").
-          </p>
-          <p className="mb-6">
-            This policy is written in compliance with the Digital Personal Data Protection Act, 2023 (DPDP Act) of India.
+            At <strong>MealEX</strong>, we are committed to protecting the privacy and confidentiality of our users’ personal information, including customers and mess owners.
           </p>
 
-          {/* Section 1: Data Collection */}
-          <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
-            1. Data Collection and Usage
+          <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
+            1. Information We Collect
           </h2>
-          <p className="mb-4">
-            To deliver our services, we collect and process certain personal and transactional data when you interact with the App.
-          </p>
           <ul className="list-disc list-outside space-y-2 pl-5 mt-4">
             <li>
-              <strong>Account Information:</strong> When you sign up using Google, Facebook, or email, we collect basic profile details (such as your name, email address, and profile photo).
+              <strong>Account Information:</strong> Name, email, profile photo when registering via Google, Facebook, or email.
             </li>
             <li>
-              <strong>Mess and Customer Profiles:</strong> Customers and mess owners provide additional information (such as mess name, contact details, location, and food preferences) to use the services.
+              <strong>Customer Data:</strong> Contact info, subscription history, plan usage, token consumption, and order logs.
             </li>
             <li>
-              <strong>Plans and Payments:</strong> We collect subscription details, payment confirmations (via Razorpay or other methods), and transaction records to process plan purchases.
+              <strong>Mess Owner Data:</strong> Mess name, location, contact, food services, plan creation data. Optional KYC through Razorpay is used for verification.
             </li>
             <li>
-              <strong>Usage Data:</strong> We collect logs related to your plan usage, token consumption, and order activity to provide you with accurate dashboards and services.
+              <strong>Payment Information:</strong> Transaction details, subscription payments via Razorpay or other payment methods.
             </li>
             <li>
-              <strong>Communication Data:</strong> We use WebSockets and notifications to update you about orders, plan activations, and service changes in real time.
+              <strong>Usage Data:</strong> IP addresses, browser info, cookies, and logs for analytics and improving the platform.
+            </li>
+            <li>
+              <strong>Communication Data:</strong> WebSocket notifications, emails, or support interactions.
             </li>
           </ul>
 
-          {/* Section 2: Links */}
-          <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
-            2. Links to Other Sites
+          <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
+            2. How We Use Your Information
           </h2>
-          <p className="mb-4">
-            The App may contain links to our official website,{" "}
-            <a
-              href="https://mealex.in"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline"
-            >
-              https://mealex.in
-            </a>. If you click on these links, you will be directed to our website. Please be aware that our website may have its own separate Privacy Policy. We have no control over and assume no responsibility for the content or privacy practices of those sites.
-          </p>
+          <ul className="list-disc list-outside space-y-2 pl-5 mt-4">
+            <li>To provide our services efficiently and track plan/token usage.</li>
+            <li>To verify mess owner identity (optional KYC with Razorpay).</li>
+            <li>For payment processing, subscription management, and refunds.</li>
+            <li>To communicate updates, promotions, or customer support information.</li>
+            <li>To analyze platform usage, improve performance, and prevent fraud.</li>
+          </ul>
 
-          {/* Section 3: Security */}
-          <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
+          <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
             3. Data Security
           </h2>
           <p className="mb-4">
-            We implement reasonable technical and organizational measures to protect your personal data, including encrypted token-based authentication, secure payment gateways, and controlled access to sensitive data.
+            We implement technical and organizational measures including secure token-based authentication, encrypted data storage, and secure payment gateways to protect your data.
           </p>
 
-          {/* Section 4: Changes */}
-          <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
-            4. Changes to This Privacy Policy
+          <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
+            4. Third-Party Services
           </h2>
           <p className="mb-4">
-            We may update this Privacy Policy from time to time to reflect changes in our services or legal requirements. Updates will be posted on this page with a revised "Last Updated" date.
+            We may use third-party services like Razorpay for payments and optional KYC verification. These providers are bound by strict data protection agreements.
           </p>
 
-          {/* Section 5: Rights */}
-          <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
-            5. Your Rights
+          <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
+            5. Refund & Cancellation Policy
+          </h2>
+          <ul className="list-disc list-outside space-y-2 pl-5 mt-4">
+            <li>
+              Refunds are provided if a service cannot be delivered or in accordance with the plan-specific policies.
+            </li>
+            <li>
+              Cancellation requests must be submitted before the service execution. Perishable items or already used tokens are non-refundable.
+            </li>
+            <li>
+              Refunds, once approved, may take 7-15 business days to process depending on the payment method.
+            </li>
+          </ul>
+
+          <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
+            6. User Rights
+          </h2>
+          <ul className="list-disc list-outside space-y-2 pl-5 mt-4">
+            <li>Access and review your personal data.</li>
+            <li>Request corrections or updates to inaccurate information.</li>
+            <li>Opt-out of communications or unsubscribe from notifications.</li>
+            <li>Request deletion of your personal data under applicable laws.</li>
+          </ul>
+
+          <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
+            7. Terms of Use
+          </h2>
+          <ul className="list-disc list-outside space-y-2 pl-5 mt-4">
+            <li>
+              Users must provide accurate and complete information during registration.
+            </li>
+            <li>
+              All services are provided as-is; MealEX is not liable for incorrect use or misuse.
+            </li>
+            <li>
+              Unauthorized access or usage may result in suspension or legal action.
+            </li>
+            <li>
+              Users agree that any disputes will be governed by the laws of India, with courts in Indore/Madhya Pradesh having exclusive jurisdiction.
+            </li>
+          </ul>
+
+          <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
+            8. Changes to This Policy
           </h2>
           <p className="mb-4">
-            Under the DPDP Act, you have rights regarding your personal data, including the right to access, correct, and request deletion of your data. To exercise these rights, please contact us using the details below.
+            We may update this policy occasionally. The "Last Updated" date will reflect any changes.
           </p>
 
-          {/* Section 6: Contact */}
-          <h2 className="text-xl font-bold text-gray-800 mt-8 mb-3">
-            6. Contact Us / Grievance Officer 
+          <h2 className="text-xl font-bold text-orange-500 mt-8 mb-3">
+            9. Contact Us
           </h2>
-          <p className="mb-4">
-            If you have any questions or concerns about this Privacy Policy, please contact our Grievance Officer:
-            
-          </p>
           <address className="not-italic bg-gray-50 p-4 rounded-lg border border-gray-200">
-            <strong>Data Privacy Team</strong>
+            <strong>MealEX Support Team</strong>
             <br />
             Email:{" "}
             <a
               href="mailto:support@mealex.in"
-              className="font-medium text-blue-600 no-underline hover:underline"
+              className="font-medium text-orange-500 hover:underline"
             >
               support@mealex.in
             </a>
             <br />
-            Address: Compunic Private Limited, 198, Somani Nagar, 60 Ft. Airport Road Indore-452005
+            Address: Compunic Private Limited, 198, Somani Nagar, 60 Ft. Airport Road, Indore-452005
           </address>
+
+          {/* Footer */}
+          <div className="mt-10 border-t border-gray-200 pt-6 flex flex-col sm:flex-row justify-between items-center">
+            <div className="mb-4 sm:mb-0">
+              <img src={mealexLogo} alt="MealEX Logo" className="h-12" />
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-6 text-orange-500 font-medium">
+              <div>
+                <h3 className="font-bold mb-1">Reach Us</h3>
+                <div>support@mealex.in</div>
+              </div>
+              <div>
+                <h3 className="font-bold mb-1">Follow Us</h3>
+                <div className="flex gap-3 mt-1">
+                  <a href="https://www.instagram.com/icompunic.in/" target="_blank"><FaInstagram size={20} /></a>
+                  <a href="https://www.linkedin.com/company/compunic-pvt-ltd/posts/?feedView=all" target="_blank"><FaLinkedin size={20} /></a>
+                  <a href="https://www.facebook.com/profile.php?id=61578668565768" target="_blank"><FaFacebook size={20} /></a>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 }
-
-
-
-

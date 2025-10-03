@@ -224,7 +224,6 @@ const handleSubmit = async (e) => {
         Authorization: `Bearer ${token}`,
       },
     });
-      console.log(res);
 
     if (res.success) {
       const { email, requestId, messId, messName } = res;
@@ -235,7 +234,6 @@ const handleSubmit = async (e) => {
       navigate("/verify-mess-otp");
     }
   } catch (err) {
-    console.error(err);
     toast.error(err?.response?.data?.message || "Mess registration failed.");
   } finally {
     setLoading(false);

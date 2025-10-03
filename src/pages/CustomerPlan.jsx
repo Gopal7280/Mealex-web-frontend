@@ -42,7 +42,6 @@ const fetchActivePlans = async () => {
       storage.setItem('customerPlanId', plans[0].customerPlanId);
     }
   } catch (err) {
-    console.error('❌ Error fetching active plans', err);
   } finally {
     setLoading(false);
   }
@@ -141,11 +140,9 @@ const initiatePayment = async () => {
 
   try {
     const res = await apiPost("/owner/mess/razorpay-order", { planId, messId });
-    console.log("🔍 Razorpay Order API Response:", res);
 const orderDetails = res?.orderDetails;
 if (!orderDetails?.id || !orderDetails?.amount) {
   toast.error("⚠️ Invalid order response from server.");
-  console.error("❌ Unexpected Razorpay response:", res);
   return;
 }
 
@@ -184,7 +181,7 @@ const { id: orderId, amount } = orderDetails;
           await apiPost("/owner/mess/payment-verify", verifyPayload);
 
           await fetchActivePlans();
-          toast.success(`🎉 Payment successful! ${selectedPlan?.name || "Plan"} activated.`);
+          toast.success(` Payment successful! ${selectedPlan?.name || "Plan"} activated.`);
 
           setShowAvailablePlans(false);
 
@@ -193,7 +190,6 @@ const { id: orderId, amount } = orderDetails;
             navigate("/customer-profile/plans");
           }, 3000);
         } catch (err) {
-          console.error("❌ Payment verification failed:", err?.response?.data || err);
           toast.error("❌ Payment verification failed. Please contact support.");
         }
       },
@@ -225,7 +221,6 @@ const { id: orderId, amount } = orderDetails;
       return;
     }
 
-    console.error("❌ Payment initiation failed:", err?.response?.data || err);
     toast.error(errorMessage);
   }
 };
@@ -238,7 +233,6 @@ const { id: orderId, amount } = orderDetails;
   setSelectedPlan(null); // reset previous selection
   try {
     const res = await apiGet(`/owner/mess/plan/${messId}`);
-    console.log('🔍 Available Plans Response:', res);
     const normalizedPlans = (res?.data || []).map(plan => ({ ...plan, _id: plan.planId }));
     if (sortType === 'priceAsc') normalizedPlans.sort((a, b) => a.price - b.price);
     else if (sortType === 'priceDesc') normalizedPlans.sort((a, b) => b.price - a.price);
@@ -246,7 +240,6 @@ const { id: orderId, amount } = orderDetails;
     setAvailablePlans(normalizedPlans);
     setShowAvailablePlans(true);
   } catch (err) {
-    console.error('❌ Error fetching available plans', err);
   } finally {
     setLoading(false);
   }
@@ -270,9 +263,8 @@ const handlePlanPurchase = async () => {
       const res = await apiPost("/owner/mess/plan/issue/initiate", payload);
       const responseData = res; // ✅ axios ka response unwrap karo
 
-console.log("🔍 Cash Plan Issue Initiation Response:", responseData);
       if (responseData.success) {
-        toast.success("✅ OTP sent successfully. Please verify.");
+        toast.success(" OTP sent successfully. Please verify.");
         
         // ⚡ Store response for next page
         storage.setItem("planIssueResponse", JSON.stringify(responseData));
@@ -283,7 +275,6 @@ console.log("🔍 Cash Plan Issue Initiation Response:", responseData);
         toast.error("❌ Failed to initiate cash plan issue.");
       }
     } catch (err) {
-      console.error("Cash initiation failed:", err);
       toast.error("❌ Something went wrong.");
     }
   } else {
@@ -484,7 +475,7 @@ console.log("🔍 Cash Plan Issue Initiation Response:", responseData);
           }`}
         >
           <div className="flex items-center gap-2 text-green-600 font-medium">
-            <span className="text-xl">🪙</span> Cash
+            <span className="text-xl">🪙</span> Pay via Cash / UPI
           </div>
           {selectedPlan?.paymentMode === 'cash' && <span className="text-green-500 text-lg">✔</span>}
         </label>
@@ -503,7 +494,7 @@ console.log("🔍 Cash Plan Issue Initiation Response:", responseData);
                 }`}
               >
                 <div className="flex items-center gap-2 text-blue-600 font-medium">
-                  <span className="text-xl cursor-pointer">💳</span> UPI/Online
+                  <span className="text-xl cursor-pointer">💳</span> Pay Online
                 </div>
                 {selectedPlan?.paymentMode === 'online' && <span className="text-blue-500 text-lg">✔</span>}
               </label>

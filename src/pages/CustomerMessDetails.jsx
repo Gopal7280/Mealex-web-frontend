@@ -7,6 +7,7 @@ import storage from '../utils/storage';
 import PaymentGateway from './PaymentGateway';
 import CustomerHeader from '../layouts/CustomerHeader';
 import { toast } from 'react-hot-toast';
+import { CheckCircle } from "lucide-react";
 
 const ExploreMessDetails = () => {
   const location = useLocation();
@@ -25,7 +26,6 @@ const ExploreMessDetails = () => {
   const fetchSubscribedMessIds = async () => {
   try {
     const res = await apiGet('/customer/mess/subscribed');
-    console.log(res);
     if (res.success && Array.isArray(res.data)) {
       const messIds = res.data.map(m => m.messId);
       storage.setItem('subscribedMessIds', JSON.stringify(messIds));
@@ -33,7 +33,6 @@ const ExploreMessDetails = () => {
     }
     return [];
   } catch (error) {
-    console.error('Failed to fetch subscribed mess IDs', error);
     return [];
   }
 };
@@ -61,13 +60,10 @@ const ExploreMessDetails = () => {
   const fetchPlans = async (messId) => {
     try {
       const res = await apiGet(`/customer/mess/plans/${messId}`);
-      console.log(res);
       if (res?.success) {
         setPlans(res.data || []);
-        console.log('Fetched plans:', res.data);
       }
     } catch (err) {
-      console.error('🔴 Error fetching plans:', err);
     }
   };
 
@@ -75,14 +71,12 @@ const ExploreMessDetails = () => {
     try {
       const response = await apiPost('/customer/mess/add', { messId: mess.messId });
       const res = response;
-      console.log(response);
 
       if (res?.success && Array.isArray(res?.mess_ids)) {
         localStorage.setItem('subscribedMessIds', JSON.stringify(res.mess_ids));
         setSubscribed(true);
         toast.success(`Subscribed to ${mess.messName} successfully!`);
       } else {
-        console.error('Unexpected response structure:', res);
         toast.error('Subscription failed. Try again.');
       }
     } catch (error) {
@@ -90,7 +84,6 @@ const ExploreMessDetails = () => {
         toast.success('Already subscribed.');
         setSubscribed(true);
       } else {
-        console.error('Subscription error:', error);
         toast.error('Failed to subscribe.');
       }
     }
@@ -113,12 +106,11 @@ const ExploreMessDetails = () => {
               <div className="flex flex-col">
                 <h3 className="text-xl font-bold text-gray-800">
                   {mess.messName}
-                  {subscribed && <span className=" ml-2">✅</span>}
                 </h3>
                 <p className="text-sm text-gray-500">{mess.address}</p>
                 <p className="text-sm text-gray-500">{mess.city}</p>
               <div className="">
-                <button
+                {/* <button
                   onClick={handleSubscribe}
                   disabled={subscribed}
                   className={`border px-4 py-2 rounded-xl ${
@@ -127,8 +119,23 @@ const ExploreMessDetails = () => {
                       : 'border-orange-400 text-orange-400 cursor-pointer hover:bg-orange-50'
                   }`}
                 >
+                    <CheckCircle className="w-4 h-4" /> 
+
                   {subscribed ? 'Subscribed' : 'Subscribe'}
-                </button>
+                </button> */}
+                <button
+  onClick={handleSubscribe}
+  disabled={subscribed}
+  className={`flex items-center gap-1 border px-3 py-2 rounded-xl text-sm ${
+    subscribed
+      ? 'bg-orange-400 text-white cursor-not-allowed'
+      : 'border-orange-400 text-orange-400 cursor-pointer hover:bg-orange-50'
+  }`}
+>
+<CheckCircle className="w-3 h-3 mr-1" />
+  {subscribed ? 'Subscribed' : 'Subscribe'}
+</button>
+
               </div>
             </div>
                           </div>
@@ -213,10 +220,11 @@ const ExploreMessDetails = () => {
                   className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
                   onClick={() => {
                     setShowPaymentModal(false);
+                        navigate(`/customer/cash-payment/${selectedPlan.planId}`);
                     toast.success('💵 Cash payment selected. Please pay at mess counter.');
                   }}
                 >
-                  Pay with Cash
+Pay via Cash / UPI
                 </button>
        
                 {/* {selectedPlan && (

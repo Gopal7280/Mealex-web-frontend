@@ -100,13 +100,12 @@ const PaymentGateway = ({ plan, messId, onSuccess }) => {
 const orderDetails = res?.orderDetails;
 if (!orderDetails?.id || !orderDetails?.amount) {
   toast.error("⚠️ Invalid order response from server.");
-  console.error("❌ Unexpected Razorpay response:", res);
   return;
 }
 
 const { id: orderId, amount } = orderDetails;
       const options = {
-        key: 'rzp_test_RD4LUvyj0ffvxI',
+        key: 'rzp_test_RD4LUvyj0ffvxI', // Live key
         amount,
         currency: 'INR',
         name: 'MealX Mess System',
@@ -139,7 +138,6 @@ const { id: orderId, amount } = orderDetails;
             toast.success('🎉 Payment successful! Tokens issued.');
             if (onSuccess) onSuccess(); // callback to parent
           } catch (err) {
-            console.error('❌ Payment verification failed:', err?.response?.data || err);
             toast.error('❌ Payment verification failed. Please contact support.');
           }
         },
@@ -155,7 +153,6 @@ const { id: orderId, amount } = orderDetails;
       const razor = new window.Razorpay(options);
       razor.open();
     } catch (err) {
-      console.error('❌ Razorpay order creation failed:', err?.response?.data || err);
       const errorMessage =
         err?.response?.data?.message || '❌ Unable to initiate payment. Please try again later.';
       toast.error(errorMessage);
@@ -167,7 +164,7 @@ const { id: orderId, amount } = orderDetails;
       className="bg-blue-500 hover:bg-blue-600 cursor-pointer text-white py-2 rounded"
       onClick={handlePayment}
     >
-      Pay with UPI / Online
+      Pay Online
     </button>
   );
 };

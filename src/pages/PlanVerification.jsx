@@ -186,12 +186,11 @@ const handleSubmit = async () => {
 
   try {
     const res = await apiPost('/owner/token/submit/verify', payload);
-    console.log('✅ Token Use Verification Response:', res);
     if (res?.success) {
       storage.removeItem('otpRequestContext');
       toast.success(`Tokens from ${contextData.name} are used Successfully`);
       setTimeout(() => {
-        navigate('/customer/use-tokens');
+        navigate('/customers');
       }, 3000);
     } else {
       setError(res?.message || 'Verification failed, please retry.');
@@ -226,7 +225,6 @@ const handleResend = async () => {
     };
 
     const res = await apiPost('/resend-otp', payload);
-  console.log('Resend OTP Response:', res);
     const {
       requestId,
       verificationToken,

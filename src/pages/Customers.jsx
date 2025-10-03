@@ -20,10 +20,8 @@ const Customers = () => {
   const fetchCustomers = async () => {
     try {
       const res = await apiGet(`/owner/mess/customer/${messId}`);
-      console.log('Customer API Response:', res);
       setCustomers(res.customers ?? []);
     } catch (err) {
-      console.error(err);
     } finally {
       setIsLoading(false);
     }

@@ -374,7 +374,6 @@ const CustomerOrders = () => {
         const res = await apiGet('/customer/mess/subscribed');
         if (res?.success) setMesses(res.data || []);
       } catch (err) {
-        console.error('Error fetching messes:', err);
       }
     };
     fetchMesses();
@@ -417,13 +416,11 @@ const CustomerOrders = () => {
   const handleCancelOrder = (order) => {
     const socket = getSocket();
     if (!socket) {
-      console.error('❌ No socket connection available.');
       return;
     }
 
     const tokensArray = Array.isArray(order.submittedTokenIds) ? order.submittedTokenIds : [];
     if (tokensArray.length === 0) {
-      console.error('❌ Cancel failed: No submittedTokenIds available.');
       return;
     }
 
@@ -448,7 +445,7 @@ const CustomerOrders = () => {
         fetchOrders();
         toast.success('Order cancelled');
       } else {
-        console.error('❌ Cancel failed:', response?.message);
+   
       }
     });
   };
@@ -486,7 +483,6 @@ const CustomerOrders = () => {
         setHasMore(false);
       }
     } catch (err) {
-      console.error('Error fetching orders:', err);
       setOrders([]);
       setFilteredOrders([]);
       setHasMore(false);
