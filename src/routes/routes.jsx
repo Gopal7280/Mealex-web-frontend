@@ -63,6 +63,11 @@ import CashPaymentPage from '../pages/CashPaymentPage';
 import PurchasedPlans from '../pages/PurchasedPlans';
 import CustomerPlansRequests from '../pages/CustomerPlansRequests';
 import OwnerPaymentSetup from '../pages/OwnerPaymentSetup';
+// import AdminDashboard from '../pages/AdminDashboard';
+// import AdminCustomerPlans from '../pages/AdminCustomerPlans';
+// import AdminMessProfiles from '../pages/AdminMessProfiles';
+// import AdminSettlements from '../pages/AdminSettlements';
+// import AdminLinkedAccounts from '../pages/AdminLinkedAccount';
 
 function RouteComponent() {
 
@@ -130,7 +135,12 @@ function RouteComponent() {
         <Route path="/owner/purchased-plans" element={<PurchasedPlans />} />
         <Route path="/customer/plans-requests" element={<CustomerPlansRequests />} />
         <Route path="/owner/mess/payment-info" element={<OwnerPaymentSetup />} />
-"
+        {/* <Route path="/admin/dashboard" element={<AdminDashboard />} />
+        <Route path="/admin/customer-plans" element={<AdminCustomerPlans />} />
+        <Route path="/admin/messes" element={<AdminMessProfiles />} />
+        <Route path="/admin/settlements" element={<AdminSettlements />} />
+        <Route path="/admin/linked-accounts" element={<AdminLinkedAccounts />} /> */}
+
 
       </Routes>
     )

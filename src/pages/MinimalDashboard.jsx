@@ -33,6 +33,7 @@ const MinimalDashboard = () => {
       const fetchMesses = async () => {
         try {
           const res = await apiGet("/owner/mess/all");
+          console.log("Fetched messes:", res);
           const messArray = res?.data || [];
           setMesses(messArray);
 
@@ -124,78 +125,82 @@ const MinimalDashboard = () => {
               <p className="text-gray-500 text-sm sm:text-base">Let's set up your mess to get started.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 px-2 sm:px-6 md:px-12">
-              {messes.map((mess, index) => {
-                const isVerified = mess.status === "active" || mess.status === "activated";
-                const isUnverified = mess.status === "inactive";
-                const isPending = mess.status === "pending";
 
-                const badgeText = isVerified
-                  ? "Verified "
-                  : isUnverified
-                  ? "Not Verified ❌"
-                  : "Pending ⏳";
+<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 px-2 sm:px-6 md:px-12">
+  {messes.map((mess) => {
+    const isVerified = mess.status === "active";
+    const isPending = mess.status === "pending";
+    const isNotVerified = mess.status === "inactive";
 
-                const borderColor = isVerified
-                  ? "border-green-500"
-                  : isUnverified
-                  ? "border-red-400"
-                  : "border-yellow-400";
+    const borderColor = isVerified
+      ? "border-green-500"
+      : isPending
+      ? "border-orange-500"
+      : "border-red-500";
 
-                const textColor = isVerified
-                  ? "text-green-600"
-                  : isUnverified
-                  ? "text-red-500"
-                  : "text-yellow-600";
+    const statusText = isVerified
+      ? "Verified "
+      : isPending
+      ? "Pending ⏳"
+      : "Not Verified ❌";
 
-                return (
-                  <div
-                    key={index}
-                    className={`rounded-lg border-2 p-4 flex items-center justify-between shadow-md bg-gradient-to-b from-green-100 to-green-50 ${borderColor}`}
-                  >
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <img
-                        src={mess.logoUrl || "/assets/mess-default.png"}
-                        alt="Mess Logo"
-                        className="w-12 h-12 sm:w-14 sm:h-14 rounded-full object-cover border"
-                      />
-                      <div>
-                        <h3 className="text-base sm:text-lg text-green-500 font-semibold">{mess.messName}</h3>
-                        <p className="text-xs sm:text-sm text-gray-500">
-                          {mess.address || "Mess Address"}, {mess.city || "Mess City"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="text-right ml-2 sm:ml-4">
-                      <p className={`font-medium text-xs sm:text-sm ${textColor}`}>{badgeText}</p>
-                      <button
-  onClick={() => {
-    if (isVerified) {
-      storage.setItem("messId", mess._id || mess.messId);
-      storage.setItem("selectedMess", JSON.stringify(mess));
+    return (
+      <div
+        key={mess.messId}
+        className={`rounded-xl border-2 ${borderColor} shadow-md overflow-hidden flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300`}
+      >
+        {/* Logo */}
+        <div className="relative">
+          <img
+            src={mess.logoUrl || chefIcon}
+            alt={mess.messName}
+            className="w-full h-40 object-cover"
+          />
+          <span className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full ${
+            isVerified ? 'bg-green-100 text-green-700' :
+            isPending ? 'bg-orange-100 text-orange-700' :
+            'bg-red-100 text-red-700'
+          }`}>
+            {statusText}
+          </span>
+        </div>
 
-      // ✅ Store available services for this mess
-      storage.setItem("messServices", JSON.stringify(mess.services || []));
+        {/* Mess Details */}
+        <div className="p-4 flex-1 flex flex-col gap-1">
+          <h3 className="text-lg font-bold text-gray-800">{mess.messName}</h3>
+          <p className="text-sm text-gray-500 capitalize">Type: {mess.messType}</p>
+          <p className="text-sm text-gray-600"><span className="font-semibold">City:</span> {mess.city}</p>
+          <p className="text-sm text-gray-600 break-words"><span className="font-semibold">Address:</span> {mess.address}</p>
+          <p className="text-sm text-gray-600"><span className="font-semibold">Contact:</span> {mess.contactNumber}</p>
+          <p className="text-sm text-gray-600"><span className="font-semibold">Email:</span> {mess.email}</p>
+          <p className="text-sm text-green-600">
+            Open: {mess.openTime} - Close: {mess.closeTime}
+          </p>
+          <p className="text-sm text-gray-700">
+            <span className="font-semibold">Services:</span> {mess.services?.join(", ") || "N/A"}
+          </p>
+          <p className="text-sm text-gray-700">
+            <span className="font-semibold">Days Open:</span> {mess.daysOpen?.join(", ") || "N/A"}
+          </p>
+        </div>
 
-      toast.success(`Logged in with ${mess.messName} successfully`);
-      navigate("/owner-dashboard");
-    } else {
-      storage.setItem("selectedMess", JSON.stringify(mess));
-      storage.setItem("messServices", JSON.stringify(mess.services || [])); // pending mess bhi store kar lo
-      navigate(`/owner/mess/id/${mess.messId}`);
-    }
-  }}
-  className="text-xl sm:text-2xl cursor-pointer text-green-600 hover:text-green-800"
->
-  →
-</button>
+        {/* Navigate Arrow */}
+        <div
+          onClick={() => {
+            storage.setItem("messId", mess.messId);
+            storage.setItem("selectedMess", JSON.stringify(mess));
+            navigate("/owner-dashboard", { state: { mess } });
+          }}
+  className="text-orange-500 text-3xl pt-0 pb-1 pr-3 pl-0 text-right hover:text-orange-600 cursor-pointer"
+        >
+          →
+        </div>
+      </div>
+    );
+  })}
+</div>
 
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+)}
 
           <div className="flex justify-center mt-10 sm:mt-16 md:mt-24">
             <button

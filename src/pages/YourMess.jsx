@@ -1,4 +1,449 @@
 
+// import React, { useEffect, useState } from 'react';
+// import { apiGet } from '../services/api';
+// import Navbar2 from '../layouts/Navbar2';
+// import OwnerHeader from '../layouts/CustomerHeader';
+// import storage from '../utils/storage';
+// import { useNavigate } from 'react-router-dom';
+// import PaymentGateway from './PaymentGateway';
+// import { FiArrowRight } from "react-icons/fi";
+// import { toast } from 'react-hot-toast';
+// import { AiOutlineBarcode } from "react-icons/ai";
+
+
+// const CustomerPlansView = () => {
+//   const [messes, setMesses] = useState([]);
+//   const [expandedMessId, setExpandedMessId] = useState(null);
+//   const [plansByMess, setPlansByMess] = useState({});
+//   const [selectedAvailablePlan, setSelectedAvailablePlan] = useState(null);
+//   const [showPaymentModal, setShowPaymentModal] = useState(false);
+//   const [selectedMessKyc, setSelectedMessKyc] = useState(0);
+
+
+//   const navigate = useNavigate();
+
+//   useEffect(() => {
+//     fetchMesses();
+//   }, []);
+
+//   const fetchMesses = async () => {
+//     const res = await apiGet('/customer/mess/subscribed');
+//     console.log('Fetched messes:', res);
+//     if (res.success && Array.isArray(res.data)) {
+//       setMesses(res.data);
+//     }
+//   };
+
+//   const fetchPlans = async (messId) => {
+//     const [issuedRes, allPlansRes] = await Promise.all([
+//       apiGet(`/customer/mess/${messId}/plan/issued`),
+//       apiGet(`/customer/mess/plans/${messId}`),
+//     ]);
+ 
+//     setPlansByMess((prev) => ({
+//       ...prev,
+//       [messId]: {
+//         purchased: issuedRes.success ? issuedRes.data : [],
+//         available: allPlansRes.success ? allPlansRes.data : [],
+//       },
+//     }));
+//   };
+
+//   // const handleMessClick = (mess) => {
+//   //   const alreadyExpanded = expandedMessId === mess.messId;
+//   //   setExpandedMessId(alreadyExpanded ? null : mess.messId);
+//   //   storage.setItem('messId', mess.messId);
+//   //   if (!plansByMess[mess.messId]) {
+//   //     fetchPlans(mess.messId);
+//   //   }
+//   //   setSelectedAvailablePlan(null);
+//   // };
+
+
+// const handleMessClick = (mess) => {
+//   const alreadyExpanded = expandedMessId === mess.messId;
+//   setExpandedMessId(alreadyExpanded ? null : mess.messId);
+//   storage.setItem('messId', mess.messId);
+//   setSelectedMessKyc(mess.kyc_stage); // ✅ store selected mess KYC
+  
+//   if (!plansByMess[mess.messId]) {
+//     fetchPlans(mess.messId);
+//   }
+//   setSelectedAvailablePlan(null);
+// };
+
+
+//   const handleUseTokens = (customerPlanId, messId, services) => {
+//   storage.setItem('customerPlanId', customerPlanId);
+//   storage.setItem('messId', messId);
+
+//   // ✅ services bhi store karein
+//   storage.setItem('messServices', JSON.stringify(services || []));
+
+//   navigate(`/using-plans`);
+// };
+
+//   const handlePaymentSuccess = () => {
+//     if (selectedAvailablePlan?.messId) {
+//       fetchPlans(selectedAvailablePlan.messId);
+//     }
+//     setSelectedAvailablePlan(null);
+//     setShowPaymentModal(false);
+//   };
+
+//   return (
+//     <div className="flex h-screen">
+//       <Navbar2 />
+//       <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
+//         <OwnerHeader />
+
+//         {/* Tabs */}
+//         <div className="flex space-x-6 border-b mb-6">
+//              <button
+//             className="pb-2 text-gray-500 cursor-pointer hover:text-orange-600"
+//             onClick={() => navigate('/customer-activeplans')}
+//           >
+//             My Plans
+//           </button>
+//           <button className="pb-2 border-b-2 cursor-pointer border-orange-500 text-orange-600">
+//             My Mess
+//           </button>
+//           <button
+//             className="pb-2 text-gray-500 cursor-pointer hover:text-orange-600"
+//             onClick={() => navigate('/customer-minimal-dashboard')}
+//           >
+//             Available Mess
+//           </button>
+//         </div>
+
+//         {/* 👇 New User Condition */}
+//         {messes.length === 0 ? (
+//           <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
+//             <p className="text-lg font-semibold text-gray-700">
+//               If you are a new user then explore messes and subscribe your first plan.
+//             </p>
+//             <button
+//               onClick={() => navigate('/customer-minimal-dashboard')}
+//               className="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg shadow-md"
+//             >
+//               Explore Mess
+//             </button>
+//           </div>
+//         ) : (
+//           /* Messes Grid */
+//           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+//             {messes.map((mess) => {
+//               const isExpanded = expandedMessId === mess.messId;
+//               const plans = plansByMess[mess.messId] || { purchased: [], available: [] };
+
+//               return (
+//                 <div key={mess.messId} className="border rounded-xl bg-white p-4 shadow-sm flex flex-col">
+//                   {/* <div
+//                     onClick={() => handleMessClick(mess)}
+//                     className={`flex items-center gap-4 cursor-pointer p-2 rounded-lg border ${
+//                       isExpanded ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
+//                     }`}
+//                   >
+//                     <img
+//                       src={mess.logoUrl || '/default-icon.png'}
+//                       alt="logo"
+//                       className="w-14 h-14 rounded-md object-cover"
+//                     />
+//                       <div className="flex-1">
+//                 <p className="font-semibold">{mess.messName}</p>
+//                 <p className="text-l text-gray-500">{mess.city} • {mess.pincode}</p>
+//                 <p className="text-sm text-green-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
+           
+//               </div>
+//                     <div
+//                       onClick={(e) => {
+//                         e.stopPropagation();
+//                         storage.setItem('messId', mess.messId);
+//                         navigate('/customer/mess-details', { state: { mess } });
+//                       }}
+//                       className="text-orange-500 text-xl"
+//                     >
+//                       <FiArrowRight />
+//                     </div>
+//                   </div> */}
+//                   <div
+//   key={mess.messId}
+//   onClick={() => handleMessClick(mess)}
+//   className="cursor-pointer border rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+// >
+//   {/* Image + Header */}
+//   <div className="relative">
+//     <img
+//       src={mess.logoUrl || '/default-icon.png'}
+//       alt={mess.messName}
+//       className="w-full h-40 object-cover"
+//     />
+//     <span
+//       className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full ${
+//         mess.status === 'active'
+//           ? 'bg-green-100 text-green-700'
+//           : 'bg-red-100 text-red-700'
+//       }`}
+//     >
+//       {mess.status}
+//     </span>
+//   </div>
+
+//   {/* Content */}
+//   <div className="p-4 flex flex-col flex-1">
+//     <h3 className="text-lg font-bold text-gray-800 mb-1">{mess.messName}</h3>
+//     <p className="text-sm text-gray-500 mb-3 capitalize">Type: {mess.messType}</p>
+
+//     <div className="space-y-1 text-sm text-gray-700">
+//       <p><span className="font-semibold">City:</span> {mess.city}</p>
+//       <p className="break-words whitespace-normal">
+//         <span className="font-semibold">Address:</span> {mess.address}
+//       </p>
+//       <p><span className="font-semibold">Contact:</span> {mess.contactNumber}</p>
+//       <p className="break-words whitespace-normal">
+//         <span className="font-semibold">Email:</span> {mess.email}
+//       </p>
+//       <p className="break-words whitespace-normal">
+//         <span className="font-semibold">Services:</span>{" "}
+//         {mess.services?.length ? mess.services.join(", ") : "N/A"}
+//       </p>
+//     </div>
+//   </div>
+// </div>
+
+
+//                   {/* Expanded Section */}
+//                   {isExpanded && (
+//                     <div className="mt-4 space-y-6">
+//                       {/* Purchased Plans */}
+//                       {/* <div>
+//                         <p className="text-lg font-semibold mb-2">
+//                           Purchased Plans ({plans.purchased.length})
+//                         </p>
+//                         {plans.purchased.length === 0 ? (
+//                           <p className="text-red-500 font-medium">No plans purchased</p>
+//                         ) : (
+//                           <div className="grid grid-cols-1 gap-4">
+//                             {plans.purchased.map((plan) => (
+//                               <div
+//                                 key={plan.customerPlanId}
+//                                 className="border p-3 rounded-xl bg-white shadow-sm flex justify-between"
+//                               >
+//                                 <div className="flex gap-4">
+//                                   <img
+//                                     src={plan.imageUrl || '/default-plan.jpg'}
+//                                     alt="plan"
+//                                     className="w-16 h-16 rounded"
+//                                   />
+//                                   <div>
+//                                     <p className="font-medium">{plan.name}</p>
+//                                     <p className="text-sm text-gray-600">{plan.description}</p>
+//                                     <p className="text-sm text-gray-500">
+//                                      Total: {plan.issuedTokenCount} Tokens / {plan.durationDays} Days
+//                                     </p>
+//                                         <p className="text-sm text-gray-600">
+//         Tokens Used: {plan.usedTokenCount} / {plan.issuedTokenCount}
+//       </p>
+//                                     <p className="text-sm text-gray-700 font-semibold">
+//   {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
+// </p>
+//                                   </div>
+//                                 </div>
+                              
+//                                 <button
+//   onClick={() => handleUseTokens(
+//     plan.customerPlanId,
+//     plan.messId,
+//     plan.MessProfile?.services || []
+//   )}
+//   className="text-sm cursor-pointer text-orange-600 hover:underline"
+// >
+//   Use Tokens
+// </button>
+
+//                               </div>
+//                             ))}
+//                           </div>
+//                         )}
+//                       </div> */}
+// {/* Purchased Plans */}
+// <div>
+//   <p className="text-lg font-semibold mb-2">
+//     Purchased Plans ({plans.purchased.length})
+//   </p>
+//   {plans.purchased.length === 0 ? (
+//     <p className="text-red-500 font-medium">No plans purchased</p>
+//   ) : (
+//     <div className="grid grid-cols-1 gap-4">
+//       {plans.purchased.map((plan) => (
+//         <div
+//           key={plan.customerPlanId}
+//           className="border p-3 rounded-xl bg-white shadow-sm relative"
+//         >
+//           <div className="flex gap-4">
+//             <img
+//               src={plan.imageUrl || '/default-plan.jpg'}
+//               alt="plan"
+//               className="w-16 h-16 rounded"
+//             />
+//             <div>
+//               <p className="font-medium">{plan.name}</p>
+//               <p className="text-sm text-gray-600">{plan.description}</p>
+//               <p className="text-sm text-gray-500">
+//                 Total: {plan.issuedTokenCount} Tokens / {plan.durationDays} Days
+//               </p>
+//               <p className="text-sm text-gray-600">
+//                 Tokens Used: {plan.usedTokenCount} / {plan.issuedTokenCount}
+//               </p>
+//               <p className="text-sm text-gray-700 font-semibold">
+//                 {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
+//               </p>
+//             </div>
+//           </div>
+
+//           {/* ✅ Use Tokens button like in CustomerActivePlans */}
+//           <div className="absolute top-3 right-3">
+//             <button
+//               onClick={() =>
+//                 handleUseTokens(
+//                   plan.customerPlanId,
+//                   plan.messId,
+//                   plan.MessProfile?.services || []
+//                 )
+//               }
+//               className="flex items-center gap-1 px-2 py-1 text-xs text-white border cursor-pointer bg-green-500 border-gray-300 rounded hover:bg-green-700"
+//             >
+//               <AiOutlineBarcode className="w-3 h-3" />
+//               Use Tokens
+//             </button>
+//           </div>
+//         </div>
+//       ))}
+//     </div>
+//   )}
+// </div>
+
+//                       {/* Available Plans */}
+//                       <div>
+//                         <p className="text-lg font-semibold mb-2">
+//                           Available Plans ({plans.available.length})
+//                         </p>
+//                         {plans.available.length === 0 ? (
+//                           <p className="text-gray-500">No available plans</p>
+//                         ) : (
+//                           <div className="grid grid-cols-1 gap-4">
+//                             {plans.available.map((plan) => {
+//                               const isSelected =
+//                                 selectedAvailablePlan?.planId === plan.planId &&
+//                                 selectedAvailablePlan?.messId === mess.messId;
+
+//                               return (
+//                                 <div
+//                                   key={plan.planId}
+//                                   className={`border p-3 rounded-xl shadow-sm cursor-pointer transition-all ${
+//                                     isSelected ? 'border-orange-500 bg-orange-50' : 'bg-white border-gray-300'
+//                                   }`}
+//                                   onClick={() =>
+//                                     setSelectedAvailablePlan({
+//                                       messId: mess.messId,
+//                                       planId: plan.planId,
+//                                       plan,
+//                                     })
+//                                   }
+//                                 >
+//                                   <div className="flex gap-4">
+//                                     <img
+//                                       src={plan.imageUrl || '/default-plan.jpg'}
+//                                       alt="plan"
+//                                       className="w-16 h-16 rounded"
+//                                     />
+//                                     <div>
+//                                       <p className="font-medium">{plan.name}</p>
+//                                       <p className="text-sm text-gray-600">{plan.description}</p>
+//                                       <p className="text-sm text-gray-500">
+//                                         {plan.totalTokens} Tokens / {plan.durationDays} Days
+//                                       </p>
+//                                       <p className="text-sm text-gray-700 font-semibold">
+//   {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
+// </p>
+//                                       <p className="text-sm text-gray-700 font-semibold">₹{plan.price}</p>
+//                                     </div>
+//                                   </div>
+//                                   {isSelected && (
+//                                     <button
+//                                       className="mt-2 bg-orange-500 cursor-pointer hover:bg-orange-600 text-white py-1 px-3 rounded"
+//                                       onClick={(e) => {
+//                                         e.stopPropagation();
+//                                         setShowPaymentModal(true);
+//                                       }}
+//                                     >
+//                                       Purchase Plan
+//                                     </button>
+//                                   )}
+//                                 </div>
+//                               );
+//                             })}
+//                           </div>
+//                         )}
+//                       </div>
+//                     </div>
+//                   )}
+//                 </div>
+//               );
+//             })}
+//           </div>
+//         )}
+
+//         {showPaymentModal && selectedAvailablePlan && (
+//   <div className="fixed inset-0 bg-opacity-50 backdrop-brightness-50 flex items-center justify-center z-50">
+//     <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">
+//       <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
+//       <div className="flex flex-col gap-3">
+//         <button
+//           className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
+//           onClick={() => {
+//             setShowPaymentModal(false);
+//     navigate(`/customer/cash-payment/${selectedAvailablePlan.planId}`); // use selectedAvailablePlan.planId
+//             toast.success('💵 Cash payment selected. Please pay at mess counter.');
+//           }}
+//         >
+//           Pay via Cash / UPI
+//         </button>
+
+//         {selectedMessKyc >= 3 ? (
+//           <PaymentGateway
+//             messId={selectedAvailablePlan.messId}
+//             plan={{ ...selectedAvailablePlan.plan, planId: selectedAvailablePlan.planId }}
+//             onSuccess={handlePaymentSuccess}
+//           />
+//         ) : (
+//           <p className="text-red-500 text-sm mt-1">
+//             Online payment is not available for this mess as KYC is incomplete.
+//           </p>
+//         )}
+
+//         <button
+//           className="text-sm text-gray-500 mt-2 cursor-pointer hover:text-red-500"
+//           onClick={() => setShowPaymentModal(false)}
+//         >
+//           Cancel
+//         </button>
+//       </div>
+//     </div>
+//   </div>
+// )}
+
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default CustomerPlansView;
+
+
+
+
+
 import React, { useEffect, useState } from 'react';
 import { apiGet } from '../services/api';
 import Navbar2 from '../layouts/Navbar2';
@@ -10,7 +455,6 @@ import { FiArrowRight } from "react-icons/fi";
 import { toast } from 'react-hot-toast';
 import { AiOutlineBarcode } from "react-icons/ai";
 
-
 const CustomerPlansView = () => {
   const [messes, setMesses] = useState([]);
   const [expandedMessId, setExpandedMessId] = useState(null);
@@ -18,7 +462,6 @@ const CustomerPlansView = () => {
   const [selectedAvailablePlan, setSelectedAvailablePlan] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedMessKyc, setSelectedMessKyc] = useState(0);
-
 
   const navigate = useNavigate();
 
@@ -28,10 +471,7 @@ const CustomerPlansView = () => {
 
   const fetchMesses = async () => {
     const res = await apiGet('/customer/mess/subscribed');
-    console.log('Fetched messes:', res);
-    if (res.success && Array.isArray(res.data)) {
-      setMesses(res.data);
-    }
+    if (res.success && Array.isArray(res.data)) setMesses(res.data);
   };
 
   const fetchPlans = async (messId) => {
@@ -39,7 +479,6 @@ const CustomerPlansView = () => {
       apiGet(`/customer/mess/${messId}/plan/issued`),
       apiGet(`/customer/mess/plans/${messId}`),
     ]);
- 
     setPlansByMess((prev) => ({
       ...prev,
       [messId]: {
@@ -49,44 +488,24 @@ const CustomerPlansView = () => {
     }));
   };
 
-  // const handleMessClick = (mess) => {
-  //   const alreadyExpanded = expandedMessId === mess.messId;
-  //   setExpandedMessId(alreadyExpanded ? null : mess.messId);
-  //   storage.setItem('messId', mess.messId);
-  //   if (!plansByMess[mess.messId]) {
-  //     fetchPlans(mess.messId);
-  //   }
-  //   setSelectedAvailablePlan(null);
-  // };
-
-
-const handleMessClick = (mess) => {
-  const alreadyExpanded = expandedMessId === mess.messId;
-  setExpandedMessId(alreadyExpanded ? null : mess.messId);
-  storage.setItem('messId', mess.messId);
-  setSelectedMessKyc(mess.kyc_stage); // ✅ store selected mess KYC
-  
-  if (!plansByMess[mess.messId]) {
-    fetchPlans(mess.messId);
-  }
-  setSelectedAvailablePlan(null);
-};
-
+  const handleMessClick = (mess) => {
+    const alreadyExpanded = expandedMessId === mess.messId;
+    setExpandedMessId(alreadyExpanded ? null : mess.messId);
+    storage.setItem('messId', mess.messId);
+    setSelectedMessKyc(mess.kyc_stage);
+    if (!plansByMess[mess.messId]) fetchPlans(mess.messId);
+    setSelectedAvailablePlan(null);
+  };
 
   const handleUseTokens = (customerPlanId, messId, services) => {
-  storage.setItem('customerPlanId', customerPlanId);
-  storage.setItem('messId', messId);
-
-  // ✅ services bhi store karein
-  storage.setItem('messServices', JSON.stringify(services || []));
-
-  navigate(`/using-plans`);
-};
+    storage.setItem('customerPlanId', customerPlanId);
+    storage.setItem('messId', messId);
+    storage.setItem('messServices', JSON.stringify(services || []));
+    navigate(`/using-plans`);
+  };
 
   const handlePaymentSuccess = () => {
-    if (selectedAvailablePlan?.messId) {
-      fetchPlans(selectedAvailablePlan.messId);
-    }
+    if (selectedAvailablePlan?.messId) fetchPlans(selectedAvailablePlan.messId);
     setSelectedAvailablePlan(null);
     setShowPaymentModal(false);
   };
@@ -99,7 +518,7 @@ const handleMessClick = (mess) => {
 
         {/* Tabs */}
         <div className="flex space-x-6 border-b mb-6">
-             <button
+          <button
             className="pb-2 text-gray-500 cursor-pointer hover:text-orange-600"
             onClick={() => navigate('/customer-activeplans')}
           >
@@ -116,7 +535,7 @@ const handleMessClick = (mess) => {
           </button>
         </div>
 
-        {/* 👇 New User Condition */}
+        {/* New User */}
         {messes.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
             <p className="text-lg font-semibold text-gray-700">
@@ -130,96 +549,76 @@ const handleMessClick = (mess) => {
             </button>
           </div>
         ) : (
-          /* Messes Grid */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {messes.map((mess) => {
               const isExpanded = expandedMessId === mess.messId;
               const plans = plansByMess[mess.messId] || { purchased: [], available: [] };
 
               return (
-                <div key={mess.messId} className="border rounded-xl bg-white p-4 shadow-sm flex flex-col">
-                  {/* <div
-                    onClick={() => handleMessClick(mess)}
-                    className={`flex items-center gap-4 cursor-pointer p-2 rounded-lg border ${
-                      isExpanded ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
-                    }`}
-                  >
-                    <img
-                      src={mess.logoUrl || '/default-icon.png'}
-                      alt="logo"
-                      className="w-14 h-14 rounded-md object-cover"
-                    />
-                      <div className="flex-1">
-                <p className="font-semibold">{mess.messName}</p>
-                <p className="text-l text-gray-500">{mess.city} • {mess.pincode}</p>
-                <p className="text-sm text-green-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
-           
-              </div>
-                    <div
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        storage.setItem('messId', mess.messId);
-                        navigate('/customer/mess-details', { state: { mess } });
-                      }}
-                      className="text-orange-500 text-xl"
-                    >
-                      <FiArrowRight />
-                    </div>
-                  </div> */}
-                  <div
+                // <div
+                //   key={mess.messId}
+                //   className="cursor-pointer rounded-xl border bg-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+                //   onClick={() => handleMessClick(mess)}
+                // >
+                //   {/* Image + Status */}
+                //   <div className="relative">
+                //     <img
+                //       src={mess.logoUrl || '/default-icon.png'}
+                //       alt={mess.messName}
+                //       className="w-full h-40 object-cover"
+                //     />
+                //     <span
+                //       className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full ${
+                //         mess.status === 'active'
+                //           ? 'bg-green-100 text-green-700'
+                //           : 'bg-red-100 text-red-700'
+                //       }`}
+                //     >
+                //       {mess.status}
+                //     </span>
+                //   </div>
+
+                <div
   key={mess.messId}
   onClick={() => handleMessClick(mess)}
-  className="cursor-pointer border rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+  className={`cursor-pointer rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col
+    ${
+      mess.status === 'active'
+        ? 'border-2 border-green-500'
+        : mess.status === 'pending'
+        ? 'border-2 border-yellow-400'
+        : 'border-2 border-red-500'
+    }`}
 >
-  {/* Image + Header */}
+  {/* Image */}
   <div className="relative">
     <img
       src={mess.logoUrl || '/default-icon.png'}
       alt={mess.messName}
       className="w-full h-40 object-cover"
     />
-    <span
-      className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full ${
-        mess.status === 'active'
-          ? 'bg-green-100 text-green-700'
-          : 'bg-red-100 text-red-700'
-      }`}
-    >
-      {mess.status}
-    </span>
   </div>
 
-  {/* Content */}
-  <div className="p-4 flex flex-col flex-1">
-    <h3 className="text-lg font-bold text-gray-800 mb-1">{mess.messName}</h3>
-    <p className="text-sm text-gray-500 mb-3 capitalize">Type: {mess.messType}</p>
 
-    <div className="space-y-1 text-sm text-gray-700">
-      <p><span className="font-semibold">City:</span> {mess.city}</p>
-      <p className="break-words whitespace-normal">
-        <span className="font-semibold">Address:</span> {mess.address}
-      </p>
-      <p><span className="font-semibold">Contact:</span> {mess.contactNumber}</p>
-      <p className="break-words whitespace-normal">
-        <span className="font-semibold">Email:</span> {mess.email}
-      </p>
-      <p className="break-words whitespace-normal">
-        <span className="font-semibold">Services:</span>{" "}
-        {mess.services?.length ? mess.services.join(", ") : "N/A"}
-      </p>
-    </div>
-  </div>
-</div>
-
+                  {/* Content */}
+                  <div className="p-4 flex flex-col flex-1">
+                    <h3 className="text-lg font-bold text-gray-800 mb-1">{mess.messName}</h3>
+                    <p className="text-sm text-gray-500 mb-3 capitalize">Type: {mess.messType}</p>
+                    <div className="space-y-1 text-sm text-gray-700">
+                      <p><span className="font-semibold">City:</span> {mess.city}</p>
+                      <p><span className="font-semibold">Address:</span> {mess.address}</p>
+                      <p><span className="font-semibold">Contact:</span> {mess.contactNumber}</p>
+                      <p><span className="font-semibold">Email:</span> {mess.email}</p>
+                      <p><span className="font-semibold">Services:</span> {mess.services?.length ? mess.services.join(", ") : "N/A"}</p>
+                    </div>
+                  </div>
 
                   {/* Expanded Section */}
                   {isExpanded && (
-                    <div className="mt-4 space-y-6">
+                    <div className="px-4 pb-4 mt-4 space-y-6">
                       {/* Purchased Plans */}
-                      {/* <div>
-                        <p className="text-lg font-semibold mb-2">
-                          Purchased Plans ({plans.purchased.length})
-                        </p>
+                      <div>
+                        <p className="text-lg font-semibold mb-2">Purchased Plans ({plans.purchased.length})</p>
                         {plans.purchased.length === 0 ? (
                           <p className="text-red-500 font-medium">No plans purchased</p>
                         ) : (
@@ -227,155 +626,58 @@ const handleMessClick = (mess) => {
                             {plans.purchased.map((plan) => (
                               <div
                                 key={plan.customerPlanId}
-                                className="border p-3 rounded-xl bg-white shadow-sm flex justify-between"
+                                className="border p-3 rounded-xl bg-white shadow-sm relative flex gap-4"
                               >
-                                <div className="flex gap-4">
-                                  <img
-                                    src={plan.imageUrl || '/default-plan.jpg'}
-                                    alt="plan"
-                                    className="w-16 h-16 rounded"
-                                  />
-                                  <div>
-                                    <p className="font-medium">{plan.name}</p>
-                                    <p className="text-sm text-gray-600">{plan.description}</p>
-                                    <p className="text-sm text-gray-500">
-                                     Total: {plan.issuedTokenCount} Tokens / {plan.durationDays} Days
-                                    </p>
-                                        <p className="text-sm text-gray-600">
-        Tokens Used: {plan.usedTokenCount} / {plan.issuedTokenCount}
-      </p>
-                                    <p className="text-sm text-gray-700 font-semibold">
-  {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
-</p>
-                                  </div>
+                                <img src={plan.imageUrl || '/default-plan.jpg'} alt="plan" className="w-16 h-16 rounded" />
+                                <div className="flex-1">
+                                  <p className="font-medium">{plan.name}</p>
+                                  <p className="text-sm text-gray-600">{plan.description}</p>
+                                  <p className="text-sm text-gray-500">Total: {plan.issuedTokenCount} Tokens / {plan.durationDays} Days</p>
+                                  <p className="text-sm text-gray-600">Tokens Used: {plan.usedTokenCount} / {plan.issuedTokenCount}</p>
+                                  <p className="text-sm text-gray-700 font-semibold">{Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}</p>
                                 </div>
-                              
-                                <button
-  onClick={() => handleUseTokens(
-    plan.customerPlanId,
-    plan.messId,
-    plan.MessProfile?.services || []
-  )}
-  className="text-sm cursor-pointer text-orange-600 hover:underline"
->
-  Use Tokens
-</button>
 
+                                <button
+                                  onClick={() => handleUseTokens(plan.customerPlanId, plan.messId, plan.MessProfile?.services || [])}
+                                  className="absolute top-3 right-3 flex items-center gap-1 px-2 py-1 text-xs text-white border cursor-pointer bg-green-500 border-gray-300 rounded hover:bg-green-700"
+                                >
+                                  <AiOutlineBarcode className="w-3 h-3" /> Use Tokens
+                                </button>
                               </div>
                             ))}
                           </div>
                         )}
-                      </div> */}
-{/* Purchased Plans */}
-<div>
-  <p className="text-lg font-semibold mb-2">
-    Purchased Plans ({plans.purchased.length})
-  </p>
-  {plans.purchased.length === 0 ? (
-    <p className="text-red-500 font-medium">No plans purchased</p>
-  ) : (
-    <div className="grid grid-cols-1 gap-4">
-      {plans.purchased.map((plan) => (
-        <div
-          key={plan.customerPlanId}
-          className="border p-3 rounded-xl bg-white shadow-sm relative"
-        >
-          <div className="flex gap-4">
-            <img
-              src={plan.imageUrl || '/default-plan.jpg'}
-              alt="plan"
-              className="w-16 h-16 rounded"
-            />
-            <div>
-              <p className="font-medium">{plan.name}</p>
-              <p className="text-sm text-gray-600">{plan.description}</p>
-              <p className="text-sm text-gray-500">
-                Total: {plan.issuedTokenCount} Tokens / {plan.durationDays} Days
-              </p>
-              <p className="text-sm text-gray-600">
-                Tokens Used: {plan.usedTokenCount} / {plan.issuedTokenCount}
-              </p>
-              <p className="text-sm text-gray-700 font-semibold">
-                {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
-              </p>
-            </div>
-          </div>
-
-          {/* ✅ Use Tokens button like in CustomerActivePlans */}
-          <div className="absolute top-3 right-3">
-            <button
-              onClick={() =>
-                handleUseTokens(
-                  plan.customerPlanId,
-                  plan.messId,
-                  plan.MessProfile?.services || []
-                )
-              }
-              className="flex items-center gap-1 px-2 py-1 text-xs text-white border cursor-pointer bg-green-500 border-gray-300 rounded hover:bg-green-700"
-            >
-              <AiOutlineBarcode className="w-3 h-3" />
-              Use Tokens
-            </button>
-          </div>
-        </div>
-      ))}
-    </div>
-  )}
-</div>
+                      </div>
 
                       {/* Available Plans */}
                       <div>
-                        <p className="text-lg font-semibold mb-2">
-                          Available Plans ({plans.available.length})
-                        </p>
+                        <p className="text-lg font-semibold mb-2">Available Plans ({plans.available.length})</p>
                         {plans.available.length === 0 ? (
                           <p className="text-gray-500">No available plans</p>
                         ) : (
                           <div className="grid grid-cols-1 gap-4">
                             {plans.available.map((plan) => {
-                              const isSelected =
-                                selectedAvailablePlan?.planId === plan.planId &&
-                                selectedAvailablePlan?.messId === mess.messId;
-
+                              const isSelected = selectedAvailablePlan?.planId === plan.planId && selectedAvailablePlan?.messId === mess.messId;
                               return (
                                 <div
                                   key={plan.planId}
-                                  className={`border p-3 rounded-xl shadow-sm cursor-pointer transition-all ${
-                                    isSelected ? 'border-orange-500 bg-orange-50' : 'bg-white border-gray-300'
-                                  }`}
-                                  onClick={() =>
-                                    setSelectedAvailablePlan({
-                                      messId: mess.messId,
-                                      planId: plan.planId,
-                                      plan,
-                                    })
-                                  }
+                                  className={`border p-3 rounded-xl shadow-sm cursor-pointer transition-all ${isSelected ? 'border-orange-500 bg-orange-50' : 'bg-white border-gray-300'}`}
+                                  onClick={() => setSelectedAvailablePlan({ messId: mess.messId, planId: plan.planId, plan })}
                                 >
                                   <div className="flex gap-4">
-                                    <img
-                                      src={plan.imageUrl || '/default-plan.jpg'}
-                                      alt="plan"
-                                      className="w-16 h-16 rounded"
-                                    />
+                                    <img src={plan.imageUrl || '/default-plan.jpg'} alt="plan" className="w-16 h-16 rounded" />
                                     <div>
                                       <p className="font-medium">{plan.name}</p>
                                       <p className="text-sm text-gray-600">{plan.description}</p>
-                                      <p className="text-sm text-gray-500">
-                                        {plan.totalTokens} Tokens / {plan.durationDays} Days
-                                      </p>
-                                      <p className="text-sm text-gray-700 font-semibold">
-  {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
-</p>
+                                      <p className="text-sm text-gray-500">{plan.totalTokens} Tokens / {plan.durationDays} Days</p>
+                                      <p className="text-sm text-gray-700 font-semibold">{Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}</p>
                                       <p className="text-sm text-gray-700 font-semibold">₹{plan.price}</p>
                                     </div>
                                   </div>
                                   {isSelected && (
                                     <button
                                       className="mt-2 bg-orange-500 cursor-pointer hover:bg-orange-600 text-white py-1 px-3 rounded"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setShowPaymentModal(true);
-                                      }}
+                                      onClick={(e) => { e.stopPropagation(); setShowPaymentModal(true); }}
                                     >
                                       Purchase Plan
                                     </button>
@@ -394,44 +696,45 @@ const handleMessClick = (mess) => {
           </div>
         )}
 
+        {/* Payment Modal */}
         {showPaymentModal && selectedAvailablePlan && (
-  <div className="fixed inset-0 bg-opacity-50 backdrop-brightness-50 flex items-center justify-center z-50">
-    <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">
-      <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
-      <div className="flex flex-col gap-3">
-        <button
-          className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
-          onClick={() => {
-            setShowPaymentModal(false);
-    navigate(`/customer/cash-payment/${selectedAvailablePlan.planId}`); // use selectedAvailablePlan.planId
-            toast.success('💵 Cash payment selected. Please pay at mess counter.');
-          }}
-        >
-          Pay via Cash / UPI
-        </button>
+          <div className="fixed inset-0 bg-opacity-50 backdrop-brightness-50 flex items-center justify-center z-50">
+            <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">
+              <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
+              <div className="flex flex-col gap-3">
+                <button
+                  className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
+                  onClick={() => {
+                    setShowPaymentModal(false);
+                    navigate(`/customer/cash-payment/${selectedAvailablePlan.planId}`);
+                    toast.success('💵 Cash payment selected. Please pay at mess counter.');
+                  }}
+                >
+                  Pay via Cash / UPI
+                </button>
 
-        {selectedMessKyc >= 3 ? (
-          <PaymentGateway
-            messId={selectedAvailablePlan.messId}
-            plan={{ ...selectedAvailablePlan.plan, planId: selectedAvailablePlan.planId }}
-            onSuccess={handlePaymentSuccess}
-          />
-        ) : (
-          <p className="text-red-500 text-sm mt-1">
-            Online payment is not available for this mess as KYC is incomplete.
-          </p>
+                {selectedMessKyc >= 3 ? (
+                  <PaymentGateway
+                    messId={selectedAvailablePlan.messId}
+                    plan={{ ...selectedAvailablePlan.plan, planId: selectedAvailablePlan.planId }}
+                    onSuccess={handlePaymentSuccess}
+                  />
+                ) : (
+                  <p className="text-red-500 text-sm mt-1">
+                    Online payment is not available for this mess as KYC is incomplete.
+                  </p>
+                )}
+
+                <button
+                  className="text-sm text-gray-500 mt-2 cursor-pointer hover:text-red-500"
+                  onClick={() => setShowPaymentModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
         )}
-
-        <button
-          className="text-sm text-gray-500 mt-2 cursor-pointer hover:text-red-500"
-          onClick={() => setShowPaymentModal(false)}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
 
       </div>
     </div>

@@ -230,6 +230,9 @@
 // export default TransactionHistory;  
 
 
+
+//last wala
+
 import React, { useEffect, useState } from 'react';
 import Navbar2 from '../layouts/Navbar2';
 import OwnerHeader from '../layouts/CustomerHeader';
@@ -281,6 +284,8 @@ const TransactionHistory = () => {
 const fetchTransactions = async (page = 1) => {
   try {
     const offset = (page - 1) * itemsPerPage;
+    console.log('Fetching transactions for page:', page, 'with offset:', offset);
+    console.log('Using messId:', messId);
     const res = await apiPost('/customer/mess/transaction', {
       messId,
       limit: itemsPerPage,

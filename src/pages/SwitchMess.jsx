@@ -345,40 +345,134 @@ const handleMessClick = (mess) => {
             <p className="text-gray-500">No messes found.</p>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {messes.map((mess) => (
+              {/* {messes.map((mess) => (
+             
                 <div
-                  key={mess.messId}
-                  className="border rounded-xl bg-white p-4 shadow-sm flex flex-col"
-                >
-                  <div className="flex items-center gap-4 p-2 rounded-lg border border-gray-300 hover:border-orange-500">
-                    <img
-                      src={mess.logoUrl || defaultIcon}
-                      alt="logo"
-                      className="w-14 h-14 rounded-md object-cover"
-                    />
-                    <div className="flex-1">
-                      <p className="font-semibold">{mess.messName}</p>
-                      <p className="text-sm text-gray-500">
-                        {mess.messType} • {mess.pincode}
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {mess.address || "Mess Address"},{" "}
-                        {mess.city || "Mess City"}
-                      </p>
-                    </div>
-                    <div
-                      onClick={() => handleMessClick(mess)}
-                      className="text-orange-500 text-xl"
-                    >
-                      <FiArrowRight className="cursor-pointer" />
-                    </div>
-                  </div>
-                </div>
-              ))}
+  key={mess.messId}
+  className="rounded-xl border shadow-md overflow-hidden flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300"
+>
+  <div className="relative">
+    <img
+      src={mess.logoUrl || defaultIcon}
+      alt={mess.messName}
+      className="w-full h-40 object-cover"
+    />
+  </div>
+
+  <div className="p-4 flex-1 flex flex-col gap-1">
+    <h3 className="text-lg font-bold text-gray-800">{mess.messName}</h3>
+    <p className="text-sm text-gray-500 capitalize">Type: {mess.messType}</p>
+    <p className="text-sm text-gray-600"><span className="font-semibold">City:</span> {mess.city}</p>
+    <p className="text-sm text-gray-600 break-words"><span className="font-semibold">Address:</span> {mess.address}</p>
+    <p className="text-sm text-gray-600"><span className="font-semibold">Contact:</span> {mess.contactNumber}</p>
+    <p className="text-sm text-gray-600"><span className="font-semibold">Email:</span> {mess.email}</p>
+    <p className="text-sm text-green-600">
+      Open: {mess.openTime} - Close: {mess.closeTime}
+    </p>
+    <p className="text-sm text-gray-700">
+      <span className="font-semibold">Services:</span> {mess.services?.join(", ") || "N/A"}
+    </p>
+    <p className="text-sm text-gray-700">
+      <span className="font-semibold">Days Open:</span> {mess.daysOpen?.join(", ") || "N/A"}
+    </p>
+  </div>
+
+  <div
+    onClick={() => handleMessClick(mess)}
+    className="flex justify-end p-3 text-orange-500 text-3xl hover:text-orange-600 cursor-pointer"
+  >
+    <FiArrowRight />
+  </div>
+</div>
+
+              ))} */}
+              {messes.map((mess) => {
+  const isVerified = mess.status === "active" || mess.status === "activated";
+  const isPending = mess.status === "pending";
+  const isNotVerified = mess.status === "inactive";
+
+  const borderColor = isVerified
+    ? "border-green-500"
+    : isPending
+    ? "border-orange-500"
+    : "border-red-500";
+
+  const statusText = isVerified
+    ? "Verified "
+    : isPending
+    ? "Pending ⏳"
+    : "Not Verified ❌";
+
+  const statusBg = isVerified
+    ? "bg-green-100 text-green-700"
+    : isPending
+    ? "bg-orange-100 text-orange-700"
+    : "bg-red-100 text-red-700";
+
+  return (
+    <div
+      key={mess.messId}
+      className={`rounded-xl border-2 ${borderColor} shadow-md overflow-hidden flex flex-col cursor-pointer hover:shadow-lg transition-all duration-300`}
+    >
+      {/* Logo + Status */}
+      <div className="relative">
+        <img
+          src={mess.logoUrl || defaultIcon}
+          alt={mess.messName}
+          className="w-full h-40 object-cover"
+        />
+        <span
+          className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full ${statusBg}`}
+        >
+          {statusText}
+        </span>
+      </div>
+
+      {/* Mess Info */}
+      <div className="p-4 flex-1 flex flex-col gap-1">
+        <h3 className="text-lg font-bold text-gray-800">{mess.messName}</h3>
+        <p className="text-sm text-gray-500 capitalize">
+          Type: {mess.messType}
+        </p>
+        <p className="text-sm text-gray-600">
+          <span className="font-semibold">City:</span> {mess.city}
+        </p>
+        <p className="text-sm text-gray-600 break-words">
+          <span className="font-semibold">Address:</span> {mess.address}
+        </p>
+        <p className="text-sm text-gray-600">
+          <span className="font-semibold">Contact:</span> {mess.contactNumber}
+        </p>
+        <p className="text-sm text-gray-600">
+          <span className="font-semibold">Email:</span> {mess.email}
+        </p>
+        <p className="text-sm text-green-600">
+          Open: {mess.openTime} - Close: {mess.closeTime}
+        </p>
+        <p className="text-sm text-gray-700">
+          <span className="font-semibold">Services:</span>{" "}
+          {mess.services?.join(", ") || "N/A"}
+        </p>
+        <p className="text-sm text-gray-700">
+          <span className="font-semibold">Days Open:</span>{" "}
+          {mess.daysOpen?.join(", ") || "N/A"}
+        </p>
+      </div>
+
+      {/* Arrow */}
+      <div
+        onClick={() => handleMessClick(mess)}
+        className="flex justify-end p-3 text-orange-500 text-3xl hover:text-orange-600 cursor-pointer"
+      >
+        <FiArrowRight />
+      </div>
+    </div>
+  );
+})}
+
             </div>
           )}
 
-          {/* Add Mess Button (same design as MinimalDashboard) */}
           <div className="flex justify-center mt-10 sm:mt-16 md:mt-24">
             <button
               onClick={handleAddMess}

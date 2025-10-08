@@ -45,6 +45,7 @@ const CustomerMinimalDashboard = () => {
       }
 
       const res = await apiGet(url);
+      console.log(res);
       if (res?.success && Array.isArray(res.data)) {
         setMesses(res.data);
         setPagination(res.pagination || { currentPage: 1, totalPages: 1 });
@@ -147,107 +148,7 @@ const CustomerMinimalDashboard = () => {
   ) : messes.length === 0 ? (
     <p className="text-gray-500">No messes found.</p>
   ) : (
-//     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-//       {messes.map((mess) => {
-//         const isExpanded = expandedMessId === mess.messId;
-//         const plans = plansByMess[mess.messId] || [];
 
-//         return (
-//           <div
-//             key={mess.messId}
-//             className="border rounded-xl bg-white p-4 shadow-sm flex flex-col"
-//           >
-//             <div
-//               onClick={() => handleMessClick(mess)}
-//               className={`flex items-center gap-4 cursor-pointer p-2 rounded-lg border ${
-//                 isExpanded ? 'border-orange-500 bg-orange-50' : 'border-gray-300'
-//               }`}
-//             >
-//               <img
-//                 src={mess.logoUrl || defaultIcon}
-//                 alt="logo"
-//                 className="w-14 h-14 rounded-md object-cover"
-//               />
-//               <div className="flex-1">
-//                 <p className="font-semibold">{mess.messName}</p>
-//                 <p className="text-l text-gray-500">{mess.city} • {mess.pincode}</p>
-//                 <p className="text-sm text-green-500">Open: {mess.openTime} - Close: {mess.closeTime}</p>
-       
-//               </div>
-//               <div
-//                 onClick={(e) => {
-//                   e.stopPropagation();
-//                   storage.setItem('messId', mess.messId);
-//                   navigate('/customer/mess-details', { state: { mess } });
-//                 }}
-//                 className="text-orange-500 text-xl"
-//               >
-//                 <FiArrowRight />
-//               </div>
-//             </div>
-
-//             {isExpanded && (
-//               <div className="mt-4 space-y-4">
-//                 <p className="text-lg font-semibold mb-2">
-//                   Available Plans ({plans.length})
-//                 </p>
-//                 <div className="grid grid-cols-1 gap-4">
-//                   {plans.length === 0 ? (
-//                     <p className="text-gray-500">No plans available</p>
-//                   ) : (
-//                     plans.map((plan) => {
-//                       const isSelected = selectedPlan?.planId === plan.planId;
-//                       return (
-//                         <div
-//                           key={plan.planId}
-//                           className={`border p-3 rounded-xl shadow-sm cursor-pointer transition-all ${
-//                             isSelected ? 'border-orange-500 bg-orange-50' : 'bg-white border-gray-300'
-//                           }`}
-//                           onClick={() => setSelectedPlan(plan)}
-//                         >
-//                           <div className="flex gap-4">
-//                             <img
-//                               src={plan.imageUrl || '/default-plan.jpg'}
-//                               alt="plan"
-//                               className="w-16 h-16 rounded object-cover"
-//                             />
-//                             <div className="flex-1">
-//                               <p className="font-medium">{plan.name}</p>
-//                               <p className="text-sm text-gray-600">{plan.description}</p>
-//                               <p className="text-sm text-gray-500">
-//                                 {plan.totalTokens} Tokens / {plan.durationDays} Days
-//                               </p>
-//                               <p className="text-sm text-gray-700 font-semibold">₹{plan.price}</p>
-
-// <p className="text-sm text-gray-700 font-semibold">
-//   {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
-// </p>
-
-
-//                             </div>
-//                           </div>
-//                           {isSelected && (
-//                             <button
-//                               className="mt-2 bg-orange-500 cursor-pointer hover:bg-orange-600 text-white py-1 px-3 rounded"
-//                               onClick={(e) => {
-//                                 e.stopPropagation();
-//                                 setShowPaymentModal(true);
-//                               }}
-//                             >
-//                               Purchase Plan
-//                             </button>
-//                           )}
-//                         </div>
-//                       );
-//                     })
-//                   )}
-//                 </div>
-//               </div>
-//             )}
-//           </div>
-//         );
-//       })}
-//     </div>
 
 
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -256,10 +157,22 @@ const CustomerMinimalDashboard = () => {
     const plans = plansByMess[mess.messId] || [];
 
     return (
+      // <div
+      //   key={mess.messId}
+      //   className="cursor-pointer border rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
+      // >
       <div
-        key={mess.messId}
-        className="cursor-pointer border rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
-      >
+  key={mess.messId}
+  className={`cursor-pointer rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col
+    ${
+      mess.status === 'active'
+        ? 'border-2 border-green-500'
+        : mess.status === 'pending'
+        ? 'border-2 border-yellow-400'
+        : 'border-2 border-red-500'
+    }`}
+>
+
         {/* Mess Image + Status */}
         <div className="relative">
           <img
@@ -267,7 +180,7 @@ const CustomerMinimalDashboard = () => {
             alt={mess.messName}
             className="w-full h-40 object-cover"
           />
-          <span
+          {/* <span
             className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full ${
               mess.status === 'active'
                 ? 'bg-green-100 text-green-700'
@@ -275,7 +188,7 @@ const CustomerMinimalDashboard = () => {
             }`}
           >
             {mess.status}
-          </span>
+          </span> */}
         </div>
 
         {/* Mess Content */}
@@ -451,43 +364,6 @@ const CustomerMinimalDashboard = () => {
 
         </div>
 
-      {/* Payment Modal */}
-      {/* {showPaymentModal && selectedPlan && (
-        <div className="fixed inset-0 bg-opacity-50 backdrop-brightness-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">Choose Payment Method</h3>
-            <div className="flex flex-col gap-3">
-              <button
-                className="bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded"
-                onClick={() => {
-                  setShowPaymentModal(false);
-                  toast.success('💵 Cash payment selected. Please pay at mess counter.');
-                }}
-              >
-                Pay with Cash
-              </button>
-
-              <PaymentGateway
-                messId={expandedMessId}
-                plan={selectedPlan}
-                onSuccess={() => {
-                  setShowPaymentModal(false);
-                  fetchPlans(expandedMessId);
-                  toast.success(`${selectedPlan?.name} has been added successfully!`);
-                 navigate('/cust/my-mess');
-                }}
-              />
-
-              <button
-                className="text-sm text-gray-500 cursor-pointer mt-2 hover:text-red-500"
-                onClick={() => setShowPaymentModal(false)}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
       {showPaymentModal && selectedPlan && (
   <div className="fixed inset-0 bg-opacity-50 backdrop-brightness-50 flex items-center justify-center z-50">
     <div className="bg-white rounded-xl p-6 shadow-xl w-[90%] max-w-md">

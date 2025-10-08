@@ -145,9 +145,9 @@ const fetchTransactions = async () => {
               <button onClick={() => navigate('/owner/history/plans')} className={` cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/plans' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
                 Plan History
               </button>
-              <button onClick={() => navigate('/owner/purchased-plans')} className={`cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/account' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
+              {/* <button onClick={() => navigate('/owner/purchased-plans')} className={`cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/account' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
             Plans Requests
-              </button>
+              </button> */}
             </div>
 
         {/* Filters */}

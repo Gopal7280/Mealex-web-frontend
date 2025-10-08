@@ -6,12 +6,15 @@ import { CheckSquare, Square } from 'lucide-react';
 import storage from '../utils/storage';
 import { getSocket, onIncomingOrder, onOrderResponse, onOrderCancelByCustomer } from '../config/socket';
 import { apiGet } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate ,useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
 
 const Orders = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+const currentPath = location.pathname;
+
 
   const [orders, setOrders] = useState([]);
   const [selectedOrders, setSelectedOrders] = useState([]);
@@ -273,101 +276,63 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
       {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
       <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <CustomerHeader/>
+     <div className="border rounded-lg p-4 bg-white">
 
-     
-        <div className="flex justify-between items-center mb-2">
-  <h2 className="font-bold text-[#33363F] text-lg md:px-4 px-1 mb-4">
-    Orders ({orders.length})
-  </h2>
-  {/* <h2 className="font-bold text-[#33363F] text-lg md:px-4 px-1 mb-4">
-  Orders ({totalOrders})
-</h2> */}
-{/* <div className="flex gap-4 mb-6 border-b border-gray-200">
-  Orders Tab - active
-  <button
-    className="px-4 py-2 -mb-1 font-medium text-gray-700 border-b-2 border-orange-500"
-  >
-    Orders
-  </button>
+  {/* Tabs section — copied and matched from PurchasedPlans.jsx */}
+  <div className="flex gap-6 mb-6 border-b pb-2">
+    <button
+      onClick={() => navigate('/orders')}
+      className={`cursor-pointer capitalize text-md font-medium transition-opacity ${
+        currentPath === '/orders'
+          ? 'opacity-100 text-orange-600 border-b-2 border-orange-500'
+          : 'opacity-50 hover:opacity-80'
+      }`}
+    >
+      Orders
+    </button>
 
-  <button
-    className="px-4 py-2 -mb-1 font-medium text-gray-500 hover:text-orange-500"
-    onClick={() => navigate('/owner/purchased-plans')}
-  >
-    Purchased Plans
-  </button>
-</div> */}
+    <button
+      onClick={() => navigate('/owner/purchased-plans')}
+      className={`cursor-pointer capitalize text-md font-medium transition-opacity ${
+        currentPath === '/owner/purchased-plans'
+          ? 'opacity-100 text-orange-600 border-b-2 border-orange-500'
+          : 'opacity-50 hover:opacity-80'
+      }`}
+    >
+      Plans Requests
+    </button>
+  </div>
 
+  {/* Header line with filter (same alignment style as PurchasedPlans) */}
+  <div className="flex justify-between items-center mb-4">
+    <h2 className="font-bold text-[#33363F] text-lg">
+      {showPastOrders ? `Past Orders(${orders.length})` : `All Orders(${orders.length})`}
+    </h2>
 
-  
-  
-</div>
+    <select
+      className="border border-gray-200 rounded px-2 py-1 cursor-pointer"
+      value={filterType}
+      onChange={(e) => {
+        const val = e.target.value;
+        setFilterType(val);
 
+        if (val === "today") {
+          setShowPastOrders(false);
+        } else if (val === "7days") {
+          setShowPastOrders(true);
+          fetchPastOrders(1, 7);
+        } else if (val === "all") {
+          setShowPastOrders(true);
+          fetchPastOrders(1, null);
+        }
+      }}
+    >
+      <option value="today">Today</option>
+      <option value="7days">Last 7 Days</option>
+      <option value="all">All Orders</option>
+    </select>
+  </div>
 
-        {selectedOrders.length > 0 && !showPastOrders && (
-          <div className="flex justify-between items-center mb-4">
-            <label className="flex  items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={selectedOrders.length === orders.length}
-                onChange={selectAll}
-                className='cursor-pointer'
-              />
-              <span>Select All</span>
-            </label>
-            <div className="space-x-4">
-              <button
-                className="bg-green-600 cursor-pointer hover:bg-green-700 text-white px-4 py-1 rounded"
-                onClick={handleAcceptAll}
-              >
-                Accept All ({selectedOrders.length})
-              </button>
-              <button
-                className="bg-red-600 cursor-pointer hover:bg-red-700 text-white px-4 py-1 rounded"
-                onClick={handleRejectAll}
-              >
-                Reject All ({selectedOrders.length})
-              </button>
-            </div>
-          </div>
-        )}
-
-        <div className="border rounded-lg p-4 bg-white">
-          {/* <div className="flex justify-between items-center mb-2">
-            
-            
-          </div> */}
-          <div className="flex justify-between items-center mb-2">
-  <h2 className="font-bold text-[#33363F] text-lg md:px-4 px-1 mb-4">
-              {showPastOrders ? "Past Orders" : "All Orders"}
-            </h2>
-  
-  <div className="relative inline-block text-left">
-  <select
-    className="border border-gray-200 rounded px-2 py-1 cursor-pointer"
-    value={filterType}
-    onChange={(e) => {
-      const val = e.target.value;
-      setFilterType(val);
-
-      if (val === "today") {
-        setShowPastOrders(false); // live API ke liye
-      } else if (val === "7days") {
-        setShowPastOrders(true);
-        fetchPastOrders(1, 7); // last 7 days
-      } else if (val === "all") {
-        setShowPastOrders(true);
-        fetchPastOrders(1, null); // all orders
-      }
-    }}
-  >
-    <option value="today">Today</option>
-    <option value="7days">Last 7 Days</option>
-    <option value="all">All Orders</option>
-  </select>
-</div>
-
-</div>
 
 
           {orders.map((order) => (
@@ -462,7 +427,8 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
           )}
 
         </div>
-      </div>
+    </div>
+
     </div>
   );
 };

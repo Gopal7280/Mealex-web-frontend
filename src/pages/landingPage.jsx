@@ -1467,6 +1467,8 @@
 //         </div>
 //       </section>
 
+
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import cdash from "../assets/cdashboard.png";
@@ -1530,24 +1532,8 @@ export default function LandingPage() {
         )}
       </header>
 
-      {/* HERO */}
-      {/* <section className="flex flex-col-reverse lg:flex-row items-center justify-between px-6 md:px-10 py-16 md:py-20 bg-gradient-to-br from-orange-50 to-green-100">
-        <div className="lg:w-1/2 text-center lg:text-left mt-10 lg:mt-0">
-          <img src={logo} alt="MealEx Logo" className="h-10 mb-5 " />
-          <p className="text-lg md:text-xl mb-6 text-gray-700 max-w-xl mx-auto lg:mx-0">
-            Meal app to manage, redeem & track meals for customers and providers
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-3">
-            <a href="https://play.google.com/store/apps/details?id=com.mealex&hl=en" target="_blank" rel="noreferrer" className="inline-block px-6 py-3 rounded-lg shadow-lg bg-green-700 text-white hover:bg-green-600 transition font-semibold">Install from Play Store</a>
-            <button onClick={() => navigate("/login", { state: "register" })} className="px-6 py-3 rounded-lg shadow-lg bg-blue-900 text-white hover:bg-blue-800 transition">Get Started (Free)</button>
-          </div>
-        </div>
-        <div className="lg:w-1/2 mb-10 lg:mb-0 flex justify-center">
-          <img src={odash} alt="MealEx App Preview" className="w-full max-w-xl rounded-xl shadow-2xl" />
-        </div>
-      </section> */}
+{/*       
       <section className="flex flex-col-reverse lg:flex-row items-center justify-between px-6 md:px-10 py-20 bg-gradient-to-br from-orange-50 to-green-50">
-  {/* Text Content */}
   <div className="lg:w-1/2 text-center lg:text-left mt-10 lg:mt-0">
     <h1 className="text-4xl md:text-5xl font-extrabold text-gray-800 mb-4">
       MealEx – Smart Digital Meal Management
@@ -1562,7 +1548,7 @@ export default function LandingPage() {
         rel="noreferrer"
         className="inline-flex items-center justify-center px-6 py-3 rounded-lg shadow-lg bg-green-500 text-white hover:bg-green-600 transition font-semibold text-lg gap-2"
       >
-        <span className="text-xl">📲</span> {/* Mobile Icon */}
+        <span className="text-xl">📲</span> 
         Install on Play Store
       </a>
       <button
@@ -1577,13 +1563,79 @@ export default function LandingPage() {
     </div>
   </div>
 
-  {/* Image Content */}
   <div className="lg:w-1/2 mb-10 lg:mb-0 flex justify-center relative">
     <img src={odash} alt="MealEx App Preview" className="w-full max-w-xl rounded-2xl shadow-2xl z-10" />
     <div className="absolute -bottom-8 -right-8 w-32 h-32 bg-orange-200 rounded-full opacity-50 blur-3xl z-0"></div>
     <div className="absolute -top-10 -left-10 w-32 h-32 bg-green-200 rounded-full opacity-50 blur-3xl z-0"></div>
   </div>
+</section> */}
+
+<section className="relative overflow-hidden bg-gradient-to-br from-orange-50 to-green-50 py-24 px-6 md:px-16">
+  <div className="absolute -top-16 -left-16 w-64 h-64 bg-orange-200 rounded-full opacity-30 blur-3xl animate-pulse-slow z-0"></div>
+  <div className="absolute -bottom-20 -right-20 w-72 h-72 bg-green-200 rounded-full opacity-30 blur-3xl animate-pulse-slow z-0"></div>
+
+  <div className="relative max-w-7xl mx-auto flex flex-col-reverse lg:flex-row items-center gap-12">
+    
+    <div className="lg:w-1/2 text-center lg:text-left space-y-6 z-10">
+      <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight">
+        MealEx – <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 to-green-500">Smart Digital Meals</span>
+      </h1>
+      <p className="text-lg md:text-xl text-gray-700 max-w-md mx-auto lg:mx-0">
+        Effortlessly manage, redeem & track meals for customers and providers. Seamless, cashless, and transparent experience.
+      </p>
+
+      <div className="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 mt-6">
+        <a
+          href="https://play.google.com/store/apps/details?id=com.mealex&hl=en"
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-lg shadow-lg hover:scale-105 hover:shadow-2xl transition-transform duration-300"
+        >
+          <span className="text-2xl">📲</span>
+          Install on Play Store
+        </a>
+        <button
+          onClick={() => navigate("/login", { state: "register" })}
+          className="inline-flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold text-lg shadow-lg hover:scale-105 hover:shadow-2xl transition-transform duration-300"
+        >
+          Get Started (Free)
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="mt-10 flex flex-wrap gap-4 justify-center lg:justify-start">
+        {[
+          { title: "Cashless", color: "bg-green-100 text-green-700" },
+          { title: "Transparent", color: "bg-blue-100 text-blue-700" },
+          { title: "Simple", color: "bg-orange-100 text-orange-700" },
+          { title: "Scalable", color: "bg-red-100 text-red-700" }
+        ].map((f, i) => (
+          <span key={i} className={`px-4 py-2 rounded-full font-semibold ${f.color} shadow-sm`}>
+            {f.title}
+          </span>
+        ))}
+      </div>
+    </div>
+
+    <div className="lg:w-1/2 relative flex justify-center">
+      <div className="relative z-10">
+        <img src={odash} alt="MealEx App Preview" className="rounded-3xl shadow-2xl w-full max-w-lg transform hover:scale-105 transition-transform duration-500" />
+      </div>
+      {/* <div className="absolute -top-10 -right-10 bg-white p-4 rounded-xl shadow-lg w-40 text-center animate-float">
+        <span className="block text-green-500 text-3xl mb-2">✅</span>
+        <p className="text-gray-700 text-sm font-semibold">Instant Token Redemption</p>
+      </div>
+      <div className="absolute -bottom-10 -left-10 bg-white p-4 rounded-xl shadow-lg w-40 text-center animate-float delay-200">
+        <span className="block text-orange-500 text-3xl mb-2">📊</span>
+        <p className="text-gray-700 text-sm font-semibold">Real-time Tracking</p>
+      </div> */}
+    </div>
+    
+  </div>
 </section>
+
 
 
       {/* FULL LONG DESCRIPTION */}

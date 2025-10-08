@@ -533,7 +533,7 @@ const handlePlanDecision = async (requestId, decision) => {
         <div className="bg-white p-4 rounded-2xl shadow">
 
           {/* Tabs */}
-          <div className="flex gap-6 mb-6 border-b pb-2">
+          {/* <div className="flex gap-6 mb-6 border-b pb-2">
             <button
               onClick={() => navigate('/history')}
               className={`cursor-pointer capitalize text-md font-medium transition-opacity ${
@@ -566,7 +566,48 @@ const handlePlanDecision = async (requestId, decision) => {
             >
               Plans Requests
             </button>
-          </div>
+          </div> */}
+          {/* <div className="flex gap-6 mb-6 border-b pb-2">
+  <button
+    onClick={() => navigate('/orders')}
+    className={`cursor-pointer capitalize text-md font-medium transition-opacity ${
+      currentPath === '/owner/orders' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'
+    }`}
+  >
+    Orders ({orders.length})
+  </button>
+
+  <button
+    onClick={() => navigate('/owner/purchased-plans')}
+    className={`cursor-pointer capitalize text-md font-medium transition-opacity ${
+      currentPath === '/owner/purchased-plans' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'
+    }`}
+  >
+    Plans Requests
+  </button>
+</div> */}
+
+<div className="flex gap-6 mb-6 border-b pb-2">
+  <button
+    onClick={() => navigate('/orders')}
+    className={`cursor-pointer capitalize text-md font-medium transition-opacity ${
+      currentPath === '/orders' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'
+    }`}
+  >
+    Orders
+  </button>
+
+  <button
+    onClick={() => navigate('/owner/purchased-plans')}
+    className={`cursor-pointer capitalize text-md font-medium transition-opacity ${
+      currentPath === '/owner/purchased-plans' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'
+    }`}
+  >
+    Plans Requests
+  </button>
+</div>
+
+
 
           {/* Filters */}
           <div className="flex gap-4 mb-4 items-center">
