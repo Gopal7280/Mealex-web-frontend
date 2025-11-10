@@ -10,6 +10,14 @@ import { FiArrowRight } from "react-icons/fi";  // sabse upar import
 import Navbar2 from '../layouts/Navbar2';
 import PaymentGateway from './PaymentGateway';
 import toast from 'react-hot-toast';
+import { AiOutlineBarcode } from "react-icons/ai";
+import { MdRoomService } from "react-icons/md";
+import { IoLocationOutline } from "react-icons/io5";
+import { HiOutlineBuildingOffice } from "react-icons/hi2";
+import { FiPhone, FiMail } from "react-icons/fi";
+import { FaMapMarkedAlt, FaCalendarAlt } from "react-icons/fa";
+import { AiOutlineClockCircle } from "react-icons/ai";
+
 
 const CustomerMinimalDashboard = () => {
   const navigate = useNavigate();
@@ -84,6 +92,26 @@ const CustomerMinimalDashboard = () => {
 };
 
 
+const dayShortMap = {
+  Monday: "Mon",
+  Tuesday: "Tue",
+  Wednesday: "Wed",
+  Thursday: "Thu",
+  Friday: "Fri",
+  Saturday: "Sat",
+  Sunday: "Sun",
+};
+
+const formatTime12Hour = (time24) => {
+  if (!time24) return "";
+  const [hourStr, minute] = time24.split(":");
+  let hour = parseInt(hourStr, 10);
+  const ampm = hour >= 12 ? "PM" : "AM";
+  hour = hour % 12 || 12; // 0 ko 12 me convert
+  return `${hour}:${minute} ${ampm}`;
+};
+
+
   return (
     <div className="flex h-screen ">
         <Navbar2 />
@@ -150,90 +178,118 @@ const CustomerMinimalDashboard = () => {
   ) : (
 
 
-
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
   {messes.map((mess) => {
     const isExpanded = expandedMessId === mess.messId;
     const plans = plansByMess[mess.messId] || [];
 
     return (
-      // <div
-      //   key={mess.messId}
-      //   className="cursor-pointer border rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col"
-      // >
       <div
-  key={mess.messId}
-  className={`cursor-pointer rounded-xl bg-white shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col
-    ${
-      mess.status === 'active'
-        ? 'border-2 border-green-500'
-        : mess.status === 'pending'
-        ? 'border-2 border-yellow-400'
-        : 'border-2 border-red-500'
-    }`}
->
-
-        {/* Mess Image + Status */}
+        key={mess.messId}
+        onClick={() => handleMessClick(mess)}
+        className={`cursor-pointer rounded-xl bg-white shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col
+          ${mess.status === 'active'
+            ? 'border-2 border-green-500'
+            : mess.status === 'pending'
+            ? 'border-2 border-yellow-400'
+            : 'border-2 border-red-500'}`}
+      >
+        {/* Mess Image */}
         <div className="relative">
           <img
-            src={mess.logoUrl || defaultIcon}
+            src={mess.logoUrl || '/default-icon.png'}
             alt={mess.messName}
-            className="w-full h-40 object-cover"
+            className="w-full h-44 object-cover"
           />
-          {/* <span
-            className={`absolute top-2 right-2 px-3 py-1 text-xs font-semibold rounded-full ${
-              mess.status === 'active'
-                ? 'bg-green-100 text-green-700'
-                : 'bg-red-100 text-red-700'
-            }`}
-          >
-            {mess.status}
-          </span> */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
         </div>
 
         {/* Mess Content */}
-        <div
-          onClick={() => handleMessClick(mess)}
-          className={`p-4 flex flex-col flex-1 ${
-            isExpanded ? 'bg-orange-50 border-t-2 border-orange-400' : ''
-          }`}
-        >
-          <div className="flex items-start justify-between mb-2">
+        <div className={`p-4 flex flex-col flex-1 space-y-3 `}>
+          <div className="flex justify-between items-start">
             <h3 className="text-lg font-bold text-gray-800">{mess.messName}</h3>
             <div
               onClick={(e) => {
                 e.stopPropagation();
                 storage.setItem('messId', mess.messId);
-                navigate('/customer/mess-details', { state: { mess } });
+                navigate('/cust/mess-details', { state: { mess } });
               }}
               className="text-orange-500 text-xl"
             >
               <FiArrowRight />
             </div>
           </div>
+                   {mess.services.length > 0 && (
+            <div className="flex flex-wrap font-black gap-2 mt-1">
+              <MdRoomService className="text-orange-500 mt-[2px]" />
+              {mess.services.map((service, idx) => (
+                <span
+                  key={idx}
+                  className="bg-orange-100 text-orange-600 text-xs font-medium px-2 py-1 rounded-full"
+                >
+                  {service}
+                </span>
+              ))}
+            </div>
+          )}
+                <div className="mt-3 grid grid-cols-3 text-center text-sm">
+            <div>
+              <p className="flex justify-center items-center gap-1 text-gray-500">
+                <IoLocationOutline className="text-orange-500" /> City
+              </p>
+              <p className="font-semibold text-black">{mess.city}</p>
+            </div>
+            <div>
+              <p className="flex justify-center items-center gap-1 text-gray-500">
+                <HiOutlineBuildingOffice className="text-orange-500" /> Type
+              </p>
+<p className="font-semibold">
+  {mess.messType?.toLowerCase() === 'both'
+    ? 'Both (Veg & Non-Veg)'
+    : mess.messType}
+</p>
 
-          <p className="text-sm text-gray-500 mb-2 capitalize">
-            Type: {mess.messType}
-          </p>
-
-          <div className="space-y-1 text-sm text-gray-700">
-            <p><span className="font-semibold">City:</span> {mess.city}</p>
-            <p className="break-words whitespace-normal">
-              <span className="font-semibold">Address:</span> {mess.address}
-            </p>
-            <p><span className="font-semibold">Contact:</span> {mess.contactNumber}</p>
-            <p className="break-words whitespace-normal">
-              <span className="font-semibold">Email:</span> {mess.email}
-            </p>
-            <p className="text-green-600 text-sm">
-              Open: {mess.openTime} - Close: {mess.closeTime}
-            </p>
+            </div>
+            <div>
+              <p className="flex justify-center items-center gap-1 text-gray-500">
+                <FiPhone className="text-orange-500" /> Contact
+              </p>
+              <p className="font-semibold">{mess.contactNumber}</p>
+            </div>
           </div>
+
+          <div className="grid grid-cols-1 gap-x-2 text-sm text-gray-700">
+ <p className="flex items-center gap-2 break-words whitespace-normal p-1 overflow-hidden text-sm">
+   <FiMail className="text-orange-500" />
+   <span className="font-semibold">Email:</span> {mess.email}
+ </p>
+ 
+ <p className="flex items-center gap-2 text-sm p-1">
+   <FaMapMarkedAlt className="text-orange-500" />
+   <span className="font-semibold">Address:</span> {mess.address}
+ </p>
+ 
+ <p className="flex items-center gap-2 text-green-600 text-sm mt-1 p-1">
+   <AiOutlineClockCircle className="text-orange-500" />
+   <span className="font-semibold">Open:</span> {formatTime12Hour(mess.openTime)} 
+   <span className="font-semibold"> - Close:</span> {formatTime12Hour(mess.closeTime)}
+ </p>
+{mess.daysOpen?.length > 0 && (
+  <p className="flex items-center gap-2 text-sm text-gray-700 p-1">
+    <FaCalendarAlt className="text-orange-500" />
+    <span className="font-semibold">Days Open:</span>{" "}
+    {mess.daysOpen.map(day => dayShortMap[day] || day).join(", ")}
+  </p>
+)}
+
+
+          </div>
+
         </div>
 
         {/* Expanded Plans */}
         {isExpanded && (
-          <div className="px-4 pb-4">
+          <div className="px-4 pb-4 space-y-6 border-t bg-gray-50">
             <p className="text-lg font-semibold mt-4 mb-2">
               Available Plans ({plans.length})
             </p>
@@ -246,18 +302,18 @@ const CustomerMinimalDashboard = () => {
                   return (
                     <div
                       key={plan.planId}
-                      className={`border p-3 rounded-xl shadow-sm cursor-pointer transition-all ${
-                        isSelected
-                          ? 'border-orange-500 bg-orange-50'
-                          : 'bg-white border-gray-300'
-                      }`}
-                      onClick={() => setSelectedPlan(plan)}
+                      className={`border p-4 rounded-xl shadow-sm cursor-pointer transition-all
+                        ${isSelected ? 'border-orange-500 bg-orange-50' : 'bg-white border-gray-300'}`}
+onClick={(e) => {
+  e.stopPropagation(); // prevent mess collapse
+  setSelectedPlan(plan);
+}}
                     >
                       <div className="flex gap-4">
                         <img
                           src={plan.imageUrl || '/default-plan.jpg'}
                           alt="plan"
-                          className="w-16 h-16 rounded object-cover"
+                          className="w-20 h-20 rounded-lg object-cover"
                         />
                         <div className="flex-1">
                           <p className="font-medium">{plan.name}</p>
@@ -266,14 +322,25 @@ const CustomerMinimalDashboard = () => {
                             {plan.totalTokens} Tokens / {plan.durationDays} Days
                           </p>
                           <p className="text-sm text-gray-700 font-semibold">₹{plan.price}</p>
-                          <p className="text-sm text-gray-700 font-semibold">
-                            {Array.isArray(plan.menu) ? plan.menu.join(", ") : plan.menu}
-                          </p>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {Array.isArray(plan.menu) ? (
+                              plan.menu.map((item, i) => (
+                                <span
+                                  key={i}
+                                  className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded-full border border-green-300"
+                                >
+                                  {item}
+                                </span>
+                              ))
+                            ) : (
+                              <p className="text-sm font-semibold text-green-600">Menu: {plan.menu}</p>
+                            )}
+                          </div>
                         </div>
                       </div>
                       {isSelected && (
                         <button
-                          className="mt-2 bg-orange-500 hover:bg-orange-600 cursor-pointer text-white py-1 px-3 rounded"
+                          className="mt-3 bg-orange-500 cursor-pointer hover:bg-orange-700 text-white py-2 px-3 rounded w-full"
                           onClick={(e) => {
                             e.stopPropagation();
                             setShowPaymentModal(true);
@@ -294,10 +361,11 @@ const CustomerMinimalDashboard = () => {
   })}
 </div>
 
-
     
   )}
 </div>
+
+
 
 
      

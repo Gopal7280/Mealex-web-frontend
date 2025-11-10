@@ -1,17 +1,16 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiPost } from '../services/api';
 import storage from '../utils/storage';
 import toast from 'react-hot-toast';
 import { ArrowLeft } from 'lucide-react';
-import { Clock } from "lucide-react";
-import { useRef } from "react";
-
+import { MdPowerSettingsNew  } from "react-icons/md";
 
 
 const InputGroup = ({ label, children }) => (
-  <div className="space-y-8">
-    <label className="text-sm font-bold text-black">{label}</label>
+  <div className="space-y-2">
+    <label className="text-sm font-semibold text-black">{label}</label>
     {children}
   </div>
 );
@@ -21,18 +20,15 @@ const MessDetailsForm = () => {
   const [isDaysModalOpen, setIsDaysModalOpen] = useState(false);
   const [selectedDays, setSelectedDays] = useState([]);
   const [loading, setLoading] = useState(false);
-  const openTimeRef = useRef(null);
-const closeTimeRef = useRef(null);
 
-     const validateFile = (file, allowedTypes) => {
-  if (!file) return true;
-  if (!allowedTypes.includes(file.type)) {
-    alert("Only PDF, JPG, PNG files are allowed.");
-    return false;
-  }
-  return true;
-};
-
+  const validateFile = (file, allowedTypes) => {
+    if (!file) return true;
+    if (!allowedTypes.includes(file.type)) {
+      alert('Only PDF, JPG, PNG files are allowed.');
+      return false;
+    }
+    return true;
+  };
 
   const [form, setForm] = useState({
     messName: '',
@@ -47,7 +43,7 @@ const closeTimeRef = useRef(null);
     fssaiLicenseNumber: '',
     activationDocType: '',
     openTime: '10:30',
-  closeTime: '22:30',
+    closeTime: '22:30',
     daysOpen: [],
     services: [],
   });
@@ -56,34 +52,30 @@ const closeTimeRef = useRef(null);
   const [activationDoc, setActivationDoc] = useState(null);
   const [fssaiDoc, setFssaiDoc] = useState(null);
 
+  const handleToggleDay = (day) => {
+    setSelectedDays((prev) => {
+      const updatedDays = prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day];
 
-const handleToggleDay = (day) => {
-  setSelectedDays((prev) => {
-    const updatedDays = prev.includes(day)
-      ? prev.filter((d) => d !== day)
-      : [...prev, day];
+      const fullDayMap = {
+        Mon: 'Monday',
+        Tue: 'Tuesday',
+        Wed: 'Wednesday',
+        Thu: 'Thursday',
+        Fri: 'Friday',
+        Sat: 'Saturday',
+        Sun: 'Sunday',
+      };
 
-    const fullDayMap = {
-      Mon: 'Monday',
-      Tue: 'Tuesday',
-      Wed: 'Wednesday',
-      Thu: 'Thursday',
-      Fri: 'Friday',
-      Sat: 'Saturday',
-      Sun: 'Sunday',
-    };
+      const mappedDays = updatedDays.map((d) => fullDayMap[d]);
 
-    const mappedDays = updatedDays.map((d) => fullDayMap[d]);
+      setForm((prevForm) => ({
+        ...prevForm,
+        daysOpen: mappedDays,
+      }));
 
-    setForm((prevForm) => ({
-      ...prevForm,
-      daysOpen: mappedDays,
-    }));
-
-    return updatedDays;
-  });
-};
-
+      return updatedDays;
+    });
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -113,154 +105,214 @@ const handleToggleDay = (day) => {
     }
 
     if (!logoFile) {
-      alert("Please upload Mess Logo.");
+      alert('Please upload Mess Logo.');
       return false;
     }
 
     if (!activationDoc) {
-      alert("Please upload Activation Document.");
+      alert('Please upload Activation Document.');
       return false;
     }
 
     if (form.services.length === 0) {
-      alert("Please select at least one service offered.");
+      alert('Please select at least one service offered.');
       return false;
     }
 
     if (form.daysOpen.length === 0) {
-      alert("Please select days open.");
+      alert('Please select days open.');
       return false;
     }
 
     if (!/^\d{10}$/.test(form.contactNumber)) {
-      alert("Please enter a valid 10-digit contact number.");
+      alert('Please enter a valid 10-digit contact number.');
       return false;
     }
 
     if (form.alternateContact && !/^\d{10}$/.test(form.alternateContact)) {
-      alert("Please enter a valid 10-digit alternate contact number.");
+      alert('Please enter a valid 10-digit alternate contact number.');
       return false;
     }
 
-    // ✅ FSSAI validation
+    // FSSAI validation
     if (form.fssaiLicenseNumber && !fssaiDoc) {
-      alert("Please upload FSSAI Document since you entered License Number.");
+      alert('Please upload FSSAI Document since you entered License Number.');
       return false;
     }
     if (fssaiDoc && !form.fssaiLicenseNumber) {
-      alert("Please enter FSSAI License Number since you uploaded FSSAI Document.");
+      alert('Please enter FSSAI License Number since you uploaded FSSAI Document.');
       return false;
     }
- 
-
 
     return true;
   };
 
+  const [openTime, setOpenTime] = useState({ hour: '10', minute: '30', period: 'AM' });
+  const [closeTime, setCloseTime] = useState({ hour: '10', minute: '30', period: 'PM' });
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (loading) return;
-  setLoading(true);
-
-  if (!validateFields()) {
-    setLoading(false);
-    return;
-  }
-
-  const formData = new FormData();
-
-  const normalizeArray = (val) => {
-    if (!val) return [];
-    if (Array.isArray(val)) return val;
-    return [val];
+  // Helper — convert 12-hour to 24-hour format
+  const convertTo24Hour = ({ hour, minute, period }) => {
+    let h = parseInt(hour, 10);
+    if (period === 'PM' && h !== 12) h += 12;
+    if (period === 'AM' && h === 12) h = 0;
+    return `${String(h).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
   };
 
-  // ensure array fields
-  normalizeArray(form.daysOpen).forEach((day) => {
-    formData.append("daysOpen[]", day);
-  });
+  // Update form values whenever openTime or closeTime change
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      openTime: convertTo24Hour(openTime),
+      closeTime: convertTo24Hour(closeTime),
+    }));
+  }, [openTime, closeTime]);
 
-  normalizeArray(form.services).forEach((service) => {
-    formData.append("services[]", service);
-  });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (loading) return;
+    setLoading(true);
 
-  // other fields
-  for (const key in form) {
-    if (key !== "daysOpen" && key !== "services") {
-      formData.append(key, form[key]);
+    if (!validateFields()) {
+      setLoading(false);
+      return;
     }
-  }
 
-  // file validations
-  if (!validateFile(logoFile, ["image/jpeg", "image/png"])) {
-    setLoading(false);
-    return;
-  }
-  if (!validateFile(activationDoc, ["image/jpeg", "image/png", "application/pdf"])) {
-    setLoading(false);
-    return;
-  }
-  if (fssaiDoc && !validateFile(fssaiDoc, ["image/jpeg", "image/png", "application/pdf"])) {
-    setLoading(false);
-    return;
-  }
+    const formData = new FormData();
 
-  formData.append("logoFile", logoFile);
-  formData.append("activationDoc", activationDoc);
-  if (fssaiDoc) formData.append("fssaiDoc", fssaiDoc);
+    const normalizeArray = (val) => {
+      if (!val) return [];
+      if (Array.isArray(val)) return val;
+      return [val];
+    };
 
-  const token = storage.getItem("token")?.replace(/"/g, "");
-  if (!token) {
-    toast.error("Session expired. Please log in again.");
-    setLoading(false);
-    return;
-  }
-
-  try {
-    const res = await apiPost("/owner/mess", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-        Authorization: `Bearer ${token}`,
-      },
+    // ensure array fields
+    normalizeArray(form.daysOpen).forEach((day) => {
+      formData.append('daysOpen[]', day);
     });
 
-    if (res.success) {
-      const { email, requestId, messId, messName } = res;
-      storage.setItem("messEmail", email);
-      storage.setItem("messRequestId", requestId);
-      storage.setItem("messId", messId);
-      storage.setItem("messName", messName);
-      navigate("/verify-mess-otp");
+    normalizeArray(form.services).forEach((service) => {
+      formData.append('services[]', service);
+    });
+
+    // other fields
+    for (const key in form) {
+      if (key !== 'daysOpen' && key !== 'services') {
+        formData.append(key, form[key]);
+      }
     }
-  } catch (err) {
-    toast.error(err?.response?.data?.message || "Mess registration failed.");
-  } finally {
-    setLoading(false);
-  }
-};
+
+    // file validations
+    if (!validateFile(logoFile, ['image/jpeg', 'image/png'])) {
+      setLoading(false);
+      return;
+    }
+    if (!validateFile(activationDoc, ['image/jpeg', 'image/png', 'application/pdf'])) {
+      setLoading(false);
+      return;
+    }
+    if (fssaiDoc && !validateFile(fssaiDoc, ['image/jpeg', 'image/png', 'application/pdf'])) {
+      setLoading(false);
+      return;
+    }
+
+    formData.append('logoFile', logoFile);
+    formData.append('activationDoc', activationDoc);
+    if (fssaiDoc) formData.append('fssaiDoc', fssaiDoc);
+
+    const token = storage.getItem('token')?.replace(/"/g, '');
+    if (!token) {
+      toast.error('Session expired. Please log in again.');
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await apiPost('/owner/mess', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      console.log(res);
+      if (res.success) {
+        const { email, requestId, messId, messName } = res;
+        storage.setItem('messEmail', email);
+        storage.setItem('messRequestId', requestId);
+        storage.setItem('messId', messId);
+        storage.setItem('messName', messName);
+        navigate('/verify-mess-otp');
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || 'Mess registration failed.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   
+    const handleLogout = async () => {
+    try {
+      const userJwt = storage.getItem("token");
+      const fcmToken = storage.getItem("fcmToken");
+      await apiPost(
+        "/user/logout",
+        { fcmToken },
+        { headers: { Authorization: `Bearer ${userJwt}` } }
+      );
+    } catch (err) {
+    } finally {
+      storage.clear();
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      if (window.Razorpay) delete window.Razorpay;
+      window.location.replace("/login");
+    }
+  };
+
   return (
- 
     <form
-  onSubmit={handleSubmit}
-  className="w-full mx-auto p-6 sm:p-8 md:p-10 bg-white rounded-2xl shadow space-y-8"
->
-  <div className="flex items-center gap-2 mb-4">
+      onSubmit={handleSubmit}
+      className="w-full mx-auto p-6 sm:p-8 md:p-10 bg-white rounded-2xl shadow space-y-6"
+    >
+      {/* <div className="flex items-center gap-2 mb-4">
+        <ArrowLeft
+          className="w-8 h-8 cursor-pointer text-orange-500 hover:text-red-500"
+          onClick={() => navigate(-1)}
+        />
+        <h2 className="text-2xl sm:text-3xl mb-2 font-bold  text-orange-500">Create Mess Profile</h2>
+
+        <button
+    onClick={handleLogout}
+    className={`flex items-center gap-1 mt-2 sm:mt-0 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm transition-all duration-200 `}
+  >
+    <MdPowerSettingsNew size={18} />
+    LOG OUT
+  </button>
+      </div> */}
+      <div className="flex justify-between items-center mb-6 relative">
+  <div className="flex items-center gap-2">
     <ArrowLeft
       className="w-8 h-8 cursor-pointer text-orange-500 hover:text-red-500"
       onClick={() => navigate(-1)}
     />
-    <h2 className="text-2xl sm:text-3xl font-bold text-orange-500">
-      Create Mess Profile
-    </h2>
+    <h2 className="text-2xl sm:text-3xl font-bold text-orange-500">Create Mess Profile</h2>
   </div>
 
+  <button
+    onClick={handleLogout}
+    className="flex items-center gap-1  hover:bg-red-200 text-red-500 
+               px-3 sm:px-4 py-1 sm:py-2 rounded-md text-xs sm:text-sm cursor-pointer
+               font-semibold shadow-sm transition-all duration-200"
+  >
+    <MdPowerSettingsNew size={16} className="sm:w-5 sm:h-5" />
+    <span className="hidden sm:inline">LOG OUT</span>
+  </button>
+</div>
 
-      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6"> */}
-  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         <InputGroup label="Mess Name*">
           <input
             type="text"
@@ -268,7 +320,7 @@ const handleSubmit = async (e) => {
             placeholder="Enter Mess Name"
             value={form.messName}
             onChange={handleChange}
-            className="w-full px-4 py-3 border  bg-gray-100 border-black focus:border-2 rounded-xl"
+            className="w-full px-4 py-3 border bg-gray-100 border-black rounded-xl"
             required
           />
         </InputGroup>
@@ -278,7 +330,7 @@ const handleSubmit = async (e) => {
             name="messType"
             value={form.messType}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
+            className="w-full px-4 py-3 cursor-pointer bg-gray-100 border border-black rounded-xl"
             required
           >
             <option value="">Select Type</option>
@@ -371,136 +423,12 @@ const handleSubmit = async (e) => {
           />
         </InputGroup>
 
-
-{/* 
-<InputGroup label="Opening Time*">
-  <div className="relative">
-    <input
-      ref={openTimeRef}
-      type="time"
-      name="openTime"
-      value={form.openTime}
-      onChange={handleChange}
-      className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl focus:ring-2 focus:ring-orange-500 "
-      required
-    />
-   
-  </div>
-</InputGroup>
-
-
-
-<InputGroup label="Closing Time*">
-  <div className="relative">
-    <input
-      ref={openTimeRef}
-      type="time"
-      name="closeTime"
-      value={form.closeTime}
-      onChange={handleChange}
-      className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl focus:ring-2 focus:ring-orange-500"
-      required
-    />
-     <Clock
-      className="absolute right-3 top-1/2 transform -translate-y-1/2 
-                 text-black w-5 h-5 cursor-pointer"
-      onClick={() => openTimeRef.current?.showPicker?.()}
-    />
-    
-  </div>
-</InputGroup> */}
-
-
-<InputGroup label="Opening Time*">
-  <div className="relative">
-    <input
-      ref={openTimeRef}
-      type="time"
-      name="openTime"
-      value={form.openTime}
-      onChange={handleChange}
-      className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl focus:ring-2 focus:ring-orange-500 pr-10"
-      required
-    />
-    <Clock
-      className="absolute right-3 top-1/2 transform -translate-y-1/2 
-                 text-black w-5 h-5 cursor-pointer"
-      onClick={() => openTimeRef.current?.showPicker?.()}
-    />
-  </div>
-</InputGroup>
-
-<InputGroup label="Closing Time*">
-  <div className="relative">
-    <input
-      ref={closeTimeRef}
-      type="time"
-      name="closeTime"
-      value={form.closeTime}
-      onChange={handleChange}
-      className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl focus:ring-2 focus:ring-orange-500 pr-10"
-      required
-    />
-    <Clock
-      className="absolute right-3 top-1/2 transform -translate-y-1/2 
-                 text-black w-5 h-5 cursor-pointer"
-      onClick={() => closeTimeRef.current?.showPicker?.()}
-    />
-  </div>
-</InputGroup>
-
-
-         <InputGroup label="FSSAI License Number">
-          <input
-            type="text"
-            name="fssaiLicenseNumber"
-            placeholder="e.g., 10022XXXXX00000"
-            value={form.fssaiLicenseNumber}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
-          />
-       
-        </InputGroup>
-    
-<InputGroup label="Upload Mess Logo*">
-  <input
-    type="file"
-    accept="image/jpeg,image/png"
-    onChange={(e) => setLogoFile(e.target.files[0])}
-    required
-    className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
-  />
-  <p className="mt-1 text-xs text-gray-500">Only JPG, PNG files are allowed.</p>
-</InputGroup>
-
-<InputGroup label="Upload Activation Document*">
-  <input
-    type="file"
-    accept="image/jpeg,image/png,application/pdf"
-    onChange={(e) => setActivationDoc(e.target.files[0])}
-    required
-    className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
-  />
-  <p className="mt-1 text-xs text-gray-500">Only PDF, JPG, PNG files are allowed.</p>
-</InputGroup>
-
-<InputGroup label="Upload FSSAI Document">
-  <input
-    type="file"
-    accept="image/jpeg,image/png,application/pdf"
-    onChange={(e) => setFssaiDoc(e.target.files[0])}
-    className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
-  />
-  <p className="mt-1 text-xs text-gray-500">Only PDF, JPG, PNG files are allowed.</p>
-</InputGroup>
-
-
-           <InputGroup label="Activation Document Type*">
+        <InputGroup label="Activation Document Type*">
           <select
             name="activationDocType"
             value={form.activationDocType}
             onChange={handleChange}
-            className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
+            className="w-full px-4 py-3 bg-gray-100 cursor-pointer border border-black rounded-xl"
             required
           >
             <option value="">Select Type</option>
@@ -513,139 +441,299 @@ const handleSubmit = async (e) => {
             <option value="other">Other</option>
           </select>
         </InputGroup>
-        <InputGroup label="Services Offered*">
-  <div className="flex flex-wrap gap-2 w-full">
-    {['dine', 'take-away', 'delivery'].map((service) => (
-      <button
-        type="button"
-        key={service}
-        onClick={() => {
-          setForm((prev) => ({
-            ...prev,
-            services: prev.services.includes(service)
-              ? prev.services.filter(s => s !== service)
-              : [...prev.services, service]
-          }));
-        }}
-        className={`px-4 py-3 border border-black rounded-xl ${
-          form.services.includes(service) ? 'bg-orange-500 text-white' : 'bg-gray-100'
-        }`}
-      >
-        {service}
-      </button>
-    ))}
-  </div>
-</InputGroup>
 
-
-       <div className="mb-4">
-  <label className="block mb-1 text-sm font-medium text-black">Days Open</label>
-  <button
-    type="button"
-    onClick={() => setIsDaysModalOpen(true)}
-    className="px-4 py-3 border border-black rounded-xl bg-gray-100"
-  >
-    {selectedDays.length > 0 ? selectedDays.join(', ') : 'Select Days Open'}
-  </button>
-</div>
-
-      </div>
-
-     {isDaysModalOpen && (
-    <div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm z-50 flex justify-center items-center p-4">
-      <div className="bg-white shadow p-6 rounded-lg w-full max-w-sm">
-        <h2 className="text-lg font-semibold mb-4">Select Days Open</h2>
-        <div className="grid grid-cols-3 gap-2">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
-            <button
-              key={day}
-              type="button"
-              onClick={() => handleToggleDay(day)}
-              className={`border px-3 py-1 rounded ${
-                selectedDays.includes(day)
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-gray-100'
-              }`}
-            >
-              {day}
-            </button>
-          ))}
-        </div>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            className="text-gray-500"
-            onClick={() => setIsDaysModalOpen(false)}
-          >
-            Cancel
-          </button>
-          <button
-            className="bg-orange-500 text-white px-4 py-1 rounded"
-            onClick={() => {
-              const fullDayMap = {
-                Mon: 'Monday',
-                Tue: 'Tuesday',
-                Wed: 'Wednesday',
-                Thu: 'Thursday',
-                Fri: 'Friday',
-                Sat: 'Saturday',
-                Sun: 'Sunday',
-              };
-              const mappedDays = selectedDays.map((day) => fullDayMap[day]);
-              setForm((prev) => ({ ...prev, daysOpen: mappedDays }));
-              setIsDaysModalOpen(false);
+        <InputGroup label="Upload Activation Document* (PDF, JPG, PNG)">
+          <input
+            type="file"
+            accept="image/jpeg,image/png,application/pdf"
+            onChange={(e) => {
+              if (!form.activationDocType) return; // ignore if disabled
+              setActivationDoc(e.target.files[0]);
             }}
-          >
-            Save
-          </button>
-        </div>
+            required={!!form.activationDocType}
+            disabled={!form.activationDocType}
+            className={`w-full px-4 py-3 bg-gray-100 border rounded-xl ${
+              !form.activationDocType ? 'opacity-60 cursor-not-allowed border-black' : 'border-black'
+            }`}
+          />
+        </InputGroup>
+
+        <InputGroup label="Upload Mess Logo* (JPG, PNG)">
+          <input
+            type="file"
+            accept="image/jpeg,image/png"
+            onChange={(e) => setLogoFile(e.target.files[0])}
+            required
+            className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
+          />
+        </InputGroup>
+
+        <InputGroup label="FSSAI License Number">
+          <input
+            type="text"
+            name="fssaiLicenseNumber"
+            placeholder="e.g., 10022XXXXX00000"
+            value={form.fssaiLicenseNumber}
+            onChange={handleChange}
+            className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
+          />
+        </InputGroup>
+
+        <InputGroup label="Upload FSSAI Document (PDF, JPG, PNG)">
+          <input
+            type="file"
+            accept="image/jpeg,image/png,application/pdf"
+            onChange={(e) => {
+              if (!form.fssaiLicenseNumber) return;
+              setFssaiDoc(e.target.files[0]);
+            }}
+            disabled={!form.fssaiLicenseNumber}
+            required={!!form.fssaiLicenseNumber}
+            className={`w-full px-4 py-3 bg-gray-100 border rounded-xl ${
+              !form.fssaiLicenseNumber ? 'opacity-60 cursor-not-allowed border-black' : 'border-black'
+            }`}
+          />
+        </InputGroup>
+
+        <InputGroup label="Services Offered*">
+          <div className="flex flex-wrap gap-2 cursor-pointer w-full">
+            {['dine', 'take-away', 'delivery'].map((service) => (
+              <button
+                type="button"
+                key={service}
+                onClick={() => {
+                  setForm((prev) => ({
+                    ...prev,
+                    services: prev.services.includes(service)
+                      ? prev.services.filter((s) => s !== service)
+                      : [...prev.services, service],
+                  }));
+                }}
+                className={`px-4 py-3 border border-black rounded-xl ${
+                  form.services.includes(service) ? 'bg-orange-500 text-white' : 'bg-gray-100'
+                }`}
+              >
+                {service}
+              </button>
+            ))}
+          </div>
+        </InputGroup>
+
+        {/* Opening time, Closing time, Days open — keep heights/padding consistent to align UI */}
+        <InputGroup label="Opening Time*">
+          <div className="flex gap-2 items-center cursor-pointer h-full">
+            <input
+              type="number"
+              min="1"
+              max="12"
+              value={openTime.hour}
+              onChange={(e) => setOpenTime((prev) => ({ ...prev, hour: e.target.value }))}
+              className="w-20 px-4 py-3 border border-black rounded-xl bg-gray-100 text-center"
+            />
+            <span className="mt-1">:</span>
+            <input
+              type="number"
+              min="0"
+              max="59"
+              value={openTime.minute}
+              onChange={(e) =>
+                setOpenTime((prev) => ({ ...prev, minute: String(e.target.value).padStart(2, '0') }))
+              }
+              className="w-20 px-4 py-3 border border-black rounded-xl bg-gray-100 text-center"
+            />
+            <select
+              value={openTime.period}
+              onChange={(e) => setOpenTime((prev) => ({ ...prev, period: e.target.value }))}
+              className="px-4 py-3 border border-black rounded-xl bg-gray-100"
+            >
+              <option>AM</option>
+              <option>PM</option>
+            </select>
+          </div>
+        </InputGroup>
+
+        <InputGroup label="Closing Time*">
+          <div className="flex gap-2 items-center cursor-pointer h-full">
+            <input
+              type="number"
+              min="1"
+              max="12"
+              value={closeTime.hour}
+              onChange={(e) => setCloseTime((prev) => ({ ...prev, hour: e.target.value }))}
+              className="w-20 px-4 py-3 border border-black rounded-xl bg-gray-100 text-center"
+            />
+            <span className="mt-1">:</span>
+            <input
+              type="number"
+              min="0"
+              max="59"
+              value={closeTime.minute}
+              onChange={(e) =>
+                setCloseTime((prev) => ({ ...prev, minute: String(e.target.value).padStart(2, '0') }))
+              }
+              className="w-20 px-4 py-3 border border-black rounded-xl bg-gray-100 text-center"
+            />
+            <select
+              value={closeTime.period}
+              onChange={(e) => setCloseTime((prev) => ({ ...prev, period: e.target.value }))}
+              className="px-4 py-3 border border-black rounded-xl bg-gray-100"
+            >
+              <option>AM</option>
+              <option>PM</option>
+            </select>
+          </div>
+        </InputGroup>
+
+        <InputGroup label="Days Open*">
+          <div className="flex flex-wrap items-center gap-3 mt-2 bg-gray-50 p-3 rounded-xl border border-gray-300">
+            <label className="flex items-center gap-2 cursor-pointer bg-white px-3 py-2 rounded-lg border hover:border-orange-400 transition">
+              <input
+                type="checkbox"
+                checked={selectedDays.length === 7}
+                onChange={(e) => {
+                  if (e.target.checked) {
+                    const allDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+                    setSelectedDays(allDays);
+                    setForm((prev) => ({
+                      ...prev,
+                      daysOpen: [
+                        'Monday',
+                        'Tuesday',
+                        'Wednesday',
+                        'Thursday',
+                        'Friday',
+                        'Saturday',
+                        'Sunday',
+                      ],
+                    }));
+                  } else {
+                    setSelectedDays([]);
+                    setForm((prev) => ({ ...prev, daysOpen: [] }));
+                  }
+                }}
+                className="w-5 h-5 accent-orange-500 rounded cursor-pointer"
+              />
+              <span className="text-sm font-semibold text-gray-800">Select All</span>
+            </label>
+
+            {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => {
+              const isSelected = selectedDays.includes(day);
+              return (
+                <label
+                  key={day}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition cursor-pointer ${
+                    isSelected
+                      ? 'bg-orange-500 border-orange-500 text-white shadow'
+                      : 'bg-white border-gray-300 hover:border-orange-400'
+                  }`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => {
+                      setSelectedDays((prev) => {
+                        let updated;
+                        if (prev.includes(day)) {
+                          updated = prev.filter((d) => d !== day);
+                        } else {
+                          updated = [...prev, day];
+                        }
+
+                        const fullDayMap = {
+                          Mon: 'Monday',
+                          Tue: 'Tuesday',
+                          Wed: 'Wednesday',
+                          Thu: 'Thursday',
+                          Fri: 'Friday',
+                          Sat: 'Saturday',
+                          Sun: 'Sunday',
+                        };
+
+                        setForm((f) => ({
+                          ...f,
+                          daysOpen: updated.map((d) => fullDayMap[d]),
+                        }));
+
+                        return updated;
+                      });
+                    }}
+                    className="w-5 h-5 accent-orange-500 cursor-pointer"
+                  />
+                  <span className={`text-sm font-medium ${isSelected ? 'text-white' : 'text-gray-800'}`}>
+                    {day}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        </InputGroup>
       </div>
-    </div>
-  )}
 
-  {/* Submit Button */}
-  <div className="flex flex-col items-center">
-    <button
-      type="submit"
-      disabled={loading}
-      className={`w-full sm:w-1/2 md:w-1/3 font-semibold py-3 rounded-xl transition 
-        ${
-          loading
-            ? 'bg-gray-400 text-white cursor-not-allowed'
-            : 'bg-orange-500 text-white hover:bg-orange-600'
-        }`}
-    >
-      {loading ? (
-        <div className="flex items-center justify-center gap-2">
-          <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-          <span>Submitting...</span>
+      {isDaysModalOpen && (
+        <div className="fixed inset-0 bg-opacity-40 backdrop-blur-sm z-50 flex justify-center items-center p-4">
+          <div className="bg-white shadow p-6 rounded-lg w-full max-w-sm">
+            <h2 className="text-lg font-semibold mb-4">Select Days Open</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((day) => (
+                <button
+                  key={day}
+                  type="button"
+                  onClick={() => handleToggleDay(day)}
+                  className={`border px-3 py-1 rounded ${selectedDays.includes(day) ? 'bg-orange-500 text-white' : 'bg-gray-100'}`}
+                >
+                  {day}
+                </button>
+              ))}
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button className="text-gray-500" onClick={() => setIsDaysModalOpen(false)}>
+                Cancel
+              </button>
+              <button
+                className="bg-orange-500 text-white px-4 py-1 rounded"
+                onClick={() => {
+                  const fullDayMap = {
+                    Mon: 'Monday',
+                    Tue: 'Tuesday',
+                    Wed: 'Wednesday',
+                    Thu: 'Thursday',
+                    Fri: 'Friday',
+                    Sat: 'Saturday',
+                    Sun: 'Sunday',
+                  };
+                  const mappedDays = selectedDays.map((day) => fullDayMap[day]);
+                  setForm((prev) => ({ ...prev, daysOpen: mappedDays }));
+                  setIsDaysModalOpen(false);
+                }}
+              >
+                Save
+              </button>
+            </div>
+          </div>
         </div>
-      ) : (
-        'Submit Details'
       )}
-    </button>
-    <p className="mt-2 text-sm text-orange-600">
-      Fields marked with * are mandatory
-    </p>
-  </div>
-</form>
 
-    
+      <div className="flex flex-col items-center">
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full sm:w-1/2 md:w-1/3 font-semibold py-3 rounded-xl transition ${
+            loading ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600'
+          }`}
+        >
+          {loading ? (
+            <div className="flex items-center justify-center gap-2">
+              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+              <span>Submitting...</span>
+            </div>
+          ) : (
+            'Submit Details'
+          )}
+        </button>
+        <p className="mt-2 text-sm text-orange-600">Fields marked with * are mandatory</p>
+      </div>
+    </form>
   );
 };
 
 export default MessDetailsForm;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

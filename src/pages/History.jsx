@@ -22,60 +22,6 @@ const History = () => {
   const token = localStorage.getItem('token');
   const messId = localStorage.getItem('messId');
 
-//   const fetchTransactions = async () => {
-    // if (!token || !messId) {
-    //   console.error('❌ Token or Mess ID missing');
-    //   return;
-    // }
-
-//     setLoading(true);
-//     try {
-   
-//        const res = await apiPost(
-//         `/owner/mess/stats/transactions?limit=${pagination.limit}&offset=${pagination.offset}`,
-//         { messId },
-//       );
-
-//       console.log('✅ API Success Response:', res?.data);
-
-//       // if (res.data.success) {
-//       //   setTransactions(res.data.data);
-//       // ✅ Abhi
-// if (Array.isArray(res.data)) {
-//   setTransactions(res.data);
-// } else if (res.data?.data) {
-//   setTransactions(res.data.data);
-// }
-//         setPagination(prev => ({
-//           ...prev,
-//           hasMore: res.data.pagination.hasMore,
-//         }));
-//       }
-//     } catch (error) {
-//       console.error('❌ Error fetching transactions:', error?.response?.data || error.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-// const fetchTransactions = async () => {
-//   try {
-//     const res = await apiPost(
-//       `/owner/mess/stats/transactions?limit=${pagination.limit}&offset=${pagination.offset}`,
-//       { messId },
-//     );
-
-//     console.log('✅ API Success Response:', res?.data);
-
-//     if (Array.isArray(res.data)) {
-//       setTransactions(res.data);
-//     } else if (res.data?.data) {
-//       setTransactions(res.data.data);
-//     }
-//   } catch (err) {
-//     console.error('❌ API Error:', err);
-//   }
-// };
 
 const fetchTransactions = async () => {
   if (!token || !messId) {
@@ -142,34 +88,18 @@ const fetchTransactions = async () => {
               <button onClick={() => navigate('/history')} className={`cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/history' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
                 Transactions History 
               </button>
-              <button onClick={() => navigate('/owner/history/plans')} className={` cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/plans' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
+              <button onClick={() => navigate('/own/history/plans')} className={` cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/own/history/plans' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
                 Plan History
               </button>
-              {/* <button onClick={() => navigate('/owner/purchased-plans')} className={`cursor-pointer capitalize text-md font-medium transition-opacity ${currentPath === '/owner/history/account' ? 'opacity-100 text-orange-600 border-b-2 border-orange-500' : 'opacity-50 hover:opacity-80'}`}>
-            Plans Requests
-              </button> */}
+            
             </div>
 
-        {/* Filters */}
-        {/* <div className="flex space-x-4 my-4">
-          {['All', 'Purchased', 'Used'].map(f => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-1 rounded cursor-pointer border ${
-                filter === f ? 'bg-orange-500 text-white' : 'text-gray-700 border-gray-300'
-              }`}
-            >
-              {f}
-            </button>
-          ))}
-        </div> */}
         <div className="flex flex-wrap gap-2 my-4">
   {['All', 'Purchased', 'Used'].map(f => (
     <button
       key={f}
       onClick={() => setFilter(f)}
-      className={`px-4 py-1 rounded cursor-pointer border text-sm sm:text-base ${
+      className={`px-4 py-1 rounded-xl cursor-pointer border text-sm sm:text-base ${
         filter === f
           ? 'bg-orange-500 text-white'
           : 'text-gray-700 border-gray-300'
@@ -205,7 +135,7 @@ const fetchTransactions = async () => {
                 </tr>
               ) : (
                 filteredTransactions.map((item, index) => (
-                  <tr key={index} className="border-b">
+                  <tr key={index} className="border-b hover:bg-gray-50 border-gray-200">
                     <td className="px-6 py-4">{item.planName || item.planId || '—'}</td>
                     <td className="px-6 py-4">
                       {/* {item.type === 'submission'
@@ -227,13 +157,6 @@ const fetchTransactions = async () => {
                           })
                         : 'N/A'}
                     </td>
-                    {/* <td
-                      className={`px-6 py-4 font-semibold ${
-                        item.type === 'transaction' ? 'text-green-600' : 'text-red-500'
-                      }`}
-                    >
-                      {item.type}
-                    </td> */}
                     <td
   className={`px-6 py-4 font-semibold ${
     item.type === 'transaction' ? 'text-green-600' : 'text-red-500'
@@ -243,8 +166,6 @@ const fetchTransactions = async () => {
 </td>
 
                     <td className="px-6 py-4">
-                      {/* {item.type === 'submission' ? item.submittedByName : item.transactionByName || '—'} */}
-
 {item.type === 'submission'
   ? item.submittedByName
   : item.transactionByName || '—'}

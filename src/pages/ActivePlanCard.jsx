@@ -13,7 +13,7 @@ const ActivePlanCard = ({ plan }) => {
   const handleUseTokens = () => {
     const customerPlanId = plan.customerPlanId || plan._id;
     storage.setItem("customerPlanId", customerPlanId);
-    navigate(`/customer/use-tokens`);
+    navigate(`/cust/use-tokens`);
     setIsMenuOpen(false);
   };
 

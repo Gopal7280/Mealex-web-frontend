@@ -8,14 +8,14 @@ import customer from '../assets/customer.png';
 import owner from '../assets/owner.png';
 import { toast } from 'react-hot-toast';
 
-const UserAccess = () => {
+const UserAccess = ({setUserRole }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [city, setCity] = useState('');
   const [pincode, setPincode] = useState('');
-  const [role, setRole] = useState('');
+const [role, setRole] = useState(storage.getItem('role') || '');
   const [otp, setOtp] = useState('');
   const [emailToken, setEmailToken] = useState('');
   const [phoneToken, setPhoneToken] = useState('');
@@ -28,7 +28,7 @@ const UserAccess = () => {
   const [activeOtpType, setActiveOtpType] = useState('');
   const [checkboxChecked, setCheckboxChecked] = useState(false);
   const [verifyingCheckbox, setVerifyingCheckbox] = useState(false);
-    const [submitting, setSubmitting] = useState(false); // ✅ new state
+  const [submitting, setSubmitting] = useState(false); // ✅ new state
 
 
   const location = useLocation();
@@ -36,6 +36,8 @@ const UserAccess = () => {
 
   const previousIdentifier = location.state?.identifier || storage.getItem('identifier')?.replace(/"/g, '') || '';
   const identifierType = previousIdentifier.includes('@') ? 'email' : 'phone';
+  const customerId = location.state?.customerId || storage.getItem("customerId");
+
 
   const sendOtp = async (type) => {
   const identifier = type === 'email' ? email : phone;
@@ -62,7 +64,7 @@ const UserAccess = () => {
         setEmailToken(res.identifierToken);
         setShowEmailOtpBox(false); 
         storage.setItem('emailToken', res.identifierToken);
-        toast.success('Email already verified ');
+        toast.success('Email already verified');
       } else {
         setIsPhoneVerified(true);
         setPhoneToken(res.identifierToken);
@@ -153,6 +155,7 @@ const UserAccess = () => {
       });
     
      toast.success('Profile created successfully!');
+       setUserRole(role.toLowerCase()); // ✅ ensures global update
       navigate(role === 'Owner' ? '/minimal-dashboard' : '/login/customers-dashboard');
     } catch (err) {
       toast.error(err?.response?.data?.message || 'Something went wrong.');
@@ -374,7 +377,33 @@ const UserAccess = () => {
             {['Customer', 'Owner'].map((r) => (
               <div
                 key={r}
-                onClick={() => setRole(r)}
+//     onClick={() => {
+//     setRole(r);
+//     storage.setItem('role', r.toLowerCase());
+
+//   // ✅ extra logic for customerId
+//   if (r === 'Customer') {
+//     let customerId = storage.getItem('customerId');
+//     if (!customerId) {
+//       storage.setItem('customerId', customerId);
+//     }
+//   }
+// }}
+onClick={() => {
+  setRole(r);
+  const lowerRole = r.toLowerCase();
+  storage.setItem('role', lowerRole);
+  setUserRole(lowerRole); // ✅ <--- important line
+
+  // ✅ optional extra logic for customerId
+  if (r === 'Customer') {
+    let customerId = storage.getItem('customerId');
+    if (!customerId) {
+      storage.setItem('customerId', customerId);
+    }
+  }
+}}
+
                 className={`flex-1 p-4 text-center border-2 rounded-xl  cursor-pointer transition ${role === r ? 'bg-orange-300 text-black' : 'bg-white text-black'}`}
               >
                 <div className="font-semibold text-lg mb-2 ">{r}</div>
@@ -402,7 +431,8 @@ const UserAccess = () => {
           }`}
         >
           {submitting ? 'Submitting...' : 'Submit Details'}
-        </button>        <button className="mt-2 text-sm text-orange-500 underline hover:text-orange-600 transition">Email Or Phone Needs To Be verified Before Submission</button>
+        </button>    
+        <button className="mt-2 text-sm text-orange-500 underline hover:text-orange-600 transition">Email Or Phone Needs To Be verified Before Submission</button>
       </div>
     </form>
   );

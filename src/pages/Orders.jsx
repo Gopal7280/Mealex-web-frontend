@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import Navbar2 from '../layouts/Navbar';
 import CustomerHeader from './ownerHeader';
@@ -9,11 +8,18 @@ import { apiGet } from '../services/api';
 import { useNavigate ,useLocation } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 
-
 const Orders = () => {
   const navigate = useNavigate();
   const location = useLocation();
-const currentPath = location.pathname;
+const currentPath = location.pathname
+
+const statusColors = {
+  pending: 'border-orange-400 text-orange-500',
+  accepted: 'border-green-400 text-green-600',
+  rejected: 'border-red-400 text-red-500',
+  cancelled: 'border-gray-400 text-gray-500',
+};
+;
 
 
   const [orders, setOrders] = useState([]);
@@ -35,13 +41,19 @@ const currentPath = location.pathname;
   );
 };
 
+
 const selectAll = () => {
-  if (selectedOrders.length === orders.length) {
+  const pendingOrders = orders
+    .filter(o => o.orderStatus?.toLowerCase() === "pending")
+    .map(o => o.orderId || o.id);
+
+  if (selectedOrders.length === pendingOrders.length) {
     setSelectedOrders([]);
   } else {
-    setSelectedOrders(orders.map(o => o.orderId || o.id)); // ✅ consistent key
+    setSelectedOrders(pendingOrders);
   }
 };
+
 
 
 const handleAcceptAll = () => {
@@ -150,6 +162,30 @@ const handleRejectAll = () => {
 
 const [filterType, setFilterType] = useState("today");
 
+// const fetchPastOrders = async (pageNumber = 1, days = null) => {
+//   if (!messId) return;
+
+//   try {
+//     let url = `/owner/mess/${messId}/orders/past?page=${pageNumber}&limit=10`;
+//     if (days) url += `&days=${days}`;
+
+//     const res = await apiGet(url);
+//     if (res.success) {
+//       const data = res.data || [];
+//       setOrders(data);
+//       setPage(pageNumber);
+//       setTotalOrders(res.pagination?.total || data.length);
+
+//       if (data.length === 10) {
+//         setTotalPages(pageNumber + 1);
+//       } else {
+//         setTotalPages(pageNumber);
+//       }
+//     }
+//   } catch (err) {
+//   }
+// };
+
 const fetchPastOrders = async (pageNumber = 1, days = null) => {
   if (!messId) return;
 
@@ -158,21 +194,24 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
     if (days) url += `&days=${days}`;
 
     const res = await apiGet(url);
+
     if (res.success) {
       const data = res.data || [];
       setOrders(data);
       setPage(pageNumber);
-      setTotalOrders(res.pagination?.total || data.length);
 
-      if (data.length === 10) {
-        setTotalPages(pageNumber + 1);
-      } else {
-        setTotalPages(pageNumber);
-      }
+      // ✅ Safely handle totalOrders & totalPages
+      const total = res.pagination?.total || data.length;
+      setTotalOrders(total);
+
+      const pages = Math.ceil(total / 10);
+      setTotalPages(pages);
     }
   } catch (err) {
+    console.error("Error fetching past orders:", err);
   }
 };
+
 
 
   useEffect(() => {
@@ -273,10 +312,44 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
   return (
     <div className="flex h-screen ">
       <Navbar2 />
-      {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
       <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <CustomerHeader/>
-     <div className="border rounded-lg p-4 bg-white">
+     <div className=" p-4 bg-white justify-between mb-4   rounded-2xl shadow">
+{!showPastOrders && selectedOrders.length > 0 && (
+  <div className="flex justify-between items-center bg-transparent mt-2 mb-3">
+    <label
+  className="flex items-center gap-2 text-gray-700 font-medium cursor-pointer hover:text-orange-600 transition-colors
+ select-none"
+  onClick={selectAll}
+>
+  <span className="text-base">Select All</span>
+  {selectedOrders.length ===
+  orders.filter(o => o.orderStatus?.toLowerCase() === "pending").length ? (
+    <CheckSquare className="text-orange-500 cursor-pointer" size={22} />
+  ) : (
+    <Square className="text-gray-400 cursor-pointer" size={22} />
+  )}
+</label>
+
+
+    <div className="flex gap-3">
+      <button
+        onClick={handleAcceptAll}
+        className="px-4 py-2 rounded-lg bg-green-600 text-white text-sm font-medium shadow-sm cursor-pointer hover:opacity-90"
+      >
+        Accept All ({selectedOrders.length})
+      </button>
+
+      <button
+        onClick={handleRejectAll}
+        className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-medium shadow-sm cursor-pointer hover:opacity-90"
+      >
+        Reject All ({selectedOrders.length})
+      </button>
+    </div>
+
+  </div>
+)}
 
   {/* Tabs section — copied and matched from PurchasedPlans.jsx */}
   <div className="flex gap-6 mb-6 border-b pb-2">
@@ -292,9 +365,9 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
     </button>
 
     <button
-      onClick={() => navigate('/owner/purchased-plans')}
+      onClick={() => navigate('/own/purchased-plans')}
       className={`cursor-pointer capitalize text-md font-medium transition-opacity ${
-        currentPath === '/owner/purchased-plans'
+        currentPath === '/own/purchased-plans'
           ? 'opacity-100 text-orange-600 border-b-2 border-orange-500'
           : 'opacity-50 hover:opacity-80'
       }`}
@@ -309,40 +382,60 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
       {showPastOrders ? `Past Orders(${orders.length})` : `All Orders(${orders.length})`}
     </h2>
 
+ 
     <select
-      className="border border-gray-200 rounded px-2 py-1 cursor-pointer"
-      value={filterType}
-      onChange={(e) => {
-        const val = e.target.value;
-        setFilterType(val);
+  className="border border-gray-200 rounded px-2 py-1 cursor-pointer"
+  value={filterType}
+  onChange={(e) => {
+    const val = e.target.value;
+    setFilterType(val);
 
-        if (val === "today") {
-          setShowPastOrders(false);
-        } else if (val === "7days") {
-          setShowPastOrders(true);
-          fetchPastOrders(1, 7);
-        } else if (val === "all") {
-          setShowPastOrders(true);
-          fetchPastOrders(1, null);
-        }
-      }}
-    >
-      <option value="today">Today</option>
-      <option value="7days">Last 7 Days</option>
-      <option value="all">All Orders</option>
-    </select>
+    if (val === "today") {
+      setShowPastOrders(false);
+    } else if (val === "7days") {
+      setShowPastOrders(true);
+      fetchPastOrders(1, 7);
+    } else if (val === "30days") {
+      setShowPastOrders(true);
+      fetchPastOrders(1, 30); // ✅ same API, just 30 days instead of 7
+    }
+  }}
+>
+  <option value="today">Today</option>
+  <option value="7days">Last 7 Days</option>
+  <option value="30days">Last 30 Days</option>
+</select>
+
   </div>
 
 
 
           {orders.map((order) => (
-            <div key={order.orderId || order.id} className={`bg-white border border-[#FC7C00] rounded-lg mb-4`}>
-              <div className={`rounded-lg p-4 relative ${isSelected(order.orderId || order.id) ? 'border-[#FC7C00] bg-orange-50' : 'border-gray-900'}`}>
-                <p className="text-sm font-bold text-[#FC7C00] mb-3">{(order.orderStatus || '').toUpperCase()}</p>
-                {!showPastOrders && (
+<div
+  key={order.orderId || order.id}
+  className={`bg-white border rounded-lg mb-4 ${
+    statusColors[order.orderStatus?.toLowerCase()] || 'border-orange-400 text-orange-500'
+  }`}
+>
+  <div
+    className={`rounded-lg p-4 relative ${
+      isSelected(order.orderId || order.id)
+        ? 'bg-orange-50 border border-orange-400'
+        : 'border border-gray-200'
+    }`}
+  >
+    <p
+      className={`text-sm font-bold mb-3 ${
+        statusColors[order.orderStatus?.toLowerCase()] || 'text-orange-500'
+      }`}
+    >
+      {(order.orderStatus || 'PENDING').toUpperCase()}
+    </p>
+
+{!showPastOrders && order.orderStatus?.toLowerCase() === 'pending' && (
              
                   <button
-  className="absolute top-4 right-4"
+  className="absolute top-4 cursor-pointer right-4"
   onClick={() => toggleOrderSelection(order.orderId || order.id)}
 >
   {isSelected(order.orderId || order.id) ? <CheckSquare /> : <Square />}
@@ -398,15 +491,21 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
 
 
                 <div className="mt-2 text-sm text-gray-700 p-1">
-                  <span className="inline-block border font-poppins border-green-500 text-green-600 font-bold md:ml-3 px-2 py-0.5 rounded mr-2 text-sm">
-                    {order.orderType || order.type}
-                  </span>
+<span
+  className={`inline-block font-poppins font-bold md:ml-3 px-2 py-0.5 rounded mr-2 text-sm border ${
+    statusColors[order.orderStatus?.toLowerCase()] || 'border-orange-400 text-orange-500'
+  }`}
+>
+  {order.orderType?.toLowerCase() === 'dine' ? 'Dine-in' : order.orderType || order.type}
+</span>
+
+
                   <span className="font-poppins font-medium text-sm text-[#393939]">{order.deliveryAddress}</span>
                 </div>
               </div>
             </div>
           ))}
-
+{/* 
           {showPastOrders && (
             <div className="flex justify-between mt-4">
               <button
@@ -424,7 +523,30 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
                 Next
               </button>
             </div>
-          )}
+          )} */}
+          {showPastOrders && (
+  <div className="flex justify-between mt-4">
+    <button
+      className="bg-gray-200 text-gray-700 cursor-pointer px-4 py-2 rounded disabled:opacity-50"
+      disabled={page <= 1}
+      onClick={() =>
+        fetchPastOrders(page - 1, filterType === "7days" ? 7 : 30)
+      }
+    >
+      Previous
+    </button>
+    <button
+      className="px-4 py-2 bg-orange-500 cursor-pointer text-white rounded disabled:opacity-50"
+      disabled={page >= totalPages}
+      onClick={() =>
+        fetchPastOrders(page + 1, filterType === "7days" ? 7 : 30)
+      }
+    >
+      Next
+    </button>
+  </div>
+)}
+
 
         </div>
     </div>

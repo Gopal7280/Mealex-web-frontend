@@ -333,14 +333,16 @@ const ResetOtp = () => {
     }
 
     try {
-      await apiPost('/forget-password/otp', {
+      const res= await apiPost('/forget-password/otp', {
         identifier,
         otp,
         requestId,
         newPassword,
         confirmNewPassword,
         context,
-      });
+      }); 
+      
+      console.log('Password reset response:', res);
       toast.success('Password reset successful! Please log in.');
       navigate('/login');
     } catch (err) {
@@ -436,7 +438,7 @@ const ResetOtp = () => {
 
         <button
           onClick={handleReset}
-          className="w-full bg-orange-600 text-white py-2 rounded"
+          className="w-full bg-orange-600 cursor-pointer text-white py-2 rounded"
         >
           Reset Password
         </button>

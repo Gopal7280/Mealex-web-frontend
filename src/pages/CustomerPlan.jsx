@@ -28,7 +28,7 @@ const kycStage = selectedMess?.kyc_stage || "0";
   const location = useLocation();
   const currentPath = location.pathname;
   const messId = storage.getItem('messId');
-  const customerId = storage.getItem('customerId');
+  const customerId = storage.getItem('CustomerId');
 
 
 
@@ -52,84 +52,6 @@ useEffect(() => {
   fetchActivePlans();
 }, [messId, customerId]);
 
-
-
-
-
-  
-//   const initiatePayment = async () => {
-//     const planId = selectedPlan._id || selectedPlan.planId;
-//     if (!planId || planId.length !== 36) {
-//       alert('Invalid or missing Plan ID. Please select a plan again.');
-//       return;
-//     }
-
-//     try {
-//       const res = await apiPost('/owner/mess/razorpay-order', { planId, messId });
-//       const { id: orderId, amount } = res.data.orderDetails;
-
-//       const options = {
-//         key: 'rzp_test_RD4LUvyj0ffvxI',
-//         amount,
-//         currency: 'INR',
-//         name: 'MealX Mess System',
-//         description: `Purchase Plan: ${selectedPlan.name}`,
-// image: {
-//   src: 'your-url.svg', // ensure the SVG file has valid width/height or use PNG
-//   width: '100',        // <-- valid value
-//   height: '40'         // <-- valid value
-// },
-//         order_id: orderId,
-//         handler: async function (response) {
-//           const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = response;
-//           if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
-//             alert('⚠️ Incomplete Razorpay response. Payment not verified.');
-//             return;
-//           }
-//           try {
-//             console.log('🔍 customerId from storage:', customerId);
-
-//             const verifyPayload = {
-//               razorpay_payment_id,
-//               razorpay_order_id,
-//               razorpay_signature,
-//               planId: selectedPlan._id || selectedPlan.planId,
-//               customerId,
-//               customerPaymentType: 'online', // 🔁 specify payment type
-//             };
-//             const verifyRes = await apiPost('/owner/mess/payment-verify', verifyPayload);
-
-//         // Auto navigate after toast
-//         setTimeout(() => {
-//         }, 5000);           
-//          await fetchActivePlans(); // <-- fetch new plans
-// toast.success(`🎉 Payment successful! ${selectedPlan?.name || "Plan"} activated.`);
-// setShowAvailablePlans(false); // hide available plans section
-
-
-
-//           } 
-//         catch (err) {
-//   console.error('❌ Payment verification failed:', err?.response?.data || err);
-//   alert('❌ Payment verification failed.');
-// }
-
-//         },
-//         prefill: {
-//           name: 'Customer Name',
-//           email: 'customer@example.com',
-//           contact: '9876543210',
-//         },
-//         notes: { messId, planId },
-//         theme: { color: '#f97316' },
-//       };
-
-//       const razor = new window.Razorpay(options);
-//       razor.open();
-//     } catch (err) {
-//       alert('Unable to initiate payment');
-//     }
-//   };
 
 const initiatePayment = async () => {
   const planId = selectedPlan._id || selectedPlan.planId;
@@ -295,9 +217,11 @@ const handlePlanPurchase = async () => {
           </h2>
 <div className="bg-white rounded-xl shadow-md px-6 py-4">
           {showAvailablePlans ? (
-            <div className="flex gap-2 mb-6 relative">
+<div className="flex flex-wrap gap-2 mb-6 relative justify-center sm:justify-start">
               <div className="relative">
-                <button onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)} className="border px-4 py-1 cursor-pointer rounded-md bg-white shadow-sm text-sm">
+                <button onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
+                 className="border px-4 py-1 cursor-pointer rounded-md bg-white shadow-sm text-sm"
+                 >
                   ⇅ Sort
                 </button>
                 {isSortDropdownOpen && (
@@ -356,16 +280,10 @@ const handlePlanPurchase = async () => {
             <h3 className="text-md font-semibold text-gray-800">{plan.name}</h3>
             <p className="text-sm text-gray-600">{plan.description}</p>
                         <p className="text-sm text-green-600">{plan.status}</p>
-
-            {/* <p className="text-sm text-gray-600">{plan.expiryDate}</p>
-            <p className="text-sm text-gray-600">{plan.purchaseDate}</p>
-             */}
          <p className="text-sm text-gray-600">
                           <strong>Created on:</strong> {new Date(plan.createdAt).toLocaleDateString()}
                         </p>
-                        {/* <p className="text-sm text-gray-600">
-                          <strong>Expires on:</strong> {new Date(plan.expiryDate).toLocaleDateString()}
-                        </p> */}
+                 
 
             <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
               ₹ <span className="font-bold text-black">{plan.price}</span>
@@ -376,14 +294,16 @@ const handlePlanPurchase = async () => {
         </div>
       ))}
     </div>
-    <div className="flex justify-center">
-      <button
-        onClick={() => setShowPaymentModal(true)}
-        className="mt-4 bg-orange-500 text-white w-1/2 py-3 cursor-pointer rounded-2xl hover:bg-orange-600"
-      >
-        Purchase Plan
-      </button>
-    </div>
+    
+    <div className="flex justify-center px-4">
+  <button
+    onClick={() => setShowPaymentModal(true)}
+    className="mt-4 bg-orange-500 text-white w-full sm:w-1/2 py-3 cursor-pointer rounded-2xl hover:bg-orange-600 transition-all"
+  >
+    Purchase Plan
+  </button>
+</div>
+
   </>
 ) : activePlans.length > 0 ? (
   <>
@@ -399,12 +319,13 @@ const handlePlanPurchase = async () => {
     </div>
     {/* 🔘 Show Purchase Plan button even if active plans exist */}
     <div className="flex justify-center  ">
-      <button
-        onClick={fetchAvailablePlans}
-        className="w-[600px] h-[50px] bg-orange-500 text-white text-lg font-semibold rounded-2xl cursor-pointer hover:bg-orange-600 m-2 mb-8 "
-      >
-        Purchase Plan
-      </button>
+   <button
+  onClick={fetchAvailablePlans}
+  className="w-full sm:w-[400px] md:w-[600px] h-[50px] bg-orange-500 text-white text-base sm:text-lg font-semibold rounded-2xl cursor-pointer hover:bg-orange-600 m-2 mb-8 transition-all"
+>
+  Purchase Plan
+</button>
+
     </div>
   </>
 ) : (
@@ -413,46 +334,19 @@ const handlePlanPurchase = async () => {
     <img src={clipboard} alt="No Plans" className="w-36 h-36 mb-2" />
     <p className="text-orange-600 text-xl font-bold mb-1">NO PLANS PURCHASED</p>
     <p className="text-gray-600 text-sm mb-6">Let's purchase a plan to get started.</p>
-    <button
-      onClick={fetchAvailablePlans}
-      className="w-[600px] h-[50px] md:mt-16 mt-2 cursor-pointer bg-orange-500 text-white text-lg font-semibold rounded-2xl hover:bg-orange-600 "
-    >
-      Purchase Plan
-    </button>
+  <button
+  onClick={fetchAvailablePlans}
+  className="w-full sm:w-[400px] md:w-[600px] h-[50px] bg-orange-500 text-white text-base sm:text-lg font-semibold rounded-2xl cursor-pointer hover:bg-orange-600 m-2 mb-8 transition-all"
+>
+  Purchase Plan
+</button>
+
   </div>
 )}
 
         </div>
         </div>
 
-
-{/* 
- {showPaymentModal && selectedPlan && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 backdrop-brightness-50">
-            <div className="bg-white rounded-2xl p-6 shadow-lg w-[90%] max-w-md relative">
-              <button onClick={() => setShowPaymentModal(false)} className="absolute top-4 right-4 text-gray-500 hover:text-gray-700">✕</button>
-              <h3 className="text-lg font-semibold text-center text-black mb-6">Choose Customer’s Payment Method</h3>
-              <div className="flex flex-col gap-4 mb-6">
-                <label onClick={() => setSelectedPlan({ ...selectedPlan, paymentMode: 'cash' })} className={`flex items-center justify-between px-4 py-3 rounded-lg border cursor-pointer ${selectedPlan?.paymentMode === 'cash' ? 'border-green-500 bg-green-50' : 'border-gray-300'}`}>
-                  <div className="flex items-center gap-2 text-green-600  font-medium">
-                    <span className="text-xl">🪙</span> Cash
-                  </div>
-                  {selectedPlan?.paymentMode === 'cash' && <span className="text-green-500 text-lg">✔</span>}
-                </label>
-                <label onClick={() => setSelectedPlan({ ...selectedPlan, paymentMode: 'online' })} className={`flex items-center cursor-pointer justify-between px-4 py-3 rounded-lg border  ${selectedPlan?.paymentMode === 'online' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}>
-                  <div className="flex items-center gap-2 text-blue-600 font-medium">
-                    <span className="text-xl cursor-pointer">💳</span> UPI/Online
-                  </div>
-                  {selectedPlan?.paymentMode === 'online' && <span className="text-blue-500 text-lg">✔</span>}
-                </label>
-              </div>
-              <button onClick={handlePlanPurchase} className="w-full bg-orange-500 cursor-pointer hover:bg-orange-600 text-white py-2 rounded-lg font-semibold">
-                Purchase Plan
-              </button>
-            </div>
-            
-          </div>
-        )} */}
         {showPaymentModal && selectedPlan && (
   <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-50 backdrop-brightness-50">
     <div className="bg-white rounded-2xl p-6 shadow-lg w-[90%] max-w-md relative">

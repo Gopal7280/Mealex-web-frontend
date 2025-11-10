@@ -398,7 +398,7 @@ import { config } from "../config/app.js";
 import { updateToken } from '../config/socket';
 
 
-const REFRESH_URL = "https://mealex.in/auth/refresh";
+const REFRESH_URL = "https://dev.mealex.in/auth/refresh";
 
 const apiClient = axios.create({
   baseURL: config.apiBaseUrl,

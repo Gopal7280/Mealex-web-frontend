@@ -1,0 +1,15 @@
+/* ✅ Only affects this page */
+.customer-profile-page {
+  height: 100vh;              /* Full screen height */
+  display: flex;
+  overflow: hidden;           /* Stop double scroll */
+  background-color: #f9fafb;  /* optional, just to match Tailwind bg-gray-50 */
+}
+
+/* ✅ Scroll only inside this container */
+.customer-profile-page .flex-1 {
+  height: 100vh;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* smooth mobile scrolling */
+  scrollbar-gutter: stable;
+}

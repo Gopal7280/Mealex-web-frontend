@@ -1,6 +1,4 @@
 
-
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../layouts/Navbar';
@@ -20,6 +18,7 @@ const Customers = () => {
   const fetchCustomers = async () => {
     try {
       const res = await apiGet(`/owner/mess/customer/${messId}`);
+      console.log(res);
       setCustomers(res.customers ?? []);
     } catch (err) {
     } finally {
@@ -33,8 +32,8 @@ const Customers = () => {
   }, [messId]);
 
   const handleCustomerClick = (id) => {
-    storage.setItem('customerId', id);
-    navigate('/owner-customer-profile', { state: { messId, customerId: id } });
+    storage.setItem('CustomerId', id);
+    navigate('/owner-customer-profile', { state: { messId, CustomerId: id } });
   };
 
   const handleAdd = () => navigate('/add-customer');
@@ -93,12 +92,16 @@ const Customers = () => {
         {/* Customers Table/List */}
         <div className="bg-white shadow rounded">
           {/* Desktop Header */}
-          <div className="hidden sm:grid grid-cols-5 font-semibold border-b p-3 text-sm text-gray-600">
+          <div className="hidden sm:grid grid-cols-6 font-semibold border-b p-3 text-sm text-gray-600">
             <div>S.No</div>
             <div>Profile</div>
             <div>Name</div>
             <div>Status</div>
+            <div>City</div>
             <div>Contact</div>
+            
+
+            
           </div>
 
           {isLoading ? (
@@ -117,7 +120,7 @@ const Customers = () => {
                 className="border-b px-3 py-2 hover:bg-orange-50 cursor-pointer transition"
               >
                 {/* Desktop Grid View */}
-                <div className="hidden sm:grid grid-cols-5 items-center text-sm">
+                <div className="hidden sm:grid grid-cols-6 items-center text-sm">
                   <div>{idx + 1}</div>
                   <img
                     src={cust.profileImage || '/default-avatar.png'}
@@ -133,6 +136,8 @@ const Customers = () => {
                     {cust.isActive ? 'Active' : 'Inactive'}
                   </div>
                   <div>{cust.city || '—'}</div>
+                                    <div>{cust.contactNumber || '—'}</div>
+
                 </div>
 
                 {/* Mobile Card View */}
@@ -155,6 +160,9 @@ const Customers = () => {
                     </span>
                     <span className="text-xs text-gray-500">
                       {cust.city || '—'}
+                    </span>
+                         <span className="text-xs text-gray-500">
+                      {cust.contactNumber || '—'}
                     </span>
                   </div>
                   <div className="ml-auto text-xs text-gray-400">

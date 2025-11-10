@@ -146,7 +146,7 @@ const OwnerDashboard = () => {
           ))}
         </div>
       
-<div className="bg-white border rounded-xl overflow-hidden mb-8">
+<div className="bg-white border border-gray-200 rounded-xl overflow-hidden mb-8">
   <div className="flex justify-between items-center px-4 sm:px-6 md:px-12 py-4">
     <h3 className="text-base font-semibold text-[#33363F]">Recent Orders</h3>
   </div>
@@ -167,23 +167,23 @@ const OwnerDashboard = () => {
         </thead>
         <tbody>
           {filteredOrders.map((order, idx) => (
-            <tr key={order.orderId || idx} className="border-t">
+            <tr key={order.orderId || idx} className="border-t border-gray-200 hover:bg-gray-50 ">
               <td className="px-4 py-2">{order.customerName}</td>
               <td className="px-4 py-2">{order.customerPlanName}</td>
               <td className="px-4 py-2">{order.tokenCount}</td>
               <td className="px-4 py-2">{order.orderType}</td>
               <td className="px-4 py-2">
                 {order.orderStatus === "pending" ? (
-                  <div className="flex gap-2 justify-center">
+                  <div className="flex gap-4 justify-center">
                     <button
                       onClick={() => handleDecision(order.orderId, "accepted")}
-                      className="text-green-600 font-semibold hover:underline"
+                      className="text-green-600 cursor-pointer font-semibold hover:underline"
                     >
                       Accept
                     </button>
                     <button
                       onClick={() => handleDecision(order.orderId, "rejected")}
-                      className="text-red-600 font-semibold hover:underline"
+                      className="text-red-600 cursor-pointer font-semibold hover:underline"
                     >
                       Reject
                     </button>
@@ -210,7 +210,7 @@ const OwnerDashboard = () => {
       </table>
 
       {/* 🔹 Mobile Responsive (Card Style) */}
-      <div className="md:hidden divide-y">
+<div className="md:hidden divide-y divide-gray-200">
         {filteredOrders.map((order, idx) => (
           <div key={order.orderId || idx} className="p-4 space-y-2 text-sm">
             <div className="flex justify-between">

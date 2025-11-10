@@ -1,5 +1,3 @@
-
-
 // import React, { useEffect, useState, useRef } from "react";
 // import { useNavigate } from "react-router-dom";
 // import Navbar from "../layouts/Navbar";
@@ -7,7 +5,17 @@
 // import { apiGet, apiPost } from "../services/api";
 // import storage from "../utils/storage";
 // import toast from "react-hot-toast";
-
+// import { MdLogout } from "react-icons/md";
+// const dayShortMap = {
+//   Monday: "Mon",
+//   Tuesday: "Tue",
+//   Wednesday: "Wed",
+//   Thursday: "Thu",
+//   Friday: "Fri",
+//   Saturday: "Sat",
+//   Sunday: "Sun",
+// };
+// const defaultServices = ["dine", "take-away", "delivery"];
 // const MessProfile = () => {
 //   const [owner, setOwner] = useState(null);
 //   const [mess, setMess] = useState(null);
@@ -17,36 +25,31 @@
 //   const [showModal, setShowModal] = useState(false);
 //   const [activeProfileType, setActiveProfileType] = useState("owner"); // owner | mess
 //   const [selectedMessId, setSelectedMessId] = useState(null);
-
-//   // inline edit states
 //   const [isEditing, setIsEditing] = useState(false);
 //   const [formData, setFormData] = useState({});
 //   const [saving, setSaving] = useState(false);
-
-//   const fileInputRef = useRef(null);
+//   const fileInputRef = useRef(null); // owner profile image
+//   const messLogoRef = useRef(null); // mess logo file input
+//   const messFssaiRef = useRef(null); // fssai doc
+//   const messActivationRef = useRef(null); // activation doc
 //   const navigate = useNavigate();
-
-//   // Fetch Owner Profile
 //   const fetchOwner = async () => {
 //     setIsLoading(true);
 //     try {
 //       const res = await apiGet("/owner/profile");
-//       const payload = res.data || res.data?.owner || null;
+//       const payload = res?.data || res?.data?.owner || null;
 //       setOwner(payload);
 //     } catch (e) {
-//       console.error(e);
 //       setOwner(null);
 //     } finally {
 //       setIsLoading(false);
 //     }
 //   };
-
-//   // Fetch Mess Profile
 //   const fetchMessProfile = async (id) => {
+//     if (!id) return;
 //     setIsLoading(true);
 //     try {
 //       const res = await apiGet(`/owner/mess/id/${id}`);
-//       console.log(res)
 //       if (res?.success) {
 //         setMess(res.data);
 //       } else {
@@ -54,17 +57,15 @@
 //         setMess(null);
 //       }
 //     } catch (e) {
-//       console.error("Error fetching mess profile:", e);
 //       setMess(null);
 //     } finally {
 //       setIsLoading(false);
 //     }
 //   };
-
-//   // Upload Image (only owner)
 //   const handleFileChange = async (e) => {
-//     const file = e.target.files[0];
+//     const file = e.target.files?.[0];
 //     if (!file) return;
+
 //     const fd = new FormData();
 //     fd.append("image", file);
 
@@ -73,21 +74,29 @@
 //       const res = await apiPost("/owner/profile/image", fd, {
 //         headers: { "Content-Type": "multipart/form-data" },
 //       });
-//       if (res?.data?.success) {
+
+//       if (res?.success) {
 //         const newUrl = res.data?.data?.profileImage || res.data?.profileImage;
-//         setOwner((prev) => ({
-//           ...prev,
-//           profileImage: `${newUrl}?t=${Date.now()}`,
-//         }));
+//         setOwner((prev) => ({ ...prev, profileImage: `${newUrl}?t=${Date.now()}` }));
+
+//         const storedHeader = JSON.parse(storage.getItem("ownerHeaderData")) || {};
+//         storage.setItem(
+//           "ownerHeaderData",
+//           JSON.stringify({
+//             ...storedHeader,
+//             profileImage: `${newUrl}?t=${Date.now()}`,
+//           })
+//         );
+//         toast.success("Profile image updated");
+//       } else {
+//         toast.error(res?.message || "Image upload failed");
 //       }
 //     } catch (err) {
-//       console.error("❌ Image upload failed:", err);
+//       toast.error("Image upload failed");
 //     } finally {
 //       setUploading(false);
 //     }
 //   };
-
-//   // Fetch owner + messes initially
 //   useEffect(() => {
 //     fetchOwner();
 //     (async () => {
@@ -95,12 +104,9 @@
 //         const res = await apiGet("/owner/mess/all");
 //         if (res?.success) setMesses(res.data || []);
 //       } catch (error) {
-//         console.error("Error fetching owner messes:", error);
 //       }
 //     })();
 //   }, []);
-
-//   // Logout
 //   const handleLogout = async () => {
 //     try {
 //       const userJwt = storage.getItem("token");
@@ -111,7 +117,6 @@
 //         { headers: { Authorization: `Bearer ${userJwt}` } }
 //       );
 //     } catch (err) {
-//       console.error("❌ Logout API failed:", err);
 //     } finally {
 //       storage.clear();
 //       localStorage.clear();
@@ -120,8 +125,6 @@
 //       window.location.replace("/login");
 //     }
 //   };
-
-//   // Select Mess
 //   const handleMessSelect = (id) => {
 //     setSelectedMessId(id);
 //     setActiveProfileType("mess");
@@ -129,94 +132,221 @@
 //     setIsEditing(false);
 //     fetchMessProfile(id);
 //   };
-
-//   // Back to Owner
 //   const switchToOwner = () => {
 //     setActiveProfileType("owner");
 //     setSelectedMessId(null);
 //     setMess(null);
 //     setIsEditing(false);
 //   };
-
-//   // Inline edit controls
 //   const startInlineEdit = () => {
-//     if (activeProfileType !== "owner") return;
-//     setFormData({
-//       ownerName: owner?.ownerName || "",
-//       contactEmail: owner?.contactEmail || "",
-//       contactNumber: owner?.contactNumber || "",
-//       ownerAddress: owner?.ownerAddress || "",
-//       city: owner?.city || "",
-//       state: owner?.state || "",
-//       pincode: owner?.pincode || "",
-//     });
-//     setIsEditing(true);
+//     if (activeProfileType === "owner") {
+//       setFormData({
+//         ownerName: owner?.ownerName || "",
+//         contactEmail: owner?.contactEmail || "",
+//         contactNumber: owner?.contactNumber || "",
+//         ownerAddress: owner?.ownerAddress || "",
+//         city: owner?.city || "",
+//         state: owner?.state || "",
+//         pincode: owner?.pincode || "",
+//         dateofbirth: owner?.dateofbirth || "",
+//         gender: owner?.gender?.toLowerCase?.() || "",
+//       });
+//       setIsEditing(true);
+//     } else if (activeProfileType === "mess" && mess) {
+//       setFormData({
+//         messName: mess?.messName || "",
+//         messType: mess?.messType || "",
+//         email: mess?.email || "",
+//         contactNumber: mess?.contactNumber || "",
+//         alternateContact: mess?.alternateContact || "",
+//         address: mess?.address || "",
+//         city: mess?.city || "",
+//         state: mess?.state || "",
+//         pincode: mess?.pincode || "",
+//         fssaiLicenseNumber: mess?.fssaiLicenseNumber || "",
+//         activationDocType: "", // user can choose a type if uploading doc
+//         openTime: mess?.openTime || "",
+//         closeTime: mess?.closeTime || "",
+//         daysOpen: mess?.daysOpen || [],
+//         services: mess?.services || [],
+//         // file placeholders will be handled via refs
+//       });
+//       setIsEditing(true);
+//     }
 //   };
-
-//   const cancelInlineEdit = () => setIsEditing(false);
-
+//   const cancelInlineEdit = () => {
+//     setIsEditing(false);
+//     setFormData({});
+//     if (messLogoRef.current) messLogoRef.current.value = "";
+//     if (messFssaiRef.current) messFssaiRef.current.value = "";
+//     if (messActivationRef.current) messActivationRef.current.value = "";
+//   };
 //   const handleEditChange = (e) => {
-//     const { name, value } = e.target;
+//     const { name, value, type, checked } = e.target;
+//     if (name === "services") {
+//       // value is service name
+//       setFormData((prev) => {
+//         const arr = prev.services ? [...prev.services] : [];
+//         if (checked) {
+//           if (!arr.includes(value)) arr.push(value);
+//         } else {
+//           const idx = arr.indexOf(value);
+//           if (idx > -1) arr.splice(idx, 1);
+//         }
+//         return { ...prev, services: arr };
+//       });
+//       return;
+//     }
+//     if (name === "daysOpen") {
+//       setFormData((prev) => {
+//         const arr = prev.daysOpen ? [...prev.daysOpen] : [];
+//         if (checked) {
+//           if (!arr.includes(value)) arr.push(value);
+//         } else {
+//           const idx = arr.indexOf(value);
+//           if (idx > -1) arr.splice(idx, 1);
+//         }
+//         return { ...prev, daysOpen: arr };
+//       });
+//       return;
+//     }
 //     setFormData((prev) => ({ ...prev, [name]: value }));
 //   };
+// const handleProfileUpdate = async () => {
+//   setSaving(true);
 
-//   const handleProfileUpdate = async () => {
-//     try {
-//       setSaving(true);
+//   try {
+//     if (activeProfileType === "owner") {
 //       const res = await apiPost("/owner/profile/update", formData);
 //       if (res?.success) {
 //         setOwner((prev) => ({ ...prev, ...res.data }));
 //         setIsEditing(false);
 //         toast.success(res.message || "Profile updated successfully!");
+
+//         const storedHeader = JSON.parse(storage.getItem("ownerHeaderData")) || {};
+//         const updatedHeader = {
+//           ...storedHeader,
+//           ownerName: res.data.ownerName || owner?.ownerName,
+//           profileImage: res.data.profileImage || owner?.profileImage,
+//         };
+//         storage.setItem("ownerHeaderData", JSON.stringify(updatedHeader));
 //       } else {
 //         toast.error(res?.message || "Update failed");
 //       }
-//     } catch (err) {
-//       console.error("Update error:", err);
-//       toast.error("Something went wrong.");
-//     } finally {
-//       setSaving(false);
 //     }
-//   };
-
-//   // Loader
-//   if (isLoading) {
-//     return (
-//       <div className="flex min-h-screen bg-[#F9F4F0]">
-//         <Navbar />
-//         <div className="w-full mx-auto p-6 text-center text-gray-500">
-//           Loading profile...
-//         </div>
-//       </div>
-//     );
+//     else if (activeProfileType === "mess") {
+//       if (!selectedMessId) {
+//         toast.error("No mess selected");
+//         setSaving(false);
+//         return;
+//       }
+//       const fd = new FormData();
+//       const allowedFields = [
+//         "messName",
+//         "messType",
+//         "email",
+//         "contactNumber",
+//         "alternateContact",
+//         "address",
+//         "city",
+//         "state",
+//         "pincode",
+//         "fssaiLicenseNumber",
+//         "activationDocType",
+//         "openTime",
+//         "closeTime",
+//       ];
+//       const formatTimeForApi = (time) => {
+//         if (!time) return "";
+//         return time.split(":").slice(0, 2).join(":");
+//       };
+//       allowedFields.forEach((k) => {
+//         let value = formData[k];
+//         if (k === "openTime" || k === "closeTime") {
+//           value = formatTimeForApi(value);
+//         }
+//         if (value !== undefined && value !== null && value !== "") {
+//           fd.append(k, value);
+//         }
+//       });
+//       if (Array.isArray(formData.daysOpen)) {
+//         formData.daysOpen.forEach((day) => fd.append("daysOpen", day));
+//       }
+//       if (Array.isArray(formData.services)) {
+//         formData.services.forEach((s) => fd.append("services", s));
+//       }
+//       if (formData.logo) {
+//         fd.append("logo", formData.logo);
+//       }
+//       if (messLogoRef.current?.files?.[0]) {
+//         fd.append("logo", messLogoRef.current.files[0]);
+//       }
+//       if (messFssaiRef.current?.files?.[0]) {
+//         fd.append("fssaiDoc", messFssaiRef.current.files[0]);
+//       }
+//       if (messActivationRef.current?.files?.[0]) {
+//         fd.append("activationDoc", messActivationRef.current.files[0]);
+//       }
+//       const res = await apiPost(
+//         `/owner/mess/${selectedMessId}/profile/update`,
+//         fd,
+//         { headers: { "Content-Type": "multipart/form-data" } }
+//       );
+//       if (res?.success) {
+//         await fetchMessProfile(selectedMessId);
+//         setIsEditing(false);
+//         toast.success(res.message || "Mess updated successfully");
+//       } else {
+//         if (res?.restrictedFields?.length) {
+//           toast.error(
+//             `Cannot update after activation: ${res.restrictedFields.join(", ")}`
+//           );
+//         } else {
+//           toast.error(res?.message || "Failed to update mess");
+//         }
+//       }
+//     }
+//   } catch (err) {
+//     console.error(err);
+//     toast.error("Something went wrong.");
+//   } finally {
+//     setSaving(false);
 //   }
-
-//   // Active Profile
-//   const profileData = activeProfileType === "owner" ? owner : mess;
-
-//   if (!profileData) {
+// };
+//   const formatTime12Hour = (time24) => {
+//     if (!time24) return "";
+//     const [hourStr, minute] = time24.split(":");
+//     let hour = parseInt(hourStr, 10);
+//     const ampm = hour >= 12 ? "PM" : "AM";
+//     hour = hour % 12 || 12;
+//     return `${hour}:${minute} ${ampm}`;
+//   };
+//  if (isLoading) {
 //     return (
 //       <div className="flex min-h-screen bg-gray-50">
 //         <Navbar />
-//         <div className="w-full mx-auto p-6 text-center text-red-500">
-//           Profile not found
-//         </div>
+//         <div className="w-full mx-auto p-6 text-center text-gray-500">Loading profile...</div>
 //       </div>
 //     );
 //   }
-
-//   return (
-//     <div className="flex h-screen bg-gray-50">
+//  const profileData = activeProfileType === "owner" ? owner : mess;
+//  if (!profileData) {
+//     return (
+//       <div className="flex min-h-screen bg-gray-50">
+//         <Navbar />
+//         <div className="w-full mx-auto p-6 text-center text-red-500">Profile not found</div>
+//       </div>
+//     );
+//   }
+//  return (
+//     <div className="flex h-screen ">
 //       <Navbar />
-//       <div className="flex-1 md:p-4 pt-16 py-4 px-4 overflow-y-auto">
+//       <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
 //         <OwnerHeader />
-
 //         <h2 className="text-2xl font-bold font-poppins text-[#232325D1] mb-4">
 //           {activeProfileType === "owner" ? "Owner Profile" : "Mess Profile"}
 //         </h2>
-
 //         <div className="bg-white shadow-md rounded-2xl p-6">
-//           {/* Header (responsive + inline name edit) */}
 //           <div className="w-full flex flex-col sm:flex-row items-start sm:items-center gap-6">
 //             <div className="relative w-32 h-32">
 //               <img
@@ -228,11 +358,9 @@
 //                 alt="Profile"
 //                 className="w-full h-full rounded-xl object-cover"
 //               />
+
 //               {activeProfileType === "owner" && (
-//                 <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 rounded-xl cursor-pointer transition">
-//                   <span className="text-white text-xs font-semibold px-2 py-1 border border-white rounded">
-//                     {uploading ? "Uploading..." : "Edit Image"}
-//                   </span>
+//                 <>
 //                   <input
 //                     type="file"
 //                     accept="image/*"
@@ -240,10 +368,41 @@
 //                     className="hidden"
 //                     onChange={handleFileChange}
 //                   />
-//                 </label>
+//                   <button
+//                     onClick={() => fileInputRef.current?.click()}
+//                     disabled={uploading}
+//                     className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md transition"
+//                     title="Edit Image"
+//                   >
+//                     ✏️
+//                   </button>
+//                 </>
+//               )}
+// {activeProfileType === "mess" && selectedMessId && isEditing && (
+//                 <>
+//                  <input
+//   type="file"
+//   accept="image/*"
+//   ref={messLogoRef}
+//   className="hidden"
+//   onChange={(e) =>
+//     setFormData((prev) => ({
+//       ...prev,
+//       logo: e.target.files?.[0], // store in state only
+//     }))
+//   }
+// />
+//    <button
+//                     onClick={() => messLogoRef.current?.click()}
+//                     disabled={uploading}
+//                     className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md transition"
+//                     title="Edit Logo"
+//                   >
+//                     ✏️
+//                   </button>
+//                 </>
 //               )}
 //             </div>
-
 //             <div className="flex-1 w-full">
 //               {isEditing && activeProfileType === "owner" ? (
 //                 <input
@@ -253,33 +412,44 @@
 //                   className="w-full sm:w-auto text-2xl font-semibold font-poppins text-[#393939] border rounded-lg px-3 py-2"
 //                   placeholder="Owner Name"
 //                 />
+//               ) : isEditing && activeProfileType === "mess" ? (
+//                 <input
+//                   name="messName"
+//                   value={formData.messName}
+//                   onChange={handleEditChange}
+//                   className="w-full sm:w-auto text-2xl font-semibold font-poppins text-[#393939] border rounded-lg px-3 py-2"
+//                   placeholder="Mess Name"
+//                 />
 //               ) : (
 //                 <h2 className="text-2xl font-semibold font-poppins text-[#393939] break-words">
 //                   {profileData.ownerName || profileData.messName || "Unnamed"}
 //                 </h2>
 //               )}
-
 //               <div className="flex flex-wrap items-center gap-3 mt-2">
 //                 <p className="text-gray-500 font-poppins break-all">
 //                   {profileData.contactEmail || profileData.email || ""}
 //                 </p>
-
 //                 {activeProfileType === "owner" && !isEditing && (
 //                   <button
 //                     onClick={startInlineEdit}
-//                     className="bg-orange-500 hover:bg-orange-600 cursor-pointer text-white text-sm font-semibold px-5 py-2 rounded-full shadow-md transition"
+//                     className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-5 py-2 rounded-full shadow-md transition"
 //                   >
 //                     ✏️ Edit Profile
+//                   </button>
+//                 )}
+//                 {activeProfileType === "mess" && !isEditing && selectedMessId && (
+//                   <button
+//                     onClick={startInlineEdit}
+//                     className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-5 py-2 rounded-full shadow-md transition"
+//                   >
+//                     ✏️ Edit Mess Profile
 //                   </button>
 //                 )}
 //               </div>
 //             </div>
 //           </div>
-
-//           {/* Details (responsive + inline inputs) */}
 //           <div className="mt-8 text-lg text-gray-600 font-poppins">
 //             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-//               {/* Email */}
 //               <div className="flex flex-col">
 //                 <span className="font-medium">Email:</span>
 //                 {isEditing && activeProfileType === "owner" ? (
@@ -291,17 +461,33 @@
 //                     className="mt-1 border rounded px-3 py-2"
 //                     placeholder="Email"
 //                   />
+//                 ) : isEditing && activeProfileType === "mess" ? (
+//                   <input
+//                     type="email"
+//                     name="email"
+//                     value={formData.email}
+//                     onChange={handleEditChange}
+//                     className="mt-1 border rounded px-3 py-2"
+//                     placeholder="Email"
+//                   />
 //                 ) : (
 //                   <span className="mt-1 break-all">
 //                     {profileData.contactEmail || profileData.email || "N/A"}
 //                   </span>
 //                 )}
 //               </div>
-
-//               {/* Contact */}
 //               <div className="flex flex-col">
 //                 <span className="font-medium">Contact:</span>
 //                 {isEditing && activeProfileType === "owner" ? (
+//                   <input
+//                     type="tel"
+//                     name="contactNumber"
+//                     value={formData.contactNumber}
+//                     onChange={handleEditChange}
+//                     className="mt-1 border rounded px-3 py-2"
+//                     placeholder="Contact Number"
+//                   />
+//                 ) : isEditing && activeProfileType === "mess" ? (
 //                   <input
 //                     type="tel"
 //                     name="contactNumber"
@@ -316,8 +502,6 @@
 //                   </span>
 //                 )}
 //               </div>
-
-//               {/* Address */}
 //               <div className="flex flex-col">
 //                 <span className="font-medium">Address:</span>
 //                 {isEditing && activeProfileType === "owner" ? (
@@ -328,17 +512,31 @@
 //                     className="mt-1 border rounded px-3 py-2"
 //                     placeholder="Address"
 //                   />
+//                 ) : isEditing && activeProfileType === "mess" ? (
+//                   <input
+//                     name="address"
+//                     value={formData.address}
+//                     onChange={handleEditChange}
+//                     className="mt-1 border rounded px-3 py-2"
+//                     placeholder="Address"
+//                   />
 //                 ) : (
 //                   <span className="mt-1 break-words">
 //                     {profileData.ownerAddress || profileData.address || "N/A"}
 //                   </span>
 //                 )}
 //               </div>
-
-//               {/* City */}
 //               <div className="flex flex-col">
 //                 <span className="font-medium">City:</span>
 //                 {isEditing && activeProfileType === "owner" ? (
+//                   <input
+//                     name="city"
+//                     value={formData.city}
+//                     onChange={handleEditChange}
+//                     className="mt-1 border rounded px-3 py-2"
+//                     placeholder="City"
+//                   />
+//                 ) : isEditing && activeProfileType === "mess" ? (
 //                   <input
 //                     name="city"
 //                     value={formData.city}
@@ -350,11 +548,17 @@
 //                   <span className="mt-1">{profileData.city || "N/A"}</span>
 //                 )}
 //               </div>
-
-//               {/* State */}
 //               <div className="flex flex-col">
 //                 <span className="font-medium">State:</span>
 //                 {isEditing && activeProfileType === "owner" ? (
+//                   <input
+//                     name="state"
+//                     value={formData.state}
+//                     onChange={handleEditChange}
+//                     className="mt-1 border rounded px-3 py-2"
+//                     placeholder="State"
+//                   />
+//                 ) : isEditing && activeProfileType === "mess" ? (
 //                   <input
 //                     name="state"
 //                     value={formData.state}
@@ -366,11 +570,17 @@
 //                   <span className="mt-1">{profileData.state || "N/A"}</span>
 //                 )}
 //               </div>
-
-//               {/* Pincode */}
 //               <div className="flex flex-col">
 //                 <span className="font-medium">Pincode:</span>
 //                 {isEditing && activeProfileType === "owner" ? (
+//                   <input
+//                     name="pincode"
+//                     value={formData.pincode}
+//                     onChange={handleEditChange}
+//                     className="mt-1 border rounded px-3 py-2"
+//                     placeholder="Pincode"
+//                   />
+//                 ) : isEditing && activeProfileType === "mess" ? (
 //                   <input
 //                     name="pincode"
 //                     value={formData.pincode}
@@ -382,21 +592,253 @@
 //                   <span className="mt-1">{profileData.pincode || "N/A"}</span>
 //                 )}
 //               </div>
+//               {activeProfileType === "owner" && (
+//                 <div className="flex flex-col">
+//                   <span className="font-medium">Date of Birth:</span>
+//                   {isEditing ? (
+//                     <input
+//                       type="date"
+//                       name="dateofbirth"
+//                       value={formData.dateofbirth || ""}
+//                       onChange={handleEditChange}
+//                       className="mt-1 border rounded px-3 py-2"
+//                     />
+//                   ) : (
+//                     <span className="mt-1">
+//                       {profileData.dateofbirth
+//                         ? new Date(profileData.dateofbirth).toLocaleDateString("en-IN", {
+//                             year: "numeric",
+//                             month: "short",
+//                             day: "numeric",
+//                           })
+//                         : "N/A"}
+//                     </span>
+//                   )}
+//                 </div>
+//               )}
+//               {activeProfileType === "owner" && (
+//                 <div className="flex flex-col">
+//                   <span className="font-medium">Gender:</span>
+//                   {isEditing ? (
+//                     <select
+//                       name="gender"
+//                       value={formData.gender || ""}
+//                       onChange={(e) =>
+//                         setFormData((prev) => ({ ...prev, gender: e.target.value.toLowerCase() }))
+//                       }
+//                       className="mt-1 border rounded px-3 py-2"
+//                     >
+//                       <option value="">Select gender</option>
+//                       <option value="male">Male</option>
+//                       <option value="female">Female</option>
+//                       <option value="others">Others</option>
+//                     </select>
+//                   ) : (
+//                     <span className="mt-1 capitalize">{profileData.gender || "N/A"}</span>
+//                   )}
+//                 </div>
+//               )}
+//               <div className="flex flex-col">
+//                 <span className="font-medium">Total Mess Count:</span>
+//                 <span className="mt-1">{profileData.messCount ?? "0"}</span>
+//               </div>
 //             </div>
+//             {activeProfileType === "mess" && mess && (
+//               <div className="mt-6">
+//                 <h3 className="text-base font-semibold mb-3">Mess Details</h3>
 
-//             {/* Save/Cancel */}
-//             {isEditing && activeProfileType === "owner" && (
+//                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+//                   {/* Mess Type */}
+//                   <div className="flex flex-col">
+//                     <span className="font-medium">Mess Type:</span>
+//                     {isEditing ? (
+//                       <select
+//                         name="messType"
+//                         value={formData.messType || ""}
+//                         onChange={handleEditChange}
+//                         className="mt-1 border rounded px-3 py-2"
+//                       >
+//                         <option value="">Select</option>
+//                         <option value="veg">Veg</option>
+//                         <option value="non-veg">Non-Veg</option>
+//                         <option value="both">Both</option>
+//                       </select>
+//                     ) : (
+//                       <span className="mt-1">{mess.messType || "N/A"}</span>
+//                     )}
+//                   </div>
+
+//                   {/* Alternate Contact */}
+//                   <div className="flex flex-col">
+//                     <span className="font-medium">Alternate Contact:</span>
+//                     {isEditing ? (
+//                       <input
+//                         name="alternateContact"
+//                         value={formData.alternateContact || ""}
+//                         onChange={handleEditChange}
+//                         className="mt-1 border rounded px-3 py-2"
+//                         placeholder="Alternate Contact"
+//                       />
+//                     ) : (
+//                       <span className="mt-1">{mess.alternateContact || "N/A"}</span>
+//                     )}
+//                   </div>
+// <div className="flex flex-col w-full">
+//   <span className="font-medium">FSSAI License Number:</span>
+//   {isEditing ? (
+//     <input
+//       name="fssaiLicenseNumber"
+//       value={formData.fssaiLicenseNumber || ""}
+//       onChange={handleEditChange}
+//       className="mt-1 border rounded px-3 py-2 w-full"
+//       placeholder="FSSAI License Number"
+//     />
+//   ) : (
+//     <span className="mt-1 break-words">{mess.fssaiLicenseNumber || "N/A"}</span>
+//   )}
+//   {isEditing && (
+//     <div className="mt-2 w-full">
+//       <input
+//         type="file"
+//         accept="image/*,application/pdf"
+//         ref={messFssaiRef}
+//         className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
+//       />
+//       <small className="text-gray-500 block mt-1 text-sm break-words">
+//         If uploading FSSAI doc, provide license number too.
+//       </small>
+//     </div>
+//   )}
+// </div>
+// <div className="flex flex-col w-full">
+//   <span className="font-medium">Activation Document Type:</span>
+//   {isEditing ? (
+//     <>
+//       <select
+//         name="activationDocType"
+//         value={formData.activationDocType || ""}
+//         onChange={handleEditChange}
+//         className="mt-1 border rounded px-3 py-2 w-full"
+//       >
+//         <option value="">Select</option>
+//         <option value="aadhaar">Aadhaar</option>
+//         <option value="gst">GST</option>
+//         <option value="pan">PAN</option>
+//         <option value="electricity_bill">Electricity Bill</option>
+//         <option value="business_license">Business License</option>
+//         <option value="rent_agreement">Rent Agreement</option>
+//       </select>
+
+//       <div className="mt-2 w-full">
+//         <input
+//           type="file"
+//           accept="image/*,application/pdf"
+//           ref={messActivationRef}
+//           className="w-full text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:bg-orange-50 file:text-orange-600 hover:file:bg-orange-100"
+//         />
+//         <small className="text-gray-500 block mt-1 text-sm break-words">
+//           If uploading activation doc, choose type first.
+//         </small>
+//       </div>
+//     </>
+//   ) : (
+//     <span className="mt-1 break-words">{mess.activationDocType || "N/A"}</span>
+//   )}
+// </div>
+//                   <div className="flex flex-col">
+//                     <span className="font-medium">Is FSSAI Verified?</span>
+//                     <span className="mt-1">{mess.isVerified ? "Yes" : "No"}</span>
+//                   </div>
+//                   <div className="flex flex-col">
+//                     <span className="font-medium">Status:</span>
+//                     <span className="mt-1">{mess.status || "N/A"}</span>
+//                   </div>
+//                   <div className="flex flex-col">
+//                     <span className="font-medium">Days Open:</span>
+//                     {isEditing ? (
+//                       <div className="mt-1 flex flex-wrap gap-2">
+//                         {Object.keys(dayShortMap).map((d) => (
+//                           <label key={d} className="inline-flex items-center gap-2 text-sm">
+//                             <input
+//                               type="checkbox"
+//                               name="daysOpen"
+//                               value={d}
+//                               checked={(formData.daysOpen || []).includes(d)}
+//                               onChange={handleEditChange}
+//                             />
+//                             <span>{dayShortMap[d]}</span>
+//                           </label>
+//                         ))}
+//                       </div>
+//                     ) : (
+//                       <span className="mt-1">{(mess.daysOpen || []).map((day) => dayShortMap[day] || day).join(", ") || "N/A"}</span>
+//                     )}
+//                   </div>
+//                   <div className="flex flex-col">
+//                     <span className="font-medium">Services:</span>
+//                     {isEditing ? (
+//                       <div className="mt-1 flex flex-wrap gap-2">
+//                         {defaultServices.map((s) => (
+//                           <label key={s} className="inline-flex items-center gap-2 text-sm">
+//                             <input
+//                               type="checkbox"
+//                               name="services"
+//                               value={s}
+//                               checked={(formData.services || []).includes(s)}
+//                               onChange={handleEditChange}
+//                             />
+//                             <span className="capitalize">{s.replace("-", " ")}</span>
+//                           </label>
+//                         ))}
+//                       </div>
+//                     ) : (
+//                       <span className="mt-1">{(mess.services || []).join(", ") || "N/A"}</span>
+//                     )}
+//                   </div>
+//                   <div className="flex flex-col">
+//                     <span className="font-medium">KYC Stage:</span>
+//                     <span className="mt-1">{mess.kyc_stage || "N/A"}</span>
+//                   </div>
+
+//                   <div className="flex flex-col">
+//                     <span className="font-medium">Open / Close Time:</span>
+//                     <span className="mt-1">
+//                       Open: {formatTime12Hour(mess.openTime)} - Close: {formatTime12Hour(mess.closeTime)}
+//                     </span>
+//                     {isEditing && (
+//                       <div className="mt-2 grid grid-cols-2 gap-2">
+//                         <input
+//                           type="time"
+//                           name="openTime"
+//                           value={formData.openTime || ""}
+//                           onChange={handleEditChange}
+//                           className="border rounded px-3 py-2"
+//                         />
+//                         <input
+//                           type="time"
+//                           name="closeTime"
+//                           value={formData.closeTime || ""}
+//                           onChange={handleEditChange}
+//                           className="border rounded px-3 py-2"
+//                         />
+//                       </div>
+//                     )}
+//                   </div>
+//                 </div>
+//               </div>
+//             )}
+//             {isEditing && (
 //               <div className="flex gap-3 mt-6">
 //                 <button
 //                   onClick={cancelInlineEdit}
-//                   className="px-4 py-2 text-sm cursor-pointer bg-gray-200 rounded hover:bg-gray-300"
+//                   className="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300"
 //                 >
 //                   Cancel
 //                 </button>
 //                 <button
 //                   disabled={saving}
 //                   onClick={handleProfileUpdate}
-//                   className="px-4 py-2 text-sm bg-orange-500 cursor-pointer text-white rounded hover:bg-orange-600"
+//                   className="px-4 py-2 text-sm bg-orange-500 text-white rounded hover:bg-orange-600"
 //                 >
 //                   {saving ? "Saving..." : "Save Changes"}
 //                 </button>
@@ -404,20 +846,18 @@
 //             )}
 //           </div>
 //         </div>
-
-//         {/* Buttons */}
 //         <div className="grid grid-cols-2 gap-4 mt-8">
 //           {activeProfileType === "owner" ? (
 //             <button
 //               onClick={() => setShowModal(true)}
-//               className="bg-orange-500 cursor-pointer hover:bg-orange-600 text-white font-bold py-2 rounded-lg shadow-sm"
+//               className="bg-white border border-orange-500 hover:bg-orange-100 text-orange-500 font-bold py-2 rounded-lg shadow-sm"
 //             >
 //               Switch to Mess Profile ↱
 //             </button>
 //           ) : (
 //             <button
 //               onClick={switchToOwner}
-//               className="bg-orange-500 cursor-pointer hover:bg-orange-600 text-white font-bold py-2 rounded-lg shadow-sm"
+//               className="bg-white border border-orange-500 hover:bg-orange-100 text-orange-500 font-bold py-2 rounded-lg shadow-sm"
 //             >
 //               Switch to Owner Profile ↩
 //             </button>
@@ -425,14 +865,17 @@
 
 //           <button
 //             onClick={handleLogout}
-//             className="border border-[#EA4335] cursor-pointer text-[#EA4335] text-sm font-bold py-2 rounded-lg"
+//             className="flex items-center justify-center gap-2 bg-[#EA4335] hover:bg-[#d9362b] text-white text-sm font-bold py-2 rounded-lg"
 //           >
+//             <MdLogout size={18} />
 //             LOG OUT
+//           </button>
+
+//           <button onClick={() => navigate("/delete-account")} className="absolute opacity-0">
+//             Delete Account
 //           </button>
 //         </div>
 //       </div>
-
-//       {/* Mess Select Modal (unchanged) */}
 //       {showModal && (
 //         <div className="fixed inset-0 flex items-start justify-center backdrop-blur-sm bg-opacity-40 z-50 pt-20">
 //           <div className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6">
@@ -443,7 +886,7 @@
 //               <ul className="space-y-3 max-h-64 overflow-y-auto">
 //                 {messes.map((m) => (
 //                   <li
-//                     key={m._id || m.messId}
+//                     key={m._id || m.messId || m.id}
 //                     onClick={() => handleMessSelect(m._id || m.id || m.messId)}
 //                     className="p-3 border rounded-lg hover:bg-orange-50 cursor-pointer"
 //                   >
@@ -456,17 +899,13 @@
 //               </ul>
 //             )}
 //             <div className="flex justify-end mt-6">
-//               <button
-//                 className="px-4 py-2 text-sm cursor-pointer bg-gray-200 rounded hover:bg-gray-300"
-//                 onClick={() => setShowModal(false)}
-//               >
+//               <button className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300" onClick={() => setShowModal(false)}>
 //                 Close
 //               </button>
 //             </div>
 //           </div>
 //         </div>
 //       )}
-
 //     </div>
 //   );
 // };
@@ -482,6 +921,18 @@ import OwnerHeader from "./ownerHeader";
 import { apiGet, apiPost } from "../services/api";
 import storage from "../utils/storage";
 import toast from "react-hot-toast";
+import { MdPowerSettingsNew  } from "react-icons/md";
+
+const dayShortMap = {
+  Monday: "Mon",
+  Tuesday: "Tue",
+  Wednesday: "Wed",
+  Thursday: "Thu",
+  Friday: "Fri",
+  Saturday: "Sat",
+  Sunday: "Sun",
+};
+const defaultServices = ["dine", "take-away", "delivery"];
 
 const MessProfile = () => {
   const [owner, setOwner] = useState(null);
@@ -490,9 +941,8 @@ const MessProfile = () => {
   const [uploading, setUploading] = useState(false);
   const [messes, setMesses] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [activeProfileType, setActiveProfileType] = useState("owner"); // owner | mess
+  const [activeProfileType, setActiveProfileType] = useState("owner");
   const [selectedMessId, setSelectedMessId] = useState(null);
-
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [saving, setSaving] = useState(false);
@@ -504,9 +954,9 @@ const MessProfile = () => {
     setIsLoading(true);
     try {
       const res = await apiGet("/owner/profile");
-      const payload = res.data || res.data?.owner || null;
+      const payload = res?.data || res?.data?.owner || null;
       setOwner(payload);
-    } catch (e) {
+    } catch {
       setOwner(null);
     } finally {
       setIsLoading(false);
@@ -514,6 +964,7 @@ const MessProfile = () => {
   };
 
   const fetchMessProfile = async (id) => {
+    if (!id) return;
     setIsLoading(true);
     try {
       const res = await apiGet(`/owner/mess/id/${id}`);
@@ -523,7 +974,7 @@ const MessProfile = () => {
         toast.error("Mess not found");
         setMess(null);
       }
-    } catch (e) {
+    } catch {
       setMess(null);
     } finally {
       setIsLoading(false);
@@ -531,8 +982,9 @@ const MessProfile = () => {
   };
 
   const handleFileChange = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
+
     const fd = new FormData();
     fd.append("image", file);
 
@@ -541,14 +993,29 @@ const MessProfile = () => {
       const res = await apiPost("/owner/profile/image", fd, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+
       if (res?.success) {
         const newUrl = res.data?.data?.profileImage || res.data?.profileImage;
         setOwner((prev) => ({
           ...prev,
           profileImage: `${newUrl}?t=${Date.now()}`,
         }));
+
+        const storedHeader =
+          JSON.parse(storage.getItem("ownerHeaderData")) || {};
+        storage.setItem(
+          "ownerHeaderData",
+          JSON.stringify({
+            ...storedHeader,
+            profileImage: `${newUrl}?t=${Date.now()}`,
+          })
+        );
+        toast.success("Profile image updated");
+      } else {
+        toast.error(res?.message || "Image upload failed");
       }
-    } catch (err) {
+    } catch {
+      toast.error("Image upload failed");
     } finally {
       setUploading(false);
     }
@@ -560,8 +1027,7 @@ const MessProfile = () => {
       try {
         const res = await apiGet("/owner/mess/all");
         if (res?.success) setMesses(res.data || []);
-      } catch (error) {
-      }
+      } catch {}
     })();
   }, []);
 
@@ -574,8 +1040,7 @@ const MessProfile = () => {
         { fcmToken },
         { headers: { Authorization: `Bearer ${userJwt}` } }
       );
-    } catch (err) {
-    } finally {
+    } catch {} finally {
       storage.clear();
       localStorage.clear();
       sessionStorage.clear();
@@ -600,7 +1065,7 @@ const MessProfile = () => {
   };
 
   const startInlineEdit = () => {
-    if (activeProfileType !== "owner") return;
+    if (!owner) return;
     setFormData({
       ownerName: owner?.ownerName || "",
       contactEmail: owner?.contactEmail || "",
@@ -609,11 +1074,16 @@ const MessProfile = () => {
       city: owner?.city || "",
       state: owner?.state || "",
       pincode: owner?.pincode || "",
+      dateofbirth: owner?.dateofbirth || "",
+      gender: owner?.gender?.toLowerCase?.() || "",
     });
     setIsEditing(true);
   };
 
-  const cancelInlineEdit = () => setIsEditing(false);
+  const cancelInlineEdit = () => {
+    setIsEditing(false);
+    setFormData({});
+  };
 
   const handleEditChange = (e) => {
     const { name, value } = e.target;
@@ -621,26 +1091,44 @@ const MessProfile = () => {
   };
 
   const handleProfileUpdate = async () => {
+    setSaving(true);
     try {
-      setSaving(true);
       const res = await apiPost("/owner/profile/update", formData);
       if (res?.success) {
         setOwner((prev) => ({ ...prev, ...res.data }));
         setIsEditing(false);
         toast.success(res.message || "Profile updated successfully!");
+
+        const storedHeader =
+          JSON.parse(storage.getItem("ownerHeaderData")) || {};
+        const updatedHeader = {
+          ...storedHeader,
+          ownerName: res.data.ownerName || owner?.ownerName,
+          profileImage: res.data.profileImage || owner?.profileImage,
+        };
+        storage.setItem("ownerHeaderData", JSON.stringify(updatedHeader));
       } else {
         toast.error(res?.message || "Update failed");
       }
-    } catch (err) {
+    } catch {
       toast.error("Something went wrong.");
     } finally {
       setSaving(false);
     }
   };
 
+  const formatTime12Hour = (time24) => {
+    if (!time24) return "";
+    const [hourStr, minute] = time24.split(":");
+    let hour = parseInt(hourStr, 10);
+    const ampm = hour >= 12 ? "PM" : "AM";
+    hour = hour % 12 || 12;
+    return `${hour}:${minute} ${ampm}`;
+  };
+
   if (isLoading) {
     return (
-      <div className="flex min-h-screen bg-[#F9F4F0]">
+      <div className="flex min-h-screen bg-gray-50">
         <Navbar />
         <div className="w-full mx-auto p-6 text-center text-gray-500">
           Loading profile...
@@ -663,15 +1151,15 @@ const MessProfile = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen">
       <Navbar />
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
         <OwnerHeader />
-
         <h2 className="text-2xl font-bold font-poppins text-[#232325D1] mb-4">
           {activeProfileType === "owner" ? "Owner Profile" : "Mess Profile"}
         </h2>
 
+        {/* Profile Card */}
         <div className="bg-white shadow-md rounded-2xl p-6">
           <div className="w-full flex flex-col sm:flex-row items-start sm:items-center gap-6">
             <div className="relative w-32 h-32">
@@ -685,10 +1173,7 @@ const MessProfile = () => {
                 className="w-full h-full rounded-xl object-cover"
               />
               {activeProfileType === "owner" && (
-                <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 rounded-xl cursor-pointer transition">
-                  <span className="text-white text-xs font-semibold px-2 py-1 border border-white rounded">
-                    {uploading ? "Uploading..." : "Edit Image"}
-                  </span>
+                <>
                   <input
                     type="file"
                     accept="image/*"
@@ -696,7 +1181,17 @@ const MessProfile = () => {
                     className="hidden"
                     onChange={handleFileChange}
                   />
-                </label>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    // className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md transition"
+          className="absolute bottom-0  right-0 z-20 bg-white text-xs md:text-sm font-medium px-1.5 py-1.5 rounded-full shadow hover:bg-orange-200 cursor-pointer transition-all duration-200"
+
+                    title="Edit Image"
+                  >
+                    ✏️
+                  </button>
+                </>
               )}
             </div>
 
@@ -706,17 +1201,17 @@ const MessProfile = () => {
                   name="ownerName"
                   value={formData.ownerName}
                   onChange={handleEditChange}
-                  className="w-full sm:w-auto text-2xl font-semibold font-poppins text-[#393939] border rounded-lg px-3 py-2"
+                  className="w-full sm:w-auto text-2xl font-semibold border rounded-lg px-3 py-2"
                   placeholder="Owner Name"
                 />
               ) : (
-                <h2 className="text-2xl font-semibold font-poppins text-[#393939] break-words">
+                <h2 className="text-2xl font-semibold break-words">
                   {profileData.ownerName || profileData.messName || "Unnamed"}
                 </h2>
               )}
 
               <div className="flex flex-wrap items-center gap-3 mt-2">
-                <p className="text-gray-500 font-poppins break-all">
+                <p className="text-gray-500 break-all">
                   {profileData.contactEmail || profileData.email || ""}
                 </p>
 
@@ -732,10 +1227,10 @@ const MessProfile = () => {
             </div>
           </div>
 
-          {/* Details */}
-          <div className="mt-8 text-lg text-gray-600 font-poppins">
+          {/* Info Section */}
+          <div className="mt-8 text-lg text-gray-600">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Email */}
+              {/* Shared Fields */}
               <div className="flex flex-col">
                 <span className="font-medium">Email:</span>
                 {isEditing && activeProfileType === "owner" ? (
@@ -745,7 +1240,6 @@ const MessProfile = () => {
                     value={formData.contactEmail}
                     onChange={handleEditChange}
                     className="mt-1 border rounded px-3 py-2"
-                    placeholder="Email"
                   />
                 ) : (
                   <span className="mt-1 break-all">
@@ -754,7 +1248,6 @@ const MessProfile = () => {
                 )}
               </div>
 
-              {/* Contact */}
               <div className="flex flex-col">
                 <span className="font-medium">Contact:</span>
                 {isEditing && activeProfileType === "owner" ? (
@@ -764,16 +1257,14 @@ const MessProfile = () => {
                     value={formData.contactNumber}
                     onChange={handleEditChange}
                     className="mt-1 border rounded px-3 py-2"
-                    placeholder="Contact Number"
                   />
                 ) : (
                   <span className="mt-1">
-                    {profileData.contactNumber || profileData.phone || "N/A"}
+                    {profileData.contactNumber || "N/A"}
                   </span>
                 )}
               </div>
 
-              {/* Address */}
               <div className="flex flex-col">
                 <span className="font-medium">Address:</span>
                 {isEditing && activeProfileType === "owner" ? (
@@ -782,7 +1273,6 @@ const MessProfile = () => {
                     value={formData.ownerAddress}
                     onChange={handleEditChange}
                     className="mt-1 border rounded px-3 py-2"
-                    placeholder="Address"
                   />
                 ) : (
                   <span className="mt-1 break-words">
@@ -791,7 +1281,6 @@ const MessProfile = () => {
                 )}
               </div>
 
-              {/* City */}
               <div className="flex flex-col">
                 <span className="font-medium">City:</span>
                 {isEditing && activeProfileType === "owner" ? (
@@ -800,14 +1289,12 @@ const MessProfile = () => {
                     value={formData.city}
                     onChange={handleEditChange}
                     className="mt-1 border rounded px-3 py-2"
-                    placeholder="City"
                   />
                 ) : (
                   <span className="mt-1">{profileData.city || "N/A"}</span>
                 )}
               </div>
 
-              {/* State */}
               <div className="flex flex-col">
                 <span className="font-medium">State:</span>
                 {isEditing && activeProfileType === "owner" ? (
@@ -816,14 +1303,12 @@ const MessProfile = () => {
                     value={formData.state}
                     onChange={handleEditChange}
                     className="mt-1 border rounded px-3 py-2"
-                    placeholder="State"
                   />
                 ) : (
                   <span className="mt-1">{profileData.state || "N/A"}</span>
                 )}
               </div>
 
-              {/* Pincode */}
               <div className="flex flex-col">
                 <span className="font-medium">Pincode:</span>
                 {isEditing && activeProfileType === "owner" ? (
@@ -832,127 +1317,106 @@ const MessProfile = () => {
                     value={formData.pincode}
                     onChange={handleEditChange}
                     className="mt-1 border rounded px-3 py-2"
-                    placeholder="Pincode"
                   />
                 ) : (
                   <span className="mt-1">{profileData.pincode || "N/A"}</span>
                 )}
               </div>
+
+              {/* Owner-only extra fields */}
+              {activeProfileType === "owner" && (
+                <>
+                  <div className="flex flex-col">
+                    <span className="font-medium">Date of Birth:</span>
+                    {isEditing ? (
+                      <input
+                        type="date"
+                        name="dateofbirth"
+                        value={formData.dateofbirth || ""}
+                        onChange={handleEditChange}
+                        className="mt-1 border rounded px-3 py-2"
+                      />
+                    ) : (
+                      <span className="mt-1">
+                        {profileData.dateofbirth
+                          ? new Date(
+                              profileData.dateofbirth
+                            ).toLocaleDateString("en-IN", {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                            })
+                          : "N/A"}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col">
+                    <span className="font-medium">Gender:</span>
+                    {isEditing ? (
+                      <select
+                        name="gender"
+                        value={formData.gender || ""}
+                        onChange={(e) =>
+                          setFormData((prev) => ({
+                            ...prev,
+                            gender: e.target.value.toLowerCase(),
+                          }))
+                        }
+                        className="mt-1 border rounded px-3 py-2"
+                      >
+                        <option value="">Select gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="others">Others</option>
+                      </select>
+                    ) : (
+                      <span className="mt-1 capitalize">
+                        {profileData.gender || "N/A"}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col">
+                    <span className="font-medium">Total Mess Count:</span>
+                    <span className="mt-1">{profileData.messCount ?? "0"}</span>
+                  </div>
+                </>
+              )}
             </div>
 
-            {/* Mess-specific fields */}
+            {/* Mess Details (view only) */}
             {activeProfileType === "mess" && mess && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div className="flex flex-col">
-                  <span className="font-medium">Mess Type:</span>
-                  <span className="mt-1">{mess.messType || "N/A"}</span>
-                </div>
-
-                <div className="flex flex-col">
-                  <span className="font-medium">Alternate Contact:</span>
-                  <span className="mt-1">{mess.alternateContact || "N/A"}</span>
-                </div>
-
-                <div className="flex flex-col">
-                  <span className="font-medium">FSSAI License Number:</span>
-                  <span className="mt-1">{mess.fssaiLicenseNumber || "N/A"}</span>
-                </div>
-
-                {/* <div className="flex flex-col">
-                  <span className="font-medium">FSSI License PDF:</span>
-                  {mess.fssaiDocUrl ? (
-                    <a href={mess.fssiLicensePdf} target="_blank" className="text-blue-600 underline mt-1">
-                      View PDF
-                    </a>
-                  ) : (
-                    <span className="mt-1">N/A</span>
-                  )}
-                </div> */}
-                <div className="flex flex-col mt-4">
-  <span className="font-medium">FSSAI Document:</span>
-  {profileData.fssaiDocUrl ? (
-    <a
-      href={profileData.fssaiDocUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="mt-1 text-blue-600 underline"
-    >
-      View FSSAI Document
-    </a>
-  ) : (
-    <span className="mt-1">N/A</span>
-  )}
-</div>
-
-
-                <div className="flex flex-col">
-                  <span className="font-medium">Activation Document Type:</span>
-                  <span className="mt-1">{mess.activationDocType || "N/A"}</span>
-                </div>
-
-                {/* <div className="flex flex-col">
-                  <span className="font-medium">Activation Document Link:</span>
-                  {mess.activationDocUrl ? (
-                    <a href={mess.activationDocumentLink} target="_blank" className="text-blue-600 underline mt-1">
-                      View Document
-                    </a>
-                  ) : (
-                    <span className="mt-1">N/A</span>
-                  )}
-                </div> */}
-                <div className="flex flex-col mt-4">
-  <span className="font-medium">Activation Document:</span>
-  {profileData.activationDocUrl ? (
-    <a
-      href={profileData.activationDocUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="mt-1 text-blue-600 underline"
-    >
-      {profileData.activationDocType || "View Document"}
-    </a>
-  ) : (
-    <span className="mt-1">N/A</span>
-  )}
-</div>
-
-
-                <div className="flex flex-col">
-                  <span className="font-medium">Is FSSAI Verified?</span>
-                  <span className="mt-1">{mess.isVerified ? "Yes" : "No"}</span>
-                </div>
-
-                <div className="flex flex-col">
-                  <span className="font-medium">Status:</span>
-                  <span className="mt-1">{mess.status || "N/A"}</span>
-                </div>
-
-                <div className="flex flex-col">
-                  <span className="font-medium">Days Open:</span>
-                  <span className="mt-1">{mess.daysOpen?.join(", ") || "N/A"}</span>
-                </div>
-
-                <div className="flex flex-col">
-                  <span className="font-medium">Services:</span>
-                  <span className="mt-1">{mess.services?.join(", ") || "N/A"}</span>
-                </div>
-
-                <div className="flex flex-col">
-                  <span className="font-medium">KYC Stage:</span>
-                  <span className="mt-1">{mess.kyc_stage || "N/A"}</span>
-                </div>
-
-                <div className="flex flex-col">
-                  <span className="font-medium">Open / Close Time:</span>
-                  <span className="mt-1">
-                    {mess.openTime && mess.closeTime ? `${mess.openTime} - ${mess.closeTime}` : "N/A"}
-                  </span>
+              <div className="mt-6">
+                <h3 className="text-base font-semibold mb-3">Mess Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <p><b>Mess Type:</b> {mess.messType || "N/A"}</p>
+                  <p><b>Alternate Contact:</b> {mess.alternateContact || "N/A"}</p>
+                  <p><b>FSSAI License Number:</b> {mess.fssaiLicenseNumber || "N/A"}</p>
+                  <p><b>Activation Doc Type:</b> {mess.activationDocType || "N/A"}</p>
+                  <p><b>Is FSSAI Verified:</b> {mess.isVerified ? "Yes" : "No"}</p>
+                  <p><b>Status:</b> {mess.status || "N/A"}</p>
+                  <p>
+                    <b>Days Open:</b>{" "}
+                    {(mess.daysOpen || [])
+                      .map((day) => dayShortMap[day] || day)
+                      .join(", ") || "N/A"}
+                  </p>
+                  <p>
+                    <b>Services:</b>{" "}
+                    {(mess.services || []).join(", ") || "N/A"}
+                  </p>
+                  <p><b>KYC Stage:</b> {mess.kyc_stage || "N/A"}</p>
+                  <p>
+                    <b>Open / Close Time:</b>{" "}
+                    {formatTime12Hour(mess.openTime)} -{" "}
+                    {formatTime12Hour(mess.closeTime)}
+                  </p>
                 </div>
               </div>
             )}
-            
 
-            {isEditing && activeProfileType === "owner" && (
+            {isEditing && (
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={cancelInlineEdit}
@@ -963,7 +1427,7 @@ const MessProfile = () => {
                 <button
                   disabled={saving}
                   onClick={handleProfileUpdate}
-                  className="px-4 py-2 text-sm bg-orange-500 cursor-pointer text-white rounded hover:bg-orange-600"
+                  className="px-4 py-2 text-sm cursor-pointer bg-orange-500 text-white rounded hover:bg-orange-600"
                 >
                   {saving ? "Saving..." : "Save Changes"}
                 </button>
@@ -977,14 +1441,14 @@ const MessProfile = () => {
           {activeProfileType === "owner" ? (
             <button
               onClick={() => setShowModal(true)}
-              className="bg-orange-500 cursor-pointer hover:bg-orange-600 text-white font-bold py-2 rounded-lg shadow-sm"
+              className="bg-white border border-orange-500 cursor-pointer hover:bg-orange-100 text-orange-500 font-bold py-2 rounded-lg shadow-sm"
             >
               Switch to Mess Profile ↱
             </button>
           ) : (
             <button
               onClick={switchToOwner}
-              className="bg-orange-500 cursor-pointer hover:bg-orange-600 text-white font-bold py-2 rounded-lg shadow-sm"
+              className="bg-white border border-orange-500 cursor-pointer hover:bg-orange-100 text-orange-500 font-bold py-2 rounded-lg shadow-sm"
             >
               Switch to Owner Profile ↩
             </button>
@@ -992,25 +1456,15 @@ const MessProfile = () => {
 
           <button
             onClick={handleLogout}
-            className="border border-[#EA4335] cursor-pointer text-[#EA4335] text-sm font-bold py-2 rounded-lg"
+            className="flex items-center justify-center gap-2 cursor-pointer bg-[#EA4335] hover:bg-[#d9362b] text-white text-sm font-bold py-2 rounded-lg"
           >
+            <MdPowerSettingsNew  size={18} />
             LOG OUT
           </button>
-           <button
-      onClick={() => navigate("/delete-account")}
-  className="absolute opacity-0 "
->
-  Delete Account
-</button>
-          {/* Invisible Delete Account Button */}
-
-
         </div>
-       
       </div>
-      
 
-      {/* Mess Select Modal */}
+      {/* Mess Selection Modal */}
       {showModal && (
         <div className="fixed inset-0 flex items-start justify-center backdrop-blur-sm bg-opacity-40 z-50 pt-20">
           <div className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6">
@@ -1021,11 +1475,15 @@ const MessProfile = () => {
               <ul className="space-y-3 max-h-64 overflow-y-auto">
                 {messes.map((m) => (
                   <li
-                    key={m._id || m.messId}
-                    onClick={() => handleMessSelect(m._id || m.id || m.messId)}
+                    key={m._id || m.messId || m.id}
+                    onClick={() =>
+                      handleMessSelect(m._id || m.id || m.messId)
+                    }
                     className="p-3 border rounded-lg hover:bg-orange-50 cursor-pointer"
                   >
-                    <div className="font-medium text-gray-800">{m.messName}</div>
+                    <div className="font-medium text-gray-800">
+                      {m.messName}
+                    </div>
                     <div className="text-sm text-gray-500">
                       {m.city}, {m.state}
                     </div>
@@ -1035,7 +1493,7 @@ const MessProfile = () => {
             )}
             <div className="flex justify-end mt-6">
               <button
-                className="px-4 py-2 text-sm cursor-pointer bg-gray-200 rounded hover:bg-gray-300"
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
                 onClick={() => setShowModal(false)}
               >
                 Close
@@ -1044,7 +1502,6 @@ const MessProfile = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };

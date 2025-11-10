@@ -5,11 +5,16 @@
 // import { useNavigate } from "react-router-dom";
 // import storage from "../utils/storage";
 // import CustomerHeader from "../layouts/CustomerHeader";
+// import { toast } from "react-hot-toast";
+// import { MdLogout } from "react-icons/md";
+// import "../styles/customerProfile.css"; // ✅ Add this line at top
+
+
 
 // const CustomerProfileDetails = () => {
 //   const [profile, setProfile] = useState(null);
 //   const [uploading, setUploading] = useState(false);
-//   const [showEditModal, setShowEditModal] = useState(false);
+//   const [isEditing, setIsEditing] = useState(false);
 //   const [formData, setFormData] = useState({});
 //   const [saving, setSaving] = useState(false);
 //   const fileInputRef = useRef(null);
@@ -21,7 +26,6 @@
 //         const res = await apiGet("/customer/profile/complete");
 //         setProfile(res?.data);
 //       } catch (error) {
-//         console.error("❌ Failed to fetch profile:", error);
 //       }
 //     };
 //     fetchProfile();
@@ -31,15 +35,12 @@
 //     try {
 //       const userJwt = storage.getItem("token");
 //       const fcmToken = storage.getItem("fcmToken");
-
 //       await apiPost(
 //         "/user/logout",
 //         { fcmToken },
 //         { headers: { Authorization: `Bearer ${userJwt}` } }
 //       );
-//       console.log("✅ Logged out successfully");
 //     } catch (err) {
-//       console.error("❌ Logout API failed:", err);
 //     } finally {
 //       storage.clear();
 //       localStorage.clear();
@@ -48,8 +49,6 @@
 //       window.location.replace("/login");
 //     }
 //   };
-
-//   const triggerFileInput = () => fileInputRef.current?.click();
 
 //   const handleFileChange = async (e) => {
 //     const file = e.target.files[0];
@@ -64,23 +63,33 @@
 //         headers: { "Content-Type": "multipart/form-data" },
 //       });
 
-//       if (response?.data?.success) {
-//         const newUrl =
-//           response.data?.data?.profileImage || response.data?.profileImage;
+// if (response?.success) {
+//   const newUrl =
+//     response.data?.data?.profileImage || response.data?.profileImage;
+//   const updatedProfile = {
+//     ...profile,
+//     profileImage: `${newUrl}?t=${Date.now()}`,
+//   };
+//   setProfile(updatedProfile);
 
-//         setProfile((prev) => ({
-//           ...prev,
-//           profileImage: `${newUrl}?t=${Date.now()}`,
-//         }));
-//       }
+//   // Update storage for CustomerHeader
+//   const storedHeader = JSON.parse(storage.getItem("customerHeaderData") || "{}");
+//   storage.setItem(
+//     "customerHeaderData",
+//     JSON.stringify({
+//       ...storedHeader,
+//       profileImage: updatedProfile.profileImage,
+//     })
+//   );
+// }
+
 //     } catch (err) {
-//       console.error("❌ Failed to upload image:", err);
 //     } finally {
 //       setUploading(false);
 //     }
 //   };
 
-//   const openEditModal = () => {
+//   const startInlineEdit = () => {
 //     setFormData({
 //       customerName: profile?.customerName || "",
 //       gender: profile?.gender || "",
@@ -90,7 +99,12 @@
 //       pincode: profile?.pincode || "",
 //       dateofbirth: profile?.dateofbirth || "",
 //     });
-//     setShowEditModal(true);
+//     setIsEditing(true);
+//   };
+
+//   const cancelInlineEdit = () => {
+//     setIsEditing(false);
+//     setFormData({});
 //   };
 
 //   const handleEditChange = (e) => {
@@ -102,18 +116,27 @@
 //     try {
 //       setSaving(true);
 //       const res = await apiPost("/customer/profile/update", formData);
-//       console.log("Update response:", res);
+//   if (res?.success) {
+//   const updatedProfile = { ...profile, ...res.data };
+//   setProfile(updatedProfile);
+//   setIsEditing(false);
+//   toast.success(res.message || "Profile updated successfully!");
 
-//       if (res?.data?.success) {
-//         setProfile((prev) => ({ ...prev, ...res.data.data }));
-//         setShowEditModal(false);
-//         alert(res.data.message || "Profile updated successfully!");
+//   // Update storage for CustomerHeader
+//   const storedHeader = JSON.parse(storage.getItem("customerHeaderData") || "{}");
+//   const newHeaderData = {
+//     ...storedHeader,
+//     customerName: updatedProfile.customerName || storedHeader.customerName,
+//     profileImage: updatedProfile.profileImage || storedHeader.profileImage,
+//     // Optional: update messName if this can change
+//     messName: updatedProfile.messes?.[0]?.messName || storedHeader.messName,
+//   };
+//   storage.setItem("customerHeaderData", JSON.stringify(newHeaderData));
 //       } else {
-//         alert(res?.data?.message || "Update failed");
+//         toast.error(res?.message || "Update failed");
 //       }
 //     } catch (err) {
-//       console.error("Update error:", err);
-//       alert("Something went wrong.");
+//       toast.error("Something went wrong.");
 //     } finally {
 //       setSaving(false);
 //     }
@@ -121,7 +144,7 @@
 
 //   if (!profile) {
 //     return (
-//       <div className="flex min-h-screen bg-[#F9F4F0]">
+//       <div className="flex  bg-[#F9F4F0]">
 //         <Navbar2 />
 //         <div className="w-full mx-auto p-6 text-center text-gray-500">
 //           Loading profile...
@@ -131,282 +154,223 @@
 //   }
 
 //   return (
-//     <div className="flex h-screen bg-gray-50">
+//     <div className="flex bg-gray-50 customer-profile-page">
 //       <Navbar2 />
-//       <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
+//       <div className="flex-1 md:p-4 pt-16 py-4 px-4 overflow-y-auto bg-gray-50">
 //         <CustomerHeader />
-//         <div className="flex justify-between items-center">
-//           <h2 className="text-2xl font-bold font-poppins text-[#232325D1] mb-2">
-//             Profile Details
-//           </h2>
-        
-//         </div>
 
-//         {/* <div className="bg-white shadow-md rounded-2xl p-6">
-//           <div className="w-full flex sm:flex-row items-center gap-6">
-//             <div className="relative w-32 h-32">
-//               <img
-//                 src={profile.profileImage || "https://via.placeholder.com/150"}
-//                 alt="Profile"
-//                 className="w-full h-full rounded-xl object-cover"
-//               />
-//               <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 rounded-xl cursor-pointer transition">
-//                 <span className="text-white text-xs font-semibold px-2 py-1 border border-white rounded">
-//                   {uploading ? "Uploading..." : "Edit Image"}
-//                 </span>
-//                 <input
-//                   type="file"
-//                   accept="image/*"
-//                   ref={fileInputRef}
-//                   className="hidden"
-//                   onChange={handleFileChange}
-//                 />
-//               </label>
-//             </div>
-
-//          <div>
-//   <h2 className="text-2xl font-semibold font-poppins text-[#393939]">
-//     {profile.customerName || "Unnamed"}
-//   </h2>
-//   <div className="flex items-center gap-3">
-//     <p className="text-gray-500 font-poppins">
-//       {profile.identifier || ""}
-//     </p>
-
-//      <button
-//     onClick={openEditModal}
-//     className="top-4 right-4 bg-orange-500 hover:bg-orange-600 
-//                text-white text-sm font-semibold px-5 py-2 rounded-full shadow-md transition"
-//   >
-//     ✏️ Edit Profile
-//   </button>
-//   </div>
-// </div>
-
-//           </div>
-
-
-//           <div className="flex justify-between w-full gap-2 font-poppins text-[#535353] mt-8">
-//             <div className="flex flex-col items-start space-y-8 w-1/2 md:pl-4 pl-1">
-//               <p className="font-medium text-xl">Email:</p>
-//               <p className="font-medium text-xl">Contact:</p>
-//               <p className="font-medium text-xl">Gender:</p>
-//               <p className="font-medium text-xl">DOB:</p>
-//               <p className="font-medium text-xl">Address:</p>
-//               <p className="font-medium text-xl">City:</p>
-//               <p className="font-medium text-xl">State:</p>
-//               <p className="font-medium text-xl">Pincode:</p>
-//               <p className="font-medium text-xl">Associated Messes:</p>
-//             </div>
-
-//             <div className="flex flex-col items-end space-y-8 w-1/2 md:pr-4 pr-1 text-xl text-gray-600">
-//               <p>{profile.contactEmail || "N/A"}</p>
-//               <p>{profile.contactNumber || "N/A"}</p>
-//               <p>{profile.gender || "Not Provided"}</p>
-//               <p>{profile.dateofbirth || "Not Provided"}</p>
-//               <p>{profile.customerAddress || "N/A"}</p>
-//               <p>{profile.city || "N/A"}</p>
-//               <p>{profile.state || "N/A"}</p>
-//               <p>{profile.pincode || "N/A"}</p>
-//               <p>{profile.mess_ids?.length || 0} connected</p>
-//             </div>
-//           </div>
-//         </div> */}
 //         <div className="bg-white shadow-md rounded-2xl p-6">
-//   <div className="w-full flex flex-col sm:flex-row items-center sm:items-start gap-6">
-//     <div className="relative w-32 h-32">
-//       <img
-//         src={profile.profileImage || "https://via.placeholder.com/150"}
-//         alt="Profile"
-//         className="w-full h-full rounded-xl object-cover"
-//       />
-//       <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 rounded-xl cursor-pointer transition">
-//         <span className="text-white text-xs font-semibold px-2 py-1 border border-white rounded">
-//           {uploading ? "Uploading..." : "Edit Image"}
-//         </span>
-//         <input
-//           type="file"
-//           accept="image/*"
-//           ref={fileInputRef}
-//           className="hidden"
-//           onChange={handleFileChange}
-//         />
-//       </label>
-//     </div>
+//           <div className="w-full flex flex-col sm:flex-row items-center sm:items-start gap-6">
+        
+//             <div className="relative w-32 h-32">
+//   <img
+//     src={profile.profileImage || "https://via.placeholder.com/150"}
+//     alt="Profile"
+//     className="w-full h-full rounded-xl object-cover"
+//   />
 
-//     {/* Name + Email + Edit button */}
-//     <div className="flex flex-col sm:flex-1 w-full">
-//       <h2 className="text-xl md:text-2xl font-semibold font-poppins text-[#393939] text-center sm:text-left">
-//         {profile.customerName || "Unnamed"}
-//       </h2>
-//       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-2 sm:mt-3">
-//         <p className="text-gray-500 font-poppins text-sm md:text-base text-center sm:text-left">
-//           {profile.identifier || ""}
-//         </p>
-//         <button
-//           onClick={openEditModal}
-//           className="bg-orange-500 hover:bg-orange-600 
-//                    text-white text-sm font-semibold px-4 py-2 
-//                    rounded-full shadow-md transition w-max self-center sm:self-auto"
-//         >
-//           ✏️ Edit Profile
-//         </button>
-//       </div>
-//     </div>
-//   </div>
+//   <>
+//     <input
+//       type="file"
+//       accept="image/*"
+//       ref={fileInputRef}
+//       className="hidden"
+//       onChange={handleFileChange}
+//     />
+//     <button
+//       onClick={() => fileInputRef.current?.click()}
+//       disabled={uploading}
+//       // className="absolute bottom-0 right-0 bg-white hover:bg-orange-200 cursor-pointer text-white rounded-full p-2 shadow-md transition"
+//           className="absolute bottom-0  right-0 z-20 bg-white text-xs md:text-sm font-medium px-1.5 py-1.5 rounded-full shadow hover:bg-orange-200 cursor-pointer transition-all duration-200"
 
-//   {/* Details */}
-//   <div className="flex flex-col md:flex-row justify-between w-full gap-6 font-poppins text-[#535353] mt-8">
-//     {/* <div className="flex flex-col items-start space-y-4 w-full md:w-1/2">
-//       <p className="font-medium text-base md:text-xl">Email:</p>
-//       <p className="font-medium text-base md:text-xl">Contact:</p>
-//       <p className="font-medium text-base md:text-xl">Gender:</p>
-//       <p className="font-medium text-base md:text-xl">DOB:</p>
-//       <p className="font-medium text-base md:text-xl">Address:</p>
-//       <p className="font-medium text-base md:text-xl">City:</p>
-//       <p className="font-medium text-base md:text-xl">State:</p>
-//       <p className="font-medium text-base md:text-xl">Pincode:</p>
-//       <p className="font-medium text-base md:text-xl">Associated Messes:</p>
-//     </div> */}
-
-//     {/* <div className="flex flex-col items-start md:items-end space-y-4 w-full md:w-1/2 text-sm md:text-xl text-gray-600">
-//       <p>{profile.contactEmail || "N/A"}</p>
-//       <p>{profile.contactNumber || "N/A"}</p>
-//       <p>{profile.gender || "Not Provided"}</p>
-//       <p>{profile.dateofbirth || "Not Provided"}</p>
-//       <p>{profile.customerAddress || "N/A"}</p>
-//       <p>{profile.city || "N/A"}</p>
-//       <p>{profile.state || "N/A"}</p>
-//       <p>{profile.pincode || "N/A"}</p>
-//       <p>{profile.mess_ids?.length || 0} connected</p>
-//     </div> */}
-//     {/* Details */}
-// <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 font-poppins text-[#535353] mt-8">
-//   <div className="font-medium text-lg">Email:</div>
-//   <div className="text-gray-600 text-lg">{profile.contactEmail || "N/A"}</div>
-
-//   <div className="font-medium text-lg">Contact:</div>
-//   <div className="text-gray-600 text-lg">{profile.contactNumber || "N/A"}</div>
-
-//   <div className="font-medium text-lg">Gender:</div>
-//   <div className="text-gray-600 text-lg">{profile.gender || "Not Provided"}</div>
-
-//   <div className="font-medium text-lg">DOB:</div>
-//   <div className="text-gray-600 text-lg">{profile.dateofbirth || "Not Provided"}</div>
-
-//   <div className="font-medium text-lg">Address:</div>
-//   <div className="text-gray-600 text-lg">{profile.customerAddress || "N/A"}</div>
-
-//   <div className="font-medium text-lg">City:</div>
-//   <div className="text-gray-600 text-lg">{profile.city || "N/A"}</div>
-
-//   <div className="font-medium text-lg">State:</div>
-//   <div className="text-gray-600 text-lg">{profile.state || "N/A"}</div>
-
-//   <div className="font-medium text-lg">Pincode:</div>
-//   <div className="text-gray-600 text-lg">{profile.pincode || "N/A"}</div>
-
-//   <div className="font-medium text-lg">Associated Messes:</div>
-//   <div className="text-gray-600 text-lg">{profile.mess_ids?.length || 0} connected</div>
-// </div>
-
-//   </div>
+//       title="Edit Image"
+//     >
+//       ✏️
+//     </button>
+    
+//   </>
 // </div>
 
 
-//         <div className="flex flex-col items-center mt-8">
-//           <button
-//             onClick={handleLogout}
-//             className="border border-[#EA4335] text-[#EA4335] text-sm font-bold font-poppins w-1/2 py-2 rounded-lg"
-//           >
-//             LOG OUT
-//           </button>
-//         </div>
-//       </div>
+//             <div className="flex flex-col sm:flex-1 w-full">
+//               {isEditing ? (
+//                 <input
+//                   name="customerName"
+//                   value={formData.customerName}
+//                   onChange={handleEditChange}
+//                   className="border p-2 rounded text-lg font-semibold"
+//                 />
+//               ) : (
+//                 <h2 className="text-xl md:text-2xl font-semibold font-poppins text-[#393939]">
+//                   {profile.customerName || "Unnamed"}
+//                 </h2>
+//               )}
+//               <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-2 sm:mt-3">
+//                 <p className="text-gray-500 font-poppins text-sm md:text-base break-all sm:break-normal">
+//                   {profile.identifier || ""}
+//                 </p>
+//                 {!isEditing && (
+//                   <button
+//                     onClick={startInlineEdit}
+//                     className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold px-4 py-2 rounded-full cursor-pointer shadow-md transition"
+//                   >
+//                     ✏️ Edit Profile
+//                   </button>
+//                 )}
+//               </div>
+//             </div>
+//           </div>
 
-//       {/* Edit Profile Modal */}
-//       {showEditModal && (
-//         <div className="fixed inset-0 flex items-start justify-center backdrop-blur-sm bg-opacity-40 z-50 pt-20">
-//           <div className="bg-white w-full max-w-lg rounded-lg shadow-lg p-6 max-h-[90vh] overflow-y-auto">
-//             <h3 className="text-lg font-semibold mb-4">Edit Profile</h3>
-//             <div className="space-y-3">
-//               <input
-//                 name="customerName"
-//                 value={formData.customerName}
-//                 onChange={handleEditChange}
-//                 placeholder="Name"
-//                 className="border p-2 rounded w-full"
-//               />
-//               <select
-//                 name="gender"
-//                 value={formData.gender}
-//                 onChange={handleEditChange}
-//                 className="border p-2 rounded w-full"
-//               >
-//                 <option value="">Select Gender</option>
-//                 <option value="male">Male</option>
-//                 <option value="female">Female</option>
-//               </select>
-//               <input
-//                 type="date"
-//                 name="dateofbirth"
-//                 value={formData.dateofbirth}
-//                 onChange={handleEditChange}
-//                 className="border p-2 rounded w-full"
-//               />
-//               <input
-//                 name="customerAddress"
-//                 value={formData.customerAddress}
-//                 onChange={handleEditChange}
-//                 placeholder="Address"
-//                 className="border p-2 rounded w-full"
-//               />
-//               <input
-//                 name="city"
-//                 value={formData.city}
-//                 onChange={handleEditChange}
-//                 placeholder="City"
-//                 className="border p-2 rounded w-full"
-//               />
-//               <input
-//                 name="state"
-//                 value={formData.state}
-//                 onChange={handleEditChange}
-//                 placeholder="State"
-//                 className="border p-2 rounded w-full"
-//               />
-//               <input
-//                 name="pincode"
-//                 value={formData.pincode}
-//                 onChange={handleEditChange}
-//                 placeholder="Pincode"
-//                 className="border p-2 rounded w-full"
-//               />
+//           {/* Inline Editable Fields */}
+//           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 font-poppins text-[#535353] mt-8">
+//             <div className="font-medium text-lg">Email:</div>
+//             <div className="text-gray-600 text-lg break-all sm:break-normal">
+//               {profile.contactEmail || "N/A"}
 //             </div>
 
+//             <div className="font-medium text-lg">Contact:</div>
+//             <div className="text-gray-600 text-lg">
+//               {profile.contactNumber || "N/A"}
+//             </div>
+
+//             <div className="font-medium text-lg">Gender:</div>
+//             <div className="text-gray-600 text-lg">
+//               {isEditing ? (
+//                 <select
+//                   name="gender"
+//                   value={formData.gender}
+//                   onChange={handleEditChange}
+//                   className="border p-2 rounded w-full"
+//                 >
+//                   <option value="">Select Gender</option>
+//                   <option value="male">Male</option>
+//                   <option value="female">Female</option>
+//                 </select>
+//               ) : (
+//                 profile.gender || "Not Provided"
+//               )}
+//             </div>
+
+//             <div className="font-medium text-lg">DOB:</div>
+//             <div className="text-gray-600 text-lg">
+//               {isEditing ? (
+//                 <input
+//                   type="date"
+//                   name="dateofbirth"
+//                   value={formData.dateofbirth}
+//                   onChange={handleEditChange}
+//                   className="border p-2 rounded w-full"
+//                 />
+//               ) : (
+//                 profile.dateofbirth || "Not Provided"
+//               )}
+//             </div>
+
+//             <div className="font-medium text-lg">Address:</div>
+//             <div className="text-gray-600 text-lg">
+//               {isEditing ? (
+//                 <input
+//                   name="customerAddress"
+//                   value={formData.customerAddress}
+//                   onChange={handleEditChange}
+//                   className="border p-2 rounded w-full"
+//                 />
+//               ) : (
+//                 profile.customerAddress || "N/A"
+//               )}
+//             </div>
+
+//             <div className="font-medium text-lg">City:</div>
+//             <div className="text-gray-600 text-lg">
+//               {isEditing ? (
+//                 <input
+//                   name="city"
+//                   value={formData.city}
+//                   onChange={handleEditChange}
+//                   className="border p-2 rounded w-full"
+//                 />
+//               ) : (
+//                 profile.city || "N/A"
+//               )}
+//             </div>
+
+//             <div className="font-medium text-lg">State:</div>
+//             <div className="text-gray-600 text-lg">
+//               {isEditing ? (
+//                 <input
+//                   name="state"
+//                   value={formData.state}
+//                   onChange={handleEditChange}
+//                   className="border p-2 rounded w-full"
+//                 />
+//               ) : (
+//                 profile.state || "N/A"
+//               )}
+//             </div>
+
+//             <div className="font-medium text-lg">Pincode:</div>
+//             <div className="text-gray-600 text-lg">
+//               {isEditing ? (
+//                 <input
+//                   name="pincode"
+//                   value={formData.pincode}
+//                   onChange={handleEditChange}
+//                   className="border p-2 rounded w-full"
+//                 />
+//               ) : (
+//                 profile.pincode || "N/A"
+//               )}
+//             </div>
+
+//             <div className="font-medium text-lg">Associated Messes:</div>
+//             <div className="text-gray-600 text-lg">
+//               {profile.mess_ids?.length || 0} connected
+//             </div>
+//           </div>
+
+//           {/* Save / Cancel Buttons */}
+//           {isEditing && (
 //             <div className="flex justify-end mt-6 gap-3">
 //               <button
-//                 onClick={() => setShowEditModal(false)}
-//                 className="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300"
+//                 onClick={cancelInlineEdit}
+//                 className="px-4 py-2 text-sm bg-gray-200 cursor-pointer rounded hover:bg-gray-300"
 //               >
 //                 Cancel
 //               </button>
 //               <button
 //                 disabled={saving}
 //                 onClick={handleProfileUpdate}
-//                 className="px-4 py-2 text-sm bg-orange-500 text-white rounded hover:bg-orange-600"
+//                 className="px-4 py-2 text-sm bg-orange-500 cursor-pointer text-white rounded hover:bg-orange-600"
 //               >
 //                 {saving ? "Saving..." : "Save Changes"}
 //               </button>
 //             </div>
-//           </div>
+//           )}
 //         </div>
-//       )}
+
+//         <div className="flex flex-col items-center mt-8">
+//          <button
+//   onClick={handleLogout}
+//   className="flex items-center justify-center gap-2 cursor-pointer bg-[#EA4335] hover:bg-[#d9362b] text-white text-sm font-bold font-poppins w-1/2 py-2 rounded-lg transition"
+// >
+//   <MdLogout size={18} />
+//   LOG OUT
+// </button>
+
+//            <button
+//       onClick={() => navigate("/delete-account")}
+//   className="absolute opacity-0"
+// >
+//   Delete Account
+// </button>
+//         </div>
+//       </div>
 //     </div>
 //   );
 // };
 
 // export default CustomerProfileDetails;
+
 
 import React, { useEffect, useState, useRef } from "react";
 import Navbar2 from "../layouts/Navbar2";
@@ -415,6 +379,8 @@ import { useNavigate } from "react-router-dom";
 import storage from "../utils/storage";
 import CustomerHeader from "../layouts/CustomerHeader";
 import { toast } from "react-hot-toast";
+import { MdPowerSettingsNew  } from "react-icons/md";
+import "../styles/customerProfile.css";
 
 const CustomerProfileDetails = () => {
   const [profile, setProfile] = useState(null);
@@ -431,6 +397,7 @@ const CustomerProfileDetails = () => {
         const res = await apiGet("/customer/profile/complete");
         setProfile(res?.data);
       } catch (error) {
+        console.error(error);
       }
     };
     fetchProfile();
@@ -471,12 +438,26 @@ const CustomerProfileDetails = () => {
       if (response?.success) {
         const newUrl =
           response.data?.data?.profileImage || response.data?.profileImage;
-        setProfile((prev) => ({
-          ...prev,
+        const updatedProfile = {
+          ...profile,
           profileImage: `${newUrl}?t=${Date.now()}`,
-        }));
+        };
+        setProfile(updatedProfile);
+
+        // Update header storage
+        const storedHeader = JSON.parse(
+          storage.getItem("customerHeaderData") || "{}"
+        );
+        storage.setItem(
+          "customerHeaderData",
+          JSON.stringify({
+            ...storedHeader,
+            profileImage: updatedProfile.profileImage,
+          })
+        );
       }
     } catch (err) {
+      console.error(err);
     } finally {
       setUploading(false);
     }
@@ -491,6 +472,8 @@ const CustomerProfileDetails = () => {
       state: profile?.state || "",
       pincode: profile?.pincode || "",
       dateofbirth: profile?.dateofbirth || "",
+      contactEmail: profile?.contactEmail || "",
+      contactNumber: profile?.contactNumber || "",
     });
     setIsEditing(true);
   };
@@ -508,17 +491,48 @@ const CustomerProfileDetails = () => {
   const handleProfileUpdate = async () => {
     try {
       setSaving(true);
-      const res = await apiPost("/customer/profile/update", formData);
+
+      // ✅ Send all fields including email and contact number
+      const payload = {
+        customerName: formData.customerName,
+        gender: formData.gender,
+        customerAddress: formData.customerAddress,
+        city: formData.city,
+        state: formData.state,
+        pincode: formData.pincode,
+        dateofbirth: formData.dateofbirth,
+        contactEmail: formData.contactEmail,
+        contactNumber: formData.contactNumber,
+      };
+
+      const res = await apiPost("/customer/profile/update", payload);
+
       if (res?.success) {
-        setProfile((prev) => ({ ...prev, ...res.data }));
+        const updatedProfile = { ...profile, ...payload };
+        setProfile(updatedProfile);
         setIsEditing(false);
-        // alert(res.message || "Profile updated successfully!");
         toast.success(res.message || "Profile updated successfully!");
+
+        // ✅ Update header storage
+        const storedHeader = JSON.parse(
+          storage.getItem("customerHeaderData") || "{}"
+        );
+        const newHeaderData = {
+          ...storedHeader,
+          customerName:
+            updatedProfile.customerName || storedHeader.customerName,
+          profileImage:
+            updatedProfile.profileImage || storedHeader.profileImage,
+          messName:
+            updatedProfile.messes?.[0]?.messName || storedHeader.messName,
+        };
+        storage.setItem("customerHeaderData", JSON.stringify(newHeaderData));
       } else {
         toast.error(res?.message || "Update failed");
       }
     } catch (err) {
       toast.error("Something went wrong.");
+      console.error(err);
     } finally {
       setSaving(false);
     }
@@ -526,7 +540,7 @@ const CustomerProfileDetails = () => {
 
   if (!profile) {
     return (
-      <div className="flex min-h-screen bg-[#F9F4F0]">
+      <div className="flex bg-[#F9F4F0]">
         <Navbar2 />
         <div className="w-full mx-auto p-6 text-center text-gray-500">
           Loading profile...
@@ -536,33 +550,38 @@ const CustomerProfileDetails = () => {
   }
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-50 customer-profile-page">
       <Navbar2 />
-      <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
+      <div className="flex-1 md:p-4 pt-16 py-4 px-4 overflow-y-auto bg-gray-50">
         <CustomerHeader />
 
         <div className="bg-white shadow-md rounded-2xl p-6">
           <div className="w-full flex flex-col sm:flex-row items-center sm:items-start gap-6">
+            {/* Profile Image */}
             <div className="relative w-32 h-32">
               <img
                 src={profile.profileImage || "https://via.placeholder.com/150"}
                 alt="Profile"
                 className="w-full h-full rounded-xl object-cover"
               />
-              <label className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 opacity-0 hover:opacity-100 rounded-xl cursor-pointer transition">
-                <span className="text-white text-xs font-semibold px-2 py-1 border border-white rounded">
-                  {uploading ? "Uploading..." : "Edit Image"}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={fileInputRef}
-                  className="hidden"
-                  onChange={handleFileChange}
-                />
-              </label>
+              <input
+                type="file"
+                accept="image/*"
+                ref={fileInputRef}
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                className="absolute bottom-0 right-0 z-20 bg-white text-xs md:text-sm font-medium px-1.5 py-1.5 rounded-full shadow hover:bg-orange-200 cursor-pointer transition-all duration-200"
+                title="Edit Image"
+              >
+                ✏️
+              </button>
             </div>
 
+            {/* Profile Name and Edit Button */}
             <div className="flex flex-col sm:flex-1 w-full">
               {isEditing ? (
                 <input
@@ -577,7 +596,7 @@ const CustomerProfileDetails = () => {
                 </h2>
               )}
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 mt-2 sm:mt-3">
-                <p className="text-gray-500 font-poppins text-sm md:text-base">
+                <p className="text-gray-500 font-poppins text-sm md:text-base break-all sm:break-normal">
                   {profile.identifier || ""}
                 </p>
                 {!isEditing && (
@@ -592,16 +611,34 @@ const CustomerProfileDetails = () => {
             </div>
           </div>
 
-          {/* Inline Editable Fields */}
+          {/* Editable Fields */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4 font-poppins text-[#535353] mt-8">
             <div className="font-medium text-lg">Email:</div>
-            <div className="text-gray-600 text-lg">
-              {profile.contactEmail || "N/A"}
+            <div className="text-gray-600 text-lg break-all sm:break-normal">
+              {isEditing ? (
+                <input
+                  name="contactEmail"
+                  value={formData.contactEmail}
+                  onChange={handleEditChange}
+                  className="border p-2 rounded w-full"
+                />
+              ) : (
+                profile.contactEmail || "N/A"
+              )}
             </div>
 
             <div className="font-medium text-lg">Contact:</div>
             <div className="text-gray-600 text-lg">
-              {profile.contactNumber || "N/A"}
+              {isEditing ? (
+                <input
+                  name="contactNumber"
+                  value={formData.contactNumber}
+                  onChange={handleEditChange}
+                  className="border p-2 rounded w-full"
+                />
+              ) : (
+                profile.contactNumber || "N/A"
+              )}
             </div>
 
             <div className="font-medium text-lg">Gender:</div>
@@ -699,19 +736,18 @@ const CustomerProfileDetails = () => {
             </div>
           </div>
 
-          {/* Save / Cancel Buttons */}
           {isEditing && (
             <div className="flex justify-end mt-6 gap-3">
               <button
                 onClick={cancelInlineEdit}
-                className="px-4 py-2 text-sm bg-gray-200 rounded hover:bg-gray-300"
+                className="px-4 py-2 text-sm bg-gray-200 cursor-pointer rounded hover:bg-gray-300"
               >
                 Cancel
               </button>
               <button
                 disabled={saving}
                 onClick={handleProfileUpdate}
-                className="px-4 py-2 text-sm bg-orange-500 text-white rounded hover:bg-orange-600"
+                className="px-4 py-2 text-sm bg-orange-500 cursor-pointer text-white rounded hover:bg-orange-600"
               >
                 {saving ? "Saving..." : "Save Changes"}
               </button>
@@ -722,16 +758,18 @@ const CustomerProfileDetails = () => {
         <div className="flex flex-col items-center mt-8">
           <button
             onClick={handleLogout}
-            className="border border-[#EA4335] cursor-pointer text-[#EA4335] text-sm font-bold font-poppins w-1/2 py-2 rounded-lg"
+            className="flex border border-red-500 items-center justify-center gap-2 cursor-pointer text-red-500 hover:bg-[#d9362b] shadow-md text-sm font-bold font-poppins w-1/2 py-2 rounded-lg transition"
           >
+            <MdPowerSettingsNew  size={18} />
             LOG OUT
           </button>
-           <button
-      onClick={() => navigate("/delete-account")}
-  className="absolute opacity-0"
->
-  Delete Account
-</button>
+
+          <button
+            onClick={() => navigate("/delete-account")}
+            className="absolute opacity-0"
+          >
+            Delete Account
+          </button>
         </div>
       </div>
     </div>

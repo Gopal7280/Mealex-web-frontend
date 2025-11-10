@@ -3,6 +3,24 @@
 @import "tailwindcss";
 @custom-variant dark (&:where(.dark, .dark *));
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease forwards;
+}
+
+.animate-slideIn {
+  animation: slideIn 0.35s ease forwards;
+}
+
 /* Base Reset and Typography */
 :root {
   /* ⚠️ Ye line hata di gayi hai — yahi system font force kar rahi thi */
@@ -80,4 +98,51 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   border: none;
   margin-left: 0.5rem;
   cursor: pointer;
+}
+
+/* html,
+body {
+  height: 100%;
+  overflow: hidden;
+} */
+
+/* 🌐 Permanently hide the Google Translate banner, logos & artifacts */
+body {
+  top: 0 !important;
+}
+
+/* Hide all Google Translate UI overlays */
+#goog-gt-tt,
+.goog-te-banner-frame,
+.goog-te-balloon-frame,
+.goog-te-menu-frame,
+.goog-logo-link,
+.goog-te-gadget span,
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+}
+
+/* Keep gadget invisible but available for script */
+.goog-te-gadget {
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Ensure layout not pushed down */
+.skiptranslate {
+  position: relative !important;
+  top: 0 !important;
+}
+
+/* Remove shadows or highlight boxes added by Google */
+.goog-te-menu-frame {
+  box-shadow: none !important;
+}
+
+.goog-text-highlight {
+  background: none !important;
+  box-shadow: none !important;
 }

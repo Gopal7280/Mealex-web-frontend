@@ -227,19 +227,7 @@ const ExploreMessDetails = () => {
 Pay via Cash / UPI
                 </button>
        
-                {/* {selectedPlan && (
-                  <PaymentGateway
-                    plan={selectedPlan}
-                    messId={mess.messId}
-                    onSuccess={() => {
-                      setShowPaymentModal(false);    
-                      fetchPlans(mess.messId);        
-                      setTimeout(() => {
-                        navigate('/cust/my-mess');
-                      }, 4000); 
-                    }}
-                  />
-                )} */}
+          
 {selectedPlan && kycStage === "3" && (
   <PaymentGateway
     plan={selectedPlan}

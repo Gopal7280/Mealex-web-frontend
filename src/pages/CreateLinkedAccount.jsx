@@ -40,59 +40,7 @@ const CreateLinkedAccount = () => {
     "educational_institutes",
   ];
   const gstMandatory = ["partnership", "private_limited", "public_limited", "trust", "llp", "ngo"];
-
-//   const handleChange = (e) => {
-//     setFormData({ ...formData, [e.target.name]: e.target.value });
-//   };
-
-// const handleSubmit = async (e) => {
-//   e.preventDefault();
-
-//   const legal_info = { pan: formData.pan };
-//   if (formData.gst) legal_info.gst = formData.gst;
-
-//   const payload = {
-//     messId, // storage se nikal ke
-//     email: formData.email,
-//     phone: formData.phone,
-//     legal_business_name: formData.legal_business_name,
-//     customer_facing_business_name: formData.customer_facing_business_name,
-//     business_type: formData.business_type,
-//     contact_name: formData.contact_name,
-//     profile: {
-//       category: "food",
-//       subcategory: formData.subcategory,
-//       addresses: {
-//         registered: {
-//           street1: formData.street1,
-//           street2: formData.street2 || "",   // ✅ empty string bhej do agar user ne nahi dala
-//           city: formData.city,
-//           state: formData.state,
-//           postal_code: formData.postal_code,
-//           country: "IN",
-//         },
-//       },
-//     },
-//     legal_info,
-//   };
-//       console.log("Payload", payload);
-
-//   try {
-//     const res = await apiPost("/owner/add/linked-account", payload);
-//     setResponse({ success: true, result: res });
-//     navigate("/create-stakeholder");
-
-    
-
-//   } catch (err) {
-//     setResponse({
-//       success: false,
-//       message: err.response?.data?.message || err.message,
-//     });
-//   }
-// };
-
-
+  
 const handleChange = (e) => {
   let { name, value } = e.target;
 

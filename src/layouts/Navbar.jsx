@@ -407,7 +407,7 @@ const Sidebar = () => {
     <>
       {/* Mobile Header */}
       <div className="md:hidden flex items-center w-full bg-white px-2 py-2 fixed top-0 left-0 z-50 gap-2 shadow-md">
-        <button onClick={() => setIsOpen(!isOpen)} className="text-gray-800">
+        <button onClick={() => setIsOpen(!isOpen)} className="text-gray-800 cursor-pointer">
           {isOpen ? <X size={24} /> : <Menu size={24} />}
         </button>
         <div>

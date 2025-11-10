@@ -32,9 +32,6 @@ const AddCustomer = () => {
   return;
 }
 
-
-
-
     setLoading(true);
     setMsg(null);
 
@@ -45,10 +42,15 @@ const AddCustomer = () => {
         setRequestId(res.requestId);
         setOtpSent(true);
       } else {
-        setMsg({ type: 'error', text: res.message || 'Failed to send OTP.' });
+        setMsg({ type: 'error', text: res.message.message || 'Failed to send OTP.' });
       }
     } catch (err) {
-      setMsg({ type: 'error', text: err.response?.message || err.message || 'Server error.' });
+        const errorMessage =
+    err.response?.data?.message || // ← backend-provided message (e.g. "Customer not found.")
+    err.response?.message ||       // fallback if API used plain message
+    err.message ||                 // generic Axios message
+    "Server error. Please try again later.";    
+  setMsg({ type: "error", text: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -87,8 +89,13 @@ const handleVerifyOtp = async (e) => {
       setMsg({ type: 'error', text: res.message || 'Invalid OTP.' });
     }
   } catch (err) {
-    setMsg({ type: 'error', text: err.response?.message || err.message });
-  } finally {
+const errorMessage =
+    err.response?.data?.message ||
+    err.response?.message ||
+    err.message ||
+    "Something went wrong.";
+
+  setMsg({ type: "error", text: errorMessage });  } finally {
     setLoading(false);
   }
 };

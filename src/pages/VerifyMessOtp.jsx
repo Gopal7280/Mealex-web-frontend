@@ -86,6 +86,175 @@
 // export default VerifyMessOtp;
 
 
+// import React, { useState, useEffect, useRef } from 'react';
+// import { useNavigate } from 'react-router-dom';
+// import { apiPost } from '../services/api';
+// import storage from '../utils/storage';
+// import toast from 'react-hot-toast';
+
+// const VerifyMessOtp = () => {
+//   const navigate = useNavigate();
+//   const [email, setEmail] = useState('');
+//   const [requestId, setRequestId] = useState('');
+//   const [messId, setMessId] = useState('');
+
+//   const [otp, setOtp] = useState(Array(6).fill(''));
+//   const [error, setError] = useState('');
+//   const [timer, setTimer] = useState(60);
+//   const [resendEnabled, setResendEnabled] = useState(false);
+//   const inputsRef = useRef([]);
+
+//     const messName = storage.getItem('messName');
+//         const messEmail = storage.getItem('messEmail');
+
+
+
+//   useEffect(() => {
+//     const savedRequestId = storage.getItem('messRequestId');
+//     const savedMessId = storage.getItem('messId');
+
+//     if (messEmail && savedRequestId && savedMessId) {
+//       setEmail(messEmail);
+//       setRequestId(savedRequestId);
+//       setMessId(savedMessId);
+//     } else {
+//       toast.error('Missing verification data. Redirecting to form...');
+//       navigate('/mess-details');
+//     }
+//   }, [navigate]);
+
+//   useEffect(() => {
+//     if (timer === 0) {
+//       setResendEnabled(true);
+//     } else {
+//       const interval = setInterval(() => setTimer(prev => prev - 1), 1000);
+//       return () => clearInterval(interval);
+//     }
+//   }, [timer]);
+
+//   const handleChange = (index, value) => {
+//     if (!/^\d?$/.test(value)) return;
+
+//     const updatedOtp = [...otp];
+//     updatedOtp[index] = value;
+//     setOtp(updatedOtp);
+
+//     if (value && index < 5) {
+//       inputsRef.current[index + 1]?.focus();
+//     }
+//   };
+
+//   const handleSubmit = async () => {
+//     if (otp.some(val => val === '')) {
+//       setError('Please enter all 6 digits');
+//       return;
+//     }
+
+//     const fullOtp = otp.join('');
+//     try {
+//       const res = await apiPost('/owner/mess/otp', {
+//         email,
+//         otp: fullOtp,
+//         requestId,
+//         context: 'mess-registration',
+//         messId
+//       });
+
+//       if (res.success) {
+//         toast.success(`${messEmail} verified successfully and ${messName} Created Successfully`);
+//         storage.removeItem('messEmail');
+//         storage.removeItem('messRequestId');
+//         storage.removeItem('messId');
+//         navigate('/minimal-dashboard');
+//       } else {
+//         setError('Invalid OTP');
+//       }
+//     } catch (err) {
+//       setError('Verification failed. Please try again.');
+//     }
+//   };
+
+
+// const handleResend = async () => {
+//   setTimer(60);
+//   setResendEnabled(false);
+//   setError('');
+
+//   try {
+//     const res = await apiPost('/resend-otp', {
+//       identifier: email,
+    
+//       context: 'mess-registration',
+//       requestId
+//     });
+//     console.log(res);
+//     if (res.success && res.requestId) {
+//       setRequestId(res.requestId);
+//       storage.setItem('messRequestId', res.requestId);
+//     } else {
+//       setError(res.message || 'Failed to resend OTP');
+//     }
+//   } catch (err) {
+//     setError('Resend failed. Please try again.');
+//   }
+// };
+
+
+//   return (
+//     <div className="min-h-screen flex items-center justify-center bg-white px-4">
+//       <div className="bg-white p-8 rounded-lg w-full max-w-md text-center">
+//         <h2 className="md:text-4xl text-2xl font-semibold text-orange-500 mb-2 md:mb-4">
+//           Verify Your Account
+//         </h2>
+//         <p className="text-gray-400 mb-2 md:mb-6 text-sm md:text-base">
+//           Enter the 6-digit code sent to <span className="font-medium">{email}</span>
+//         </p>
+
+//         <div className="flex justify-between gap-2 mb-4">
+//           {otp.map((digit, index) => (
+//             <input
+//               key={index}
+//               ref={el => inputsRef.current[index] = el}
+//               type="text"
+//               inputMode="numeric"
+//               maxLength={1}
+//               value={digit}
+//               onChange={(e) => handleChange(index, e.target.value)}
+//               className="w-10 h-12 border-2 border-orange-500 text-center rounded-lg text-lg focus:outline-none"
+//             />
+//           ))}
+//         </div>
+
+//         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
+
+//         <button
+//           onClick={handleSubmit}
+//           className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition"
+//         >
+//           Verify
+//         </button>
+
+//         <div className="mt-4 text-sm text-gray-600">
+//           {resendEnabled ? (
+//             <button
+//               onClick={handleResend}
+//               className="text-orange-500 font-bold hover:underline"
+//             >
+//               Resend OTP
+//             </button>
+//           ) : (
+//             `Resend OTP in ${timer}s`
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
+// export default VerifyMessOtp;
+
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiPost } from '../services/api';
@@ -97,17 +266,15 @@ const VerifyMessOtp = () => {
   const [email, setEmail] = useState('');
   const [requestId, setRequestId] = useState('');
   const [messId, setMessId] = useState('');
-
   const [otp, setOtp] = useState(Array(6).fill(''));
   const [error, setError] = useState('');
   const [timer, setTimer] = useState(60);
   const [resendEnabled, setResendEnabled] = useState(false);
+  const [loading, setLoading] = useState(false);
   const inputsRef = useRef([]);
 
-    const messName = storage.getItem('messName');
-        const messEmail = storage.getItem('messEmail');
-
-
+  const messName = storage.getItem('messName');
+  const messEmail = storage.getItem('messEmail');
 
   useEffect(() => {
     const savedRequestId = storage.getItem('messRequestId');
@@ -132,72 +299,156 @@ const VerifyMessOtp = () => {
     }
   }, [timer]);
 
-  const handleChange = (index, value) => {
-    if (!/^\d?$/.test(value)) return;
 
-    const updatedOtp = [...otp];
-    updatedOtp[index] = value;
-    setOtp(updatedOtp);
+const handleChange = (index, value) => {
+  if (!/^\d?$/.test(value)) return;
 
-    if (value && index < 5) {
-      inputsRef.current[index + 1]?.focus();
-    }
-  };
+  const updatedOtp = [...otp];
+  updatedOtp[index] = value;
+  setOtp(updatedOtp);
 
-  const handleSubmit = async () => {
-    if (otp.some(val => val === '')) {
-      setError('Please enter all 6 digits');
-      return;
-    }
+  if (value && index < otp.length - 1) {
+    inputsRef.current[index + 1]?.focus();
+  }
 
-    const fullOtp = otp.join('');
-    try {
-      const res = await apiPost('/owner/mess/otp', {
-        email,
-        otp: fullOtp,
-        requestId,
-        context: 'mess-registration',
-        messId
-      });
-
-      if (res.success) {
-        toast.success(`${messEmail} verified successfully and ${messName} Created Successfully`);
-        storage.removeItem('messEmail');
-        storage.removeItem('messRequestId');
-        storage.removeItem('messId');
-        navigate('/minimal-dashboard');
-      } else {
-        setError('Invalid OTP');
-      }
-    } catch (err) {
-      setError('Verification failed. Please try again.');
-    }
-  };
-
-
-const handleResend = async () => {
-  setTimer(60);
-  setResendEnabled(false);
-  setError('');
-
-  try {
-    const res = await apiPost('/resend-otp', {
-      identifier: email,
-    
-      context: 'mess-registration',
-      requestId
-    });
-    if (res.success && res.requestId) {
-      setRequestId(res.requestId);
-      storage.setItem('messRequestId', res.requestId);
-    } else {
-      setError(res.message || 'Failed to resend OTP');
-    }
-  } catch (err) {
-    setError('Resend failed. Please try again.');
+  if (updatedOtp.every(val => val !== '')) {
+    const fullOtp = updatedOtp.join('');
+    setTimeout(() => verifyAndSubmit(fullOtp), 150);
   }
 };
 
+const handleKeyDown = (e, index) => {
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    const updatedOtp = [...otp];
+
+    if (otp[index] === '') {
+      // If current box empty, move to previous
+      if (index > 0) {
+        inputsRef.current[index - 1]?.focus();
+        updatedOtp[index - 1] = '';
+      }
+    } else {
+      // Just clear current box
+      updatedOtp[index] = '';
+    }
+
+    setOtp(updatedOtp);
+  }
+
+  // Left/Right navigation
+  if (e.key === 'ArrowLeft' && index > 0) inputsRef.current[index - 1]?.focus();
+  if (e.key === 'ArrowRight' && index < otp.length - 1) inputsRef.current[index + 1]?.focus();
+};
+
+// const handlePaste = (e) => {
+//   e.preventDefault();
+//   const pasteData = e.clipboardData.getData('Text').trim();
+//   if (!/^\d+$/.test(pasteData)) return; // only digits
+
+//   const digits = pasteData.slice(0, otp.length).split('');
+//   const newOtp = [...otp];
+//   digits.forEach((digit, i) => {
+//     newOtp[i] = digit;
+//   });
+
+//   setOtp(newOtp);
+
+//   // Focus the next empty box or last one
+//   const nextIndex = digits.length < otp.length ? digits.length : otp.length - 1;
+//   inputsRef.current[nextIndex]?.focus();
+
+//   // Auto-submit if full OTP pasted
+//   if (digits.length === otp.length) {
+//     setTimeout(() => handleSubmit(), 200);
+//   }
+// };
+
+
+const handlePaste = (e) => {
+  e.preventDefault();
+  const pasteData = e.clipboardData.getData('Text').trim();
+  if (!/^\d+$/.test(pasteData)) return;
+
+  const digits = pasteData.slice(0, otp.length).split('');
+  const newOtp = Array.from({ length: otp.length }, (_, i) => digits[i] || '');
+  setOtp(newOtp);
+
+  const nextIndex = digits.length < otp.length ? digits.length : otp.length - 1;
+  inputsRef.current[nextIndex]?.focus();
+
+  if (digits.length === otp.length) {
+    const fullOtp = digits.join('');
+    setTimeout(() => verifyAndSubmit(fullOtp), 150);
+  }
+};
+
+const verifyAndSubmit = async (fullOtp) => {
+  if (!/^\d{6}$/.test(fullOtp)) {
+    setError('Please enter all 6 digits');
+    return;
+  }
+
+  setError('');
+  setLoading(true);
+
+  try {
+    const res = await apiPost('/owner/mess/otp', {
+      email,
+      otp: fullOtp,
+      requestId,
+      context: 'mess-registration',
+      messId
+    });
+
+    if (res.success) {
+      toast.success(`${messEmail} verified successfully and ${messName} Created Successfully`);
+      storage.removeItem('messEmail');
+      storage.removeItem('messRequestId');
+      storage.removeItem('messId');
+      navigate('/minimal-dashboard');
+    } else {
+      setError('Invalid OTP');
+    }
+  } catch (err) {
+    setError('Verification failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+const handleSubmit = async () => {
+  const fullOtp = otp.join('');
+  if (!/^\d{6}$/.test(fullOtp)) {
+    setError('Please enter all 6 digits');
+    return;
+  }
+  await verifyAndSubmit(fullOtp);
+};
+
+
+  const handleResend = async () => {
+    setTimer(60);
+    setResendEnabled(false);
+    setError('');
+
+    try {
+      const res = await apiPost('/resend-otp', {
+        identifier: email,
+        context: 'mess-registration',
+        requestId
+      });
+      if (res.success && res.requestId) {
+        setRequestId(res.requestId);
+        storage.setItem('messRequestId', res.requestId);
+      } else {
+        setError(res.message || 'Failed to resend OTP');
+      }
+    } catch (err) {
+      setError('Resend failed. Please try again.');
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
@@ -209,35 +460,68 @@ const handleResend = async () => {
           Enter the 6-digit code sent to <span className="font-medium">{email}</span>
         </p>
 
+      
         <div className="flex justify-between gap-2 mb-4">
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              ref={el => inputsRef.current[index] = el}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={(e) => handleChange(index, e.target.value)}
-              className="w-10 h-12 border-2 border-orange-500 text-center rounded-lg text-lg focus:outline-none"
-            />
-          ))}
-        </div>
+  {otp.map((digit, index) => (
+    <input
+      key={index}
+      ref={el => (inputsRef.current[index] = el)}
+      type="text"
+      inputMode="numeric"
+      maxLength={1}
+      value={digit}
+      onChange={e => handleChange(index, e.target.value)}
+      onKeyDown={e => handleKeyDown(e, index)}
+      onPaste={handlePaste}
+      className="w-10 h-12 border-2 border-orange-500 text-center rounded-lg text-lg focus:outline-none"
+    />
+  ))}
+</div>
+
 
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 
         <button
           onClick={handleSubmit}
-          className="w-full bg-orange-500 text-white py-3 rounded-lg hover:bg-orange-600 transition"
+          disabled={loading}
+          className={`w-full flex justify-center items-center bg-orange-500 text-white py-3 rounded-lg transition ${
+            loading ? 'opacity-70 cursor-not-allowed' : 'hover:bg-orange-600 cursor-pointer'
+          }`}
         >
-          Verify
+          {loading ? (
+            <>
+              <svg
+                className="animate-spin h-5 w-5 mr-2 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                ></path>
+              </svg>
+              Verifying...
+            </>
+          ) : (
+            'Verify'
+          )}
         </button>
 
         <div className="mt-4 text-sm text-gray-600">
           {resendEnabled ? (
             <button
               onClick={handleResend}
-              className="text-orange-500 font-bold hover:underline"
+              className="text-orange-500 font-bold cursor-pointer hover:underline"
             >
               Resend OTP
             </button>

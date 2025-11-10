@@ -1,8 +1,3 @@
-
-
-
-
-
 import React, { useEffect, useState } from 'react';
 import Navbar2 from '../layouts/Navbar2';
 import { CheckCircle, AlertCircle, Info } from 'lucide-react';
@@ -174,7 +169,7 @@ useEffect(() => {
         </div>
 
         {/* Type Filter Buttons */}
-        <div className="flex gap-3 mb-4">
+        {/* <div className="flex gap-3 mb-4">
           <button
             onClick={() => setFilter('purchased')}
             className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
@@ -207,7 +202,60 @@ useEffect(() => {
           >
             All
           </button>
-        </div>
+        </div> */}
+        <div
+  className="
+    flex gap-3 mb-4 
+    overflow-x-auto whitespace-nowrap 
+    scrollbar-hide
+  "
+>
+    <button
+    onClick={() => setFilter('all')}
+    className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 shrink-0 ${
+      filter === 'all'
+        ? 'border-black font-semibold'
+        : 'border-[#5B5B5B] cursor-pointer'
+    }`}
+  >
+    All
+  </button>
+  <button
+    onClick={() => setFilter('purchased')}
+    className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 shrink-0 ${
+      filter === 'purchased'
+        ? 'border-black font-semibold'
+        : 'border-[#5B5B5B] cursor-pointer'
+    }`}
+  >
+    Purchased
+  </button>
+
+  <button
+    onClick={() => setFilter('used')}
+    className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 shrink-0 ${
+      filter === 'used'
+        ? 'border-black font-semibold'
+        : 'border-[#5B5B5B] cursor-pointer'
+    }`}
+  >
+    Used
+  </button>
+
+  <button
+    onClick={() => setFilter('expiry')}
+    className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 shrink-0 ${
+      filter === 'expiry'
+        ? 'border-black font-semibold'
+        : 'border-[#5B5B5B] cursor-pointer'
+    }`}
+  >
+    Expiry
+  </button>
+
+
+</div>
+
 
         {/* Notification List */}
         <div className="space-y-2">

@@ -1,5 +1,3 @@
-
-
 import { io } from 'socket.io-client';
 import storage from "../utils/storage";
 
@@ -20,7 +18,7 @@ export const connectSocket = (token) => {
 
   if (socket && isConnected) return socket;
 
-  socket = io('https://mealex.in', {
+  socket = io('https://dev.mealex.in', {
     auth: { token },
     reconnection: true,
     reconnectionAttempts: Infinity,
@@ -151,6 +149,7 @@ function startHeartbeat(interval = HEARTBEAT_INTERVAL_MS) {
   heartbeatInterval = setInterval(() => {
     if (socket && socket.connected) {
       socket.emit('heartbeat');
+      console.log('heartbeat sent');
     } else if (socket) {
       socket.connect(); // attempt reconnect
     }

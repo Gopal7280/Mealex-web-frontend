@@ -459,6 +459,8 @@
 // };
 
 // export default OtpVerification;
+
+
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { apiPost } from '../services/api';
@@ -507,46 +509,85 @@ const OtpVerification = () => {
     }
   };
 
-  const handleSubmit = async () => {
-    const finalOtp = otp.join('');
-    if (finalOtp.length !== 6) {
-      setError('Please enter a valid 6-digit OTP');
-      return;
+  
+const handleSubmit = async (otpArray) => {
+  const finalOtp = otpArray ? otpArray.join('') : otp.join('');
+  if (finalOtp.length !== 6) {
+    setError('Please enter a valid 6-digit OTP');
+    return;
+  }
+
+  try {
+    setLoading(true);
+    setError('');
+    const response = await apiPost('/register/otp', {
+      identifier,
+      identifierType,
+      otp: finalOtp,
+      requestId,
+      context,
+    });
+
+    if (response.success) {
+      const token = response.token;
+      const identifier = response.identifier;
+      const customerId = response.id;
+
+      storage.removeItem('token');
+      storage.removeItem('identifier');
+      storage.setItem('identifier', identifier);
+      storage.setItem('token', token);
+      storage.setItem('customerId', customerId);
+
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      await setupNotifications(token, foregroundListenerBound);
+      toast.success('🎉 Account verified !');
+
+      navigate('/user-access');
+    } else {
+      setError(response.message || 'OTP verification failed');
     }
+  } catch (err) {
+    setError(err.response?.message || 'OTP verification failed');
+  } finally {
+    setLoading(false);
+  }
+};
 
-    try {
-      setLoading(true); // ✅ start loading
-      setError('');
-      const response = await apiPost('/register/otp', {
-        identifier,
-        identifierType,
-        otp: finalOtp,
-        requestId,
-        context,
-      });
-      if (response.success) {
-        const token = response.token;
-        const identifier = response.identifier;
 
-        storage.removeItem('token');
-        storage.removeItem('identifier');
-        storage.setItem('identifier', identifier);
-        storage.setItem('token', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-        await setupNotifications(token, foregroundListenerBound);
-        toast.success('🎉 Account verified & logged in!');
+const handlePaste = (e) => {
+  e.preventDefault();
+  const pasteData = e.clipboardData.getData('Text').trim();
 
-        navigate('/user-access');
-      } else {
-        setError(response.message || 'OTP verification failed');
+  if (!/^\d{6}$/.test(pasteData)) return; // only accept 6 digits
+
+  const newOtp = pasteData.split('');
+  setOtp(newOtp);
+
+  // ✅ Directly pass the pasted OTP to handleSubmit
+  setTimeout(() => {
+    handleSubmit(newOtp);
+  }, 50);
+};
+
+
+
+// ✅ Handle backspace to move to previous input
+const handleKeyDown = (e, index) => {
+  if (e.key === 'Backspace') {
+    if (otp[index] === '') {
+      if (index > 0) {
+        const prevInput = document.getElementById(`otp-${index - 1}`);
+        prevInput.focus();
+        const newOtp = [...otp];
+        newOtp[index - 1] = '';
+        setOtp(newOtp);
       }
-    } catch (err) {
-      setError(err.response?.message || 'OTP verification failed');
-    } finally {
-      setLoading(false); // ✅ stop loading
     }
-  };
+  }
+};
+
 
   const handleResend = async () => {
     try {
@@ -567,6 +608,7 @@ const OtpVerification = () => {
     }
   };
 
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white px-4">
       <div className="bg-white p-8 rounded-lg w-full max-w-md text-center">
@@ -577,7 +619,7 @@ const OtpVerification = () => {
           Enter the 6-digit code sent to <span className="font-medium">{identifier}</span>
         </p>
 
-        <div className="flex justify-between gap-2 mb-4">
+        {/* <div className="flex justify-between gap-2 mb-4">
           {otp.map((digit, index) => (
             <input
               key={index}
@@ -590,7 +632,27 @@ const OtpVerification = () => {
               className="w-10 h-12 border-2 border-orange-500 text-center rounded-lg text-lg focus:outline-none"
             />
           ))}
-        </div>
+        </div> */}
+        <div 
+  className="flex justify-between gap-2 mb-4"
+  onPaste={handlePaste} // ✅ ADD THIS
+>
+  {otp.map((digit, index) => (
+    <input
+      key={index}
+      id={`otp-${index}`}
+      type="text"
+      inputMode="numeric"
+      maxLength={1}
+      value={digit}
+      onChange={e => handleChange(index, e.target.value)}
+        onKeyDown={e => handleKeyDown(e, index)}   // ✅ ADD THIS
+  onPaste={index === 0 ? handlePaste : undefined} // ✅ only first input
+      className="w-10 h-12 border-2 border-orange-500 text-center rounded-lg text-lg focus:outline-none"
+    />
+  ))}
+</div>
+
 
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 

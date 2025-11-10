@@ -1,12 +1,12 @@
 
-
-
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../layouts/Navbar';
 import OwnerHeader from './ownerHeader';
 import { apiGet } from '../services/api';
 import storage from '../utils/storage';
+import { CheckCircle, XCircle } from 'lucide-react';
+
 
 const VALID_TABS = ['profile', 'plans', 'history'];
 
@@ -20,7 +20,7 @@ const CustomerProfile = () => {
 
   useEffect(() => {
     const messId = storage.getItem('messId');
-    const customerId = storage.getItem('customerId');
+    const customerId = storage.getItem('CustomerId');
 
     if (!messId || !customerId) {
       setIsLoading(false);
@@ -121,13 +121,27 @@ const ProfileDetails = ({ profile }) => {
             <p className="text-2xl md:text-3xl text-[#393939] font-semibold font-poppins">
               {customerName}
             </p>
-            <span
+            {/* <span
               className={`text-lg md:text-xl ${
                 isActive ? "text-[#34A853]" : "text-red-500"
               }`}
             >
               {isActive ? "((.)) Active" : "Inactive"}
-            </span>
+            </span> */}
+            <div className="flex items-center gap-2 mt-1">
+  {isActive ? (
+    <>
+      <CheckCircle className="w-5 h-5 text-green-600" />
+      <span className="text-lg md:text-xl text-green-600">Active</span>
+    </>
+  ) : (
+    <>
+      <XCircle className="w-5 h-5 text-red-500" />
+      <span className="text-lg md:text-xl text-red-500">Inactive</span>
+    </>
+  )}
+</div>
+
           </div>
         </div>
 
@@ -152,11 +166,5 @@ const ProfileDetails = ({ profile }) => {
 };
 
 
-// const Detail = ({ label, value }) => (
-//   <div className="flex justify-between border-b pb-1">
-//     <span className="font-medium">{label}</span>
-//     <span className="text-right">{value}</span>
-//   </div>
-// );
 
 export default CustomerProfile;

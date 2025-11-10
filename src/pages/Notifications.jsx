@@ -180,43 +180,47 @@ useEffect(() => {
             ))}
           </select>
         </div>
+        <div
+  className="
+    flex gap-3 mb-4 
+    overflow-x-auto scrollbar-hide 
+    whitespace-nowrap
+  "
+>
+    <button
+    onClick={() => setFilter("all")}
+    className={`border cursor-pointer text-sm px-3 py-1 rounded shrink-0 hover:bg-gray-100 ${
+      filter === "all" ? "border-black font-semibold" : "border-[#5B5B5B]"
+    }`}
+  >
+    All
+  </button>
+  <button
+    onClick={() => setFilter("purchased")}
+    className={`border cursor-pointer text-sm px-3 py-1 rounded shrink-0 hover:bg-gray-100 ${
+      filter === "purchased" ? "border-black font-semibold" : "border-[#5B5B5B]"
+    }`}
+  >
+    Purchased
+  </button>
 
-        {/* Type Filter Buttons */}
-        <div className="flex gap-3 mb-4">
-          <button
-            onClick={() => setFilter("purchased")}
-            className={`border cursor-pointer text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === "purchased" ? "border-black font-semibold" : "border-[#5B5B5B]"
-            }`}
-          >
-            Purchased
-          </button>
-          <button
-            onClick={() => setFilter("used")}
-            className={`border cursor-pointer text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === "used" ? "border-black font-semibold" : "border-[#5B5B5B]"
-            }`}
-          >
-            Used
-          </button>
-          <button
-            onClick={() => setFilter("expiry")}
-            className={`border cursor-pointer text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === "expiry" ? "border-black font-semibold" : "border-[#5B5B5B]"
-            }`}
-          >
-            Expiry
-          </button>
-          <button
-            onClick={() => setFilter("all")}
-            className={`border cursor-pointer text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === "all" ? "border-black font-semibold" : "border-[#5B5B5B]"
-            }`}
-          >
-            All
-          </button>
-        </div>
-
+  <button
+    onClick={() => setFilter("used")}
+    className={`border cursor-pointer text-sm px-3 py-1 rounded shrink-0 hover:bg-gray-100 ${
+      filter === "used" ? "border-black font-semibold" : "border-[#5B5B5B]"
+    }`}
+  >
+    Used
+  </button>
+<button
+    onClick={() => setFilter("expiry")}
+    className={`border cursor-pointer text-sm px-3 py-1 rounded shrink-0 hover:bg-gray-100 ${
+      filter === "expiry" ? "border-black font-semibold" : "border-[#5B5B5B]"
+    }`}
+  >
+    Expiry
+  </button>
+</div>
         {/* Notification List */}
         <div className="space-y-2">
           {loading ? (
@@ -238,8 +242,7 @@ useEffect(() => {
     NEW
   </span>
 )}
-
-                        </p>
+            </p>
                         
                         <p className="text-gray-700 mt-0.5">
                           {notif.message || `${notif.submittedByName || "Someone"} performed an action`}
@@ -255,8 +258,6 @@ useEffect(() => {
             })
           )}
         </div>
-
-    
 {pagination?.totalPages > 1 && (
   <div className="flex flex-col items-center mt-6 gap-3">
     {/* Prev / Next */}
@@ -317,9 +318,6 @@ useEffect(() => {
     </div>
   </div>
 )}
-
-
-
       </div>
     </div>
   );

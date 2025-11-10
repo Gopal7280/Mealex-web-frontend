@@ -17,53 +17,18 @@ const CustomerHistory = () => {
   const [filter, setFilter] = useState("All");
 
   const messId = storage.getItem('messId');
-  const customerId = storage.getItem('customerId');
-
-//   const fetchHistory = async () => {
-//     if (!messId || !customerId) {
-//       console.error('Missing messId or customerId');
-//       return;
-//     }
-
-//     setLoading(true);
-//     try {
-//       const response = await apiPost(
-//         `/owner/mess/stats/customer/transactions?limit=${pagination.limit}&offset=${pagination.offset}`,
-//         { messId, customerId }
-//       );
-//  console.log('Fetched history data:', response?.data);
-//       if (response.data.success) {
-//         // map type for UI
-//         const mappedData = (response.data.data || []).map(item => ({
-//           ...item,
-//           type: item.type === "transaction" ? "Purchased" : "Used",
-//         }));
-
-//         setHistoryData(mappedData);
-//         setPagination(prev => ({
-//           ...prev,
-//           hasMore: response.data.pagination.hasMore,
-//         }));
-//       } else {
-//         console.warn('API responded without success flag:', response.data);
-//       }
-//     } catch (error) {
-//       console.error('Error fetching history:', error?.response?.data || error.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
+  const CustomerId = storage.getItem('CustomerId');
 
 const fetchHistory = async () => {
-  if (!messId || !customerId) return;
+  if (!messId || !CustomerId) return;
 
   setLoading(true);
   try {
     const response = await apiPost(
       `/owner/mess/stats/customer/transactions?limit=${pagination.limit}&offset=${pagination.offset}`,
-      { messId, customerId }
+      { messId, customerId: CustomerId }
     );
-
+ console.log('✅ Customer History Response:', response);
 
     const mappedData = response.data.map(item => ({
       ...item,
@@ -113,7 +78,6 @@ const fetchHistory = async () => {
       {/* <div className="flex-1 p-6 overflow-y-auto bg-[#f9f4f0] min-h-screen"> */}
       <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
 
-        {/* <div className="px-6 py-4"> */}
           <OwnerHeader />
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">Customer Details</h2>
 
@@ -137,7 +101,7 @@ const fetchHistory = async () => {
                 <button
                   key={f}
                   onClick={() => setFilter(f)}
-                  className={`border px-3 py-1 cursor-pointer rounded shadow-sm text-sm ${
+                  className={`border  px-3 py-1 cursor-pointer rounded-xl shadow-sm text-sm ${
                     filter === f ? "bg-orange-500 text-white" : "bg-white"
                   }`}
                 >

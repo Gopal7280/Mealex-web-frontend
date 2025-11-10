@@ -1,5 +1,3 @@
-
-
 //new after heartbeat 
 
 import React, { useEffect, useState } from 'react';
@@ -129,64 +127,6 @@ useEffect(() => {
     setIsModalOpen(true);
   };
 
-  // const handleSubmitOrder = async () => {
-  //   const socket = getSocket();
-  //   // if (!socket)
-  //   //  return toast.error('WebSocket not connected');
-  // if (!socket) {
-  //   toast.error('WebSocket not connected');
-  //   setIsSubmitting(false); // ✅ reset immediately if no socket
-  //   return;
-  // }
-
-
-  //   // setLoading(true);
-  //     setIsSubmitting(true);   // ⬅️ Start submitting state
-
-  //   await refetchPlan();
-
-  //   const latestUnusedTokens = planData.issuedTokens
-  //     .filter(issuedToken => {
-  //       return !planData.usedTokens.some(used => {
-  //         return typeof used === 'string'
-  //           ? used === issuedToken._id
-  //           : used._id === issuedToken._id;
-  //       });
-  //     })
-  //     .slice(0, selectedCount);
-
-  //   if (latestUnusedTokens.length < selectedCount) {
-  //     toast.error("❌ Not enough valid unused tokens available. Please try again.");
-  //     setLoading(false);
-  //     setIsSubmitting(false);   // ⬅️ reset on failure
-
-  //     return;
-  //   }
-
-  //   storage.setItem('tokens', latestUnusedTokens);
-
-  //   const payload = {
-  //     customerPlanId,
-  //     tokens: latestUnusedTokens,
-  //     customerId,
-  //     orderType: selectedService,
-  //     token: JWT,
-  //     ...(selectedService === 'delivery' && { deliveryAddress }),
-  //   };
-
-  //   socket.emit('new_order', payload, (response) => {
-  //     if (response?.success) {
-  //       toast.success('Order placed successfully!');
-  //       setIsModalOpen(false);
-  //       setTimeout(refetchPlan, 1000);
-  //     } else {
-  //       toast.error(`❌ Failed: ${response?.message}`);
-  //     }
-  //         setIsSubmitting(false);   // ⬅️ always reset after response
-
-  //   });
-  // };
-
 const handleSubmitOrder = async () => {
   const socket = getSocket();
   if (!socket) {
@@ -231,9 +171,11 @@ const handleSubmitOrder = async () => {
       if (response?.success) {
         toast.success('Order placed successfully!');
         setIsModalOpen(false);
+        setIsSubmitting(false); // ✅ reset on failure
         setTimeout(refetchPlan, 1000);
       } else {
         toast.error(`❌ Failed: ${response?.message}`);
+        setIsSubmitting(false); // ✅ reset on failure
       }
       setIsSubmitting(false); // ✅ always reset after socket response
     });
@@ -264,8 +206,6 @@ const handleSubmitOrder = async () => {
             <div className="text-sm text-gray-500">
               {/* {usedTokens.length}/{issuedTokens.length} Tokens Used */}
 {usedTokens.length}/{issuedTokens.length + usedTokens.length} Tokens Used
-
-
             </div>
             
             <div className="text-sm text-gray-500">
