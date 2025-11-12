@@ -18,7 +18,7 @@ export const connectSocket = (token) => {
 
   if (socket && isConnected) return socket;
 
-  socket = io('https://dev.mealex.in', {
+  socket = io('https://mealex.in', {
     auth: { token },
     reconnection: true,
     reconnectionAttempts: Infinity,

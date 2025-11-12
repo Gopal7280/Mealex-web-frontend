@@ -758,7 +758,7 @@ const CustomerProfileDetails = () => {
         <div className="flex flex-col items-center mt-8">
           <button
             onClick={handleLogout}
-            className="flex border border-red-500 items-center justify-center gap-2 cursor-pointer text-red-500 hover:bg-[#d9362b] shadow-md text-sm font-bold font-poppins w-1/2 py-2 rounded-lg transition"
+            className="flex border border-red-500 items-center justify-center gap-2 cursor-pointer text-red-500 hover:bg-red-200 shadow-md text-sm font-bold font-poppins w-1/2 py-2 rounded-lg transition"
           >
             <MdPowerSettingsNew  size={18} />
             LOG OUT

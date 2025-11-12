@@ -137,10 +137,14 @@ import {
   Menu,
   X,
 } from "lucide-react";
+// import { useTranslation } from "react-i18next";
+
 
 const CustomerSidebar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
+    // const { t } = useTranslation();
+
 
   // Helper to highlight active link
   const getLinkClasses = (paths) => {
@@ -191,7 +195,8 @@ const CustomerSidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <LayoutDashboard size={20} />
-            Dashboard
+          {/* {t("dashboard")} */}
+Dashboard
           </Link>
 
           <Link
@@ -200,7 +205,8 @@ const CustomerSidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <ClipboardList size={20} />
-            Plans
+          {/* {t("plans")}   */}
+Plans
           </Link>
 
           <Link
@@ -209,7 +215,8 @@ const CustomerSidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <ShoppingCart size={20} />
-            Orders
+            {/* {t("orders")} */}
+Orders
           </Link>
 
           <Link
@@ -218,7 +225,8 @@ const CustomerSidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <Clock size={20} />
-            History
+            {/* {t("history")} */}
+ History
           </Link>
 
           <Link
@@ -227,13 +235,14 @@ const CustomerSidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <UserCog size={20} />
-            Switch Role
+          {/* {t("switchRole")} */}
+Switch Role
           </Link>
         </div>
 
         {/* Footer */}
         <div className="p-4 border-t text-xs text-gray-500 text-center">
-          © 2025 MealX. All rights reserved.
+          © 2025 MealEX. All rights reserved.
         </div>
       </div>
     </>

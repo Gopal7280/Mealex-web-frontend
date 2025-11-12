@@ -1124,6 +1124,186 @@ const PlanHistory = () => {
   );
 };
 
+// const PlanDetailModal = ({ loading, data, onClose }) => {
+//   if (loading) {
+//     return (
+//       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+//         <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 text-center">
+//           <p className="text-gray-600">Loading details...</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   if (!data) {
+//     return (
+//       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+//         <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6 text-center">
+//           <p className="text-gray-600">No details available</p>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   const { planName, action, createdAt, updatedAt, newData, previousData } = data;
+
+//   const ignoreKeys = ["planId", "messId", "createdAt", "updatedAt", "__v", "_id"];
+
+//   const displayFields = Object.entries(newData || {}).filter(
+//     ([key]) => !ignoreKeys.includes(key)
+//   );
+
+//   const changedKeys = Object.keys(previousData || {}).filter(
+//     (key) => !ignoreKeys.includes(key)
+//   );
+
+//   // Helper to format key names (camelCase → normal text)
+//   const formatKey = (key) =>
+//     key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
+
+//   return (
+//     <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 pt-12 animate-fadeIn">
+//       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative overflow-hidden">
+//         {/* Sticky Header */}
+//         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10 flex justify-between items-center">
+//           <h2 className="text-lg font-semibold text-gray-800">
+//             Plan Activity Details
+//           </h2>
+//           <button
+//             onClick={onClose}
+//             className="text-gray-600 cursor-pointer hover:text-gray-900 transition"
+//           >
+//             <X size={20} />
+//           </button>
+//         </div>
+
+//         {/* Scrollable Body */}
+//         <div className="p-6 overflow-y-auto max-h-[80vh] space-y-6">
+//           {/* Overview */}
+//           <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+//             <p className="font-semibold text-gray-800 text-lg">{planName}</p>
+//             <p className="text-sm text-gray-600 capitalize">
+//               Action: <span className="font-medium">{action}</span>
+//             </p>
+//             <p className="text-sm text-gray-600">
+//               Date: {new Date(updatedAt || createdAt).toLocaleString()}
+//             </p>
+//           </div>
+
+//           {/* Plan Details - single card */}
+//           <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+//             <h3 className="font-semibold text-gray-800 mb-3">Plan Details</h3>
+
+//             {/* Plan image (if exists) */}
+//             {newData?.imageUrl && (
+//               <div className="flex justify-center mb-4">
+//                 <img
+//                   src={newData.imageUrl}
+//                   alt="Plan"
+//                   className="w-40 h-40 object-cover rounded-lg shadow"
+//                 />
+//               </div>
+//             )}
+
+//             <div className="grid grid-cols-2 gap-3 text-sm">
+//               {displayFields.map(([key, value]) => {
+//                 if (key === "imageUrl") return null; // handled separately
+
+//                 return (
+//                   <div key={key} className="col-span-2 sm:col-span-1">
+//                     <p className="font-medium text-gray-700 capitalize">
+//                       {formatKey(key)}:
+//                     </p>
+//                     {Array.isArray(value) ? (
+//                       <ul className="list-disc list-inside text-gray-600 text-[13px]">
+//                         {value.map((item, idx) => (
+//                           <li key={idx}>{item}</li>
+//                         ))}
+//                       </ul>
+//                     ) : (
+//                       <p className="text-gray-600 text-[13px] break-words">
+//                         {String(value)}
+//                       </p>
+//                     )}
+//                   </div>
+//                 );
+//               })}
+//             </div>
+//           </div>
+
+//           {/* Changed Fields */}
+//           {changedKeys.length > 0 && (
+//             <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+//               <h3 className="font-semibold text-gray-800 mb-3">Changed Fields</h3>
+
+//               {changedKeys.map((key) => {
+//                 // special case for image change
+//                 if (key === "imageUrl") {
+//                   return (
+//                     <div key={key} className="mb-4">
+//                       <p className="font-medium text-gray-800 capitalize mb-2">
+//                         {formatKey(key)}
+//                       </p>
+//                       <div className="flex flex-col sm:flex-row gap-4">
+//                         <div className="flex-1 text-center">
+//                           <p className="text-sm text-gray-500 mb-1">Previous</p>
+//                           {previousData[key] ? (
+//                             <img
+//                               src={previousData[key]}
+//                               alt="Previous Plan"
+//                               className="w-36 h-36 object-cover rounded-lg border shadow-sm mx-auto"
+//                             />
+//                           ) : (
+//                             <p className="text-gray-400 text-sm">No Image</p>
+//                           )}
+//                         </div>
+//                         <div className="flex-1 text-center">
+//                           <p className="text-sm text-gray-500 mb-1">Updated</p>
+//                           {newData[key] ? (
+//                             <img
+//                               src={newData[key]}
+//                               alt="New Plan"
+//                               className="w-36 h-36 object-cover rounded-lg border shadow-sm mx-auto"
+//                             />
+//                           ) : (
+//                             <p className="text-gray-400 text-sm">No Image</p>
+//                           )}
+//                         </div>
+//                       </div>
+//                     </div>
+//                   );
+//                 }
+
+//                 return (
+//                   <div key={key} className="border-b border-gray-100 pb-3 mb-3">
+//                     <p className="font-medium text-gray-800 capitalize mb-1">
+//                       {formatKey(key)}
+//                     </p>
+//                     <p className="text-sm text-red-600 mb-1">
+//                       <span className="font-medium text-gray-700">Previous:</span>{" "}
+//                       {String(previousData[key]) ?? "—"}
+//                     </p>
+//                     <p className="text-sm text-green-700">
+//                       <span className="font-medium text-gray-700">Updated:</span>{" "}
+//                       {String(newData?.[key]) ?? "—"}
+//                     </p>
+//                   </div>
+//                 );
+//               })}
+//             </div>
+//           )}
+
+//           {changedKeys.length === 0 && (
+//             <p className="text-center text-gray-500 mt-2">
+//               No field-level updates found.
+//             </p>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
+
 const PlanDetailModal = ({ loading, data, onClose }) => {
   if (loading) {
     return (
@@ -1145,11 +1325,13 @@ const PlanDetailModal = ({ loading, data, onClose }) => {
     );
   }
 
-  const { planName, action, createdAt, updatedAt, newData, previousData } = data;
+  const { planName, action, createdAt, updatedAt, newData, previousData, MessPlan } = data;
+
+  // Use MessPlan details if available
+  const planDetails = MessPlan || newData || {};
 
   const ignoreKeys = ["planId", "messId", "createdAt", "updatedAt", "__v", "_id"];
-
-  const displayFields = Object.entries(newData || {}).filter(
+  const displayFields = Object.entries(planDetails).filter(
     ([key]) => !ignoreKeys.includes(key)
   );
 
@@ -1157,18 +1339,14 @@ const PlanDetailModal = ({ loading, data, onClose }) => {
     (key) => !ignoreKeys.includes(key)
   );
 
-  // Helper to format key names (camelCase → normal text)
   const formatKey = (key) =>
     key.replace(/([A-Z])/g, " $1").replace(/^./, (s) => s.toUpperCase());
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-start justify-center z-50 p-4 pt-12 animate-fadeIn">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg relative overflow-hidden">
-        {/* Sticky Header */}
         <div className="sticky top-0 bg-white border-b border-gray-200 p-4 z-10 flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Plan Activity Details
-          </h2>
+          <h2 className="text-lg font-semibold text-gray-800">Plan Activity Details</h2>
           <button
             onClick={onClose}
             className="text-gray-600 cursor-pointer hover:text-gray-900 transition"
@@ -1177,9 +1355,7 @@ const PlanDetailModal = ({ loading, data, onClose }) => {
           </button>
         </div>
 
-        {/* Scrollable Body */}
         <div className="p-6 overflow-y-auto max-h-[80vh] space-y-6">
-          {/* Overview */}
           <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
             <p className="font-semibold text-gray-800 text-lg">{planName}</p>
             <p className="text-sm text-gray-600 capitalize">
@@ -1190,15 +1366,14 @@ const PlanDetailModal = ({ loading, data, onClose }) => {
             </p>
           </div>
 
-          {/* Plan Details - single card */}
+          {/* Plan Details Section */}
           <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
             <h3 className="font-semibold text-gray-800 mb-3">Plan Details</h3>
 
-            {/* Plan image (if exists) */}
-            {newData?.imageUrl && (
+            {planDetails?.imageUrl && (
               <div className="flex justify-center mb-4">
                 <img
-                  src={newData.imageUrl}
+                  src={planDetails.imageUrl}
                   alt="Plan"
                   className="w-40 h-40 object-cover rounded-lg shadow"
                 />
@@ -1207,8 +1382,7 @@ const PlanDetailModal = ({ loading, data, onClose }) => {
 
             <div className="grid grid-cols-2 gap-3 text-sm">
               {displayFields.map(([key, value]) => {
-                if (key === "imageUrl") return null; // handled separately
-
+                if (key === "imageUrl") return null;
                 return (
                   <div key={key} className="col-span-2 sm:col-span-1">
                     <p className="font-medium text-gray-700 capitalize">
@@ -1217,7 +1391,7 @@ const PlanDetailModal = ({ loading, data, onClose }) => {
                     {Array.isArray(value) ? (
                       <ul className="list-disc list-inside text-gray-600 text-[13px]">
                         {value.map((item, idx) => (
-                          <li key={idx}>{item}</li>
+                          <li key={idx}>{String(item)}</li>
                         ))}
                       </ul>
                     ) : (
@@ -1231,13 +1405,12 @@ const PlanDetailModal = ({ loading, data, onClose }) => {
             </div>
           </div>
 
-          {/* Changed Fields */}
+          {/* Changed Fields Section */}
           {changedKeys.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4">
               <h3 className="font-semibold text-gray-800 mb-3">Changed Fields</h3>
 
               {changedKeys.map((key) => {
-                // special case for image change
                 if (key === "imageUrl") {
                   return (
                     <div key={key} className="mb-4">
@@ -1303,4 +1476,7 @@ const PlanDetailModal = ({ loading, data, onClose }) => {
     </div>
   );
 };
+
+
+
 export default PlanHistory;

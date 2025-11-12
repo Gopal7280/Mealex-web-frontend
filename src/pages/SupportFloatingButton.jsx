@@ -3,8 +3,12 @@ import { MessageCircle } from 'lucide-react'
 import { apiPost } from '../services/api'
 import storage from '../utils/storage'
 import toast from 'react-hot-toast'
+// import { useTranslation } from "react-i18next";
+
 
 const SupportFloatingButton = () => {
+    // const { t } = useTranslation();
+
   const [isOpen, setIsOpen] = useState(false)
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -59,7 +63,7 @@ const SupportFloatingButton = () => {
     <MessageCircle size={20} className='sm:w-6 sm:h-6' />
   </button>
   <span className='text-[10px] sm:text-xs font-medium bg-white text-orange-500 px-1.5 sm:px-2 py-0.5 rounded shadow-sm'>
-    Support
+   Support
   </span>
 </div>
 

@@ -3860,10 +3860,10 @@ export default function LandingPage() {
       <footer className="bg-blue-900 text-white py-12 px-6 reveal">
         <div className="max-w-7xl mx-auto md:flex md:justify-between md:items-center">
           <div className="mb-6 md:mb-0">
-            <h3 className="text-2xl font-bold mb-1"><span className="text-orange-400">MEA</span>LEX</h3>
+            {/* <h3 className="text-2xl font-bold mb-1"><span className="text-orange-400">MEA</span>LEX</h3> */}
+            <img src={logo} alt="MealEx Logo" className="h-6 md:h-8" />
             <p className="text-gray-300">© {new Date().getFullYear()} mealex. All rights reserved.</p>
           </div>
-
           <div className="flex flex-wrap justify-center gap-6  md:gap-8 text-lg mb-6 md:mb-0">
             <button onClick={() => scrollToSection("about")} className="hover:text-orange-400 cursor-pointer transition">About</button>
             <button onClick={() => scrollToSection("features")} className="hover:text-orange-400 cursor-pointer transition">Features</button>

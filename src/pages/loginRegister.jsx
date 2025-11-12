@@ -222,7 +222,6 @@ const handleRegister = async e => {
 
   try {
     setLoader(true);
-    // ✅ new apiPost returns data directly, not response.data
     const data = await apiPost('/register', {
       identifier: normalizedIdentifier,
       password,
@@ -247,60 +246,6 @@ const handleRegister = async e => {
     setLoader(false);
   }
 };
-
-
-  
-// const handleGoogleSuccess = async (credentialResponse) => {
-//   try {
-//     const idToken = credentialResponse.credential;
-//     const res = await apiPost('/google-auth', { idToken });
-//    console.log('Google Auth response:', res);
-//     if (res.success) {
-//       // Store token & identifier
-//       const { token, identifier, identifierType, isOwner, isCustomer } = res;
-
-//       storage.setItem('token', token);
-//       storage.setItem('identifier', identifier);
-//       setToken(token);
-
-    
-
-//       // Navigate based on role, same as handleLogin
-//       if (isOwner && isCustomer) {
-//         storage.setItem('roles', 'both');
-//         storage.setItem('customerId', res.id); // simple customer
-//         setUserRole('both'); // ✅ <--- add this
-
-//   navigate('/minimal-dashboard', { state: { customerId: res.id } });
-//       } else if (isCustomer) {
-//         storage.setItem('role', 'customer');
-//         storage.setItem('customerId', res.id); // simple customer
-//           setUserRole('customer'); // ✅ <--- add this
-
-//         navigate('customers-dashboard');
-//         toast.success('🎉 Logged In As Customer!');
-//       } else if (isOwner) {
-//         storage.setItem('role', 'owner');
-//           setUserRole('owner'); // ✅ <--- add this
-
-//         navigate('/minimal-dashboard');
-//         toast.success('🎉 Logged In As Owner!');
-//       } else {
-//                 storage.setItem('customerId', res.id); // simple customer
-//         navigate('/user-access', {
-//           state: { identifier, identifierType, token ,customerId: res.id}
-//         });
-//       }
-//     } else {
-//       toast.error(res.message || 'Google Sign-In failed');
-//     }
-//   } catch (err) {
-//     console.error('Google login error:', err);
-//     toast.error('Something went wrong with Google Sign-In');
-//   }
-// };
-
-
 const handleGoogleSuccess = async (credentialResponse) => {
   try {
     const idToken = credentialResponse.credential;
@@ -390,9 +335,6 @@ const handleGoogleSuccess = async (credentialResponse) => {
 
   return (
     <div className="flex min-h-screen bg-white relative px-4 sm:px-6 lg:px-8">
-      {/* <img src={handdrawn} alt="Top Decoration" className="absolute top-0 md:right-0 w-24 sm:w-28 md:w-36 h-auto object-contain z-10" />
-      <img src={handdrawnn} alt="Bottom Decoration" className="absolute bottom-0 md:left-0 w-24 sm:w-28 md:w-36 h-auto object-contain z-10" /> */}
-
       <img
   src={handdrawn}
   alt="Top Decoration"
@@ -566,47 +508,6 @@ const handleGoogleSuccess = async (credentialResponse) => {
          <div className="space-y-3 justify-center flex w-full">
           <GoogleLogin onSuccess={handleGoogleSuccess} onError={() => console.log('Login Failed')} />
         </div> 
-{/* <div className="space-y-3 justify-center flex w-full">
-  <GoogleLogin
-    onSuccess={handleGoogleSuccess}
-    onError={() => console.log('Google Login Failed')}
-    useOneTap
-    render={renderProps => (
-      <button
-        onClick={renderProps.onClick}
-        disabled={renderProps.disabled}
-        className="w-full bg-white border-2 border-gray-300 text-gray-700 font-semibold py-3 rounded-xl shadow-sm hover:bg-gray-50 transition cursor-pointer flex items-center justify-center gap-3"
-        style={{fontSize: "16px"}}
-      >
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="" className="w-5 h-5" />
-        Continue with Google
-      </button>
-    )}
-  />
-</div> */}
-{/* <div className="w-full h-12">
-  <GoogleLogin
-    onSuccess={handleGoogleSuccess}
-    onError={() => console.log("Login Failed")}
-    theme="outline"
-    size="large"
-    width="100%"
-    text="continue_with"
-    shape="pill"
-  />
-</div>
-<div className="w-full">
-  <GoogleLogin
-    onSuccess={handleGoogleSuccess}
-    onError={() => console.log("Login Failed")}
-    theme="outline"
-    size="large"
-    width="100%"
-    text="continue_with" // makes button look like a real secondary CTA
-  />
-</div> */}
-
-
         <Dialog
           header="Reset Password"
           visible={visible}

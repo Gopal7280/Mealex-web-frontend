@@ -1,6 +1,10 @@
 import '../styles/Loader.css';
 import { PiGearLight } from 'react-icons/pi';
+// import { useTranslation } from "react-i18next";
+
 export function Loader() {
+    // const { t } = useTranslation();
+
   return (
     <>
       <div className="bg-[#e5e7eb] text-black flex items-center justify-center h-screen">

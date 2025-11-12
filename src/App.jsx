@@ -713,8 +713,8 @@ import { connectSocket, disconnectSocket } from "./config/socket";
 import { initFCM, onMessageListener } from "./firebase";
 import SupportFloatingButton from "./pages/SupportFloatingButton";
 import { apiPost } from "./services/api";
-// import LanguageModal from "./layouts/LanguageModal";
-import "./config/i18n";
+// import LanguageModal from "./components/LanguageModal";
+// import "./config/i18n";
 
 
 
@@ -871,15 +871,26 @@ function App() {
 //   }, [auth]);
 
 //   // ✅ Show language modal only on first visit (before login)
-//   useEffect(() => {
-//     const langSelected = localStorage.getItem("mealex_lang_selected");
-//     const seen = localStorage.getItem("mealex_first_visit_done");
+//   // useEffect(() => {
+//   //   const langSelected = localStorage.getItem("mealex_lang_selected");
+//   //   const seen = localStorage.getItem("mealex_first_visit_done");
 
-//     if (!langSelected && !seen) {
-//       setShowLangModal(true);
-//       localStorage.setItem("mealex_first_visit_done", "true");
-//     }
-//   }, []);
+//   //   if (!langSelected && !seen) {
+//   //     setShowLangModal(true);
+//   //     localStorage.setItem("mealex_first_visit_done", "true");
+//   //   }
+//   // }, []);
+
+//   useEffect(() => {
+//   const langSelected = localStorage.getItem("mealex_lang_selected");
+
+//   // agar langSelected absent ya invalid ho tab modal show karo
+//   if (!langSelected || !["en", "hi"].includes(langSelected)) {
+//     setShowLangModal(true);
+//     localStorage.setItem("mealex_first_visit_done", "true");
+//   }
+// }, []);
+
 
 //   return (
 //     <BrowserRouter>

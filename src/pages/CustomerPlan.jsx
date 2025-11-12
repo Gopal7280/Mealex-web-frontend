@@ -75,7 +75,7 @@ const { id: orderId, amount } = orderDetails;
       key: "rzp_test_RD4LUvyj0ffvxI",
       amount,
       currency: "INR",
-      name: "MealX Mess System",
+      name: "MealEX Mess System",
       description: `Purchase Plan: ${selectedPlan.name}`,
       image: {
         src: "your-url.svg", // replace with PNG if SVG not working
@@ -412,10 +412,7 @@ const handlePlanPurchase = async () => {
     </div>
   </div>
 )}
-
-      </div>
-      
-    
+  </div>
   );
 };
 

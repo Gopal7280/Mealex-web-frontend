@@ -79,6 +79,13 @@ const MessDetailsForm = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+
+      if (name === "city" || name === "state") {
+    const lettersOnly = value.replace(/[^a-zA-Z\s]/g, "");
+    setForm((prev) => ({ ...prev, [name]: lettersOnly }));
+    return;
+  }
+  
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -168,6 +175,7 @@ const MessDetailsForm = () => {
   }, [openTime, closeTime]);
 
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
     if (loading) return;
     setLoading(true);
@@ -177,6 +185,11 @@ const MessDetailsForm = () => {
       return;
     }
 
+    if (name === "city") {
+    const lettersOnly = value.replace(/[^a-zA-Z\s]/g, ""); // removes numbers/special chars
+    setForm((prev) => ({ ...prev, [name]: lettersOnly }));
+    return;
+  }
     const formData = new FormData();
 
     const normalizeArray = (val) => {
@@ -276,21 +289,6 @@ const MessDetailsForm = () => {
       onSubmit={handleSubmit}
       className="w-full mx-auto p-6 sm:p-8 md:p-10 bg-white rounded-2xl shadow space-y-6"
     >
-      {/* <div className="flex items-center gap-2 mb-4">
-        <ArrowLeft
-          className="w-8 h-8 cursor-pointer text-orange-500 hover:text-red-500"
-          onClick={() => navigate(-1)}
-        />
-        <h2 className="text-2xl sm:text-3xl mb-2 font-bold  text-orange-500">Create Mess Profile</h2>
-
-        <button
-    onClick={handleLogout}
-    className={`flex items-center gap-1 mt-2 sm:mt-0 bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm transition-all duration-200 `}
-  >
-    <MdPowerSettingsNew size={18} />
-    LOG OUT
-  </button>
-      </div> */}
       <div className="flex justify-between items-center mb-6 relative">
   <div className="flex items-center gap-2">
     <ArrowLeft

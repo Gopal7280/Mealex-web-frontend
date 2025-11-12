@@ -8,8 +8,6 @@ import planIllustration from '../assets/clipboard.png.png';
 import { CheckCircle, Trash2 } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 
-
-
 const OwnerPlans = () => {
   const navigate = useNavigate();
   const [plans, setPlans] = useState([]);
@@ -21,7 +19,6 @@ const OwnerPlans = () => {
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
   const [isPriceClicked, setIsPriceClicked] = useState(false);
   const [planToDelete, setPlanToDelete] = useState(null); // store plan _id temporarily
-
 
   const fetchPlans = async () => {
     try {
@@ -209,7 +206,6 @@ const OwnerPlans = () => {
                 </div>
               </div>
             )}
-
             {/* Deactivated Plans Section */}
             {deactivatedPlans.length > 0 && (
               <div className="mb-6">
@@ -253,121 +249,9 @@ const OwnerPlans = () => {
     </div>
   </div>
 )}
-
     </div>
   );
 };
-
-// const PlanCard = ({ plan, handleAction, handleImageChange, onDeleteClick }) => {
-//   const navigate = useNavigate();
-
-//   return (
-//     <div className="relative">
-//       <div
-//         className={`relative bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-300 ${
-//           plan.isActive ? "" : "grayscale opacity-80"
-//         }`}
-//       >
-//         {/* --- Edit Plan Button (Always Visible) --- */}
-//         <button
-//           onClick={() => navigate("/edit-plan", { state: { plan } })}
-//           className="absolute top-3 right-3 z-20 bg-white text-xs md:text-sm font-medium px-3 py-1.5 rounded-full shadow hover:bg-orange-200 cursor-pointer transition-all duration-200"
-//         >
-//           ✏️ 
-//         </button>
-
-//         {/* Plan Image */}
-//         <div className="relative w-full h-48">
-//           <img
-//             src={plan.imageUrl}
-//             alt={plan.name}
-//             className="w-full h-full object-cover"
-//           />
-//         </div>
-
-//         {/* Plan Info */}
-//         <div className="p-4 flex flex-col gap-2">
-//           <h3 className="text-lg font-bold text-gray-800">{plan.name}</h3>
-//           <p className="text-sm text-gray-600 line-clamp-2">{plan.description}</p>
-//           <div className="flex flex-wrap gap-2 mt-2">
-//             {plan.menu?.map((item, idx) => (
-//               <span
-//                 key={idx}
-//                 className="bg-orange-100 text-orange-600 text-xs font-medium px-2 py-1 rounded-full"
-//               >
-//                 {item}
-//               </span>
-//             ))}
-//           </div>
-
-//           <div className="mt-3 grid grid-cols-3 text-center text-sm">
-//             <div>
-//               <p className="text-gray-500">Price</p>
-//               <p className="font-semibold text-black">₹ {plan.price}</p>
-//             </div>
-//             <div>
-//               <p className="text-gray-500">Tokens</p>
-//               <p className="font-semibold">{plan.totalTokens}</p>
-//             </div>
-//             <div>
-//               <p className="text-gray-500">Duration</p>
-//               <p className="font-semibold">{plan.durationDays} Days</p>
-//             </div>
-//             <div className="flex items-center gap-1 mt-2 text-sm text-gray-600">
-//               <span className="text-blue-600">👥</span>
-//               <span className="font-medium">{plan.usageCount}</span>
-//               <span>Active Users</span>
-//             </div>
-//           </div>
-
-//           <p
-//             className={`mt-2 text-sm font-medium ${
-//               plan.isActive ? "text-green-600" : "text-red-500"
-//             }`}
-//           >
-//             {plan.status}
-//           </p>
-//         </div>
-//       </div>
-
-//       {/* Action Buttons */}
-//       <div className="flex items-center justify-between gap-2 mt-3">
-//         <button
-//           onClick={() => handleAction("activate", plan._id)}
-//           disabled={plan.isActive}
-//           className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
-//             plan.isActive
-//               ? "border border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
-//               : "bg-gradient-to-r from-emerald-500 to-green-600 cursor-pointer hover:from-emerald-600 hover:to-green-700 text-white shadow-md"
-//           }`}
-//         >
-//           <CheckCircle className="w-4 h-4" /> Activate
-//         </button>
-
-//         <button
-//           onClick={() => handleAction("deactivate", plan._id)}
-//           disabled={!plan.isActive}
-//           className={`flex-1 py-2 rounded-full text-sm cursor-pointer font-semibold transition-all duration-200 ${
-//             !plan.isActive
-//               ? "border border-gray-300 text-gray-400 bg-gray-100 cursor-not-allowed"
-//               : "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-md"
-//           }`}
-//         >
-//           ⏸ Deactivate
-//         </button>
-
-//         <button
-//           onClick={onDeleteClick}
-//           className="p-2 rounded-md hover:bg-red-100 cursor-pointer text-red-600 transition"
-//           title="Delete Plan"
-//         >
-//           <Trash2 className="w-5 h-5 cursor-pointer" />
-//         </button>
-//       </div>
-//     </div>
-//   );
-// };
-
 const PlanCard = ({ plan, handleAction, handleImageChange, onDeleteClick }) => {
   const navigate = useNavigate();
 
@@ -463,19 +347,6 @@ const PlanCard = ({ plan, handleAction, handleImageChange, onDeleteClick }) => {
         >
           ⏸ Deactivate
         </button>
-
-        {/* <button
-          onClick={!isActive ? onDeleteClick : undefined}
-          disabled={isActive}
-          className={`p-2 rounded-md transition ${
-            isActive
-              ? "opacity-50 cursor-not-allowed text-red-300 bg-gray-100"
-              : "hover:bg-red-100 text-red-600 cursor-pointer"
-          }`}
-          title={isActive ? "Cannot delete active plan" : "Delete Plan"}
-        >
-          <Trash2 className="w-5 h-5" />
-        </button> */}
         <button
   onClick={() => {
     if (!isActive) onDeleteClick();
@@ -490,12 +361,8 @@ const PlanCard = ({ plan, handleAction, handleImageChange, onDeleteClick }) => {
 >
   <Trash2 className="w-5 h-5" />
 </button>
-
       </div>
     </div>
   );
 };
-
-
-
 export default OwnerPlans;

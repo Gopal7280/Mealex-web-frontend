@@ -657,7 +657,7 @@ const handleKeyDown = (e, index) => {
         {error && <p className="text-red-500 text-sm mb-3">{error}</p>}
 
         <button
-          onClick={handleSubmit}
+  onClick={() => handleSubmit()} // ✅ wrap in arrow function
           disabled={loading}
           className={`w-full py-3 rounded-lg transition ${
             loading

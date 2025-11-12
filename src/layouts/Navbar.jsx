@@ -383,8 +383,12 @@ import {
  FileCheck   // ✅ KYC style icon
 
 } from "lucide-react";
+// import { useTranslation } from "react-i18next";
+
 
 const Sidebar = () => {
+  // const { t } = useTranslation();
+
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -432,17 +436,14 @@ const Sidebar = () => {
             Connecting Plates & People
           </span>
         </div>
-
-              
-
-
-          <Link
+        <Link
             to="/owner-dashboard"
             className={getLinkClasses("/owner-dashboard")}
             onClick={() => setIsOpen(false)}
           >
             <LayoutDashboard size={20} />
-            Dashboard
+  {/* {t("dashboard")} */}
+          Dashboard
           </Link>
 
           <Link
@@ -451,7 +452,8 @@ const Sidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <ClipboardList size={20} />
-            Plans
+          {/* {t("plans")}   */}
+ Plans
           </Link>
 
           {/* Show Add New Plan link only on Plans page */}
@@ -471,7 +473,8 @@ const Sidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <ShoppingCart size={20} />
-            Orders
+              {/* {t("orders")} */}
+Orders
           </Link>
 
           {/* Customers: active on /customers AND /add-customer */}
@@ -481,7 +484,8 @@ const Sidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <Users size={20} />
-            Customers
+  {/* {t("customers")} */}
+Customers
           </Link>
 
           <Link
@@ -490,7 +494,8 @@ const Sidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <Clock size={20} />
-            History
+            {/* {t("history")} */}
+History
           </Link>
 
           <Link
@@ -499,7 +504,8 @@ const Sidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <Repeat size={20} />
-            Switch Mess
+            {/* {t("switchMess")} */}
+Switch Mess
           </Link>
 
           <Link
@@ -508,7 +514,8 @@ const Sidebar = () => {
             onClick={() => setIsOpen(false)}
           >
             <UserCog size={20} />
-            Switch Role
+            {/* {t("switchRole")} */}
+  Switch Role
           </Link>
            
           <Link
@@ -517,7 +524,8 @@ const Sidebar = () => {
           onClick={() => setIsOpen(false)}
            >
           <FileCheck size={20} />   {/* ✅ KYC icon */}
-          Add Account
+         {/* {t("addAccount")}  */}
+Add Account
           </Link>
 
           {/* <Link
@@ -532,7 +540,7 @@ const Sidebar = () => {
 
         {/* Footer (Fixed at Bottom) */}
         <div className="p-4 border-t text-xs text-gray-500 text-center">
-          © 2025 MealX. All rights reserved.
+          © 2025 MealEX. All rights reserved.
         </div>
       </div>
     </>

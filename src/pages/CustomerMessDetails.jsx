@@ -43,9 +43,6 @@ const ExploreMessDetails = () => {
       navigate('/customer');
       return;
     }
-
-  
-
     const loadSubscribedStatus = async () => {
   const subscribedIds = await fetchSubscribedMessIds();
   const isSubscribed = subscribedIds.includes(mess.messId);

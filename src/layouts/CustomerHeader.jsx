@@ -104,15 +104,21 @@ import { apiGet } from '../services/api';
 import bellIcon from '../assets/bell-icon.png';
 import customerAvatar from '../assets/customer.png';
 import storage from '../utils/storage';
+import { useTranslation } from "react-i18next";
+import { FaGlobe } from "react-icons/fa";
+// import LanguageModal from "../components/LanguageModal";
 
 const CustomerHeader = () => {
   const navigate = useNavigate();
+    // const { t } = useTranslation();
   const [customerName, setCustomerName] = useState('Customer');
   const [messName, setMessName] = useState('Subscribed Mess');
   const [profileImage, setProfileImage] = useState('');
 
   // ✅ NEW STATE: unread notification
   const [hasUnread, setHasUnread] = useState(false);
+  const [langModalVisible, setLangModalVisible] = useState(false);
+
 
   useEffect(() => {
     const storedHeader = storage.getItem('customerHeaderData');
@@ -199,9 +205,16 @@ const CustomerHeader = () => {
 
       {/* Right Section */}
       <div className="flex items-center gap-4">
-
+ {/* <div className="relative">
+  <FaGlobe
+    className="text-3xl text-gray-700 cursor-pointer"
+    onClick={() => setLangModalVisible(true)}
+  />
+</div> */}
         {/* ✅ Bell wrapper for dot */}
         <div className="relative">
+         
+
           <img
             src={bellIcon}
             alt="Notifications"
@@ -234,6 +247,11 @@ const CustomerHeader = () => {
           onClick={handleAvatarClick}
         />
       </div>
+      {/* <LanguageModal 
+  visible={langModalVisible}
+  onClose={() => setLangModalVisible(false)}
+/> */}
+
     </div>
   );
 };

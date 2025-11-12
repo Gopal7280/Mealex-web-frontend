@@ -1,6 +1,3 @@
-
-
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../layouts/Navbar';
@@ -162,3 +159,173 @@ const errorMessage =
 };
 
 export default AddCustomer;
+
+// import React, { useState } from 'react'
+// import { useNavigate } from 'react-router-dom'
+// import Navbar from '../layouts/Navbar'
+// import OwnerHeader from './ownerHeader'
+// import { apiPost } from '../services/api'
+// import storage from '../utils/storage'
+// import { useTranslation } from 'react-i18next'
+
+// const AddCustomer = () => {
+//   const [identifier, setIdentifier] = useState('')
+//   const [otp, setOtp] = useState('')
+//   const [otpSent, setOtpSent] = useState(false)
+//   const [requestId, setRequestId] = useState('')
+//   const [loading, setLoading] = useState(false)
+//   const [msg, setMsg] = useState(null)
+//   const { t } = useTranslation()
+
+//   const messId = storage.getItem('messId')
+//   const navigate = useNavigate()
+
+//   const handleSendOtp = async e => {
+//     e.preventDefault()
+//     if (!identifier.trim()) {
+//       setMsg({ type: 'error', text: t('identifierRequired') })
+//       return
+//     }
+//     if (!messId) {
+//       setMsg({ type: 'error', text: t('messIdNotFound') })
+//       return
+//     }
+//     setLoading(true)
+//     setMsg(null)
+//     try {
+//       const res = await apiPost('/owner/customer/add', { identifier, messId })
+//       if (res.success) {
+//         setMsg({ type: 'success', text: res.message })
+//         setRequestId(res.requestId)
+//         setOtpSent(true)
+//       } else {
+//         setMsg({
+//           type: 'error',
+//           text: res.message.message || t('failedToSendOtp'),
+//         })
+//       }
+//     } catch (err) {
+//       const errorMessage =
+//         err.response?.data?.message ||
+//         err.response?.message ||
+//         err.message ||
+//         t('serverError')
+//       setMsg({ type: 'error', text: errorMessage })
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   const handleVerifyOtp = async e => {
+//     e.preventDefault()
+//     if (otp.length !== 6) {
+//       setMsg({ type: 'error', text: t('enterValidOtp') })
+//       return
+//     }
+
+//     setLoading(true)
+//     setMsg(null)
+
+//     try {
+//       const payload = {
+//         requestId,
+//         otp,
+//         messId,
+//         identifier,
+//         identifierType: identifier.includes('@') ? 'email' : 'phone',
+//         context: 'add-customer',
+//       }
+
+//       const res = await apiPost('/owner/customer/verify', payload)
+//       if (res.success) {
+//         setMsg({
+//           type: 'success',
+//           text: res.message || t('customerVerified'),
+//         })
+//         setOtpSent(false)
+//         setIdentifier('')
+//         setOtp('')
+//         navigate('/customers')
+//       } else {
+//         setMsg({ type: 'error', text: res.message || t('invalidOtp') })
+//       }
+//     } catch (err) {
+//       const errorMessage =
+//         err.response?.data?.message ||
+//         err.response?.message ||
+//         err.message ||
+//         t('somethingWentWrong')
+//       setMsg({ type: 'error', text: errorMessage })
+//     } finally {
+//       setLoading(false)
+//     }
+//   }
+
+//   return (
+//     <div className="flex h-screen">
+//       <Navbar />
+//       <div className="flex-1 md:p-4 pt-16 py-4 px-4 bg-gray-50 overflow-y-auto">
+//         <OwnerHeader />
+
+//         <div className="max-w-md mx-auto bg-white rounded shadow p-6">
+//           <h2 className="text-xl font-semibold mb-4">{t('addCustomer')}</h2>
+
+//           {msg && (
+//             <div
+//               className={`p-2 mb-4 rounded text-sm ${
+//                 msg.type === 'success'
+//                   ? 'bg-green-100 text-green-700'
+//                   : 'bg-red-100 text-red-700'
+//               }`}
+//             >
+//               {msg.text}
+//             </div>
+//           )}
+
+//           {!otpSent ? (
+//             <form onSubmit={handleSendOtp}>
+//               <label className="block text-gray-700 mb-2">
+//                 {t('customerEmailPhone')}
+//               </label>
+//               <input
+//                 type="text"
+//                 value={identifier}
+//                 onChange={e => setIdentifier(e.target.value)}
+//                 placeholder={t('enterEmailPhone')}
+//                 className="w-full border px-3 py-2 rounded mb-4 focus:outline-none focus:ring focus:border-orange-300"
+//               />
+//               <button
+//                 type="submit"
+//                 disabled={loading}
+//                 className="w-full bg-orange-500 cursor-pointer hover:bg-orange-600 text-white py-2 rounded transition"
+//               >
+//                 {loading ? t('sendingOtp') : t('sendOtp')}
+//               </button>
+//             </form>
+//           ) : (
+//             <form onSubmit={handleVerifyOtp}>
+//               <label className="block text-gray-700 mb-2">{t('enterOtp')}</label>
+//               <input
+//                 type="text"
+//                 value={otp}
+//                 onChange={e => setOtp(e.target.value)}
+//                 placeholder={t('enter6DigitOtp')}
+//                 maxLength={6}
+//                 className="w-full border px-3 py-2 rounded mb-4 focus:outline-none focus:ring focus:border-orange-300"
+//               />
+//               <button
+//                 type="submit"
+//                 disabled={loading}
+//                 className="w-full bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 rounded transition"
+//               >
+//                 {loading ? t('verifying') : t('verifyOtp')}
+//               </button>
+//             </form>
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default AddCustomer;

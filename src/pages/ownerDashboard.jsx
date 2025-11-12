@@ -6,9 +6,12 @@ import OwnerHeader from './ownerHeader';
 import cubeIcon from '../assets/cube.png';
 import storage from '../utils/storage';
 import { apiGet } from '../services/api';
+// import { useTranslation } from "react-i18next";
 import { connectSocket, getSocket, onIncomingOrder, onOrderResponse, onOrderCancelByCustomer } from '../config/socket';
 
 const OwnerDashboard = () => {
+    // const { t } = useTranslation();
+
   const [orders, setOrders] = useState([]);
   const [activeFilter, setActiveFilter] = useState("all");  // 🔹 filter state
   const location = useLocation();
@@ -22,6 +25,15 @@ const OwnerDashboard = () => {
     { key: "rejected", label: 'Rejected Requests', value: orders.filter(o => o.orderStatus === 'rejected').length, textColor: 'text-red-600', borderColor: 'border-[#C50000]', bgColor: 'bg-[#C50000]' },
     { key: "cancelled", label: 'Cancelled Requests', value: orders.filter(o => o.orderStatus === 'cancelled').length, textColor: 'text-purple-800', borderColor: 'border-purple-800', bgColor: 'bg-purple-800' }, // 🔹 New Cancelled
   ];
+
+//   const summaryData = [
+//   { key: "all", label: t("allRequests"), value: orders.length, textColor: 'text-gray-600', borderColor: 'border-[#5B5B5B]', bgColor: 'bg-[#5B5B5B]' },
+//   { key: "accepted", label: t("acceptedRequests"), value: orders.filter(o => o.orderStatus === 'accepted').length, textColor: 'text-green-600', borderColor: 'border-[#075E32]', bgColor: 'bg-[#075E32]' },
+//   { key: "pending", label: t("pendingRequests"), value: orders.filter(o => o.orderStatus === 'pending').length, textColor: 'text-yellow-600', borderColor: 'border-yellow-400', bgColor: 'bg-[#FBBC05]' },
+//   { key: "rejected", label: t("rejectedRequests"), value: orders.filter(o => o.orderStatus === 'rejected').length, textColor: 'text-red-600', borderColor: 'border-[#C50000]', bgColor: 'bg-[#C50000]' },
+//   { key: "cancelled", label: t("cancelledRequests"), value: orders.filter(o => o.orderStatus === 'cancelled').length, textColor: 'text-purple-800', borderColor: 'border-purple-800', bgColor: 'bg-purple-800' },
+// ];
+
 
   useEffect(() => {
     const token = storage.getItem('token');
@@ -268,11 +280,7 @@ const OwnerDashboard = () => {
     </div>
   )}
 </div>
-
-
-
-
-      </main>
+   </main>
     </div>
   );
 };
