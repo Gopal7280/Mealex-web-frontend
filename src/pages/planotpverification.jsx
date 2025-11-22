@@ -205,38 +205,80 @@ const PlanOtpVerification = () => {
     }
   }, [timer]);
 
-  const verifyAndSubmit = async (fullOtp) => {
-    if (!/^\d{6}$/.test(fullOtp)) {
-      setError('Please enter all 6 digits');
-      return;
+  // const verifyAndSubmit = async (fullOtp) => {
+  //   if (!/^\d{6}$/.test(fullOtp)) {
+  //     setError('Please enter all 6 digits');
+  //     return;
+  //   }
+
+  //   setError('');
+  //   setLoading(true);
+
+  //   try {
+  //     const res = await apiPost('/owner/mess/plan/issue/verify', {
+  //       otp: fullOtp,
+  //       verificationToken: verificationData?.verificationToken,
+  //       requestId: verificationData?.requestId,
+  //       context: verificationData?.context,
+  //       identifier: verificationData?.identifier,
+  //       identifierType: verificationData?.identifierType,
+  //     });
+
+  //     if (res.success) {
+  //       toast.success('🎉 Plan issued successfully!');
+  //       storage.removeItem('planIssueResponse');
+  //       navigate('/customer-profile/plans');
+  //     } else {
+  //       setError('Invalid OTP');
+  //     }
+  //   } catch (err) {
+  //     setError('Verification failed. Please try again.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+const verifyAndSubmit = async (fullOtp) => {
+  if (!/^\d{6}$/.test(fullOtp)) {
+    setError('Please enter all 6 digits');
+    return;
+  }
+
+  setError('');
+  setLoading(true);
+
+  try {
+    const res = await apiPost('/owner/mess/plan/issue/verify', {
+      otp: fullOtp,
+      verificationToken: verificationData?.verificationToken,
+      requestId: verificationData?.requestId,
+      context: verificationData?.context,
+      identifier: verificationData?.identifier,
+      identifierType: verificationData?.identifierType,
+    });
+
+    if (res?.success) {
+      toast.success('🎉 Plan issued successfully!');
+      storage.removeItem('planIssueResponse');
+      navigate('/customer-profile/plans');
+    } else {
+      // 🔥 Backend gives correct error message here
+      setError(res?.message || 'Invalid OTP');
     }
+  } catch (err) {
 
-    setError('');
-    setLoading(true);
+    const backendMessage =
+      err?.response?.data?.message || // actual backend error
+      err?.response?.data?.error ||
+      'Verification failed. Please try again.';
 
-    try {
-      const res = await apiPost('/owner/mess/plan/issue/verify', {
-        otp: fullOtp,
-        verificationToken: verificationData?.verificationToken,
-        requestId: verificationData?.requestId,
-        context: verificationData?.context,
-        identifier: verificationData?.identifier,
-        identifierType: verificationData?.identifierType,
-      });
-
-      if (res.success) {
-        toast.success('🎉 Plan issued successfully!');
-        storage.removeItem('planIssueResponse');
-        navigate('/customer-profile/plans');
-      } else {
-        setError('Invalid OTP');
-      }
-    } catch (err) {
-      setError('Verification failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    // 🔥 NOW backend message will show:
+    // "Invalid or expired OTP."
+    setError(backendMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleSubmit = async () => {
     const fullOtp = otp.join('');

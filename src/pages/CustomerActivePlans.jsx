@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { AiOutlineBarcode } from "react-icons/ai";
 import storage from "../utils/storage";
 
-const CustomerActivePlans = () => {
+const CustomerActivePlans = () => { 
   const [activePlans, setActivePlans] = useState([]);
   const [expiredPlans, setExpiredPlans] = useState([]);
   const [completedPlans, setCompletedPlans] = useState([]);
@@ -32,12 +32,27 @@ const CustomerActivePlans = () => {
     }
   };
 
-  const handleUseTokens = (customerPlanId, messId, services) => {
-    storage.setItem("customerPlanId", customerPlanId);
-    storage.setItem("messId", messId);
-    storage.setItem("messServices", JSON.stringify(services));
-    navigate("/using-plans");
-  };
+  // const handleUseTokens = (customerPlanId, messId, services) => {
+  //   storage.setItem("customerPlanId", customerPlanId);
+  //   storage.setItem("messId", messId);
+  //   storage.setItem("messServices", JSON.stringify(services));
+  //   navigate("/using-plans");
+  // };
+
+  const handleUseTokens = (customerPlanId, messId, services, charges) => {
+  storage.setItem("customerPlanId", customerPlanId);
+  storage.setItem("messId", messId);
+
+  // Save charges + services in state while navigating
+  navigate("/using-plans", {
+    state: {
+      services: services,
+      dineCharge: charges.dineCharge,
+      takeAwayCharge: charges.takeAwayCharge,
+      deliveryCharge: charges.deliveryCharge
+    }
+  });
+};
 
   const PlanCard = ({ plan, disableUseTokens }) => (
     <div className={`relative bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg ${disableUseTokens ? "opacity-50 pointer-events-none" : ""}`}>
@@ -110,7 +125,18 @@ const CustomerActivePlans = () => {
         {!disableUseTokens && (
           <div className="mt-4">
             <button
-              onClick={() => handleUseTokens(plan.customerPlanId, plan.messId, plan.MessProfile?.services || [])}
+onClick={() =>
+  handleUseTokens(
+    plan.customerPlanId,
+    plan.messId,
+    plan.MessProfile?.services || [],
+    {
+      dineCharge: plan.MessProfile?.dineCharge,
+      takeAwayCharge: plan.MessProfile?.takeAwayCharge,
+      deliveryCharge: plan.MessProfile?.deliveryCharge
+    }
+  )
+}
               className="flex items-center gap-1 px-3 py-2 text-xs text-white bg-orange-500 rounded-full hover:bg-orange-700 cursor-pointer transition"
             >
               <AiOutlineBarcode className="w-3 h-3" />
@@ -201,7 +227,6 @@ const CustomerActivePlans = () => {
     </div>
   );
 };
-
 export default CustomerActivePlans;
 
 

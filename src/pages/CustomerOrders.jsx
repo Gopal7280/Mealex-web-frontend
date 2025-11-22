@@ -273,20 +273,23 @@ const CustomerOrders = () => {
                   </div>
 
                   <div className="mt-2 text-sm text-gray-700 p-1 break-words">
-                    {/* <span className="inline-block border font-poppins border-green-500 text-green-600 font-bold px-2 py-0.5 rounded mr-2 text-sm">
-                      {order.orderType}
-                    </span> */}
+               
                     <span className="inline-block border font-poppins border-green-500 text-green-600 font-bold px-2 py-0.5 rounded mr-2 text-sm">
   {order.orderType?.toLowerCase() === 'dine' ? 'Dine-In' : order.orderType}
 </span>
 
                     {order.deliveryAddress}
+
+                     {Number(order.charge) > 0 && (
+    <span className="inline-block border font-poppins border-orange-500 text-orange-600 font-bold px-2 py-0.5 rounded mr-2 text-sm">
+      Extra Charge: ₹{order.charge}
+    </span>
+  )}
                   </div>
                 </div>
               </div>
             ))
           )}
-
           {hasMore && (
             <div className="flex justify-between mt-4">
               <button disabled={page===1} className="px-4 py-1 border rounded" onClick={()=>setPage(page-1)}>Previous</button>

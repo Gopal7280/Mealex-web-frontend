@@ -453,7 +453,7 @@ const UseTokens = () => {
           <div className="bg-white p-6 rounded-xl w-[90%] max-w-md shadow-lg">
             <h3 className="text-lg font-semibold mb-4 text-center">Select Order Type</h3>
 
-            <div className="flex gap-3 justify-center mb-4">
+            {/* <div className="flex gap-3 justify-center mb-4">
               {services.length > 0 ? (
                 services.map(type => (
                   <button
@@ -467,7 +467,31 @@ const UseTokens = () => {
               ) : (
                 <p className="text-gray-500 text-sm">No services available</p>
               )}
-            </div>
+            </div> */}
+            <div className="flex gap-3 justify-center mb-4">
+  {services.length > 0 ? (
+    services.map(type => {
+      const displayName =
+        type.toLowerCase() === 'dine' ? 'Dine-In' : type.charAt(0).toUpperCase() + type.slice(1);
+      return (
+        <button
+          key={type}
+          onClick={() => setOrderType(type)}
+          className={`px-4 py-2 rounded-full border transition-all duration-200 ${
+            orderType === type
+              ? 'bg-orange-500 text-white scale-105'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          {displayName}
+        </button>
+      );
+    })
+  ) : (
+    <p className="text-gray-500 text-sm">No services available</p>
+  )}
+</div>
+
 
             {orderType === 'delivery' && (
               <input
@@ -487,7 +511,7 @@ const UseTokens = () => {
                 Cancel
               </button>
 
-              <button
+              {/* <button
                 onClick={async () => {
                   if (!orderType) return alert('Please select an order type');
                   if (orderType === 'delivery' && !address.trim()) return alert('Please enter address');
@@ -496,7 +520,25 @@ const UseTokens = () => {
                 }}
                 disabled={isSubmitting}
                 className="px-4 py-2 bg-orange-500 cursor-pointer text-white rounded hover:bg-orange-600 disabled:opacity-50 flex items-center gap-2"
-              >
+              > */}
+              <button
+  onClick={async () => {
+    if (!orderType) return;
+    if (orderType === 'delivery' && !address.trim()) {
+      toast.error('Please enter address');
+      return;
+    }
+    await handleUsePlan();
+    setShowModal(false);
+  }}
+  disabled={!orderType || isSubmitting}
+  className={`px-4 py-2 rounded flex items-center gap-2 text-white transition-all duration-200 ${
+    !orderType || isSubmitting
+      ? 'bg-gray-300 cursor-not-allowed'
+      : 'bg-orange-500 hover:bg-orange-600 cursor-pointer'
+  }`}
+>
+
                 {isSubmitting ? (
                   <>
                     <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></span>

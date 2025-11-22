@@ -1376,7 +1376,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiGet, apiPost } from "../services/api";
 import Navbar from "../layouts/Navbar";
-import OwnerHeader from "../layouts/CustomerHeader";
+import OwnerHeader from "./ownerHeader";
 import { toast } from "react-hot-toast";
 import { ArrowLeft } from "lucide-react";
 import storage from "../utils/storage";

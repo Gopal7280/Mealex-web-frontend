@@ -24,6 +24,15 @@ const EditPlan = () => {
     imageUrl: plan?.imageUrl || '',
   });
 
+  const isFormValid =
+  formData.name.trim() !== "" &&
+  formData.menu.trim() !== "" &&
+  formData.durationDays &&
+  formData.totalTokens &&
+  formData.price &&
+  formData.imageUrl;
+
+
   // 🧩 Handle input field changes
   const handleChange = (e) => {
     setFormData((prev) => ({
@@ -77,10 +86,31 @@ const EditPlan = () => {
       const res = await apiPost(`/owner/mess/plan/update/${plan._id}`, payload);
       toast.success('Plan updated successfully!');
       navigate('/plans');
-    } catch (error) {
-      setLoading(false);
-      toast.error('Failed to update plan. Please try again.');
-    }
+    } 
+    // catch (error) {
+    //   setLoading(false);
+    //   toast.error('Failed to update plan. Please try again.');
+    // }
+    catch (error) {
+  setLoading(false);
+
+  const backendMsg = error?.response?.data?.message;
+  const backendErrors = error?.response?.data?.errors;
+
+  if (backendErrors && backendErrors.length > 0) {
+    // show first validation error from array
+    toast.error(backendErrors[0].message);
+    return;
+  }
+
+  if (backendMsg) {
+    toast.error(backendMsg);
+    return;
+  }
+
+  toast.error("Something went wrong. Please try again.");
+}
+
   };
 
   return (
@@ -209,7 +239,7 @@ const EditPlan = () => {
 
         {/* --- Submit Button --- */}
         <div className="mt-10">
-          <button
+          {/* <button
             type="submit"
             onClick={handleSubmit}
             disabled={loading}
@@ -228,7 +258,28 @@ const EditPlan = () => {
             ) : (
               'Save Changes'
             )}
-          </button>
+          </button> */}
+          <button
+  type="submit"
+  onClick={handleSubmit}
+  disabled={loading || !isFormValid}
+  className={`w-full font-semibold py-3 rounded-xl transition 
+    ${
+      loading || !isFormValid
+        ? "bg-gray-400 text-white cursor-not-allowed"
+        : "bg-orange-500 text-white cursor-pointer hover:bg-green-900"
+    }`}
+>
+  {loading ? (
+    <div className="flex items-center justify-center gap-2">
+      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+      <span>Editing Plan...</span>
+    </div>
+  ) : (
+    'Save Changes'
+  )}
+</button>
+
         </div>
       </div>
     </div>

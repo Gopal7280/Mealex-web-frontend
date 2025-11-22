@@ -213,6 +213,14 @@ const handleRegister = async e => {
     setErrorMsg('Please fill all fields correctly.');
     return;
   }
+  // ✅ Phone number validation (if not an email)
+if (!identifier.includes('@')) {
+  if (!/^\d{10}$/.test(identifier)) {
+    setErrorMsg('Please enter a valid 10-digit mobile number.');
+    return;
+  }
+}
+
   if (password !== confirmPassword) {
     setError('Passwords do not match!');
     return;

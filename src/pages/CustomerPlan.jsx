@@ -11,7 +11,7 @@ import toast from 'react-hot-toast';
 
 const CustomerPlans = () => {
   const selectedMess = JSON.parse(storage.getItem("selectedMess"));
-const kycStage = selectedMess?.kyc_stage || "0";
+  const kycStage = selectedMess?.kyc_stage || "0";
 
   const [activePlans, setActivePlans] = useState([]);
   const [showAvailablePlans, setShowAvailablePlans] = useState(false);
@@ -311,7 +311,10 @@ const handlePlanPurchase = async () => {
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 ">
     
  {activePlans.map((plan) => (
-  <ActivePlanCard key={plan._id} plan={plan} 
+  <ActivePlanCard 
+  key={plan._id} 
+  plan={plan} 
+  onPlanExtended={fetchActivePlans}
   />
 ))}
 
@@ -325,7 +328,6 @@ const handlePlanPurchase = async () => {
 >
   Purchase Plan
 </button>
-
     </div>
   </>
 ) : (

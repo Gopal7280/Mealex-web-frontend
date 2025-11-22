@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiPost } from '../services/api';
@@ -7,19 +6,30 @@ import toast from 'react-hot-toast';
 import { ArrowLeft } from 'lucide-react';
 import { MdPowerSettingsNew  } from "react-icons/md";
 
-
-const InputGroup = ({ label, children }) => (
-  <div className="space-y-2">
-    <label className="text-sm font-semibold text-black">{label}</label>
-    {children}
-  </div>
-);
+const InputGroup = ({ label, children }) => {
+  const parts = label.split("*");
+  return (
+    <div className="space-y-2">
+      <label className="text-sm font-semibold text-black">
+        {parts[0]}
+        {label.includes("*") && <span className="text-red-500">*</span>}
+      </label>
+      {children}
+    </div>
+  );
+};
 
 const MessDetailsForm = () => {
   const navigate = useNavigate();
   const [isDaysModalOpen, setIsDaysModalOpen] = useState(false);
   const [selectedDays, setSelectedDays] = useState([]);
   const [loading, setLoading] = useState(false);
+  // 🌍 Country / State / City related states
+const [countries, setCountries] = useState([]);
+const [states, setStates] = useState([]);
+const [selectedCountry, setSelectedCountry] = useState("India");
+const [selectedState, setSelectedState] = useState("");
+const [pincode, setPincode] = useState("");
 
   const validateFile = (file, allowedTypes) => {
     if (!file) return true;
@@ -46,6 +56,9 @@ const MessDetailsForm = () => {
     closeTime: '22:30',
     daysOpen: [],
     services: [],
+       dineCharge: "",
+  takeAwayCharge: "",
+  deliveryCharge: ""
   });
 
   const [logoFile, setLogoFile] = useState(null);
@@ -85,9 +98,29 @@ const MessDetailsForm = () => {
     setForm((prev) => ({ ...prev, [name]: lettersOnly }));
     return;
   }
-  
+  if (
+  name === "dineCharge" ||
+  name === "takeAwayCharge" ||
+  name === "deliveryCharge"
+) {
+  let num = value.trim() === "" ? "" : value;
+
+  if (!/^\d*$/.test(num)) return;
+
+  setForm((prev) => ({ 
+    ...prev, 
+    [name]: num 
+  }));
+
+  return;
+}
+
+
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+
+
+
 
   const validateFields = () => {
     const requiredFields = [
@@ -153,6 +186,29 @@ const MessDetailsForm = () => {
 
     return true;
   };
+// ✅ Simple silent check to see if form is ready for submission
+const isFormValid = () => {
+  const requiredFields = [
+    'messName',
+    'messType',
+    'email',
+    'contactNumber',
+    'address',
+    'city',
+    'state',
+    'pincode',
+    'openTime',
+    'closeTime',
+    'activationDocType',
+  ];
+
+  return requiredFields.every((f) => form[f]) &&
+         logoFile &&
+         activationDoc &&
+         form.services.length > 0 &&
+         form.daysOpen.length > 0 &&
+         /^\d{10}$/.test(form.contactNumber);
+};
 
   const [openTime, setOpenTime] = useState({ hour: '10', minute: '30', period: 'AM' });
   const [closeTime, setCloseTime] = useState({ hour: '10', minute: '30', period: 'PM' });
@@ -165,8 +221,61 @@ const MessDetailsForm = () => {
     return `${String(h).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
   };
 
-  // Update form values whenever openTime or closeTime change
-  useEffect(() => {
+
+useEffect(() => {
+  const fetchCountries = async () => {
+    try {
+      // const res = await fetch("https://restcountries.com/v3.1/all");
+const res = await fetch("https://restcountries.com/v3.1/all?fields=name");
+
+      const data = await res.json();
+
+      const countryList = data
+        .map((c) => c.name.common)
+        .filter(Boolean)
+        .sort((a, b) => a.localeCompare(b));
+
+      setCountries(countryList);
+      setSelectedCountry("India");
+      setForm((prev) => ({ ...prev, country: "India" }));
+    } catch (err) {
+      console.error("Error fetching countries:", err);
+    }
+  };
+
+  fetchCountries();
+}, []);
+
+// 🧭 Fetch states dynamically when country changes
+useEffect(() => {
+  const fetchStates = async () => {
+    if (!selectedCountry) return;
+
+    try {
+      const res = await fetch("https://countriesnow.space/api/v0.1/countries/states", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ country: selectedCountry }),
+      });
+
+      const data = await res.json();
+
+      if (data?.data?.states?.length) {
+        const allStates = data.data.states.map((s) => s.name).filter(Boolean);
+        setStates(allStates.sort());
+      } else {
+        setStates([]); // no states found
+      }
+    } catch (err) {
+      console.error("Error fetching states:", err);
+      setStates([]);
+    }
+  };
+
+  fetchStates();
+}, [selectedCountry]);
+
+useEffect(() => {
     setForm((prev) => ({
       ...prev,
       openTime: convertTo24Hour(openTime),
@@ -185,11 +294,6 @@ const MessDetailsForm = () => {
       return;
     }
 
-    if (name === "city") {
-    const lettersOnly = value.replace(/[^a-zA-Z\s]/g, ""); // removes numbers/special chars
-    setForm((prev) => ({ ...prev, [name]: lettersOnly }));
-    return;
-  }
     const formData = new FormData();
 
     const normalizeArray = (val) => {
@@ -206,15 +310,29 @@ const MessDetailsForm = () => {
     normalizeArray(form.services).forEach((service) => {
       formData.append('services[]', service);
     });
+// Dine charge
+if (form.services.includes("dine")) {
+  formData.append("dineCharge", form.dineCharge || "0");
+}
 
-    // other fields
+if (form.services.includes("take-away")) {
+  formData.append("takeAwayCharge", form.takeAwayCharge || "0");
+}
+
+if (form.services.includes("delivery")) {
+  formData.append("deliveryCharge", form.deliveryCharge || "0");
+}
+
+formData.append("country", form.country?.toLowerCase() || "");
+console.log(form.dineCharge, form.takeAwayCharge, form.deliveryCharge, form.country);
     for (const key in form) {
+        if (key === "country") continue; 
+        if (["dineCharge", "takeAwayCharge", "deliveryCharge"].includes(key)) continue;
+
       if (key !== 'daysOpen' && key !== 'services') {
         formData.append(key, form[key]);
       }
     }
-
-    // file validations
     if (!validateFile(logoFile, ['image/jpeg', 'image/png'])) {
       setLoading(false);
       return;
@@ -261,9 +379,6 @@ const MessDetailsForm = () => {
       setLoading(false);
     }
   };
-
-
-  
     const handleLogout = async () => {
     try {
       const userJwt = storage.getItem("token");
@@ -373,41 +488,127 @@ const MessDetailsForm = () => {
           />
         </InputGroup>
 
-        <InputGroup label="State*">
-          <input
-            type="text"
-            name="state"
-            placeholder="Enter State"
-            value={form.state}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
-            required
-          />
-        </InputGroup>
 
-        <InputGroup label="Pincode*">
-          <input
-            type="text"
-            name="pincode"
-            placeholder="Enter Pincode"
-            value={form.pincode}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
-            required
-          />
-        </InputGroup>
+{/* 🌍 Country */}
+<InputGroup label="Country*">
+  <select
+    name="country"
+    value={selectedCountry}
+    onChange={(e) => {
+      const country = e.target.value;
+      setSelectedCountry(country);
+      setForm((prev) => ({
+        ...prev,
+        country,
+        state: "",
+        city: "",
+      }));
+      if (country !== "India") setStates([]);
+    }}
+    className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl cursor-pointer"
+    required
+  >
+    <option value="">Select Country</option>
+    <option value="India">India</option>
+    {countries
+      .filter((c) => c !== "India")
+      .map((c) => (
+        <option key={c} value={c}>
+          {c}
+        </option>
+      ))}
+  </select>
+</InputGroup>
 
-        <InputGroup label="City*">
-          <input
-            type="text"
-            name="city"
-            placeholder="Enter City"
-            value={form.city}
-            onChange={handleChange}
-            className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
-            required
-          />
-        </InputGroup>
+{/* 🏙️ State */}
+<InputGroup label="State*">
+  {selectedCountry === "India" ? (
+    <select
+      name="state"
+      value={selectedState}
+      onChange={(e) => {
+        const state = e.target.value;
+        setSelectedState(state);
+        setForm((prev) => ({ ...prev, state }));
+      }}
+      className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl cursor-pointer"
+      required
+    >
+      <option value="">Select State</option>
+      {states.map((s) => (
+        <option key={s} value={s}>
+          {s}
+        </option>
+      ))}
+    </select>
+  ) : (
+    <input
+      type="text"
+      name="state"
+      value={form.state || ""}
+      onChange={(e) =>
+        setForm((prev) => ({ ...prev, state: e.target.value }))
+      }
+      className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
+      placeholder="Enter State"
+      required
+    />
+  )}
+</InputGroup>
+
+{/* 📮 Pincode */}
+<InputGroup label="Pincode*">
+  <input
+    type="text"
+    name="pincode"
+    value={pincode}
+    maxLength={6}
+    onChange={async (e) => {
+      const value = e.target.value.replace(/\D/g, "");
+      setPincode(value);
+      setForm((prev) => ({ ...prev, pincode: value }));
+
+      if (selectedCountry === "India" && value.length === 6) {
+        try {
+          const res = await fetch(`https://api.postalpincode.in/pincode/${value}`);
+          const data = await res.json();
+          if (data[0]?.Status === "Success") {
+            const details = data[0].PostOffice[0];
+            setForm((prev) => ({
+              ...prev,
+              city: details.District,
+              state: details.State,
+              country: "India",
+            }));
+            setSelectedState(details.State);
+          }
+        } catch (err) {
+          console.error("Error fetching pincode details:", err);
+        }
+      }
+    }}
+    className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
+    placeholder="Enter Pincode"
+    required
+  />
+</InputGroup>
+
+<InputGroup label="City*">
+  <input
+    type="text"
+    name="city"
+    value={form.city || ""}
+    onChange={(e) => {
+      const lettersOnly = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+      setForm((prev) => ({ ...prev, city: lettersOnly }));
+    }}
+    className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
+    placeholder="Enter City"
+    required
+  />
+</InputGroup>
+
+
 
         <InputGroup label="Address*">
           <input
@@ -517,7 +718,44 @@ const MessDetailsForm = () => {
           </div>
         </InputGroup>
 
-        {/* Opening time, Closing time, Days open — keep heights/padding consistent to align UI */}
+  {form.services.includes("dine") && (
+    <InputGroup label="Dine-in Charge">
+      <input
+        type="text"
+        name="dineCharge"
+        placeholder="Enter Charge"
+        value={form.dineCharge}
+        onChange={handleChange}
+        className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
+      />
+    </InputGroup>
+  )}
+
+  {form.services.includes("take-away") && (
+    <InputGroup label="Take Away Charge">
+      <input
+        type="text"
+        name="takeAwayCharge"
+        placeholder="Enter Charge"
+        value={form.takeAwayCharge}
+        onChange={handleChange}
+        className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
+      />
+    </InputGroup>
+  )}
+
+  {form.services.includes("delivery") && (
+    <InputGroup label="Delivery Charge">
+      <input
+        type="text"
+        name="deliveryCharge"
+        placeholder="Enter Charge"
+        value={form.deliveryCharge}
+        onChange={handleChange}
+        className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
+      />
+    </InputGroup>
+  )}
         <InputGroup label="Opening Time*">
           <div className="flex gap-2 items-center cursor-pointer h-full">
             <input
@@ -710,24 +948,25 @@ const MessDetailsForm = () => {
           </div>
         </div>
       )}
-
       <div className="flex flex-col items-center">
-        <button
-          type="submit"
-          disabled={loading}
-          className={`w-full sm:w-1/2 md:w-1/3 font-semibold py-3 rounded-xl transition ${
-            loading ? 'bg-gray-400 text-white cursor-not-allowed' : 'bg-orange-500 text-white hover:bg-orange-600'
-          }`}
-        >
-          {loading ? (
-            <div className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
-              <span>Submitting...</span>
-            </div>
-          ) : (
-            'Submit Details'
-          )}
-        </button>
+     <button
+  type="submit"
+  disabled={loading || !isFormValid()}
+  className={`w-full sm:w-1/2 md:w-1/3 font-semibold py-3 rounded-xl transition ${
+    loading || !isFormValid()
+      ? 'bg-gray-400 text-white cursor-not-allowed'
+      : 'bg-orange-500 text-white hover:bg-orange-600 cursor-pointer'
+  }`}
+>
+  {loading ? (
+    <div className="flex items-center justify-center gap-2">
+      <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+      <span>Submitting...</span>
+    </div>
+  ) : (
+    'Submit Details'
+  )}
+</button>
         <p className="mt-2 text-sm text-orange-600">Fields marked with * are mandatory</p>
       </div>
     </form>

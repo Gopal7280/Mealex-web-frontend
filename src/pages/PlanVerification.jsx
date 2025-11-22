@@ -428,15 +428,19 @@ const PlanVerification = () => {
         setError(res?.message || 'Verification failed, please retry.');
       }
     } catch (err) {
-      const msg = err.response?.data?.message?.toLowerCase() || '';
-      setOtp(Array(6).fill(''));
-      setResendEnabled(true);
-      setError(
-        msg.includes('expired')
-          ? 'Your code has expired — please request a new one.'
-          : 'Incorrect code — please try again.'
-      );
-    } finally {
+  setOtp(Array(6).fill(''));
+  setResendEnabled(true);
+
+  const backendMsg = err?.response?.data?.message;
+
+  if (backendMsg) {
+    setError(backendMsg);
+  } else {
+    setError("Verification failed. Please try again.");
+  }
+}
+
+    finally {
       setIsVerifying(false);
     }
   };

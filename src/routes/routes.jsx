@@ -207,6 +207,7 @@ import PurchasedPlans from '../pages/PurchasedPlans';
 import CustomerPlansRequests from '../pages/CustomerPlansRequests';
 import OwnerPaymentSetup from '../pages/OwnerPaymentSetup';
 import NotFoundPage from '../pages/NotFoundPage';
+import OrderHistory from '../pages/OrderHistory';
 
 function RouteComponent({setUserRole }) {
   const [auth, setAuth] = useState(false);
@@ -323,6 +324,11 @@ function RouteComponent({setUserRole }) {
       <Route path="/own/history/plans" element={
         <ProtectedRoute allowedRoles={['owner', 'both']}>
           <PlanHistory />
+        </ProtectedRoute>
+      } />
+         <Route path="/own/history/orders" element={
+        <ProtectedRoute allowedRoles={['owner', 'both']}>
+          <OrderHistory />
         </ProtectedRoute>
       } />
       <Route path="/own/purchased-plans" element={

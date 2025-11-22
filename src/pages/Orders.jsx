@@ -162,30 +162,6 @@ const handleRejectAll = () => {
 
 const [filterType, setFilterType] = useState("today");
 
-// const fetchPastOrders = async (pageNumber = 1, days = null) => {
-//   if (!messId) return;
-
-//   try {
-//     let url = `/owner/mess/${messId}/orders/past?page=${pageNumber}&limit=10`;
-//     if (days) url += `&days=${days}`;
-
-//     const res = await apiGet(url);
-//     if (res.success) {
-//       const data = res.data || [];
-//       setOrders(data);
-//       setPage(pageNumber);
-//       setTotalOrders(res.pagination?.total || data.length);
-
-//       if (data.length === 10) {
-//         setTotalPages(pageNumber + 1);
-//       } else {
-//         setTotalPages(pageNumber);
-//       }
-//     }
-//   } catch (err) {
-//   }
-// };
-
 const fetchPastOrders = async (pageNumber = 1, days = null) => {
   if (!messId) return;
 
@@ -501,29 +477,15 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
 
 
                   <span className="font-poppins font-medium text-sm text-[#393939]">{order.deliveryAddress}</span>
+                  {order.charge !== undefined && order.charge !== null && (
+    <span className="font-poppins font-semibold text-sm text-orange-600 ml-3">
+      Extra Charge: ₹{order.charge}
+    </span>
+  )}
                 </div>
               </div>
             </div>
           ))}
-{/* 
-          {showPastOrders && (
-            <div className="flex justify-between mt-4">
-              <button
-                className="bg-gray-200 cursor-pointer px-3 py-1 rounded disabled:opacity-50"
-                disabled={page <= 1}
-                onClick={() => fetchPastOrders(page - 1)}
-              >
-                Previous
-              </button>
-              <button
-                className="bg-gray-200 px-3 cursor-pointer py-1 rounded disabled:opacity-50"
-                disabled={page >= totalPages}
-                onClick={() => fetchPastOrders(page + 1)}
-              >
-                Next
-              </button>
-            </div>
-          )} */}
           {showPastOrders && (
   <div className="flex justify-between mt-4">
     <button
@@ -546,15 +508,11 @@ const fetchPastOrders = async (pageNumber = 1, days = null) => {
     </button>
   </div>
 )}
-
-
         </div>
     </div>
-
     </div>
   );
 };
-
 export default Orders;
 
 

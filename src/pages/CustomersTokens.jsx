@@ -9,8 +9,19 @@ import { Dialog } from '@headlessui/react';
 import { connectSocket, getSocket, onOrderResponse, onOrderUpdate } from '../config/socket';
 import CustomerHeader from '../layouts/CustomerHeader';
 import { toast } from 'react-hot-toast';
+import { useLocation } from "react-router-dom";
+
 
 const CustomerUseTokens = () => {
+const location = useLocation();
+const { dineCharge,
+   takeAwayCharge,
+    deliveryCharge,  
+    services = []
+ } = location.state || {};
+
+
+
   const navigate = useNavigate();
   const [planData, setPlanData] = useState(null);
   const [selectedCount, setSelectedCount] = useState(1);
@@ -49,17 +60,17 @@ const CustomerUseTokens = () => {
   };
 
 
-  const [services, setServices] = useState([]);
+  // const [services, setServices] = useState([]);
 
-useEffect(() => {
-  const savedServices = storage.getItem("messServices");
-  if (savedServices) {
-    try {
-      setServices(JSON.parse(savedServices));
-    } catch (e) {
-    }
-  }
-}, []);
+// useEffect(() => {
+//   const savedServices = storage.getItem("messServices");
+//   if (savedServices) {
+//     try {
+//       setServices(JSON.parse(savedServices));
+//     } catch (e) {
+//     }
+//   }
+// }, []);
 
 
   useEffect(() => {
@@ -256,6 +267,20 @@ const handleSubmitOrder = async () => {
         {service.charAt(0).toUpperCase() + service.slice(1)}
       </button>
     ))}
+  </div>
+)}
+{/* Show Service Charge */}
+{selectedService && (
+  <div className="bg-orange-50 border border-orange-200 rounded-lg p-3 mb-4 text-center shadow-sm">
+    <p className="text-sm font-semibold text-orange-700">
+      {selectedService === 'dine'
+        ? `Dine-in Charge: ₹${dineCharge}`
+        : selectedService === 'take-away'
+        ? `Take-Away Charge: ₹${takeAwayCharge}`
+        : selectedService === 'delivery'
+        ? `Delivery Charge: ₹${deliveryCharge}`
+        : ''}
+    </p>
   </div>
 )}
 

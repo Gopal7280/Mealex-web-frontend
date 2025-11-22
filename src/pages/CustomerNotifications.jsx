@@ -9,6 +9,8 @@ const CustomerNotifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [gotoPage, setGotoPage] = useState("");
   const limit = 10;
   const [hasMore, setHasMore] = useState(true);
   const [filter, setFilter] = useState('all'); // all, purchased, used, expiry
@@ -98,8 +100,19 @@ useEffect(() => {
     });
   }
 
+  // setNotifications(data);
+  //   const total = res.totalNotifications || 0;
+  // const totalPages = Math.ceil(total / limit);
+
+  // setHasMore((res.notifications || []).length === limit);
   setNotifications(data);
-  setHasMore((res.notifications || []).length === limit);
+
+// save total pages directly from API
+setTotalPages(res.totalPages || 1);
+
+// now calculate hasMore
+setHasMore(page < (res.totalPages || 1));
+
 } else {
   setNotifications([]);
   setHasMore(false);
@@ -167,42 +180,6 @@ useEffect(() => {
 </select>
 
         </div>
-
-        {/* Type Filter Buttons */}
-        {/* <div className="flex gap-3 mb-4">
-          <button
-            onClick={() => setFilter('purchased')}
-            className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === 'purchased' ? 'border-black font-semibold' : 'border-[#5B5B5B] cursor-pointer'
-            }`}
-          >
-            Purchased
-          </button>
-          <button
-            onClick={() => setFilter('used')}
-            className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === 'used' ? 'border-black font-semibold' : 'border-[#5B5B5B] cursor-pointer'
-            }`}
-          >
-            Used
-          </button>
-          <button
-            onClick={() => setFilter('expiry')}
-            className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === 'expiry' ? 'border-black font-semibold' : 'cursor-pointer border-[#5B5B5B]'
-            }`}
-          >
-            Expiry
-          </button>
-          <button
-            onClick={() => setFilter('all')}
-            className={`border text-sm px-3 py-1 rounded hover:bg-gray-100 ${
-              filter === 'all' ? 'border-black font-semibold' : 'cursor-pointer border-[#5B5B5B]'
-            }`}
-          >
-            All
-          </button>
-        </div> */}
         <div
   className="
     flex gap-3 mb-4 
@@ -296,7 +273,7 @@ useEffect(() => {
         </div>
 
         {/* Pagination Controls */}
-        <div className="flex justify-between mt-6">
+        {/* <div className="flex justify-between mt-6">
           <button
             onClick={() => setPage((prev) => prev - 1)}
             disabled={page === 1}
@@ -315,7 +292,69 @@ useEffect(() => {
           >
             Next
           </button>
-        </div>
+        </div> */}
+        {/* Pagination (Same as Owner Side) */}
+{hasMore || page > 1 ? (
+  <div className="flex flex-col items-center mt-6 gap-3">
+
+    {/* Prev / Next */}
+    <div className="flex gap-2">
+      <button
+        disabled={page === 1}
+        className="px-3 py-1 rounded cursor-pointer bg-gray-200 text-gray-600 disabled:opacity-50"
+        onClick={() => setPage((prev) => Math.max(prev - 1, 1))}
+      >
+        Prev
+      </button>
+
+      <span className="px-3 py-1 text-gray-700">
+  Page {page} of {totalPages}
+      </span>
+
+      <button
+        disabled={!hasMore}
+        className="px-3 py-1 rounded cursor-pointer bg-gray-200 text-gray-600 disabled:opacity-50"
+        onClick={() => setPage((prev) => prev + 1)}
+      >
+        Next
+      </button>
+    </div>
+
+    {/* Go To Page */}
+    <div className="flex gap-2 items-center">
+      <input
+        type="number"
+        min="1"
+        placeholder="Page no."
+        className="border px-3 py-1 rounded w-24 text-sm"
+        value={gotoPage}
+        onChange={(e) => setGotoPage(e.target.value)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") {
+            const pageNum = Number(gotoPage);
+            if (pageNum >= 1) {
+              setPage(pageNum);
+            }
+            setGotoPage("");
+          }
+        }}
+      />
+      <button
+        className="px-3 py-1 bg-orange-500 cursor-pointer text-white rounded text-sm"
+        onClick={() => {
+          const pageNum = Number(gotoPage);
+          if (pageNum >= 1) {
+            setPage(pageNum);
+          }
+          setGotoPage("");
+        }}
+      >
+        Go
+      </button>
+    </div>
+  </div>
+) : null}
+
       </div>
     </div>
   );

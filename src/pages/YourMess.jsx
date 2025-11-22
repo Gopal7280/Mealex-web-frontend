@@ -59,12 +59,30 @@ const CustomerPlansView = () => {
     setSelectedAvailablePlan(null);
   };
 
-  const handleUseTokens = (customerPlanId, messId, services) => {
-    storage.setItem('customerPlanId', customerPlanId);
-    storage.setItem('messId', messId);
-    storage.setItem('messServices', JSON.stringify(services || []));
-    navigate(`/using-plans`);
-  };
+  // const handleUseTokens = (customerPlanId, messId, services) => {
+  //   storage.setItem('customerPlanId', customerPlanId);
+  //   storage.setItem('messId', messId);
+  //   storage.setItem('messServices', JSON.stringify(services || []));
+  //   navigate(`/using-plans`);
+  // };
+  const handleUseTokens = (customerPlanId, messId, services, charges) => {
+  storage.setItem('customerPlanId', customerPlanId);
+  storage.setItem('messId', messId);
+
+  // Save services
+  // storage.setItem('messServices', JSON.stringify(services || []));
+
+  navigate(`/using-plans`, {
+    state: {
+      services,
+      dineCharge: charges.dineCharge,
+      takeAwayCharge: charges.takeAwayCharge,
+      deliveryCharge: charges.deliveryCharge
+    }
+  });
+};
+
+
 
   const handlePaymentSuccess = () => {
     if (selectedAvailablePlan?.messId) fetchPlans(selectedAvailablePlan.messId);
@@ -281,12 +299,25 @@ const formatTime12Hour = (time24) => {
       )}
     </div>                                </div>
                                 </div>
+                        
                                 <button
-                                  onClick={() => handleUseTokens(plan.customerPlanId, plan.messId, plan.MessProfile?.services || [])}
-                                  className="w-full border border-orange-500 mt-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-white  bg-orange-500 rounded-lg hover:bg-orange-700"
-                                >
-                                  <AiOutlineBarcode className="w-4 h-4" /> Use Tokens
-                                </button>
+  onClick={() =>
+    handleUseTokens(
+      plan.customerPlanId,
+      plan.messId,
+      plan.MessProfile?.services || [],
+      {
+        dineCharge: plan.MessProfile?.dineCharge,
+        takeAwayCharge: plan.MessProfile?.takeAwayCharge,
+        deliveryCharge: plan.MessProfile?.deliveryCharge
+      }
+    )
+  }
+  className="w-full border border-orange-500 mt-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-white bg-orange-500 rounded-lg hover:bg-orange-700"
+>
+  <AiOutlineBarcode className="w-4 h-4" /> Use Tokens
+</button>
+
                               </div>
                             ))}
                           </div>

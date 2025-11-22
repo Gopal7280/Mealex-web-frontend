@@ -1000,7 +1000,7 @@ const PlanHistory = () => {
               Transactions History
             </button>
             <button
-              onClick={() => navigate('/owner/history/plans')}
+              onClick={() => navigate('/own/history/plans')}
               className={`cursor-pointer capitalize text-md font-medium transition-opacity ${
                 currentTab === 'plans'
                   ? 'opacity-100 text-orange-600 border-b-2 border-orange-500'
@@ -1009,6 +1009,16 @@ const PlanHistory = () => {
             >
               Plan History
             </button>
+              <button 
+    onClick={() => navigate('/own/history/orders')}
+    className={`cursor-pointer capitalize text-md font-medium transition-opacity ${
+      currentTab === 'orders'
+        ? 'opacity-100 text-orange-600 border-b-2 border-orange-500'
+        : 'opacity-50 hover:opacity-80'
+    }`}
+  >
+    Order History
+  </button>
           </div>
 
           {/* Filters */}

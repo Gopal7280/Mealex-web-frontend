@@ -478,8 +478,20 @@ const OtpVerification = () => {
   const [resending, setResending] = useState(false); // ✅ for resend OTP
   const navigate = useNavigate();
   const location = useLocation();
+  const [pasting, setPasting] = useState(false);
   const foregroundListenerBound = useRef(false);
+  const [submitting, setSubmitting] = useState(false);
 
+// ✅ Redirect if already logged in or verified
+useEffect(() => {
+  const token = storage.getItem('token');
+  if (token) {
+    console.log('User already logged in, redirecting...');
+    navigate('/user-access', { replace: true });
+    console.log('Redirected to /user-access');
+  }
+}, [navigate]);
+ 
   const identifier = location.state?.identifier;
   const identifierType = location.state?.identifierType;
   const requestId = location.state?.requestId;
@@ -510,10 +522,86 @@ const OtpVerification = () => {
   };
 
   
+// const handleSubmit = async (otpArray) => {
+//   if (submitting || pasting) return; // ⛔ prevent duplicate API calls
+//       setSubmitting(true);
+
+//   const finalOtp = otpArray ? otpArray.join('') : otp.join('');
+//   if (finalOtp.length !== 6) {
+//     setError('Please enter a valid 6-digit OTP');
+//     return;
+//   }
+
+//   try {
+//     setLoading(true);
+//     setError('');
+//     const response = await apiPost('/register/otp', {
+//       identifier,
+//       identifierType,
+//       otp: finalOtp,
+//       requestId,
+//       context,
+//     });
+//   console.log('✅ OTP Response:', response);
+//     if (response.success) {
+//       const token = response.token;
+//       const identifier = response.identifier;
+//       const customerId = response.id;
+
+//       storage.removeItem('token');
+//       storage.removeItem('identifier');
+//       storage.setItem('identifier', identifier);
+//       storage.setItem('token', token);
+//       storage.setItem('customerId', customerId);
+
+//       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+//       await setupNotifications(token, foregroundListenerBound);
+//       toast.success('🎉 Account verified !');
+
+//       navigate('/user-access');
+//     } else {
+//       setError(response.message || 'OTP verification failed');
+//     }
+//   } catch (err) {
+//   const backendMsg = err.response?.data?.message;
+//   setError(backendMsg || 'OTP verification failed');
+// } finally {
+//   setLoading(false);
+//   setSubmitting(false);
+// }
+// };
+
+
+
+// const handlePaste = (e) => {
+//   e.preventDefault();
+//   const pasteData = e.clipboardData.getData('Text').trim();
+
+//   if (!/^\d{6}$/.test(pasteData)) return; // only accept 6 digits
+
+//   const newOtp = pasteData.split('');
+//   setOtp(newOtp);
+
+//   // ✅ Directly pass the pasted OTP to handleSubmit
+//   // setTimeout(() => {
+//   //   handleSubmit(newOtp);
+//   // }, 50);
+//   handleSubmit(newOtp);
+
+// };
+
+
+
+// ✅ Handle backspace to move to previous input
+
 const handleSubmit = async (otpArray) => {
+  if (submitting || pasting) return; // ⛔ prevent duplicate API calls
+  setSubmitting(true);
+
   const finalOtp = otpArray ? otpArray.join('') : otp.join('');
   if (finalOtp.length !== 6) {
     setError('Please enter a valid 6-digit OTP');
+    setSubmitting(false); // ✅ release lock if invalid
     return;
   }
 
@@ -527,6 +615,7 @@ const handleSubmit = async (otpArray) => {
       requestId,
       context,
     });
+    console.log('✅ OTP Response:', response);
 
     if (response.success) {
       const token = response.token;
@@ -548,32 +637,37 @@ const handleSubmit = async (otpArray) => {
       setError(response.message || 'OTP verification failed');
     }
   } catch (err) {
-    setError(err.response?.message || 'OTP verification failed');
+    const backendMsg = err.response?.data?.message;
+    setError(backendMsg || 'OTP verification failed');
   } finally {
     setLoading(false);
+    setSubmitting(false);
   }
 };
 
-
-
 const handlePaste = (e) => {
   e.preventDefault();
-  const pasteData = e.clipboardData.getData('Text').trim();
 
-  if (!/^\d{6}$/.test(pasteData)) return; // only accept 6 digits
+  if (pasting) return; // ⛔ Prevent double paste handling
+  setPasting(true);
+
+  const pasteData = e.clipboardData.getData('Text').trim();
+  if (!/^\d{6}$/.test(pasteData)) {
+    setPasting(false);
+    return;
+  }
 
   const newOtp = pasteData.split('');
   setOtp(newOtp);
 
-  // ✅ Directly pass the pasted OTP to handleSubmit
+  // Call handleSubmit only once after React updates are done
   setTimeout(() => {
     handleSubmit(newOtp);
-  }, 50);
+    setPasting(false);
+  }, 100);
 };
 
 
-
-// ✅ Handle backspace to move to previous input
 const handleKeyDown = (e, index) => {
   if (e.key === 'Backspace') {
     if (otp[index] === '') {
@@ -618,24 +712,8 @@ const handleKeyDown = (e, index) => {
         <p className="text-gray-400 mb-2 md:mb-6 text-sm md:text-base">
           Enter the 6-digit code sent to <span className="font-medium">{identifier}</span>
         </p>
-
-        {/* <div className="flex justify-between gap-2 mb-4">
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              id={`otp-${index}`}
-              type="text"
-              inputMode="numeric"
-              maxLength={1}
-              value={digit}
-              onChange={e => handleChange(index, e.target.value)}
-              className="w-10 h-12 border-2 border-orange-500 text-center rounded-lg text-lg focus:outline-none"
-            />
-          ))}
-        </div> */}
         <div 
   className="flex justify-between gap-2 mb-4"
-  onPaste={handlePaste} // ✅ ADD THIS
 >
   {otp.map((digit, index) => (
     <input
@@ -658,7 +736,7 @@ const handleKeyDown = (e, index) => {
 
         <button
   onClick={() => handleSubmit()} // ✅ wrap in arrow function
-          disabled={loading}
+  disabled={loading || submitting}
           className={`w-full py-3 rounded-lg transition ${
             loading
               ? 'bg-orange-300 cursor-not-allowed'

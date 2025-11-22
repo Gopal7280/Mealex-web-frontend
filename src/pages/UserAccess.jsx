@@ -56,7 +56,7 @@ const [role, setRole] = useState(storage.getItem('role') || '');
     const res = await apiPost('/user/communication', { identifier }, {
       headers: { Authorization: `Bearer ${token}` }
     });
-
+  console.log("OTP send response:", res);
     // ✅ agar direct token mila to OTP ki zaroorat nahi
     if (res.identifierToken) {
       if (type === 'email') {
@@ -90,38 +90,106 @@ const [role, setRole] = useState(storage.getItem('role') || '');
   }
 };
 
-  const verifyOtp = async () => {
-    const identifier = activeOtpType === 'email' ? email : phone;
-    const token = storage.getItem('token');
-    try {
-      const res = await apiPost('/user/verify/otp', {
+  // const verifyOtp = async () => {
+  //   const identifier = activeOtpType === 'email' ? email : phone;
+  //   const token = storage.getItem('token');
+  //   try {
+  //     const res = await apiPost('/user/verify/otp', {
+  //       identifier,
+  //       requestId: verificationRequestId,
+  //       otp,
+  //       context: otpContext || `${activeOtpType}-verify`,
+  //     }, {
+  //       headers: { Authorization: `Bearer ${token}` }
+  //     });
+  //  console.log("OTP verification response:", res);
+  //     if (res.success) {
+  //       const returnedToken = res.identifierToken;
+  //       if (activeOtpType === 'email') {
+  //         setIsEmailVerified(true);
+  //         setEmailToken(returnedToken);
+  //         setShowEmailOtpBox(false);
+  //       } else {
+  //         setIsPhoneVerified(true);
+  //         setPhoneToken(returnedToken);
+  //         setShowPhoneOtpBox(false);
+  //       }
+  //       toast.success(`${activeOtpType} verified successfully`);
+  //     } else {
+  //     toast.error(res.message || 'Invalid OTP');
+  //     }
+  //   } catch {
+  //   const errorMsg = err?.response?.data?.message || 'OTP verification failed';
+  //       toast.error(errorMsg);
+
+  //   }
+  // };
+
+const verifyOtp = async () => {
+  const identifier = activeOtpType === 'email' ? email : phone;
+  const token = storage.getItem('token');
+
+  try {
+    const res = await apiPost(
+      '/user/verify/otp',
+      {
         identifier,
         requestId: verificationRequestId,
         otp,
         context: otpContext || `${activeOtpType}-verify`,
-      }, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (res.success) {
-        const returnedToken = res.identifierToken;
-        if (activeOtpType === 'email') {
-          setIsEmailVerified(true);
-          setEmailToken(returnedToken);
-          setShowEmailOtpBox(false);
-        } else {
-          setIsPhoneVerified(true);
-          setPhoneToken(returnedToken);
-          setShowPhoneOtpBox(false);
-        }
-        toast.success(`${activeOtpType} verified successfully`);
-      } else {
-        toast.error('Invalid OTP');
+      },
+      {
+        headers: { Authorization: `Bearer ${token}` },
       }
-    } catch {
-      toast.error('OTP verification failed');
+    );
+
+    console.log("OTP verification response:", res);
+
+    if (res.success) {
+      const returnedToken = res.identifierToken;
+      if (activeOtpType === 'email') {
+        setIsEmailVerified(true);
+        setEmailToken(returnedToken);
+        setShowEmailOtpBox(false);
+      } else {
+        setIsPhoneVerified(true);
+        setPhoneToken(returnedToken);
+        setShowPhoneOtpBox(false);
+      }
+      toast.success(`${activeOtpType} verified successfully`);
+    } else {
+      // ✅ Show backend error message if available
+      toast.error(res.message || 'Invalid OTP');
     }
-  };
+  } catch (err) {
+    // ✅ Show more specific error message from backend
+    const errorMsg = err?.response?.data?.message || 'OTP verification failed';
+    toast.error(errorMsg);
+  }
+};
+
+
+  const Label = ({ text }) => {
+  const parts = text.split("*");
+  return (
+    <label className="block mb-2 text-sm font-medium">
+      {parts[0]}
+      {text.includes("*") && <span className="text-red-500">*</span>}
+    </label>
+  );
+};
+
+const validateFields = () => {
+  return (
+    firstName.trim() !== '' &&
+    lastName.trim() !== '' &&
+    city.trim() !== '' &&
+    email.trim() !== '' &&
+    pincode.trim() !== '' &&
+    role.trim() !== '' &&
+    (isEmailVerified || isPhoneVerified)
+  );
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -173,19 +241,22 @@ const [role, setRole] = useState(storage.getItem('role') || '');
       <span className="underline"> Create User Profile</span></div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block mb-2 text-sm  font-medium">First Name*</label>
+          {/* <label className="block mb-2 text-sm  font-medium">First Name*</label> */}
+<Label text="First Name*" />
+
           <input type="text" className="w-full px-4 py-3 bg-gray-100 border-2 rounded-xl" value={firstName} onChange={e => setFirstName(e.target.value)} placeholder='Enter First Name' required />
         </div>
 
         <div>
-          <label className="block mb-2 text-sm  font-medium">Last Name*</label>
+          {/* <label className="block mb-2 text-sm  font-medium">Last Name*</label> */}
+<Label text="Last Name*" />
           <input type="text" className="w-full px-4 py-3 bg-gray-100 border-2 rounded-xl" value={lastName} onChange={e => setLastName(e.target.value)} placeholder='Enter last Name' required />
         </div>
 
 
 <div>
-  <label className="block mb-2 text-sm font-medium">Phone*</label>
-
+  {/* <label className="block mb-2 text-sm font-medium">Phone*</label> */}
+<Label text="Phone*" />
   <div className="flex items-center w-full px-4 py-3 bg-gray-100 border-2 rounded-xl">
    
     <input
@@ -209,7 +280,7 @@ const [role, setRole] = useState(storage.getItem('role') || '');
       type="button"
       onClick={() => sendOtp('phone')}
       disabled={isPhoneVerified}
-      className={`ml-2 text-sm text-black ${isPhoneVerified ? 'cursor-not-allowed' : 'hover:text-orange-600'}`}
+      className={`ml-2 text-sm text-black ${isPhoneVerified ? 'cursor-not-allowed' : 'cursor-pointer hover:text-orange-600'}`}
     >
       {isPhoneVerified ? '✅' : 'Verify'}
     </button>
@@ -219,7 +290,7 @@ const [role, setRole] = useState(storage.getItem('role') || '');
     <div className="mt-2">
       <label className="block mb-2 text-sm font-medium">Enter Phone OTP</label>
       <input type="text" className="w-full px-4 py-2 border rounded mb-2" value={otp} onChange={(e) => setOtp(e.target.value)} />
-      <button type="button" onClick={verifyOtp} className="text-white px-3 py-1 rounded-xl hover:bg-green-600 bg-green-500">
+      <button type="button" onClick={verifyOtp} className="text-white px-3 py-1 cursor-pointer rounded-xl hover:bg-green-600 bg-green-500">
         Submit OTP
       </button>
     </div>
@@ -247,7 +318,7 @@ const [role, setRole] = useState(storage.getItem('role') || '');
             }, {
               headers: { Authorization: `Bearer ${token}` }
             });
-
+            console.log("Checkbox phone verification response:", res);
             const identifierToken = res.identifierToken;
             setPhone(previousIdentifier);
             setPhoneToken(identifierToken);
@@ -273,8 +344,8 @@ const [role, setRole] = useState(storage.getItem('role') || '');
 
         {/* Email */}
 <div>
-  <label className="block mb-2 text-sm font-medium">Email*</label>
-
+  {/* <label className="block mb-2 text-sm font-medium">Email*</label> */}
+<Label text="Email*" />
   <div className="flex items-center w-full px-4 py-3 bg-gray-100 border-2 rounded-xl">
    
     <input
@@ -298,7 +369,7 @@ const [role, setRole] = useState(storage.getItem('role') || '');
       type="button"
       onClick={() => sendOtp('email')}
       disabled={isEmailVerified}
-      className={`ml-2 text-sm text-black ${isEmailVerified ? 'cursor-not-allowed' : 'hover:text-orange-600'}`}
+      className={`ml-2 text-sm text-black ${isEmailVerified ? 'cursor-not-allowed' : 'cursor-pointer hover:text-orange-600'}`}
     >
       {isEmailVerified ? '✅' : 'Verify'}
     </button>
@@ -308,7 +379,7 @@ const [role, setRole] = useState(storage.getItem('role') || '');
     <div className="mt-2">
       <label className="block mb-2 text-sm font-medium">Enter Email OTP</label>
       <input type="text" className="w-full px-4 py-2 border rounded mb-2" value={otp} onChange={(e) => setOtp(e.target.value)} />
-      <button type="button" onClick={verifyOtp} className="text-white px-3 py-1 rounded-xl hover:bg-green-600 bg-green-500">
+      <button type="button" onClick={verifyOtp} className="text-white px-3 py-1  cursor-pointer rounded-xl hover:bg-green-600 bg-green-500">
         Submit OTP
       </button>
     </div>
@@ -336,7 +407,7 @@ const [role, setRole] = useState(storage.getItem('role') || '');
             }, {
               headers: { Authorization: `Bearer ${token}` }
             });
-
+            console.log("Checkbox email verification response:", res);
             const identifierToken = res.identifierToken;
             setEmail(previousIdentifier);
             setEmailToken(identifierToken);
@@ -362,33 +433,24 @@ const [role, setRole] = useState(storage.getItem('role') || '');
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
-          <label className="block mb-2 text-sm  font-medium">City*</label>
+          {/* <label className="block mb-2 text-sm  font-medium">City*</label> */}
+<Label text="City*" />
           <input type="text" className="w-full px-4 py-3 bg-gray-100 border-2  rounded-xl" value={city} onChange={e => setCity(e.target.value)} placeholder='Enter city ' required />
         </div>
 
         <div>
-          <label className="block mb-2 text-sm font-medium">Pincode*</label>
+          {/* <label className="block mb-2 text-sm font-medium">Pincode*</label> */}
+<Label text="Pincode*" />
           <input type="text" className="w-full px-4 py-3 bg-gray-100 border-2  rounded-xl" value={pincode} onChange={e => setPincode(e.target.value)}   placeholder='Enter Pincode' required />
         </div>
 
         <div>
-          <label className="block mb-2 text-sm  font-medium">Role*</label>
+          {/* <label className="block mb-2 text-sm  font-medium">Role*</label> */}
+<Label text="Role*" />
           <div className="flex justify-between gap-4 mb-6">
             {['Customer', 'Owner'].map((r) => (
               <div
                 key={r}
-//     onClick={() => {
-//     setRole(r);
-//     storage.setItem('role', r.toLowerCase());
-
-//   // ✅ extra logic for customerId
-//   if (r === 'Customer') {
-//     let customerId = storage.getItem('customerId');
-//     if (!customerId) {
-//       storage.setItem('customerId', customerId);
-//     }
-//   }
-// }}
 onClick={() => {
   setRole(r);
   const lowerRole = r.toLowerCase();
@@ -421,17 +483,19 @@ onClick={() => {
       </div>
 
       <div className="flex flex-col items-center">
-   <button
-          type="submit"
-          disabled={submitting}
-          className={`w-1/3 font-semibold py-3 rounded-xl transition text-white ${
-            submitting
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-orange-500 hover:bg-orange-600 cursor-pointer'
-          }`}
-        >
-          {submitting ? 'Submitting...' : 'Submit Details'}
-        </button>    
+  
+        <button
+  type="submit"
+  disabled={submitting || !validateFields()}
+  className={`w-1/3 font-semibold py-3 rounded-xl transition text-white ${
+    submitting || !validateFields()
+      ? 'bg-gray-400 cursor-not-allowed'
+      : 'bg-orange-500 hover:bg-orange-600 cursor-pointer'
+  }`}
+>
+  {submitting ? 'Submitting...' : 'Submit Details'}
+</button>
+
         <button className="mt-2 text-sm text-orange-500 underline hover:text-orange-600 transition">Email Or Phone Needs To Be verified Before Submission</button>
       </div>
     </form>

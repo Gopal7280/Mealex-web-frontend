@@ -341,29 +341,6 @@ const handleKeyDown = (e, index) => {
   if (e.key === 'ArrowRight' && index < otp.length - 1) inputsRef.current[index + 1]?.focus();
 };
 
-// const handlePaste = (e) => {
-//   e.preventDefault();
-//   const pasteData = e.clipboardData.getData('Text').trim();
-//   if (!/^\d+$/.test(pasteData)) return; // only digits
-
-//   const digits = pasteData.slice(0, otp.length).split('');
-//   const newOtp = [...otp];
-//   digits.forEach((digit, i) => {
-//     newOtp[i] = digit;
-//   });
-
-//   setOtp(newOtp);
-
-//   // Focus the next empty box or last one
-//   const nextIndex = digits.length < otp.length ? digits.length : otp.length - 1;
-//   inputsRef.current[nextIndex]?.focus();
-
-//   // Auto-submit if full OTP pasted
-//   if (digits.length === otp.length) {
-//     setTimeout(() => handleSubmit(), 200);
-//   }
-// };
-
 
 const handlePaste = (e) => {
   e.preventDefault();
@@ -410,9 +387,15 @@ const verifyAndSubmit = async (fullOtp) => {
     } else {
       setError('Invalid OTP');
     }
-  } catch (err) {
-    setError('Verification failed. Please try again.');
-  } finally {
+ } catch (err) {
+  const backendMessage =
+    err?.response?.data?.message ||
+    err?.message ||
+    'Verification failed. Please try again.';
+
+  setError(backendMessage);
+}
+ finally {
     setLoading(false);
   }
 };
@@ -445,9 +428,18 @@ const handleSubmit = async () => {
       } else {
         setError(res.message || 'Failed to resend OTP');
       }
+    // } catch (err) {
+    //   setError('Resend failed. Please try again.');
+    // }
     } catch (err) {
-      setError('Resend failed. Please try again.');
-    }
+  const backendMessage =
+    err?.response?.data?.message ||
+    err?.message ||
+    'Resend failed. Please try again.';
+
+  setError(backendMessage);
+}
+
   };
 
   return (
