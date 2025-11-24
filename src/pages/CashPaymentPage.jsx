@@ -85,8 +85,37 @@ export default function CashPaymentPage() {
               <div className="py-8 w-full text-center text-gray-500">Loading payment details...</div>
             ) : (
               <>
-                <img src={qrSrc} alt="QR Code" className="w-48 h-48 object-contain" />
-                <p className="text-gray-500 text-sm">Scan this QR to pay at the mess counter </p>
+                {/* <img src={qrSrc} alt="QR Code" className="w-48 h-48 object-contain" /> */}
+<div className="relative">
+  <img
+    src={qrSrc}
+    alt="QR Code"
+    className={`w-48 h-48 object-contain rounded-lg border transition-all duration-200 ${
+      paymentDetails?.qrStatus === "inactive" ? "blur-sm opacity-50" : ""
+    }`}
+  />
+
+  {paymentDetails?.qrStatus === "inactive" && (
+    <div className="absolute inset-0 flex items-center justify-center">
+      <span className="bg-red-600 text-white text-xs px-3 py-1 rounded-full shadow-md animate-pulse">
+        QR Disabled — Pay at Counter
+      </span>
+    </div>
+  )}
+</div>
+{paymentDetails?.qrStatus === "inactive" && (
+  <p className="text-red-500 ml-4 font-medium text-sm mt-1">
+    Currently this UPI QR is unavailable. Please ask mess owner for cash/phone UPI payment.
+  </p>
+)}
+
+                {/* <p className="text-gray-500 text-sm">Scan this QR to pay at the mess counter </p> */}
+{paymentDetails?.qrStatus === "active" && (
+  <p className="text-gray-500 text-sm">
+    Scan this QR to pay at the mess counter
+  </p>
+)}
+
                 {phone && (
   <div className="mt-3 text-center">
     <p className="text-gray-700 font-medium">
@@ -101,9 +130,9 @@ export default function CashPaymentPage() {
             )}
           </div>
 
-          <div className="w-full bg-gray-100 p-4 rounded-lg text-center">
+          {/* <div className="w-full bg-gray-100 p-4 rounded-lg text-center">
             <p className="text-gray-700 font-medium">UPI ID: <span className="text-orange-500 font-semibold">{upiId}</span></p>
-          </div>
+          </div> */}
 
           <button
             className={`w-full bg-green-500 hover:bg-green-600 cursor-pointer text-white py-2 px-4 rounded-lg font-medium ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}

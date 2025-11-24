@@ -5,6 +5,7 @@ import CustomerHeader from "../layouts/CustomerHeader";
 import { useNavigate } from "react-router-dom";
 import { AiOutlineBarcode } from "react-icons/ai";
 import storage from "../utils/storage";
+import { MdRoomService } from "react-icons/md";
 
 const CustomerActivePlans = () => { 
   const [activePlans, setActivePlans] = useState([]);
@@ -32,12 +33,7 @@ const CustomerActivePlans = () => {
     }
   };
 
-  // const handleUseTokens = (customerPlanId, messId, services) => {
-  //   storage.setItem("customerPlanId", customerPlanId);
-  //   storage.setItem("messId", messId);
-  //   storage.setItem("messServices", JSON.stringify(services));
-  //   navigate("/using-plans");
-  // };
+  
 
   const handleUseTokens = (customerPlanId, messId, services, charges) => {
   storage.setItem("customerPlanId", customerPlanId);
@@ -87,6 +83,25 @@ const CustomerActivePlans = () => {
             <span key={idx} className="bg-orange-100 text-orange-600 text-xs font-medium px-2 py-1 rounded-full">{item}</span>
           ))}
         </div>
+
+<div className="mt-3">
+  <div className="text-gray-600 text-xs mb-1 font-semibold flex items-center gap-1">
+    <MdRoomService className="text-orange-500" />
+    Services
+  </div>
+
+  <div className="flex flex-wrap gap-2">
+    {plan.MessProfile.services.map((service, idx) => (
+      <span
+        key={idx}
+        className="bg-yellow-100 text-yellow-600 text-xs font-medium px-2 py-1 rounded-full"
+      >
+        {service}
+      </span>
+    ))}
+  </div>
+</div>
+
 
         {/* Price & Tokens */}
         <div className="mt-3 grid grid-cols-3 text-center text-sm">

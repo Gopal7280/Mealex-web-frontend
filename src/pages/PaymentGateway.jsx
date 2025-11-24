@@ -201,7 +201,7 @@ const PaymentGateway = ({ plan, messId, onSuccess }) => {
       const { id: orderId, amount } = orderDetails;
 
       const options = {
-        key: 'rzp_test_RD4LUvyj0ffvxI',
+        key: 'rzp_live_RihiXNidesRxou',
         amount,
         currency: 'INR',
         name: 'MealEX Mess System',

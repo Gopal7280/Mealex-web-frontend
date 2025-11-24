@@ -59,12 +59,6 @@ const CustomerPlansView = () => {
     setSelectedAvailablePlan(null);
   };
 
-  // const handleUseTokens = (customerPlanId, messId, services) => {
-  //   storage.setItem('customerPlanId', customerPlanId);
-  //   storage.setItem('messId', messId);
-  //   storage.setItem('messServices', JSON.stringify(services || []));
-  //   navigate(`/using-plans`);
-  // };
   const handleUseTokens = (customerPlanId, messId, services, charges) => {
   storage.setItem('customerPlanId', customerPlanId);
   storage.setItem('messId', messId);
@@ -187,19 +181,39 @@ const formatTime12Hour = (time24) => {
                       
                     </div>
              
-                    {mess.services.length > 0 && (
+                    {/* {mess.services.length > 0 && (
   <div className="flex flex-wrap font-black gap-2 mt-1">
     <MdRoomService className="text-orange-500 mt-[2px]" />
     {mess.services.map((service, idx) => (
       <span
         key={idx}
-        className="bg-orange-100 text-orange-600 text-xs font-medium px-2 py-1 rounded-full"
+        className="bg-yellow-100 text-yellow-600 text-xs font-medium px-2 py-1 rounded-full"
       >
         {service}
       </span>
     ))}
   </div>
+)} */}
+{mess.services?.length > 0 && (
+  <div className="mt-3">
+    <div className="text-gray-600 text-xs mb-1 font-semibold flex items-center gap-1">
+      <MdRoomService className="text-orange-500" />
+      Services
+    </div>
+
+    <div className="flex flex-wrap gap-2">
+      {mess.services.map((service, idx) => (
+        <span
+          key={idx}
+          className="bg-yellow-100 text-yellow-600 text-xs font-medium px-2 py-1 rounded-full"
+        >
+          {service}
+        </span>
+      ))}
+    </div>
+  </div>
 )}
+
 
         <div className="mt-3 grid grid-cols-3 text-center text-sm">
   <div>

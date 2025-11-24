@@ -309,5 +309,4 @@ const Label = ({ text }) => {
     </div>
   );
 };
-
 export default CreatePlan;

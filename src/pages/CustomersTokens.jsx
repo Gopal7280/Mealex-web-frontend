@@ -60,18 +60,6 @@ const { dineCharge,
   };
 
 
-  // const [services, setServices] = useState([]);
-
-// useEffect(() => {
-//   const savedServices = storage.getItem("messServices");
-//   if (savedServices) {
-//     try {
-//       setServices(JSON.parse(savedServices));
-//     } catch (e) {
-//     }
-//   }
-// }, []);
-
 
   useEffect(() => {
     const token = storage.getItem('token');

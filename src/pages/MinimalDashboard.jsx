@@ -94,43 +94,7 @@ const MinimalDashboard = () => {
   return (
     <div className="min-h-screen overflow-y-auto bg-white px-4 sm:px-6 py-1">
 {/* Header */}
-{/* <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-4 sm:gap-2 w-full p-4 md:p-12">
-  <div className="flex items-center gap-2 sm:flex-col sm:items-start">
-    <ArrowLeft
-      className="w-8 h-8 cursor-pointer text-orange-500 hover:text-red-500"
-      onClick={() => navigate(-1)}
-    />
-    <div className="flex flex-col">
-      <p className="text-blue-800 font-bold text-sm sm:text-base">Welcome,</p>
-      <p className="text-lg sm:text-2xl md:text-4xl font-bold text-orange-500">{ownerName}</p>
-    </div>
-  </div>
 
-
-<div className="flex flex-col sm:flex-row items-center md:mt-6 sm:items-center gap-2 sm:gap-4 relative">
-  <div className="flex flex-col items-center sm:items-end">
-    <img
-      src={mealx}
-      alt="MealX Logo"
-      className="w-20 sm:w-32 md:w-48 cursor-pointer select-none"
-      onClick={() => setShowLogout((prev) => !prev)} // toggle on mobile
-    />
-    <p className="text-xs sm:text-sm md:text-lg text-orange-600 font-semibold">
-      Connecting Plates & People
-    </p>
-  </div>
-
-  <button
-    onClick={handleLogout}
-    className={`flex items-center gap-1 mt-2 sm:mt-0  hover:bg-red-600 text-red-500 px-3 py-1.5 rounded-md text-xs font-semibold shadow-sm transition-all duration-200
-      `}
-  >
-    <MdPowerSettingsNew size={18} />
-    LOG OUT
-  </button>
-</div>
-
-</div> */}
 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-2 w-full p-4 md:p-12">
 
   {/* Left Section — Arrow + Welcome + Name + Logout (on mobile inline) */}
@@ -301,7 +265,7 @@ const formatTime12Hour = (time24) => {
       </div>
     </div>
 
-    {mess.services?.length > 0 && (
+    {/* {mess.services?.length > 0 && (
       <div className="flex flex-wrap font-black gap-2 mt-1">
         <MdRoomService className="text-orange-500 mt-[2px]" />
         {mess.services.map((service, idx) => (
@@ -312,6 +276,25 @@ const formatTime12Hour = (time24) => {
             {service}
           </span>
         ))}
+      </div>
+    )} */}
+    {mess.services?.length > 0 && (
+      <div className="mt-3">
+        <div className="text-gray-600 text-xs mb-1 font-semibold flex items-center gap-1">
+          <MdRoomService className="text-orange-500" />
+          Services
+        </div>
+    
+        <div className="flex flex-wrap gap-2">
+          {mess.services.map((service, idx) => (
+            <span
+              key={idx}
+              className="bg-yellow-100 text-yellow-600 text-xs font-medium px-2 py-1 rounded-full"
+            >
+              {service}
+            </span>
+          ))}
+        </div>
       </div>
     )}
 

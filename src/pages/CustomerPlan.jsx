@@ -37,6 +37,7 @@ const fetchActivePlans = async () => {
     const res = await apiGet(`owner/mess/${messId}/customer/${customerId}/active-plans`);
     const plans = res?.data || [];
     setActivePlans(plans);
+    console.log("Active Plans:", plans);
 
     if (plans.length > 0 && plans[0].customerPlanId) {
       storage.setItem('customerPlanId', plans[0].customerPlanId);
@@ -72,7 +73,7 @@ const { id: orderId, amount } = orderDetails;
     // const { id: orderId, amount } = res.orderDetails;
 
     const options = {
-      key: "rzp_test_RD4LUvyj0ffvxI",
+      key: "rzp_live_RihiXNidesRxou",
       amount,
       currency: "INR",
       name: "MealEX Mess System",

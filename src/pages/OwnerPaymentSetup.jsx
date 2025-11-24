@@ -1403,6 +1403,12 @@ export default function OwnerPaymentSetup() {
   const [editQrHolder, setEditQrHolder] = useState("");
   const [editQrFile, setEditQrFile] = useState(null);
   const [editQrPreview, setEditQrPreview] = useState(null);
+  // add alongside other edit states
+
+
+// <<< ADD THIS LINE >>>
+const [editQrStatus, setEditQrStatus] = useState("active");
+
 
   useEffect(() => {
     if (!messId) return;
@@ -1494,33 +1500,140 @@ export default function OwnerPaymentSetup() {
     }
   };
 
-  const handleQrSubmit = async () => {
-    setSubmittingQr(true);
-    try {
-      if (editQrFile) {
-        const form = new FormData();
-        form.append("messId", messId);
-        form.append("qrImage", editQrFile);
-        await apiPost("/owner/mess/update/qr", form, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-        toast.success("QR image updated");
-      } else {
-        await apiPost("/owner/mess/update/qr/details", {
-          messId,
-          accountHolderName: editQrHolder,
-          qrStatus: "active",
-        });
-        toast.success("QR details updated");
-      }
-      setIsEditingQr(false);
-      fetchDetails();
-    } catch (err) {
-      toast.error("Failed: " + (err?.response?.data?.message || err.message));
-    } finally {
-      setSubmittingQr(false);
+  // const handleQrSubmit = async () => {
+  //   setSubmittingQr(true);
+  //   try {
+  //     if (editQrFile) {
+  //       const form = new FormData();
+  //       form.append("messId", messId);
+  //       form.append("qrImage", editQrFile);
+  //       await apiPost("/owner/mess/update/qr", form, {
+  //         headers: { "Content-Type": "multipart/form-data" },
+  //       });
+  //       toast.success("QR image updated");
+  //     } else {
+  //       await apiPost("/owner/mess/update/qr/details", {
+  //         messId,
+  //         accountHolderName: editQrHolder,
+  //         qrStatus: "active",
+  //       });
+  //       toast.success("QR details updated");
+  //     }
+  //     setIsEditingQr(false);
+  //     fetchDetails();
+  //   } catch (err) {
+  //     toast.error("Failed: " + (err?.response?.data?.message || err.message));
+  //   } finally {
+  //     setSubmittingQr(false);
+  //   }
+  // };
+
+// const handleQrSubmit = async () => {
+//   setSubmittingQr(true);
+//   try {
+//     if (editQrFile) {
+//       // If image uploaded → image update API (status auto active)
+//       const form = new FormData();
+//       form.append("messId", messId);
+//       form.append("qrImage", editQrFile);
+
+//       await apiPost("/owner/mess/update/qr", form, {
+//         headers: { "Content-Type": "multipart/form-data" },
+//       });
+
+//       toast.success("QR image updated successfully");
+//     } else {
+//       // Update name + status only
+//       await apiPost("/owner/mess/update/qr/details", {
+//         messId,
+//         accountHolderName: editQrHolder,
+//         qrStatus: editQrStatus,
+//       });
+
+//       toast.success("QR details updated successfully");
+//     }
+
+//     setIsEditingQr(false);
+//     fetchDetails();
+//   } catch (err) {
+//     toast.error("Failed: " + (err?.response?.data?.message || err.message));
+//   } finally {
+//     setSubmittingQr(false);
+//   }
+// };
+
+
+const handleQrSubmit = async () => {
+  setSubmittingQr(true);
+
+  try {
+    let updatedFields = {};
+    let didChange = false;
+
+    // --- If Only QR Image Changed ---
+    if (editQrFile) {
+      const form = new FormData();
+      form.append("messId", messId);
+      form.append("qrImage", editQrFile);
+
+      const resUpload = await apiPost("/owner/mess/update/qr", form, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      toast.success(resUpload.message || "QR updated successfully");
+      didChange = true;
+
+      updatedFields.qrCodeUrl = resUpload.data?.qrCodeUrl; // correct key!
+      updatedFields.qrStatus = "active"; // backend rule
     }
-  };
+
+    // --- If Status/Name Changed ---
+    const needDetailsUpdate =
+      (!editQrFile &&
+        (editQrHolder !== details.qrAccountHolderName ||
+         editQrStatus !== details.qrStatus)) ||
+      (editQrFile && (editQrHolder || editQrStatus !== "active"));
+
+    if (needDetailsUpdate) {
+      const payload = { messId };
+
+      if (editQrHolder) payload.accountHolderName = editQrHolder;
+      if (editQrStatus) payload.qrStatus = editQrStatus;
+
+      const resDetails = await apiPost("/owner/mess/update/qr/details", payload);
+      toast.success(resDetails.message || "QR details updated");
+      didChange = true;
+
+      updatedFields.qrAccountHolderName =
+        payload.accountHolderName || details.qrAccountHolderName;
+      updatedFields.qrStatus =
+        payload.qrStatus || updatedFields.qrStatus;
+    }
+
+    if (!didChange) {
+      toast("No changes found");
+      return;
+    }
+
+    // --- Instant State Update WITHOUT fetchDetails() ---
+    setDetails(prev => ({
+      ...prev,
+      ...updatedFields,
+      qrCodeUpdatedAt: new Date().toISOString(), // UI refresh
+    }));
+
+    // Reset fields
+    setEditQrFile(null);
+    setEditQrPreview(null);
+
+    setIsEditingQr(false);
+  } catch (err) {
+    toast.error(err?.response?.data?.message || err?.message || "Error updating QR");
+  } finally {
+    setSubmittingQr(false);
+  }
+};
+
 
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
@@ -1707,6 +1820,15 @@ export default function OwnerPaymentSetup() {
                     className="w-full border rounded px-2 py-1 mb-2"
                     placeholder="QR Holder Name"
                   />
+                    {/* Status Dropdown */}
+    <select
+      className="w-full border rounded px-2 py-2 mb-3 text-sm"
+      value={editQrStatus}
+      onChange={(e) => setEditQrStatus(e.target.value)}
+    >
+      <option value="active">Active</option>
+      <option value="inactive">Inactive</option>
+    </select>
                   <input
                     type="file"
                     accept="image/*"
@@ -1754,6 +1876,7 @@ export default function OwnerPaymentSetup() {
                     <button
                       onClick={() => {
                         setIsEditingQr(true);
+                        setEditQrStatus(details.qrStatus || "active");
                         setEditQrHolder(details.qrAccountHolderName || "");
                       }}
                       className="mt-6 px-4 py-2 bg-orange-500 hover:bg-orange-700 text-white rounded-md text-sm"
@@ -1761,13 +1884,21 @@ export default function OwnerPaymentSetup() {
                       Edit
                     </button>
                   </div>
-                  {details.qrCodeUrl && (
+                  {/* {details.qrCodeUrl && (
                     <img
                       src={details.qrCodeUrl}
                       alt="QR"
                       className="h-36 w-36 object-contain border rounded"
                     />
-                  )}
+                  )} */}
+                  <img
+  src={details.qrCodeUrl}
+  alt="QR"
+  className={`h-36 w-36 object-contain border rounded transition-all duration-200 ${
+    details.qrStatus === "inactive" ? "blur-xs opacity-60" : ""
+  }`}
+/>
+
                 </div>
               )}
             </div>
