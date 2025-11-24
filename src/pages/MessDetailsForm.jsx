@@ -5,6 +5,7 @@ import storage from '../utils/storage';
 import toast from 'react-hot-toast';
 import { ArrowLeft } from 'lucide-react';
 import { MdPowerSettingsNew  } from "react-icons/md";
+import defaultLogo from '../assets/noiimage.png'; 
 
 const InputGroup = ({ label, children }) => {
   const parts = label.split("*");
@@ -31,6 +32,7 @@ const [selectedCountry, setSelectedCountry] = useState("India");
 const [selectedState, setSelectedState] = useState("");
 const [pincode, setPincode] = useState("");
 
+
   const validateFile = (file, allowedTypes) => {
     if (!file) return true;
     if (!allowedTypes.includes(file.type)) {
@@ -39,6 +41,16 @@ const [pincode, setPincode] = useState("");
     }
     return true;
   };
+
+  const indianStates = [
+  "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+  "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
+  "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+  "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab",
+  "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+  "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi"
+];
+
 
   const [form, setForm] = useState({
     messName: '',
@@ -119,9 +131,6 @@ const [pincode, setPincode] = useState("");
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-
-
-
   const validateFields = () => {
     const requiredFields = [
       'messName',
@@ -142,11 +151,6 @@ const [pincode, setPincode] = useState("");
         alert(`Please fill out the ${field} field.`);
         return false;
       }
-    }
-
-    if (!logoFile) {
-      alert('Please upload Mess Logo.');
-      return false;
     }
 
     if (!activationDoc) {
@@ -203,7 +207,6 @@ const isFormValid = () => {
   ];
 
   return requiredFields.every((f) => form[f]) &&
-         logoFile &&
          activationDoc &&
          form.services.length > 0 &&
          form.daysOpen.length > 0 &&
@@ -246,34 +249,6 @@ const res = await fetch("https://restcountries.com/v3.1/all?fields=name");
   fetchCountries();
 }, []);
 
-// 🧭 Fetch states dynamically when country changes
-useEffect(() => {
-  const fetchStates = async () => {
-    if (!selectedCountry) return;
-
-    try {
-      const res = await fetch("https://countriesnow.space/api/v0.1/countries/states", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ country: selectedCountry }),
-      });
-
-      const data = await res.json();
-
-      if (data?.data?.states?.length) {
-        const allStates = data.data.states.map((s) => s.name).filter(Boolean);
-        setStates(allStates.sort());
-      } else {
-        setStates([]); // no states found
-      }
-    } catch (err) {
-      console.error("Error fetching states:", err);
-      setStates([]);
-    }
-  };
-
-  fetchStates();
-}, [selectedCountry]);
 
 useEffect(() => {
     setForm((prev) => ({
@@ -333,10 +308,10 @@ console.log(form.dineCharge, form.takeAwayCharge, form.deliveryCharge, form.coun
         formData.append(key, form[key]);
       }
     }
-    if (!validateFile(logoFile, ['image/jpeg', 'image/png'])) {
-      setLoading(false);
-      return;
-    }
+    // if (!validateFile(logoFile, ['image/jpeg', 'image/png'])) {
+    //   setLoading(false);
+    //   return;
+    // }
     if (!validateFile(activationDoc, ['image/jpeg', 'image/png', 'application/pdf'])) {
       setLoading(false);
       return;
@@ -346,7 +321,15 @@ console.log(form.dineCharge, form.takeAwayCharge, form.deliveryCharge, form.coun
       return;
     }
 
-    formData.append('logoFile', logoFile);
+  
+if (logoFile) {
+  formData.append("logoFile", logoFile); // use uploaded logo
+} else {
+  const defaultBlob = await fetch(defaultLogo).then(res => res.blob());
+  formData.append("logoFile", defaultBlob, "defaultLogo.png");
+}
+
+
     formData.append('activationDoc', activationDoc);
     if (fssaiDoc) formData.append('fssaiDoc', fssaiDoc);
 
@@ -520,7 +503,6 @@ console.log(form.dineCharge, form.takeAwayCharge, form.deliveryCharge, form.coun
   </select>
 </InputGroup>
 
-{/* 🏙️ State */}
 <InputGroup label="State*">
   {selectedCountry === "India" ? (
     <select
@@ -535,7 +517,7 @@ console.log(form.dineCharge, form.takeAwayCharge, form.deliveryCharge, form.coun
       required
     >
       <option value="">Select State</option>
-      {states.map((s) => (
+      {indianStates.map((s) => (
         <option key={s} value={s}>
           {s}
         </option>
@@ -555,6 +537,7 @@ console.log(form.dineCharge, form.takeAwayCharge, form.deliveryCharge, form.coun
     />
   )}
 </InputGroup>
+
 
 {/* 📮 Pincode */}
 <InputGroup label="Pincode*">
@@ -657,12 +640,11 @@ console.log(form.dineCharge, form.takeAwayCharge, form.deliveryCharge, form.coun
           />
         </InputGroup>
 
-        <InputGroup label="Upload Mess Logo* (JPG, PNG)">
+        <InputGroup label="Upload Mess Logo (JPG, PNG)">
           <input
             type="file"
             accept="image/jpeg,image/png"
             onChange={(e) => setLogoFile(e.target.files[0])}
-            required
             className="w-full px-4 py-3 bg-gray-100 border border-black rounded-xl"
           />
         </InputGroup>
@@ -972,5 +954,4 @@ console.log(form.dineCharge, form.takeAwayCharge, form.deliveryCharge, form.coun
     </form>
   );
 };
-
 export default MessDetailsForm;
