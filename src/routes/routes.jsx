@@ -291,6 +291,11 @@ function RouteComponent({setUserRole }) {
           <PlanVerification />
         </ProtectedRoute>
       } />
+          <Route path="/plan-otp-verification" element={
+          <ProtectedRoute allowedRoles={['owner', 'both']}>
+            <PlanotpVerification />
+          </ProtectedRoute>
+        } />
       <Route path="/customer-profile/plans" element={
         <ProtectedRoute allowedRoles={['owner', 'both']}>
           <CustomersPlan />
@@ -433,11 +438,7 @@ function RouteComponent({setUserRole }) {
           <CustomerProfile />
         </ProtectedRoute>
       } />
-      <Route path="/plan-otp-verification" element={
-        <ProtectedRoute allowedRoles={['customer', 'both']}>
-          <PlanotpVerification />
-        </ProtectedRoute>
-      } />
+    
       <Route path="/customer/cash-payment/:planId" element={
         <ProtectedRoute allowedRoles={['customer', 'both']}>
           <CashPaymentPage />
